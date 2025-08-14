@@ -8,8 +8,9 @@ A high-performance Python library for numerical methods in fractional calculus, 
 - **High-Performance Computing**: JAX for automatic differentiation and GPU acceleration
 - **JIT Compilation**: NUMBA for optimized numerical kernels
 - **Parallel Computing**: Multi-core and GPU support
-- **Comprehensive Testing**: Benchmarking and validation suite
+- **Comprehensive Testing**: Automated testing with pytest and coverage reporting
 - **Modern Python**: Type hints, comprehensive documentation
+- **CI/CD**: Automated testing and quality checks
 
 ## 📦 Installation
 
@@ -30,6 +31,9 @@ source venv/bin/activate     # Linux/Mac
 
 # Install dependencies
 pip install -r requirements.txt
+
+# Install in development mode
+pip install -e .
 ```
 
 ## 🏗️ Project Structure
@@ -83,10 +87,14 @@ fc_library/
 │   ├── test_optimisation/      # Optimization tests
 │   ├── test_solvers/           # Solver tests
 │   └── integration_tests/      # Integration tests
-└── docs/                         # Documentation
-    ├── api_reference/           # API documentation
-    ├── examples/                # Example documentation
-    └── source/                  # Source documentation
+├── scripts/                      # Utility scripts
+│   └── run_tests.py            # Comprehensive test runner
+├── docs/                         # Documentation
+│   ├── api_reference/           # API documentation
+│   ├── examples/                # Example documentation
+│   └── source/                  # Source documentation
+└── .github/workflows/           # CI/CD workflows
+    └── tests.yml               # Automated testing
 ```
 
 ## 🔧 Usage
@@ -96,61 +104,105 @@ fc_library/
 ```python
 import numpy as np
 from src.algorithms.caputo import CaputoDerivative
-from src.optimisation.jax_implementations import JAXCaputo
 
 # Initialize fractional derivative
 alpha = 0.5  # Fractional order
 caputo = CaputoDerivative(alpha)
 
-# Define function
-def f(x):
-    return x**2
+# Define function values and time points
+t = np.linspace(0.1, 2.0, 50)
+f = t  # Simple linear function
+h = t[1] - t[0]  # Step size
 
 # Compute fractional derivative
-x = np.linspace(0, 1, 100)
-result = caputo.compute(f, x)
-
-# Using JAX for automatic differentiation
-jax_caputo = JAXCaputo(alpha)
-jax_result = jax_caputo.compute(f, x)
+result = caputo.compute(f, t, h)
+print(f"Caputo derivative of order {alpha}: {result}")
 ```
 
-### Advanced Example with JAX and NUMBA
+### Advanced Example with Different Methods
 
 ```python
-import jax
-import jax.numpy as jnp
-from src.solvers.pde_solvers import hybrid_solver
+import numpy as np
+from src.algorithms.caputo import CaputoDerivative
+from src.algorithms.riemann_liouville import RiemannLiouvilleDerivative
+from src.algorithms.grunwald_letnikov import GrunwaldLetnikovDerivative
 
-# Define PDE parameters
-params = {
-    'alpha': 0.5,  # Fractional order
-    'dt': 0.01,    # Time step
-    'dx': 0.1      # Spatial step
-}
+# Test parameters
+alpha = 0.5
+t = np.linspace(0.1, 2.0, 100)
+f = t**2  # Quadratic function
+h = t[1] - t[0]
 
-# Initial conditions
-u0 = jnp.sin(jnp.linspace(0, 2*jnp.pi, 100))
+# Compare different methods
+caputo = CaputoDerivative(alpha)
+riemann = RiemannLiouvilleDerivative(alpha)
+grunwald = GrunwaldLetnikovDerivative(alpha)
 
-# Solve fractional PDE
-solution = hybrid_solver(u0, params)
+result_caputo = caputo.compute(f, t, h)
+result_riemann = riemann.compute(f, t, h)
+result_grunwald = grunwald.compute(f, t, h)
+
+print(f"Caputo: {result_caputo[-1]:.6f}")
+print(f"Riemann-Liouville: {result_riemann[-1]:.6f}")
+print(f"Grünwald-Letnikov: {result_grunwald[-1]:.6f}")
 ```
 
-## 🧪 Testing and Benchmarking
+## 🧪 Testing and Quality Assurance
+
+### Automated Testing
+
+The project includes comprehensive automated testing with:
+
+- **Unit Tests**: Individual component testing
+- **Integration Tests**: End-to-end functionality testing
+- **Benchmark Tests**: Performance validation
+- **Code Quality**: Linting, formatting, and type checking
 
 ### Run Tests
+
 ```bash
-pytest tests/
+# Run all tests with coverage
+python scripts/run_tests.py
+
+# Run specific test types
+python scripts/run_tests.py --type unit
+python scripts/run_tests.py --type integration
+python scripts/run_tests.py --type benchmark
+
+# Run with pytest directly
+pytest tests/ -v --cov=src
+
+# Run fast tests only
+pytest tests/ -m "not slow"
 ```
 
-### Run Benchmarks
+### Code Quality Checks
+
 ```bash
+# Linting with flake8
+flake8 src tests
+
+# Code formatting with black
+black src tests
+
+# Type checking with mypy
+mypy src
+
+# Run all quality checks
+python scripts/run_tests.py --no-coverage --reports
+```
+
+### Benchmarks
+
+```bash
+# Run performance benchmarks
 python benchmarks/performance_tests.py
-```
 
-### Run Accuracy Comparisons
-```bash
+# Run accuracy comparisons
 python benchmarks/accuracy_comparisons.py
+
+# Run scaling analysis
+python benchmarks/scaling_analysis.py
 ```
 
 ## 📊 Performance Features
@@ -194,9 +246,24 @@ The library includes comprehensive benchmarks comparing:
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+3. Make your changes and ensure tests pass
+4. Run quality checks: `python scripts/run_tests.py`
+5. Commit your changes (`git commit -m 'Add amazing feature'`)
+6. Push to the branch (`git push origin feature/amazing-feature`)
+7. Open a Pull Request
+
+### Development Setup
+
+```bash
+# Install development dependencies
+pip install -e ".[dev]"
+
+# Install pre-commit hooks
+pre-commit install
+
+# Run tests before committing
+python scripts/run_tests.py --type fast
+```
 
 ## 📝 License
 
@@ -220,15 +287,38 @@ For questions and support:
 - [x] Project structure setup
 - [x] Core dependencies installation
 - [x] Basic framework implementation
-- [ ] Algorithm implementations
-- [ ] JAX optimizations
-- [ ] NUMBA kernels
-- [ ] Benchmarking suite
-- [ ] Documentation
-- [ ] Testing suite
-- [ ] Examples and tutorials
+- [x] Algorithm implementations (Caputo, Riemann-Liouville, Grünwald-Letnikov)
+- [x] JAX optimizations
+- [x] NUMBA kernels
+- [x] Benchmarking suite
+- [x] Automated testing with pytest
+- [x] CI/CD pipeline
+- [x] Code quality tools
+- [x] Documentation structure
+- [x] Examples and tutorials
+- [ ] Advanced solver implementations
+- [ ] GPU-specific optimizations
+- [ ] Extended documentation
+
+## 🚀 Quick Start
+
+```bash
+# Clone and setup
+git clone https://github.com/dave2k77/fractional_calculus_library.git
+cd fractional_calculus_library
+python -m venv venv
+source venv/bin/activate  # or .\venv\Scripts\Activate.ps1 on Windows
+pip install -r requirements.txt
+
+# Run tests to verify installation
+python scripts/run_tests.py --type fast
+
+# Try the examples
+python examples/basic_usage/getting_started.py
+```
 
 ---
 
 **Author**: David  
-**Repository**: https://github.com/dave2k77/fractional_calculus_library
+**Repository**: https://github.com/dave2k77/fractional_calculus_library  
+**License**: MIT
