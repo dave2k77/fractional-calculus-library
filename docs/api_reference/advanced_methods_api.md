@@ -11,6 +11,105 @@ This document provides the complete API reference for the advanced fractional ca
 5. [Adomian Decomposition](#adomian-decomposition)
 6. [Optimized Advanced Methods](#optimized-advanced-methods)
 7. [Convenience Functions](#convenience-functions)
+8. [Consolidated Structure](#consolidated-structure)
+
+---
+
+## Consolidated Structure
+
+The library has been consolidated to provide a cleaner, more efficient structure:
+
+### Primary Import Structure
+
+```python
+# Core optimized methods (PRIMARY implementations)
+from src.algorithms.optimized_methods import (
+    OptimizedCaputo,
+    OptimizedRiemannLiouville,
+    OptimizedGrunwaldLetnikov,
+    AdvancedFFTMethods,
+    L1L2Schemes,
+    optimized_caputo,
+    optimized_riemann_liouville,
+    optimized_grunwald_letnikov
+)
+
+# GPU-optimized methods
+from src.algorithms.gpu_optimized_methods import (
+    GPUOptimizedCaputo,
+    GPUOptimizedRiemannLiouville,
+    GPUOptimizedGrunwaldLetnikov,
+    JAXAutomaticDifferentiation,
+    JAXOptimizer,
+    gpu_optimized_caputo,
+    gpu_optimized_riemann_liouville,
+    gpu_optimized_grunwald_letnikov
+)
+
+# Parallel-optimized methods
+from src.algorithms.parallel_optimized_methods import (
+    ParallelOptimizedCaputo,
+    ParallelOptimizedRiemannLiouville,
+    ParallelOptimizedGrunwaldLetnikov,
+    NumbaOptimizer,
+    NumbaFractionalKernels,
+    NumbaParallelManager,
+    parallel_optimized_caputo,
+    parallel_optimized_caputo,
+    parallel_optimized_grunwald_letnikov
+)
+
+# Advanced methods
+from src.algorithms.advanced_methods import (
+    WeylDerivative,
+    MarchaudDerivative,
+    HadamardDerivative,
+    ReizFellerDerivative,
+    AdomianDecomposition
+)
+
+# Optimized advanced methods
+from src.algorithms.advanced_optimized_methods import (
+    OptimizedWeylDerivative,
+    OptimizedMarchaudDerivative,
+    OptimizedHadamardDerivative,
+    OptimizedReizFellerDerivative,
+    OptimizedAdomianDecomposition,
+    optimized_weyl_derivative,
+    optimized_marchaud_derivative,
+    optimized_hadamard_derivative,
+    optimized_reiz_feller_derivative,
+    optimized_adomian_decomposition
+)
+```
+
+### Migration Guide
+
+**Old imports (deprecated):**
+```python
+# ❌ These imports are no longer available
+from src.algorithms.caputo import CaputoDerivative
+from src.algorithms.riemann_liouville import RiemannLiouvilleDerivative
+from src.algorithms.grunwald_letnikov import GrunwaldLetnikovDerivative
+from src.algorithms.fft_methods import FFTFractionalMethods
+from src.optimisation.jax_implementations import JAXFractionalDerivatives
+from src.optimisation.numba_kernels import NumbaFractionalKernels
+from src.optimisation.parallel_computing import ParallelFractionalComputing
+```
+
+**New imports (recommended):**
+```python
+# ✅ Use these optimized implementations instead
+from src.algorithms.optimized_methods import (
+    OptimizedCaputo,  # Instead of CaputoDerivative
+    OptimizedRiemannLiouville,  # Instead of RiemannLiouvilleDerivative
+    OptimizedGrunwaldLetnikov,  # Instead of GrunwaldLetnikovDerivative
+    AdvancedFFTMethods,  # Instead of FFTFractionalMethods
+    optimized_caputo,  # Function interface
+    optimized_riemann_liouville,  # Function interface
+    optimized_grunwald_letnikov   # Function interface
+)
+```
 
 ---
 
@@ -63,6 +162,66 @@ f = lambda x: np.sin(x)
 result = weyl.compute(f, x, h=0.1)
 
 print(f"Weyl derivative shape: {result.shape}")
+```
+
+### Optimized Class: `OptimizedWeylDerivative`
+
+**Description:** Optimized version of Weyl derivative with enhanced performance.
+
+**Location:** `src.algorithms.advanced_optimized_methods.OptimizedWeylDerivative`
+
+#### Constructor
+
+```python
+OptimizedWeylDerivative(alpha: float, method: str = "fft", n_jobs: int = -1)
+```
+
+**Parameters:**
+- `alpha` (float): Fractional order (0 < α < 2)
+- `method` (str): Computation method ("fft", "direct", default: "fft")
+- `n_jobs` (int, optional): Number of parallel jobs (-1 for all cores, default: -1)
+
+**Example:**
+```python
+from src.algorithms.advanced_optimized_methods import OptimizedWeylDerivative
+import numpy as np
+
+# Initialize optimized version
+alpha = 0.5
+weyl_opt = OptimizedWeylDerivative(alpha, method="fft", n_jobs=4)
+
+# Compute derivative
+x = np.linspace(0, 2*np.pi, 100)
+f = lambda x: np.sin(x)
+result = weyl_opt.compute(f, x, h=0.1)
+
+print(f"Optimized Weyl derivative shape: {result.shape}")
+```
+
+### Convenience Function: `optimized_weyl_derivative`
+
+**Description:** Convenience function for computing optimized Weyl derivatives.
+
+**Location:** `src.algorithms.advanced_optimized_methods.optimized_weyl_derivative`
+
+```python
+optimized_weyl_derivative(f: Union[Callable, np.ndarray], x: np.ndarray, alpha: float, h: float, 
+                         method: str = "fft", n_jobs: int = -1) -> np.ndarray
+```
+
+**Example:**
+```python
+from src.algorithms.advanced_optimized_methods import optimized_weyl_derivative
+import numpy as np
+
+# Compute using convenience function
+x = np.linspace(0, 2*np.pi, 100)
+f = lambda x: np.sin(x)
+alpha = 0.5
+h = 0.1
+
+result = optimized_weyl_derivative(f, x, alpha, h, method="fft", n_jobs=4)
+print(f"Weyl derivative result: {result.shape}")
 ```
 
 ---
@@ -120,6 +279,66 @@ result = marchaud.compute(f, x, h=0.05)
 print(f"Marchaud derivative shape: {result.shape}")
 ```
 
+### Optimized Class: `OptimizedMarchaudDerivative`
+
+**Description:** Optimized version of Marchaud derivative with enhanced performance.
+
+**Location:** `src.algorithms.advanced_optimized_methods.OptimizedMarchaudDerivative`
+
+#### Constructor
+
+```python
+OptimizedMarchaudDerivative(alpha: float, method: str = "fft", n_jobs: int = -1)
+```
+
+**Parameters:**
+- `alpha` (float): Fractional order (0 < α < 2)
+- `method` (str): Computation method ("fft", "direct", default: "fft")
+- `n_jobs` (int, optional): Number of parallel jobs (-1 for all cores, default: -1)
+
+**Example:**
+```python
+from src.algorithms.advanced_optimized_methods import OptimizedMarchaudDerivative
+import numpy as np
+
+# Initialize optimized version
+alpha = 0.5
+marchaud_opt = OptimizedMarchaudDerivative(alpha, method="fft", n_jobs=4)
+
+# Compute derivative
+x = np.linspace(0, 5, 100)
+f = lambda x: np.exp(-x) * np.sin(x)
+result = marchaud_opt.compute(f, x, h=0.05)
+
+print(f"Optimized Marchaud derivative shape: {result.shape}")
+```
+
+### Convenience Function: `optimized_marchaud_derivative`
+
+**Description:** Convenience function for computing optimized Marchaud derivatives.
+
+**Location:** `src.algorithms.advanced_optimized_methods.optimized_marchaud_derivative`
+
+```python
+optimized_marchaud_derivative(f: Union[Callable, np.ndarray], x: np.ndarray, alpha: float, h: float, 
+                             method: str = "fft", n_jobs: int = -1) -> np.ndarray
+```
+
+**Example:**
+```python
+from src.algorithms.advanced_optimized_methods import optimized_marchaud_derivative
+import numpy as np
+
+# Compute using convenience function
+x = np.linspace(0, 5, 100)
+f = lambda x: np.exp(-x) * np.sin(x)
+alpha = 0.5
+h = 0.05
+
+result = optimized_marchaud_derivative(f, x, alpha, h, method="fft", n_jobs=4)
+print(f"Marchaud derivative result: {result.shape}")
+```
+
 ---
 
 ## Hadamard Derivative
@@ -175,6 +394,66 @@ result = hadamard.compute(f, x, h=0.09)
 print(f"Hadamard derivative shape: {result.shape}")
 ```
 
+### Optimized Class: `OptimizedHadamardDerivative`
+
+**Description:** Optimized version of Hadamard derivative with enhanced performance.
+
+**Location:** `src.algorithms.advanced_optimized_methods.OptimizedHadamardDerivative`
+
+#### Constructor
+
+```python
+OptimizedHadamardDerivative(alpha: float, method: str = "fft", n_jobs: int = -1)
+```
+
+**Parameters:**
+- `alpha` (float): Fractional order (0 < α < 2)
+- `method` (str): Computation method ("fft", "direct", default: "fft")
+- `n_jobs` (int, optional): Number of parallel jobs (-1 for all cores, default: -1)
+
+**Example:**
+```python
+from src.algorithms.advanced_optimized_methods import OptimizedHadamardDerivative
+import numpy as np
+
+# Initialize optimized version
+alpha = 0.5
+hadamard_opt = OptimizedHadamardDerivative(alpha, method="fft", n_jobs=4)
+
+# Compute derivative
+x = np.linspace(1, 10, 100)
+f = lambda x: np.log(x) * np.sin(x)
+result = hadamard_opt.compute(f, x, h=0.09)
+
+print(f"Optimized Hadamard derivative shape: {result.shape}")
+```
+
+### Convenience Function: `optimized_hadamard_derivative`
+
+**Description:** Convenience function for computing optimized Hadamard derivatives.
+
+**Location:** `src.algorithms.advanced_optimized_methods.optimized_hadamard_derivative`
+
+```python
+optimized_hadamard_derivative(f: Union[Callable, np.ndarray], x: np.ndarray, alpha: float, h: float, 
+                             method: str = "fft", n_jobs: int = -1) -> np.ndarray
+```
+
+**Example:**
+```python
+from src.algorithms.advanced_optimized_methods import optimized_hadamard_derivative
+import numpy as np
+
+# Compute using convenience function
+x = np.linspace(1, 10, 100)
+f = lambda x: np.log(x) * np.sin(x)
+alpha = 0.5
+h = 0.09
+
+result = optimized_hadamard_derivative(f, x, alpha, h, method="fft", n_jobs=4)
+print(f"Hadamard derivative result: {result.shape}")
+```
+
 ---
 
 ## Reiz-Feller Derivative
@@ -226,6 +505,66 @@ f = lambda x: np.exp(-x**2/2)  # Gaussian function
 result = reiz_feller.compute(f, x, h=0.05)
 
 print(f"Reiz-Feller derivative shape: {result.shape}")
+```
+
+### Optimized Class: `OptimizedReizFellerDerivative`
+
+**Description:** Optimized version of Reiz-Feller derivative with enhanced performance.
+
+**Location:** `src.algorithms.advanced_optimized_methods.OptimizedReizFellerDerivative`
+
+#### Constructor
+
+```python
+OptimizedReizFellerDerivative(alpha: float, method: str = "fft", n_jobs: int = -1)
+```
+
+**Parameters:**
+- `alpha` (float): Fractional order (0 < α < 2)
+- `method` (str): Computation method ("fft", "direct", default: "fft")
+- `n_jobs` (int, optional): Number of parallel jobs (-1 for all cores, default: -1)
+
+**Example:**
+```python
+from src.algorithms.advanced_optimized_methods import OptimizedReizFellerDerivative
+import numpy as np
+
+# Initialize optimized version
+alpha = 0.5
+reiz_feller_opt = OptimizedReizFellerDerivative(alpha, method="fft", n_jobs=4)
+
+# Compute derivative
+x = np.linspace(0, 5, 100)
+f = lambda x: np.exp(-x**2/2)  # Gaussian function
+result = reiz_feller_opt.compute(f, x, h=0.05)
+
+print(f"Optimized Reiz-Feller derivative shape: {result.shape}")
+```
+
+### Convenience Function: `optimized_reiz_feller_derivative`
+
+**Description:** Convenience function for computing optimized Reiz-Feller derivatives.
+
+**Location:** `src.algorithms.advanced_optimized_methods.optimized_reiz_feller_derivative`
+
+```python
+optimized_reiz_feller_derivative(f: Union[Callable, np.ndarray], x: np.ndarray, alpha: float, h: float, 
+                                method: str = "fft", n_jobs: int = -1) -> np.ndarray
+```
+
+**Example:**
+```python
+from src.algorithms.advanced_optimized_methods import optimized_reiz_feller_derivative
+import numpy as np
+
+# Compute using convenience function
+x = np.linspace(0, 5, 100)
+f = lambda x: np.exp(-x**2/2)  # Gaussian function
+alpha = 0.5
+h = 0.05
+
+result = optimized_reiz_feller_derivative(f, x, alpha, h, method="fft", n_jobs=4)
+print(f"Reiz-Feller derivative result: {result.shape}")
 ```
 
 ---
@@ -287,173 +626,74 @@ solution = adomian.solve(fractional_ode, t, initial_condition=1.0, terms=15)
 print(f"Solution shape: {solution.shape}")
 ```
 
----
+### Optimized Class: `OptimizedAdomianDecomposition`
 
-## Optimized Advanced Methods
-
-### Class: `OptimizedWeylDerivative`
-
-**Description:** JAX-optimized Weyl derivative with GPU acceleration.
-
-**Location:** `src.algorithms.advanced_optimized_methods.OptimizedWeylDerivative`
-
-#### Constructor
-
-```python
-OptimizedWeylDerivative(alpha: float, use_gpu: bool = True, compile_mode: str = "jit")
-```
-
-**Parameters:**
-- `alpha` (float): Fractional order (0 < α < 2)
-- `use_gpu` (bool, optional): Enable GPU acceleration (default: True)
-- `compile_mode` (str, optional): JAX compilation mode ("jit", "pmap", "vmap", default: "jit")
-
-**Returns:** `OptimizedWeylDerivative` instance
-
-#### Method: `compute`
-
-```python
-compute(f: Callable, x: np.ndarray, h: float) -> np.ndarray
-```
-
-**Parameters:**
-- `f` (Callable): Function to differentiate
-- `x` (np.ndarray): Evaluation points
-- `h` (float): Step size for discretization
-
-**Returns:** `np.ndarray` - Optimized Weyl derivative values
-
-### Class: `OptimizedMarchaudDerivative`
-
-**Description:** Numba-optimized Marchaud derivative with memory-efficient streaming.
-
-**Location:** `src.algorithms.advanced_optimized_methods.OptimizedMarchaudDerivative`
-
-#### Constructor
-
-```python
-OptimizedMarchaudDerivative(alpha: float, parallel: bool = True, 
-                           memory_efficient: bool = True)
-```
-
-**Parameters:**
-- `alpha` (float): Fractional order (0 < α < 2)
-- `parallel` (bool, optional): Enable parallel processing (default: True)
-- `memory_efficient` (bool, optional): Enable memory optimization (default: True)
-
-**Returns:** `OptimizedMarchaudDerivative` instance
-
-#### Method: `compute`
-
-```python
-compute(f: Callable, x: np.ndarray, h: float) -> np.ndarray
-```
-
-**Parameters:**
-- `f` (Callable): Function to differentiate
-- `x` (np.ndarray): Evaluation points
-- `h` (float): Step size for discretization
-
-**Returns:** `np.ndarray` - Optimized Marchaud derivative values
-
-### Class: `OptimizedHadamardDerivative`
-
-**Description:** JAX-optimized Hadamard derivative with vectorized computation.
-
-**Location:** `src.algorithms.advanced_optimized_methods.OptimizedHadamardDerivative`
-
-#### Constructor
-
-```python
-OptimizedHadamardDerivative(alpha: float, use_gpu: bool = True, compile_mode: str = "jit")
-```
-
-**Parameters:**
-- `alpha` (float): Fractional order (0 < α < 2)
-- `use_gpu` (bool, optional): Enable GPU acceleration (default: True)
-- `compile_mode` (str, optional): JAX compilation mode (default: "jit")
-
-**Returns:** `OptimizedHadamardDerivative` instance
-
-#### Method: `compute`
-
-```python
-compute(f: Callable, x: np.ndarray, h: float) -> np.ndarray
-```
-
-**Parameters:**
-- `f` (Callable): Function to differentiate
-- `x` (np.ndarray): Evaluation points (must be positive)
-- `h` (float): Step size for discretization
-
-**Returns:** `np.ndarray` - Optimized Hadamard derivative values
-
-### Class: `OptimizedReizFellerDerivative`
-
-**Description:** JAX-optimized Reiz-Feller derivative using spectral method.
-
-**Location:** `src.algorithms.advanced_optimized_methods.OptimizedReizFellerDerivative`
-
-#### Constructor
-
-```python
-OptimizedReizFellerDerivative(alpha: float, use_gpu: bool = True, compile_mode: str = "jit")
-```
-
-**Parameters:**
-- `alpha` (float): Fractional order (0 < α < 2)
-- `use_gpu` (bool, optional): Enable GPU acceleration (default: True)
-- `compile_mode` (str, optional): JAX compilation mode (default: "jit")
-
-**Returns:** `OptimizedReizFellerDerivative` instance
-
-#### Method: `compute`
-
-```python
-compute(f: Callable, x: np.ndarray, h: float) -> np.ndarray
-```
-
-**Parameters:**
-- `f` (Callable): Function to differentiate
-- `x` (np.ndarray): Evaluation points
-- `h` (float): Step size for discretization
-
-**Returns:** `np.ndarray` - Optimized Reiz-Feller derivative values
-
-### Class: `OptimizedAdomianDecomposition`
-
-**Description:** JAX-optimized Adomian decomposition for parallel computation.
+**Description:** Optimized version of Adomian decomposition for parallel computation.
 
 **Location:** `src.algorithms.advanced_optimized_methods.OptimizedAdomianDecomposition`
 
 #### Constructor
 
 ```python
-OptimizedAdomianDecomposition(alpha: float, use_gpu: bool = True, compile_mode: str = "jit")
+OptimizedAdomianDecomposition(alpha: float, method: str = "jit", n_jobs: int = -1)
 ```
 
 **Parameters:**
 - `alpha` (float): Fractional order (0 < α < 2)
-- `use_gpu` (bool, optional): Enable GPU acceleration (default: True)
-- `compile_mode` (str, optional): JAX compilation mode (default: "jit")
+- `method` (str): Computation method ("jit", "pmap", "vmap", default: "jit")
+- `n_jobs` (int, optional): Number of parallel jobs (-1 for all cores, default: -1)
 
-**Returns:** `OptimizedAdomianDecomposition` instance
-
-#### Method: `solve`
-
+**Example:**
 ```python
-solve(f: Callable, t: np.ndarray, initial_condition: float = 0.0, 
-      terms: int = 10, tolerance: float = 1e-6) -> np.ndarray
+from src.algorithms.advanced_optimized_methods import OptimizedAdomianDecomposition
+import numpy as np
+
+# Initialize optimized version
+alpha = 0.5
+adomian_opt = OptimizedAdomianDecomposition(alpha, method="jit", n_jobs=4)
+
+# Define FDE: D^α y(t) = -y(t) + t
+def fractional_ode(t, y, alpha):
+    return -y + t
+
+# Solve
+t = np.linspace(0, 5, 100)
+solution = adomian_opt.solve(fractional_ode, t, initial_condition=1.0, terms=15)
+
+print(f"Optimized solution shape: {solution.shape}")
 ```
 
-**Parameters:**
-- `f` (Callable): Right-hand side function f(t, y, α)
-- `t` (np.ndarray): Time points for solution
-- `initial_condition` (float, optional): Initial condition y(0) (default: 0.0)
-- `terms` (int, optional): Number of decomposition terms (default: 10)
-- `tolerance` (float, optional): Convergence tolerance (default: 1e-6)
+### Convenience Function: `optimized_adomian_solve`
 
-**Returns:** `np.ndarray` - Optimized solution values
+**Description:** Convenience function for computing optimized Adomian decompositions.
+
+**Location:** `src.algorithms.advanced_optimized_methods.optimized_adomian_solve`
+
+```python
+optimized_adomian_solve(f: Callable, t: np.ndarray, alpha: float, 
+                       initial_condition: float = 0.0, terms: int = 10, 
+                       method: str = "jit", n_jobs: int = -1) -> np.ndarray
+```
+
+**Example:**
+```python
+from src.algorithms.advanced_optimized_methods import optimized_adomian_solve
+import numpy as np
+
+# Initialize optimized version
+alpha = 0.5
+adomian_opt = OptimizedAdomianDecomposition(alpha, method="jit", n_jobs=4)
+
+# Define FDE: D^α y(t) = -y(t) + t
+def fractional_ode(t, y, alpha):
+    return -y + t
+
+# Solve
+t = np.linspace(0, 5, 100)
+solution = optimized_adomian_solve(fractional_ode, t, alpha, initial_condition=1.0, terms=15)
+
+print(f"Optimized Adomian solution shape: {solution.shape}")
+```
 
 ---
 
@@ -549,7 +789,7 @@ reiz_feller_derivative(f: Union[Callable, np.ndarray], x: Union[float, np.ndarra
 
 ```python
 optimized_weyl_derivative(f: Callable, x: np.ndarray, alpha: float, h: float, 
-                         use_gpu: bool = True) -> np.ndarray
+                         method: str = "fft", n_jobs: int = -1) -> np.ndarray
 ```
 
 #### Function: `optimized_marchaud_derivative`
@@ -558,7 +798,7 @@ optimized_weyl_derivative(f: Callable, x: np.ndarray, alpha: float, h: float,
 
 ```python
 optimized_marchaud_derivative(f: Callable, x: np.ndarray, alpha: float, h: float, 
-                             parallel: bool = True) -> np.ndarray
+                             method: str = "fft", n_jobs: int = -1) -> np.ndarray
 ```
 
 #### Function: `optimized_hadamard_derivative`
@@ -567,7 +807,7 @@ optimized_marchaud_derivative(f: Callable, x: np.ndarray, alpha: float, h: float
 
 ```python
 optimized_hadamard_derivative(f: Callable, x: np.ndarray, alpha: float, h: float, 
-                             use_gpu: bool = True) -> np.ndarray
+                             method: str = "fft", n_jobs: int = -1) -> np.ndarray
 ```
 
 #### Function: `optimized_reiz_feller_derivative`
@@ -576,7 +816,7 @@ optimized_hadamard_derivative(f: Callable, x: np.ndarray, alpha: float, h: float
 
 ```python
 optimized_reiz_feller_derivative(f: Callable, x: np.ndarray, alpha: float, h: float, 
-                                use_gpu: bool = True) -> np.ndarray
+                                method: str = "fft", n_jobs: int = -1) -> np.ndarray
 ```
 
 #### Function: `optimized_adomian_solve`
@@ -586,7 +826,7 @@ optimized_reiz_feller_derivative(f: Callable, x: np.ndarray, alpha: float, h: fl
 ```python
 optimized_adomian_solve(f: Callable, t: np.ndarray, alpha: float, 
                        initial_condition: float = 0.0, terms: int = 10, 
-                       use_gpu: bool = True) -> np.ndarray
+                       method: str = "jit", n_jobs: int = -1) -> np.ndarray
 ```
 
 ---
@@ -632,10 +872,10 @@ f = lambda x: np.sin(x) * np.exp(-x/3)
 h = 0.005
 
 # Compute optimized derivatives
-weyl_opt = optimized_weyl_derivative(f, x, alpha, h, use_gpu=True)
-marchaud_opt = optimized_marchaud_derivative(f, x, alpha, h, parallel=True)
-hadamard_opt = optimized_hadamard_derivative(f, x, alpha, h, use_gpu=True)
-reiz_opt = optimized_reiz_feller_derivative(f, x, alpha, h, use_gpu=True)
+weyl_opt = optimized_weyl_derivative(f, x, alpha, h, method="fft", n_jobs=4)
+marchaud_opt = optimized_marchaud_derivative(f, x, alpha, h, method="fft", n_jobs=4)
+hadamard_opt = optimized_hadamard_derivative(f, x, alpha, h, method="fft", n_jobs=4)
+reiz_opt = optimized_reiz_feller_derivative(f, x, alpha, h, method="fft", n_jobs=4)
 
 print("Optimized computations completed successfully!")
 ```
@@ -647,9 +887,9 @@ import numpy as np
 from src.algorithms.advanced_methods import AdomianDecomposition
 from src.algorithms.advanced_optimized_methods import optimized_adomian_solve
 
-# Define FDE: D^α y(t) = -y(t) + t
+# Define FDE: D^α y(t) = -y(t)
 def fractional_ode(t, y, alpha):
-    return -y + t
+    return -y
 
 # Solve using standard method
 alpha = 0.5

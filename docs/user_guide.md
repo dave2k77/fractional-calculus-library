@@ -23,11 +23,11 @@ A comprehensive guide to using the Fractional Calculus Library for numerical met
 
 ```python
 import numpy as np
-from src.algorithms.caputo import CaputoDerivative
+from src.algorithms.optimized_methods import OptimizedCaputo, optimized_caputo
 
 # Create a fractional derivative calculator
 alpha = 0.5  # Fractional order
-caputo = CaputoDerivative(alpha)
+caputo = OptimizedCaputo(alpha)
 
 # Define time points and function values
 t = np.linspace(0.1, 2.0, 100)
@@ -37,6 +37,10 @@ h = t[1] - t[0]  # Step size
 # Compute fractional derivative
 result = caputo.compute(f, t, h)
 print(f"Caputo derivative of order {alpha}: {result[-1]:.6f}")
+
+# Or use the function interface
+result_func = optimized_caputo(f, t, alpha, h)
+print(f"Function interface result: {result_func[-1]:.6f}")
 ```
 
 ### Import Structure
@@ -46,10 +50,37 @@ print(f"Caputo derivative of order {alpha}: {result[-1]:.6f}")
 from src.core.definitions import FractionalOrder
 from src.core.derivatives import FractionalDerivative
 
-# Algorithms
-from src.algorithms.caputo import CaputoDerivative
-from src.algorithms.riemann_liouville import RiemannLiouvilleDerivative
-from src.algorithms.grunwald_letnikov import GrunwaldLetnikovDerivative
+# Optimized algorithms (PRIMARY implementations)
+from src.algorithms.optimized_methods import (
+    OptimizedCaputo,
+    OptimizedRiemannLiouville,
+    OptimizedGrunwaldLetnikov,
+    optimized_caputo,
+    optimized_riemann_liouville,
+    optimized_grunwald_letnikov
+)
+
+# GPU-optimized algorithms
+from src.algorithms.gpu_optimized_methods import (
+    GPUOptimizedCaputo,
+    gpu_optimized_caputo,
+    JAXAutomaticDifferentiation
+)
+
+# Parallel-optimized algorithms
+from src.algorithms.parallel_optimized_methods import (
+    ParallelOptimizedCaputo,
+    parallel_optimized_caputo,
+    NumbaParallelManager
+)
+
+# Advanced methods
+from src.algorithms.advanced_methods import (
+    WeylDerivative,
+    MarchaudDerivative,
+    optimized_weyl_derivative,
+    optimized_marchaud_derivative
+)
 
 # Utilities
 from src.utils import ErrorAnalyzer, PlotManager
@@ -78,8 +109,12 @@ print(f"Is valid: {alpha.is_valid()}")  # True
 
 ```python
 import numpy as np
-from src.algorithms.caputo import CaputoDerivative
-from src.algorithms.riemann_liouville import RiemannLiouvilleDerivative
+from src.algorithms.optimized_methods import (
+    OptimizedCaputo,
+    OptimizedRiemannLiouville,
+    optimized_caputo,
+    optimized_riemann_liouville
+)
 
 # Test parameters
 alpha = 0.5
@@ -87,15 +122,22 @@ t = np.linspace(0.1, 2.0, 100)
 f = np.sin(t)
 h = t[1] - t[0]
 
-# Compare different methods
-caputo = CaputoDerivative(alpha)
-riemann = RiemannLiouvilleDerivative(alpha)
+# Compare different methods using classes
+caputo = OptimizedCaputo(alpha)
+riemann = OptimizedRiemannLiouville(alpha)
 
 result_caputo = caputo.compute(f, t, h)
 result_riemann = riemann.compute(f, t, h)
 
 print(f"Caputo: {result_caputo[-1]:.6f}")
 print(f"Riemann-Liouville: {result_riemann[-1]:.6f}")
+
+# Or use function interfaces
+result_caputo_func = optimized_caputo(f, t, alpha, h)
+result_riemann_func = optimized_riemann_liouville(f, t, alpha, h)
+
+print(f"Caputo (function): {result_caputo_func[-1]:.6f}")
+print(f"Riemann-Liouville (function): {result_riemann_func[-1]:.6f}")
 ```
 
 ---
@@ -107,14 +149,14 @@ print(f"Riemann-Liouville: {result_riemann[-1]:.6f}")
 The Caputo derivative is particularly useful for initial value problems:
 
 ```python
-from src.algorithms.caputo import CaputoDerivative
+from src.algorithms.optimized_methods import OptimizedCaputo
 import numpy as np
 
 # Initialize with different methods
 alpha = 0.5
-caputo_trap = CaputoDerivative(alpha, method="trapezoidal")
-caputo_simp = CaputoDerivative(alpha, method="simpson")
-caputo_gauss = CaputoDerivative(alpha, method="gauss")
+caputo_trap = OptimizedCaputo(alpha, method="trapezoidal")
+caputo_simp = OptimizedCaputo(alpha, method="simpson")
+caputo_gauss = OptimizedCaputo(alpha, method="gauss")
 
 # Test function
 t = np.linspace(0.1, 2.0, 100)
@@ -134,11 +176,11 @@ print(f"Gauss: {result_gauss[-1]:.6f}")
 ### Riemann-Liouville Derivative
 
 ```python
-from src.algorithms.riemann_liouville import RiemannLiouvilleDerivative
+from src.algorithms.optimized_methods import OptimizedRiemannLiouville
 
 # Initialize Riemann-Liouville derivative
 alpha = 0.7
-riemann = RiemannLiouvilleDerivative(alpha, method="trapezoidal")
+riemann = OptimizedRiemannLiouville(alpha, method="trapezoidal")
 
 # Test with power function (has known analytical solution)
 t = np.linspace(0.1, 2.0, 100)
@@ -158,11 +200,11 @@ print(f"Analytical: {analytical[-1]:.6f}")
 ### Grünwald-Letnikov Derivative
 
 ```python
-from src.algorithms.grunwald_letnikov import GrunwaldLetnikovDerivative
+from src.algorithms.optimized_methods import OptimizedGrunwaldLetnikov
 
 # Initialize Grünwald-Letnikov derivative
 alpha = 0.5
-grunwald = GrunwaldLetnikovDerivative(alpha)
+grunwald = OptimizedGrunwaldLetnikov(alpha)
 
 # Test with trigonometric function
 t = np.linspace(0.1, 2*np.pi, 200)
@@ -266,8 +308,8 @@ t = np.linspace(0.1, 2.0, 100)
 f = t**2  # f(t) = t²
 
 # Compute numerical result
-from src.algorithms.caputo import CaputoDerivative
-caputo = CaputoDerivative(0.5)
+from src.algorithms.optimized_methods import OptimizedCaputo
+caputo = OptimizedCaputo(0.5)
 numerical = caputo.compute(f, t, t[1] - t[0])
 
 # Analytical solution
@@ -329,8 +371,8 @@ print(f"Initial memory: {initial_memory:.2f} MB")
 t = np.linspace(0.1, 10.0, 50000)
 f = np.sin(t)
 
-from src.algorithms.caputo import CaputoDerivative
-caputo = CaputoDerivative(0.5)
+from src.algorithms.optimized_methods import OptimizedCaputo
+caputo = OptimizedCaputo(0.5)
 result = caputo.compute(f, t, t[1] - t[0])
 
 # Check memory after computation
@@ -386,8 +428,8 @@ f = t**2
 analytical_result = analytical.power_function_derivative(t, 2, 0.5)
 
 # Compare with numerical result
-from src.algorithms.caputo import CaputoDerivative
-caputo = CaputoDerivative(0.5)
+from src.algorithms.optimized_methods import OptimizedCaputo
+caputo = OptimizedCaputo(0.5)
 numerical_result = caputo.compute(f, t, t[1] - t[0])
 
 # Validate
@@ -440,8 +482,8 @@ t = np.linspace(0.1, 2*np.pi, 100)
 f = np.sin(t)
 
 # Compute derivatives
-from src.algorithms.caputo import CaputoDerivative
-caputo = CaputoDerivative(0.5)
+from src.algorithms.optimized_methods import OptimizedCaputo
+caputo = OptimizedCaputo(0.5)
 result = caputo.compute(f, t, t[1] - t[0])
 
 # Create comparison plot
@@ -468,8 +510,8 @@ for n in grid_sizes:
     t = np.linspace(0.1, 2.0, n)
     f = t**2
     
-    from src.algorithms.caputo import CaputoDerivative
-    caputo = CaputoDerivative(0.5)
+    from src.algorithms.optimized_methods import OptimizedCaputo
+    caputo = OptimizedCaputo(0.5)
     numerical = caputo.compute(f, t, t[1] - t[0])
     
     # Analytical solution
@@ -495,13 +537,13 @@ plt.show()
 
 ```python
 # For initial value problems: Use Caputo
-from src.algorithms.caputo import CaputoDerivative
+from src.algorithms.optimized_methods import OptimizedCaputo
 
 # For boundary value problems: Use Riemann-Liouville
-from src.algorithms.riemann_liouville import RiemannLiouvilleDerivative
+from src.algorithms.optimized_methods import OptimizedRiemannLiouville
 
 # For high-order derivatives: Use Grünwald-Letnikov
-from src.algorithms.grunwald_letnikov import GrunwaldLetnikovDerivative
+from src.algorithms.optimized_methods import OptimizedGrunwaldLetnikov
 ```
 
 ### 2. Grid Size Selection
@@ -599,8 +641,8 @@ from src.validation.analytical_solutions import AnalyticalSolutions
 from src.validation.convergence_tests import ConvergenceTester
 
 # Use different numerical methods
-caputo_trap = CaputoDerivative(alpha, method="trapezoidal")
-caputo_simp = CaputoDerivative(alpha, method="simpson")
+caputo_trap = OptimizedCaputo(alpha, method="trapezoidal")
+caputo_simp = OptimizedCaputo(alpha, method="simpson")
 ```
 
 #### Issue 4: Import Errors

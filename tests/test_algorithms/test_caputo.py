@@ -2,45 +2,48 @@
 """
 Tests for Caputo derivative algorithm.
 
-Tests the CaputoDerivative class and its various methods.
+Tests the OptimizedCaputo class and its various methods.
 """
 
 import pytest
 import numpy as np
-from src.algorithms.caputo import CaputoDerivative
+from src.algorithms.optimized_methods import OptimizedCaputo, optimized_caputo
 
 
-class TestCaputoDerivative:
-    """Test CaputoDerivative class."""
+class TestOptimizedCaputo:
+    """Test OptimizedCaputo class."""
 
-    def test_caputo_derivative_creation(self):
-        """Test creating CaputoDerivative instances."""
+    def test_optimized_caputo_creation(self):
+        """Test creating OptimizedCaputo instances."""
         # Test with float
-        caputo = CaputoDerivative(0.5)
-        assert caputo.alpha.alpha == 0.5
-        assert caputo.method == "direct"
+        caputo = OptimizedCaputo(0.5)
+        assert caputo.alpha == 0.5
+        # Method is passed to compute(), not stored in __init__
 
-        # Test with different methods
-        caputo_l2 = CaputoDerivative(0.5, method="l2")
-        assert caputo_l2.method == "l2"
+        # Test with different alpha values
+        caputo_alpha1 = OptimizedCaputo(0.3)
+        caputo_alpha2 = OptimizedCaputo(0.7)
 
-        caputo_fft = CaputoDerivative(0.5, method="fft")
-        assert caputo_fft.method == "fft"
+        assert caputo_alpha1.alpha == 0.3
+        assert caputo_alpha2.alpha == 0.7
 
-    def test_caputo_derivative_validation(self):
-        """Test CaputoDerivative validation."""
-        # Test valid alpha values
-        CaputoDerivative(0.1)
-        CaputoDerivative(1.0)
-        CaputoDerivative(2.5)
+    def test_optimized_caputo_validation(self):
+        """Test OptimizedCaputo validation."""
+        # Test valid alpha values (L1 scheme requires 0 < α < 1)
+        OptimizedCaputo(0.1)
+        OptimizedCaputo(0.5)
+        OptimizedCaputo(0.9)
 
-        # Test invalid method
+        # Test invalid alpha values
         with pytest.raises(ValueError):
-            CaputoDerivative(0.5, method="invalid_method")
+            OptimizedCaputo(-0.1)
 
-    def test_caputo_derivative_compute_scalar(self):
+        with pytest.raises(ValueError):
+            OptimizedCaputo(1.0)
+
+    def test_optimized_caputo_compute_scalar(self):
         """Test computing Caputo derivative for scalar input."""
-        caputo = CaputoDerivative(0.5)
+        caputo = OptimizedCaputo(0.5)
 
         # Test with simple function
         def f(t):
@@ -50,13 +53,13 @@ class TestCaputoDerivative:
         h = 0.01
 
         result = caputo.compute(f, t, h)
-        assert isinstance(result, (int, float, np.number))
-        assert not np.isnan(result)
-        assert not np.isinf(result)
+        assert isinstance(result, np.ndarray)  # Caputo compute returns array
+        assert not np.any(np.isnan(result))
+        assert not np.any(np.isinf(result))
 
-    def test_caputo_derivative_compute_array(self):
+    def test_optimized_caputo_compute_array(self):
         """Test computing Caputo derivative for array input."""
-        caputo = CaputoDerivative(0.5)
+        caputo = OptimizedCaputo(0.5)
 
         # Test with array function values
         t = np.linspace(0.1, 2.0, 50)
@@ -69,7 +72,7 @@ class TestCaputoDerivative:
         assert not np.any(np.isnan(result))
         assert not np.any(np.isinf(result))
 
-    def test_caputo_derivative_different_methods(self):
+    def test_optimized_caputo_different_methods(self):
         """Test different computation methods."""
         alpha = 0.5
         t = np.linspace(0.1, 2.0, 50)
@@ -77,19 +80,18 @@ class TestCaputoDerivative:
         h = t[1] - t[0]
 
         # Test L1 method
-        caputo_l1 = CaputoDerivative(alpha, method="l1")
-        result_l1 = caputo_l1.compute(f, t, h)
+        caputo = OptimizedCaputo(alpha)
+        result_l1 = caputo.compute(f, t, h, method="l1")
 
-        # Test L2 method
-        caputo_l2 = CaputoDerivative(alpha, method="l2")
-        result_l2 = caputo_l2.compute(f, t, h)
+        # Test Diethelm-Ford-Freed method
+        result_dff = caputo.compute(f, t, h, method="diethelm_ford_freed")
 
         # Results should be different but both valid
-        assert not np.allclose(result_l1, result_l2)
+        assert not np.allclose(result_l1, result_dff)
         assert not np.any(np.isnan(result_l1))
-        assert not np.any(np.isnan(result_l2))
+        assert not np.any(np.isnan(result_dff))
 
-    def test_caputo_derivative_analytical_comparison(self):
+    def test_optimized_caputo_analytical_comparison(self):
         """Test against known analytical results."""
         # For f(t) = t, the Caputo derivative of order α is:
         # D^α f(t) = t^(1-α) / Γ(2-α)
@@ -100,130 +102,114 @@ class TestCaputoDerivative:
         f = t
         h = t[1] - t[0]
 
-        caputo = CaputoDerivative(alpha)
+        caputo = OptimizedCaputo(alpha)
         numerical = caputo.compute(f, t, h)
 
         # Analytical solution
         analytical = t ** (1 - alpha) / gamma(2 - alpha)
 
         # Check that numerical result is reasonable
-        # (exact agreement not expected due to discretization)
-        error = np.abs(numerical - analytical)
-        # The error can be large for the direct method, so we use a more lenient tolerance
-        assert np.mean(error) < 2.0  # Average error should be reasonable
+        # (exact match not expected due to discretization)
+        # Use a more lenient tolerance for discretization effects
+        assert np.allclose(numerical, analytical, rtol=0.5)
 
-    def test_caputo_derivative_edge_cases(self):
-        """Test edge cases and boundary conditions."""
-        caputo = CaputoDerivative(0.5)
-
-        # Test with very small step size
-        t = np.linspace(0.1, 1.0, 1000)
-        f = t
-        h = t[1] - t[0]
-
-        result = caputo.compute(f, t, h)
-        assert not np.any(np.isnan(result))
-
-        # Test with single point - skip this test as it requires interpolation
-        # which doesn't work well with single points
-        # t_single = np.array([1.0])
-        # f_single = np.array([1.0])
-        # h_single = 0.01
-        # result_single = caputo.compute(f_single, t_single, h_single)
-        # assert result_single.shape == (1,)
-
-    def test_caputo_derivative_negative_alpha(self):
-        """Test Caputo derivative with negative alpha (fractional integral)."""
-        # For negative alpha, this becomes a fractional integral
-        # Note: FractionalOrder doesn't allow negative values, so we test the validation
-        with pytest.raises(ValueError, match="Fractional order must be non-negative"):
-            caputo = CaputoDerivative(-0.5)
-
-        # Test with valid positive alpha
-        caputo = CaputoDerivative(0.5)
-        t = np.linspace(0.1, 2.0, 50)
-        f = t
-        h = t[1] - t[0]
-
-        result = caputo.compute(f, t, h)
-        assert isinstance(result, np.ndarray)
-        assert not np.any(np.isnan(result))
-
-    def test_caputo_derivative_complex_function(self):
-        """Test with more complex functions."""
-        caputo = CaputoDerivative(0.5)
-
-        # Test with exponential function
-        t = np.linspace(0.1, 2.0, 50)
-        f = np.exp(-t)
-        h = t[1] - t[0]
-
-        result = caputo.compute(f, t, h)
-        assert isinstance(result, np.ndarray)
-        assert not np.any(np.isnan(result))
-
-        # Test with trigonometric function
-        f_trig = np.sin(t)
-        result_trig = caputo.compute(f_trig, t, h)
-        assert isinstance(result_trig, np.ndarray)
-        assert not np.any(np.isnan(result_trig))
-
-    def test_caputo_derivative_method_consistency(self):
-        """Test that different methods give consistent results."""
+    def test_optimized_caputo_function_interface(self):
+        """Test the optimized_caputo function interface."""
         alpha = 0.5
         t = np.linspace(0.1, 2.0, 50)
         f = t**2
         h = t[1] - t[0]
 
-        # Test L1 and L2 methods
-        caputo_l1 = CaputoDerivative(alpha, method="l1")
-        caputo_l2 = CaputoDerivative(alpha, method="l2")
+        # Test function interface
+        result = optimized_caputo(f, t, alpha, h)
+        assert isinstance(result, np.ndarray)
+        assert result.shape == t.shape
+        assert not np.any(np.isnan(result))
 
-        result_l1 = caputo_l1.compute(f, t, h)
-        result_l2 = caputo_l2.compute(f, t, h)
+    def test_optimized_caputo_edge_cases(self):
+        """Test edge cases and boundary conditions."""
+        caputo = OptimizedCaputo(0.5)
 
-        # Both should give reasonable results
-        assert np.std(result_l1) > 0  # Non-zero variance
-        assert np.std(result_l2) > 0  # Non-zero variance
+        # Test with zero function
+        t = np.linspace(0.1, 2.0, 10)
+        f = np.zeros_like(t)
+        h = t[1] - t[0]
 
-        # Results should be in similar range (L1 and L2 can differ significantly)
-        assert np.abs(np.mean(result_l1) - np.mean(result_l2)) < 5.0
+        result = caputo.compute(f, t, h)
+        assert np.allclose(result, 0, atol=1e-10)
 
-    def test_caputo_derivative_error_handling(self):
-        """Test error handling for invalid inputs."""
-        caputo = CaputoDerivative(0.5)
+        # Test with constant function
+        f = np.ones_like(t)
+        result = caputo.compute(f, t, h)
+        # Caputo derivative of constant should be zero
+        assert np.allclose(result, 0, atol=1e-10)
 
-        # Test with invalid step size (using L1 method which validates h)
-        caputo_l1 = CaputoDerivative(0.5, method="l1")
-        with pytest.raises(ValueError):
-            caputo_l1.compute(np.array([1, 2]), np.array([1, 2]), 0)
+    def test_optimized_caputo_performance(self):
+        """Test performance characteristics."""
+        caputo = OptimizedCaputo(0.5)
 
-        # Test with invalid method
-        with pytest.raises(ValueError):
-            CaputoDerivative(0.5, method="invalid_method")
+        # Test with larger arrays
+        t = np.linspace(0.1, 10.0, 1000)
+        f = t**3
+        h = t[1] - t[0]
 
-    def test_caputo_derivative_convergence(self):
-        """Test convergence with decreasing step size."""
+        result = caputo.compute(f, t, h)
+        assert isinstance(result, np.ndarray)
+        assert result.shape == t.shape
+        assert not np.any(np.isnan(result))
+        assert not np.any(np.isinf(result))
+
+    def test_optimized_caputo_method_consistency(self):
+        """Test that different methods give consistent results for same input."""
         alpha = 0.5
-        t_max = 1.0
+        t = np.linspace(0.1, 2.0, 50)
+        f = t**2
+        h = t[1] - t[0]
 
-        # Test with different grid sizes
-        grid_sizes = [50, 100, 200]
-        results = []
+        # Test both methods
+        caputo = OptimizedCaputo(alpha)
+        result_l1 = caputo.compute(f, t, h, method="l1")
+        result_dff = caputo.compute(f, t, h, method="diethelm_ford_freed")
 
-        for N in grid_sizes:
-            t = np.linspace(0.1, t_max, N)
-            f = t
-            h = t[1] - t[0]
+        # Both should be finite and valid
+        assert not np.any(np.isnan(result_l1))
+        assert not np.any(np.isnan(result_dff))
+        assert not np.any(np.isinf(result_l1))
+        assert not np.any(np.isinf(result_dff))
 
-            caputo = CaputoDerivative(alpha)
-            result = caputo.compute(f, t, h)
-            results.append(result[-1])  # Take last point
+        # Results should be different (different schemes)
+        assert not np.allclose(result_l1, result_dff)
 
-        # Results should converge (get more stable)
-        assert len(results) == len(grid_sizes)
-        assert all(not np.isnan(r) for r in results)
+    def test_optimized_caputo_alpha_validation(self):
+        """Test alpha parameter validation."""
+        # Test valid alpha values (L1 scheme requires 0 < α < 1)
+        for alpha in [0.1, 0.5, 0.9]:
+            caputo = OptimizedCaputo(alpha)
+            assert caputo.alpha == alpha
 
+        # Test invalid alpha values
+        with pytest.raises(ValueError):
+            OptimizedCaputo(-0.1)
 
-if __name__ == "__main__":
-    pytest.main([__file__])
+        with pytest.raises(ValueError):
+            OptimizedCaputo(0.0)
+
+    def test_optimized_caputo_input_validation(self):
+        """Test input validation."""
+        caputo = OptimizedCaputo(0.5)
+        t = np.linspace(0.1, 2.0, 10)
+        f = t**2
+        h = t[1] - t[0]
+
+        # Test with mismatched array lengths
+        f_wrong = t[:-1]  # One element shorter
+        with pytest.raises(ValueError):
+            caputo.compute(f_wrong, t, h)
+
+        # Test with negative step size
+        with pytest.raises(ValueError):
+            caputo.compute(f, t, -h)
+
+        # Test with zero step size
+        with pytest.raises(ValueError):
+            caputo.compute(f, t, 0)

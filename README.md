@@ -108,23 +108,16 @@ print("All methods working perfectly with dramatic speedups!")
 fc_library/
 ├── src/                          # Main source code
 │   ├── algorithms/               # Fractional derivative algorithms
-│   │   ├── caputo.py            # Caputo derivative implementation
-│   │   ├── riemann_liouville.py # Riemann-Liouville derivative
-│   │   ├── grunwald_letnikov.py # Grünwald-Letnikov derivative
-│   │   ├── optimized_methods.py # 🚀 Optimized core methods
+│   │   ├── optimized_methods.py # 🚀 PRIMARY - All core optimized methods
+│   │   ├── gpu_optimized_methods.py # 🚀 GPU acceleration + JAX features
+│   │   ├── parallel_optimized_methods.py # 🚀 Parallel processing + Numba features
 │   │   ├── advanced_methods.py  # Advanced methods (Weyl, Marchaud, etc.)
-│   │   ├── advanced_optimized_methods.py # 🚀 Optimized advanced methods
-│   │   ├── fft_methods.py       # FFT-based methods
-│   │   └── L1_L2_schemes.py     # L1/L2 numerical schemes
+│   │   └── advanced_optimized_methods.py # 🚀 Optimized advanced methods
 │   ├── core/                     # Core definitions and utilities
 │   │   ├── definitions.py       # Mathematical definitions
 │   │   ├── derivatives.py       # Derivative base classes
 │   │   ├── integrals.py         # Integral implementations
 │   │   └── utilities.py         # Utility functions
-│   ├── optimisation/             # Performance optimization
-│   │   ├── jax_implementations.py # JAX-based implementations
-│   │   ├── numba_kernels.py     # NUMBA JIT kernels
-│   │   └── parallel_computing.py # Parallel computing utilities
 │   ├── solvers/                  # Differential equation solvers
 │   │   ├── ode_solvers.py       # ODE solvers
 │   │   ├── pde_solvers.py       # PDE solvers
@@ -490,12 +483,14 @@ The library includes **highly optimized implementations** that provide **dramati
 - **GPU Acceleration**: Leverage GPU computing when available
 - **JIT Compilation**: Just-in-time compilation for performance
 - **Vectorization**: Efficient array operations
+- **Advanced Features**: `JAXAutomaticDifferentiation`, `JAXOptimizer`, `vectorize_fractional_derivatives`
 
 ### **⚡ NUMBA Integration**
 - **JIT Compilation**: Compile Python functions to machine code
 - **Parallel Computing**: Multi-threading support
 - **Memory Optimization**: Efficient memory management
 - **Type Specialization**: Optimized for specific data types
+- **Advanced Features**: `NumbaOptimizer`, `NumbaFractionalKernels`, `NumbaParallelManager`, `memory_efficient_caputo`
 
 ### **🔄 Parallel Computing**
 - **Multi-core Processing**: Utilize all CPU cores

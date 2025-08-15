@@ -12,10 +12,10 @@ from scipy.sparse.linalg import spsolve
 import warnings
 
 from src.core.definitions import FractionalOrder
-from src.algorithms import (
-    caputo_derivative,
-    riemann_liouville_derivative,
-    grunwald_letnikov_derivative,
+from src.algorithms.optimized_methods import (
+    optimized_caputo,
+    optimized_riemann_liouville,
+    optimized_grunwald_letnikov,
 )
 
 

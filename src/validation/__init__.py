@@ -35,20 +35,18 @@ from .benchmarks import (
 __all__ = [
     # Analytical solutions
     "AnalyticalSolutions",
-    "PowerFunctionSolutions", 
+    "PowerFunctionSolutions",
     "ExponentialSolutions",
     "TrigonometricSolutions",
     "get_analytical_solution",
     "validate_against_analytical",
-    
     # Convergence tests
     "ConvergenceTester",
     "ConvergenceAnalyzer",
-    "OrderOfAccuracy", 
+    "OrderOfAccuracy",
     "run_convergence_study",
     "run_method_convergence_test",
     "estimate_convergence_rate",
-    
     # Benchmarks
     "BenchmarkSuite",
     "PerformanceBenchmark",

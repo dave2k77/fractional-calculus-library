@@ -36,19 +36,17 @@ from .plotting import (
 __all__ = [
     # Error analysis
     "ErrorAnalyzer",
-    "ConvergenceAnalyzer", 
+    "ConvergenceAnalyzer",
     "ValidationFramework",
     "compute_error_metrics",
     "analyze_convergence",
     "validate_solution",
-    
     # Memory management
     "MemoryManager",
     "CacheManager",
     "optimize_memory_usage",
     "clear_cache",
     "get_memory_usage",
-    
     # Plotting
     "PlotManager",
     "create_comparison_plot",
