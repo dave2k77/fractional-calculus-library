@@ -57,6 +57,31 @@ from .L1_L2_schemes import (
     l2_scheme_numba,
 )
 
+from .advanced_methods import (
+    WeylDerivative,
+    MarchaudDerivative,
+    HadamardDerivative,
+    ReizFellerDerivative,
+    AdomianDecomposition,
+    weyl_derivative,
+    marchaud_derivative,
+    hadamard_derivative,
+    reiz_feller_derivative,
+)
+
+from .advanced_optimized_methods import (
+    OptimizedWeylDerivative,
+    OptimizedMarchaudDerivative,
+    OptimizedHadamardDerivative,
+    OptimizedReizFellerDerivative,
+    OptimizedAdomianDecomposition,
+    optimized_weyl_derivative,
+    optimized_marchaud_derivative,
+    optimized_hadamard_derivative,
+    optimized_reiz_feller_derivative,
+    optimized_adomian_solve,
+)
+
 # Define what gets imported with "from algorithms import *"
 __all__ = [
     # Caputo derivative algorithms
@@ -100,4 +125,25 @@ __all__ = [
     "solve_time_fractional_pde_numba",
     "l1_scheme_numba",
     "l2_scheme_numba",
+    # Advanced fractional calculus methods
+    "WeylDerivative",
+    "MarchaudDerivative",
+    "HadamardDerivative",
+    "ReizFellerDerivative",
+    "AdomianDecomposition",
+    "weyl_derivative",
+    "marchaud_derivative",
+    "hadamard_derivative",
+    "reiz_feller_derivative",
+    # Optimized advanced methods
+    "OptimizedWeylDerivative",
+    "OptimizedMarchaudDerivative",
+    "OptimizedHadamardDerivative",
+    "OptimizedReizFellerDerivative",
+    "OptimizedAdomianDecomposition",
+    "optimized_weyl_derivative",
+    "optimized_marchaud_derivative",
+    "optimized_hadamard_derivative",
+    "optimized_reiz_feller_derivative",
+    "optimized_adomian_solve",
 ]

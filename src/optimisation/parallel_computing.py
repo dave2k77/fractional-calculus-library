@@ -51,6 +51,31 @@ except ImportError:
 from src.core.definitions import FractionalOrder
 
 
+class ParallelConfig:
+    """
+    Configuration class for parallel processing settings.
+    
+    Provides a simple interface for configuring parallel processing
+    parameters across different fractional calculus methods.
+    """
+    
+    def __init__(self, n_jobs: int = -1, enabled: bool = True, 
+                 backend: str = "threading", chunk_size: Optional[int] = None):
+        """
+        Initialize parallel configuration.
+        
+        Args:
+            n_jobs: Number of jobs (-1 for all cores)
+            enabled: Whether parallel processing is enabled
+            backend: Backend for parallel processing ("threading", "multiprocessing")
+            chunk_size: Size of chunks for parallel processing
+        """
+        self.n_jobs = n_jobs if n_jobs > 0 else mp.cpu_count()
+        self.enabled = enabled
+        self.backend = backend
+        self.chunk_size = chunk_size
+
+
 class ParallelComputingManager:
     """
     Advanced parallel computing manager for fractional calculus.
