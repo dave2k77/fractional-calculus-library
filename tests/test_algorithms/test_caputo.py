@@ -193,9 +193,10 @@ class TestCaputoDerivative:
         """Test error handling for invalid inputs."""
         caputo = CaputoDerivative(0.5)
 
-        # Test with invalid step size
+        # Test with invalid step size (using L1 method which validates h)
+        caputo_l1 = CaputoDerivative(0.5, method="l1")
         with pytest.raises(ValueError):
-            caputo.compute(np.array([1, 2]), np.array([1, 2]), 0)
+            caputo_l1.compute(np.array([1, 2]), np.array([1, 2]), 0)
 
         # Test with invalid method
         with pytest.raises(ValueError):

@@ -52,6 +52,7 @@ class GrunwaldLetnikovDerivative:
             "short_memory",
             "variable_step",
             "predictor_corrector",
+            "optimized_direct",
         ]
         if self.method not in valid_methods:
             raise ValueError(f"Method must be one of {valid_methods}")
@@ -85,6 +86,8 @@ class GrunwaldLetnikovDerivative:
             return self._compute_variable_step(f, t, h, **kwargs)
         elif self.method == "predictor_corrector":
             return self._compute_predictor_corrector(f, t, h, **kwargs)
+        elif self.method == "optimized_direct":
+            return self._compute_optimized_direct(f, t, h, **kwargs)
 
     def _compute_direct(
         self,
@@ -396,6 +399,23 @@ class GrunwaldLetnikovDerivative:
         alpha = self.alpha.alpha
         # Simplified corrector - can be enhanced with proper Adams-Moulton weights
         return 0.5 * (result[n - 1] + pred + h * (f[n] - f[n - 1]))
+
+
+    def _compute_optimized_direct(
+        self, f: Union[Callable, np.ndarray], t: Union[float, np.ndarray], h: Optional[float] = None, **kwargs
+    ) -> Union[float, np.ndarray]:
+        """
+        Optimized direct implementation for Grünwald-Letnikov derivative.
+        
+        This method uses the optimized direct computation for maximum efficiency.
+        """
+        from src.algorithms.optimized_methods import OptimizedGrunwaldLetnikov
+        
+        # Create optimized calculator
+        optimized_calc = OptimizedGrunwaldLetnikov(self.alpha)
+        
+        # Compute using optimized direct method
+        return optimized_calc._grunwald_letnikov_numpy(f, h)
 
 
 # JAX-optimized implementations

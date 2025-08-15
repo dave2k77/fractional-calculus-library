@@ -45,7 +45,7 @@ class CaputoDerivative:
         self.method = method.lower()
 
         # Validate method
-        valid_methods = ["direct", "fft", "l1", "l2", "predictor_corrector"]
+        valid_methods = ["direct", "fft", "l1", "l2", "predictor_corrector", "optimized_l1", "optimized_predictor_corrector"]
         if self.method not in valid_methods:
             raise ValueError(f"Method must be one of {valid_methods}")
 
@@ -78,6 +78,10 @@ class CaputoDerivative:
             return self._compute_l2(f, t, h, **kwargs)
         elif self.method == "predictor_corrector":
             return self._compute_predictor_corrector(f, t, h, **kwargs)
+        elif self.method == "optimized_l1":
+            return self._compute_optimized_l1(f, t, h, **kwargs)
+        elif self.method == "optimized_predictor_corrector":
+            return self._compute_optimized_predictor_corrector(f, t, h, **kwargs)
 
     def _compute_direct(
         self, f: Union[Callable, np.ndarray], t: Union[float, np.ndarray], **kwargs
@@ -126,9 +130,22 @@ class CaputoDerivative:
         else:
             # Array case - interpolate and integrate
             t_array = kwargs.get("t_array", np.linspace(0, t, len(f)))
-            f_interp = interpolate.interp1d(
-                t_array, f, kind="cubic", fill_value="extrapolate"
-            )
+            
+            # Handle case where f has only one element
+            if len(f) == 1:
+                # For single point, return zero derivative
+                return 0.0
+            
+            # Ensure we have enough points for cubic interpolation
+            if len(f) < 4:
+                # Use linear interpolation for small arrays
+                f_interp = interpolate.interp1d(
+                    t_array, f, kind="linear", fill_value="extrapolate"
+                )
+            else:
+                f_interp = interpolate.interp1d(
+                    t_array, f, kind="cubic", fill_value="extrapolate"
+                )
 
             def integrand(tau):
                 # Handle edge case where t - tau is very small
@@ -171,6 +188,8 @@ class CaputoDerivative:
         Uses the fact that Caputo derivative can be written as a convolution
         with a power-law kernel.
         """
+        if h <= 0:
+            raise ValueError("Step size h must be positive")
         if callable(f):
             # Sample the function
             t_max = np.max(t) if hasattr(t, "__len__") else t
@@ -225,6 +244,9 @@ class CaputoDerivative:
 
         First-order accurate scheme suitable for 0 < α < 1.
         """
+        if h <= 0:
+            raise ValueError("Step size h must be positive")
+        
         if self.alpha.alpha >= 1:
             raise ValueError("L1 scheme requires 0 < α < 1")
 
@@ -270,6 +292,9 @@ class CaputoDerivative:
 
         Second-order accurate scheme suitable for 0 < α < 1.
         """
+        if h <= 0:
+            raise ValueError("Step size h must be positive")
+        
         if self.alpha.alpha >= 1:
             raise ValueError("L2 scheme requires 0 < α < 1")
 
@@ -315,6 +340,8 @@ class CaputoDerivative:
 
         Uses Adams-Bashforth-Moulton type scheme.
         """
+        if h <= 0:
+            raise ValueError("Step size h must be positive")
         if callable(f):
             t_max = np.max(t) if hasattr(t, "__len__") else t
             t_array = np.arange(0, t_max + h, h)
@@ -377,6 +404,38 @@ class CaputoDerivative:
                 self._nth_derivative(f, t + h, n - 1)
                 - self._nth_derivative(f, t - h, n - 1)
             ) / (2 * h)
+
+    def _compute_optimized_l1(
+        self, f: Union[Callable, np.ndarray], t: Union[float, np.ndarray], h: Optional[float] = None, **kwargs
+    ) -> Union[float, np.ndarray]:
+        """
+        Optimized L1 scheme implementation for Caputo derivative.
+        
+        This method uses the optimized L1 scheme for maximum efficiency.
+        """
+        from src.algorithms.optimized_methods import OptimizedCaputo
+        
+        # Create optimized calculator
+        optimized_calc = OptimizedCaputo(self.alpha)
+        
+        # Compute using optimized L1 method
+        return optimized_calc._l1_scheme_numpy(f, h)
+
+    def _compute_optimized_predictor_corrector(
+        self, f: Union[Callable, np.ndarray], t: Union[float, np.ndarray], h: Optional[float] = None, **kwargs
+    ) -> Union[float, np.ndarray]:
+        """
+        Optimized predictor-corrector implementation for Caputo derivative.
+        
+        This method uses the optimized Diethelm-Ford-Freed predictor-corrector method.
+        """
+        from src.algorithms.optimized_methods import OptimizedCaputo
+        
+        # Create optimized calculator
+        optimized_calc = OptimizedCaputo(self.alpha)
+        
+        # Compute using optimized predictor-corrector method
+        return optimized_calc._diethelm_ford_freed_numpy(f, h)
 
 
 # JAX-optimized implementations

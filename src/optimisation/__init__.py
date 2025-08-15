@@ -44,6 +44,17 @@ from .parallel_computing import (
     get_system_info,
 )
 
+# Import GPU optimization
+from .gpu_optimization import (
+    GPUOptimizer,
+    MultiGPUManager,
+    GPUBackend,
+    MemoryStrategy,
+    create_gpu_optimizer,
+    create_multi_gpu_manager,
+    optimize_fractional_derivative_gpu,
+)
+
 # Define what gets imported with "from optimisation import *"
 __all__ = [
     # JAX optimizations
@@ -75,4 +86,12 @@ __all__ = [
     "parallel_fractional_derivative",
     "optimize_parallel_parameters",
     "get_system_info",
+    # GPU optimization
+    "GPUOptimizer",
+    "MultiGPUManager",
+    "GPUBackend",
+    "MemoryStrategy",
+    "create_gpu_optimizer",
+    "create_multi_gpu_manager",
+    "optimize_fractional_derivative_gpu",
 ]

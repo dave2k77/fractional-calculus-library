@@ -45,7 +45,7 @@ class RiemannLiouvilleDerivative:
         self.method = method.lower()
 
         # Validate method
-        valid_methods = ["direct", "fft", "grunwald_letnikov", "predictor_corrector"]
+        valid_methods = ["direct", "fft", "grunwald_letnikov", "predictor_corrector", "optimized_fft"]
         if self.method not in valid_methods:
             raise ValueError(f"Method must be one of {valid_methods}")
 
@@ -76,6 +76,8 @@ class RiemannLiouvilleDerivative:
             return self._compute_grunwald_letnikov(f, t, h, **kwargs)
         elif self.method == "predictor_corrector":
             return self._compute_predictor_corrector(f, t, h, **kwargs)
+        elif self.method == "optimized_fft":
+            return self._compute_optimized_fft(f, t, h, **kwargs)
 
     def _compute_direct(
         self, f: Union[Callable, np.ndarray], t: Union[float, np.ndarray], **kwargs
@@ -393,6 +395,23 @@ class RiemannLiouvilleDerivative:
         alpha = self.alpha.alpha
         # Simplified corrector - can be enhanced with proper Adams-Moulton weights
         return 0.5 * (result[n - 1] + pred + h * (f[n] - f[n - 1]))
+
+
+    def _compute_optimized_fft(
+        self, f: Union[Callable, np.ndarray], t: Union[float, np.ndarray], h: Optional[float] = None, **kwargs
+    ) -> Union[float, np.ndarray]:
+        """
+        Optimized FFT convolution implementation for Riemann-Liouville derivative.
+        
+        This method uses the optimized FFT convolution approach for maximum efficiency.
+        """
+        from src.algorithms.optimized_methods import OptimizedRiemannLiouville
+        
+        # Create optimized calculator
+        optimized_calc = OptimizedRiemannLiouville(self.alpha)
+        
+        # Compute using optimized method
+        return optimized_calc.compute(f, t, h)
 
 
 # JAX-optimized implementations
