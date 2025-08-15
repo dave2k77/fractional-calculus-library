@@ -55,18 +55,25 @@ class WeylDerivative:
                 use_parallel: bool = True) -> Union[float, np.ndarray]:
         """Compute Weyl derivative using optimized FFT convolution."""
         if callable(f):
-            x_max = np.max(x) if hasattr(x, "__len__") else x
-            if h is None:
-                h = x_max / 1000
-            # Use the provided x array if it's an array, otherwise create one
             if hasattr(x, "__len__"):
                 x_array = x
             else:
+                x_max = x
+                if h is None:
+                    h = x_max / 1000
                 x_array = np.arange(0, x_max + h, h)
             f_array = np.array([f(xi) for xi in x_array])
         else:
             f_array = f
-            x_array = np.arange(len(f)) * (h or 1.0)
+            if hasattr(x, "__len__"):
+                x_array = x
+            else:
+                x_array = np.arange(len(f)) * (h or 1.0)
+        
+        # Ensure arrays have the same length
+        min_len = min(len(f_array), len(x_array))
+        f_array = f_array[:min_len]
+        x_array = x_array[:min_len]
         
         if use_parallel and self.parallel_config.enabled:
             return self._compute_parallel(f_array, x_array, h or 1.0)
@@ -161,18 +168,25 @@ class MarchaudDerivative:
                 use_parallel: bool = True, memory_optimized: bool = True) -> Union[float, np.ndarray]:
         """Compute Marchaud derivative with memory optimization."""
         if callable(f):
-            x_max = np.max(x) if hasattr(x, "__len__") else x
-            if h is None:
-                h = x_max / 1000
-            # Use the provided x array if it's an array, otherwise create one
             if hasattr(x, "__len__"):
                 x_array = x
             else:
+                x_max = x
+                if h is None:
+                    h = x_max / 1000
                 x_array = np.arange(0, x_max + h, h)
             f_array = np.array([f(xi) for xi in x_array])
         else:
             f_array = f
-            x_array = np.arange(len(f)) * (h or 1.0)
+            if hasattr(x, "__len__"):
+                x_array = x
+            else:
+                x_array = np.arange(len(f)) * (h or 1.0)
+        
+        # Ensure arrays have the same length
+        min_len = min(len(f_array), len(x_array))
+        f_array = f_array[:min_len]
+        x_array = x_array[:min_len]
         
         if memory_optimized:
             return self._compute_memory_optimized(f_array, x_array, h or 1.0, use_parallel)
@@ -282,18 +296,25 @@ class HadamardDerivative:
                 x: Union[float, np.ndarray], h: Optional[float] = None) -> Union[float, np.ndarray]:
         """Compute Hadamard derivative using logarithmic transformation."""
         if callable(f):
-            x_max = np.max(x) if hasattr(x, "__len__") else x
-            if h is None:
-                h = x_max / 1000
-            # Use the provided x array if it's an array, otherwise create one
             if hasattr(x, "__len__"):
                 x_array = x
             else:
+                x_max = x
+                if h is None:
+                    h = x_max / 1000
                 x_array = np.arange(1, x_max + h, h)  # Start from 1 for Hadamard
             f_array = np.array([f(xi) for xi in x_array])
         else:
             f_array = f
-            x_array = np.arange(1, len(f) + 1) * (h or 1.0)
+            if hasattr(x, "__len__"):
+                x_array = x
+            else:
+                x_array = np.arange(1, len(f) + 1) * (h or 1.0)
+        
+        # Ensure arrays have the same length
+        min_len = min(len(f_array), len(x_array))
+        f_array = f_array[:min_len]
+        x_array = x_array[:min_len]
         
         return self._compute_hadamard(f_array, x_array, h or 1.0)
     
@@ -356,18 +377,25 @@ class ReizFellerDerivative:
                 use_parallel: bool = True) -> Union[float, np.ndarray]:
         """Compute Reiz-Feller derivative using spectral method."""
         if callable(f):
-            x_max = np.max(x) if hasattr(x, "__len__") else x
-            if h is None:
-                h = x_max / 1000
-            # Use the provided x array if it's an array, otherwise create one
             if hasattr(x, "__len__"):
                 x_array = x
             else:
+                x_max = x
+                if h is None:
+                    h = x_max / 1000
                 x_array = np.arange(-x_max, x_max + h, h)
             f_array = np.array([f(xi) for xi in x_array])
         else:
             f_array = f
-            x_array = np.arange(len(f)) * (h or 1.0)
+            if hasattr(x, "__len__"):
+                x_array = x
+            else:
+                x_array = np.arange(len(f)) * (h or 1.0)
+        
+        # Ensure arrays have the same length
+        min_len = min(len(f_array), len(x_array))
+        f_array = f_array[:min_len]
+        x_array = x_array[:min_len]
         
         return self._compute_spectral(f_array, x_array, h or 1.0, use_parallel)
     

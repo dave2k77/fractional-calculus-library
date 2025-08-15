@@ -79,7 +79,7 @@ from .advanced_optimized_methods import (
     optimized_marchaud_derivative,
     optimized_hadamard_derivative,
     optimized_reiz_feller_derivative,
-    optimized_adomian_solve,
+    optimized_adomian_decomposition,
 )
 
 # Define what gets imported with "from algorithms import *"
@@ -145,5 +145,5 @@ __all__ = [
     "optimized_marchaud_derivative",
     "optimized_hadamard_derivative",
     "optimized_reiz_feller_derivative",
-    "optimized_adomian_solve",
+    "optimized_adomian_decomposition",
 ]
