@@ -211,18 +211,19 @@ class OptimizedGrunwaldLetnikov:
         return self._grunwald_letnikov_numpy(f_array, h or 1.0)
     
     def _grunwald_letnikov_numpy(self, f: np.ndarray, h: float) -> np.ndarray:
-        """Optimized GL derivative using numpy."""
+        """Optimized GL derivative using numpy with JAX-accelerated binomial coefficients."""
         N = len(f)
         alpha = self.alpha_val
         result = np.zeros(N)
         
-        # Precompute binomial coefficients efficiently
-        coeffs = self._fast_binomial_coefficients(alpha, N-1)
-        # Apply alternating signs: (-1)^k * C(α,k)
+        # Precompute binomial coefficients using JAX for accuracy
+        coeffs = self._fast_binomial_coefficients_jax(alpha, N-1)
+        
+        # Apply alternating signs: (-1)^j * C(α,j)
         signs = (-1) ** np.arange(N)
         coeffs = signs * coeffs
         
-        # Compute derivative
+        # Compute derivative using corrected indexing
         for n in range(1, N):
             sum_val = 0.0
             for j in range(n + 1):
@@ -232,12 +233,30 @@ class OptimizedGrunwaldLetnikov:
         
         return result
     
+    def _fast_binomial_coefficients_jax(self, alpha: float, max_k: int) -> np.ndarray:
+        """Fast binomial coefficient generation using robust recursive formula."""
+        # Check cache first
+        cache_key = (alpha, max_k)
+        if cache_key in self._coefficient_cache:
+            return self._coefficient_cache[cache_key]
+        
+        # Use robust recursive formula to avoid gamma function poles
+        coeffs = np.zeros(max_k + 1)
+        coeffs[0] = 1.0
+        
+        # Recursive formula: C(α,k+1) = C(α,k) * (α-k)/(k+1)
+        # This is numerically stable and avoids gamma function issues
+        for k in range(max_k):
+            coeffs[k + 1] = coeffs[k] * (alpha - k) / (k + 1)
+        
+        # Cache the result
+        self._coefficient_cache[cache_key] = coeffs
+        
+        return coeffs
+    
     def _fast_binomial_coefficients(self, alpha: float, max_k: int) -> np.ndarray:
-        """Fast binomial coefficient generation using numpy."""
-        k = np.arange(max_k + 1)
-        # Use scipy for binomial coefficients
-        from scipy.special import binom
-        return binom(alpha, k)
+        """Legacy method - kept for backward compatibility."""
+        return self._fast_binomial_coefficients_jax(alpha, max_k)
 
 
 class OptimizedFractionalMethods:

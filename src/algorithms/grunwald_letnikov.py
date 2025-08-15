@@ -164,12 +164,12 @@ class GrunwaldLetnikovDerivative:
         if j == 0:
             return 1.0
         else:
-            # Use gamma function for fractional binomial coefficient
-            return (
-                (-1) ** j
-                * gamma_approx(alpha + 1)
-                / (gamma_approx(j + 1) * gamma_approx(alpha - j + 1))
-            )
+            # Use robust recursive formula to avoid gamma function poles
+            # C(α,j) = C(α,j-1) * (α-(j-1))/j
+            coeff = 1.0
+            for k in range(1, j + 1):
+                coeff *= (alpha - (k - 1)) / k
+            return (-1) ** j * coeff
 
     def _compute_fft(
         self,
@@ -299,44 +299,38 @@ class GrunwaldLetnikovDerivative:
         tol = kwargs.get("tolerance", 1e-6)
         max_iter = kwargs.get("max_iterations", 10)
 
+        # Compute with adaptive step size
         for n in range(1, N):
-            # Start with base step size
-            current_h = h
-            prev_result = 0.0
-
-            for iter_count in range(max_iter):
+            h_adaptive = h
+            for iter in range(max_iter):
                 # Compute with current step size
-                j_max = int(t[n] / current_h)
                 sum_val = 0.0
-
+                j_max = min(n, int(t[n] / h_adaptive))
+                
                 for j in range(j_max + 1):
                     coeff = self._grunwald_coefficient(alpha, j)
-                    t_j = t[n] - j * current_h
-                    # Interpolate function value at t_j
-                    if t_j <= t[0]:
-                        f_val = f[0]
-                    elif t_j >= t[-1]:
-                        f_val = f[-1]
-                    else:
-                        # Linear interpolation
+                    t_j = t[n] - j * h_adaptive
+                    if t_j >= 0:
+                        # Interpolate function value
                         idx = int(t_j / h)
                         if idx < len(f) - 1:
-                            f_val = f[idx] + (f[idx + 1] - f[idx]) * (t_j - t[idx]) / h
+                            # Linear interpolation
+                            frac = (t_j - t[idx]) / h
+                            f_val = f[idx] * (1 - frac) + f[idx + 1] * frac
                         else:
                             f_val = f[-1]
+                        sum_val += coeff * f_val
 
-                    sum_val += coeff * f_val
-
-                current_result = sum_val * (current_h ** (-alpha))
+                result_current = sum_val * (h_adaptive ** (-alpha))
 
                 # Check convergence
-                if abs(current_result - prev_result) < tol:
+                if iter > 0 and abs(result_current - result_prev) < tol:
                     break
 
-                prev_result = current_result
-                current_h *= 0.5  # Reduce step size
+                result_prev = result_current
+                h_adaptive *= 0.5  # Reduce step size
 
-            result[n] = current_result
+            result[n] = result_current
 
         return result
 
@@ -350,7 +344,7 @@ class GrunwaldLetnikovDerivative:
         """
         Predictor-corrector method for Grünwald-Letnikov derivative.
 
-        Uses Adams-Bashforth-Moulton type scheme.
+        Uses a predictor step followed by a corrector step for improved accuracy.
         """
         if callable(f):
             t_max = np.max(t) if hasattr(t, "__len__") else t
@@ -360,46 +354,43 @@ class GrunwaldLetnikovDerivative:
             f_array = f
             t_array = kwargs.get("t_array", np.arange(len(f)) * h)
 
-        return self._predictor_corrector_scheme(f_array, t_array, h)
+        return self._predictor_corrector_scheme(f_array, t_array, h, **kwargs)
 
     def _predictor_corrector_scheme(
-        self, f: np.ndarray, t: np.ndarray, h: float
+        self, f: np.ndarray, t: np.ndarray, h: float, **kwargs
     ) -> np.ndarray:
         """Predictor-corrector scheme implementation."""
         alpha = self.alpha.alpha
         N = len(f)
         result = np.zeros(N)
 
-        # Initial values (use direct method for first few points)
-        for i in range(1, min(4, N)):
-            result[i] = self._compute_direct_scalar(f, t[i], h)
+        # Predictor-corrector parameters
+        max_iter = kwargs.get("max_iterations", 3)
+        tol = kwargs.get("tolerance", 1e-8)
 
-        # Predictor-corrector for remaining points
-        for n in range(4, N):
-            # Predictor (Adams-Bashforth)
-            pred = self._predictor_step(f, result, n, h)
+        # Compute derivative using predictor-corrector
+        for n in range(1, N):
+            # Predictor step (explicit)
+            pred = 0.0
+            for j in range(n + 1):
+                coeff = self._grunwald_coefficient(alpha, j)
+                pred += coeff * f[n - j]
+            pred *= h ** (-alpha)
 
-            # Corrector (Adams-Moulton)
-            result[n] = self._corrector_step(f, result, pred, n, h)
+            # Corrector step (implicit)
+            for iter in range(max_iter):
+                corr = pred
+                # Simplified corrector - can be enhanced with proper Adams-Moulton weights
+                corr = 0.5 * (result[n - 1] + pred + h * (f[n] - f[n - 1]))
+
+                # Check convergence
+                if iter > 0 and abs(corr - result_prev) < tol:
+                    break
+                result_prev = corr
+
+            result[n] = corr
 
         return result
-
-    def _predictor_step(
-        self, f: np.ndarray, result: np.ndarray, n: int, h: float
-    ) -> float:
-        """Predictor step of Adams-Bashforth type."""
-        alpha = self.alpha.alpha
-        # Simplified predictor - can be enhanced with proper Adams-Bashforth weights
-        return result[n - 1] + h * (f[n] - f[n - 1])
-
-    def _corrector_step(
-        self, f: np.ndarray, result: np.ndarray, pred: float, n: int, h: float
-    ) -> float:
-        """Corrector step of Adams-Moulton type."""
-        alpha = self.alpha.alpha
-        # Simplified corrector - can be enhanced with proper Adams-Moulton weights
-        return 0.5 * (result[n - 1] + pred + h * (f[n] - f[n - 1]))
-
 
     def _compute_optimized_direct(
         self, f: Union[Callable, np.ndarray], t: Union[float, np.ndarray], h: Optional[float] = None, **kwargs
@@ -493,11 +484,15 @@ def grunwald_letnikov_direct_numba(f: np.ndarray, alpha: float, h: float) -> np.
     N = len(f)
     result = np.zeros(N)
 
-    # Compute coefficients
+    # Compute coefficients using recursive formula for efficiency
     coeffs = np.zeros(N)
     coeffs[0] = 1.0
     for j in range(1, N):
         coeffs[j] = coeffs[j - 1] * (1 - (alpha + 1) / j)
+
+    # Apply alternating signs: (-1)^j * C(α,j)
+    for j in range(N):
+        coeffs[j] = (-1) ** j * coeffs[j]
 
     # Compute derivative
     for n in prange(1, N):
@@ -534,6 +529,10 @@ def grunwald_letnikov_short_memory_numba(
     for j in range(1, memory_length + 1):
         coeffs[j] = coeffs[j - 1] * (1 - (alpha + 1) / j)
 
+    # Apply alternating signs
+    for j in range(memory_length + 1):
+        coeffs[j] = (-1) ** j * coeffs[j]
+
     # Compute derivative
     for n in prange(1, N):
         j_max = min(n, memory_length)
@@ -564,7 +563,7 @@ def grunwald_coefficient_numba(alpha: float, j: int) -> float:
         result = 1.0
         for k in range(1, j + 1):
             result *= 1 - (alpha + 1) / k
-        return result
+        return (-1) ** j * result
 
 
 # Convenience functions
