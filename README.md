@@ -5,6 +5,7 @@ A high-performance Python library for numerical methods in fractional calculus, 
 ## 🚀 Features
 
 - **Multiple Fractional Derivative Definitions**: Caputo, Riemann-Liouville, Grünwald-Letnikov
+- **🚀 Advanced Methods**: Weyl, Marchaud, Hadamard, Reiz-Feller derivatives, Adomian Decomposition
 - **🚀 Optimized Methods**: Dramatic performance improvements (up to 196x speedup)
 - **High-Performance Computing**: JAX for automatic differentiation and GPU acceleration
 - **JIT Compilation**: NUMBA for optimized numerical kernels
@@ -46,6 +47,8 @@ fc_library/
 │   │   ├── caputo.py            # Caputo derivative implementation
 │   │   ├── riemann_liouville.py # Riemann-Liouville derivative
 │   │   ├── grunwald_letnikov.py # Grünwald-Letnikov derivative
+│   │   ├── advanced_methods.py  # Advanced methods (Weyl, Marchaud, etc.)
+│   │   ├── advanced_optimized_methods.py # Optimized advanced methods
 │   │   ├── fft_methods.py       # FFT-based methods
 │   │   └── L1_L2_schemes.py     # L1/L2 numerical schemes
 │   ├── core/                     # Core definitions and utilities
@@ -186,6 +189,75 @@ print(f"Results match: {np.allclose(result_std, result_opt, rtol=1e-10)}")
 # - Grünwald-Letnikov: method="optimized_direct"
 ```
 
+### 🚀 Advanced Methods Example
+
+```python
+import numpy as np
+from src.algorithms.advanced_methods import (
+    WeylDerivative, MarchaudDerivative, HadamardDerivative,
+    ReizFellerDerivative, AdomianDecomposition
+)
+
+# Test parameters
+alpha = 0.5
+x = np.linspace(0, 5, 100)
+f = lambda x: np.sin(x)  # Test function
+
+# Weyl derivative (for periodic functions)
+weyl = WeylDerivative(alpha)
+result_weyl = weyl.compute(f, x, h=0.05)
+
+# Marchaud derivative (with memory optimization)
+marchaud = MarchaudDerivative(alpha)
+result_marchaud = marchaud.compute(f, x, h=0.05)
+
+# Hadamard derivative (logarithmic transformation)
+x_hadamard = np.linspace(1, 5, 100)  # Must be positive
+hadamard = HadamardDerivative(alpha)
+result_hadamard = hadamard.compute(f, x_hadamard, h=0.05)
+
+# Reiz-Feller derivative (spectral method)
+reiz_feller = ReizFellerDerivative(alpha)
+result_reiz = reiz_feller.compute(f, x, h=0.05)
+
+print(f"Weyl derivative: {result_weyl[-1]:.6f}")
+print(f"Marchaud derivative: {result_marchaud[-1]:.6f}")
+print(f"Hadamard derivative: {result_hadamard[-1]:.6f}")
+print(f"Reiz-Feller derivative: {result_reiz[-1]:.6f}")
+
+# Adomian Decomposition for solving FDEs
+def fractional_ode(t, y, alpha):
+    """Example: D^α y(t) = -y(t)"""
+    return -y
+
+adomian = AdomianDecomposition(alpha)
+solution = adomian.solve(fractional_ode, x, initial_condition=1.0)
+print(f"Adomian solution at t=5: {solution[-1]:.6f}")
+```
+
+### 🚀 Optimized Advanced Methods
+
+```python
+import numpy as np
+from src.algorithms.advanced_optimized_methods import (
+    optimized_weyl_derivative, optimized_marchaud_derivative,
+    optimized_hadamard_derivative, optimized_reiz_feller_derivative
+)
+
+# JAX/Numba optimized versions for maximum performance
+alpha = 0.5
+x = np.linspace(0, 5, 1000)
+f = lambda x: np.sin(x)
+
+# Optimized versions (GPU-accelerated with JAX)
+result_weyl_opt = optimized_weyl_derivative(f, x, alpha, h=0.005)
+result_marchaud_opt = optimized_marchaud_derivative(f, x, alpha, h=0.005)
+result_hadamard_opt = optimized_hadamard_derivative(f, x, alpha, h=0.005)
+result_reiz_opt = optimized_reiz_feller_derivative(f, x, alpha, h=0.005)
+
+print("Optimized advanced methods completed successfully!")
+```
+
 ## 🧪 Testing and Quality Assurance
 
 ### Automated Testing
@@ -261,6 +333,8 @@ The library includes highly optimized implementations that provide dramatic perf
 - **L1 Scheme**: Optimized Caputo derivative implementation
 - **Fast Binomial Coefficients**: Efficient Grünwald-Letnikov computation
 - **Diethelm-Ford-Freed**: High-order predictor-corrector method
+- **Advanced Methods**: Weyl, Marchaud, Hadamard, Reiz-Feller with JAX/Numba optimization
+- **Adomian Decomposition**: Parallel computation of decomposition terms
 
 ### JAX Integration
 - **Automatic Differentiation**: Compute gradients automatically
