@@ -448,6 +448,6 @@ python examples/basic_usage/getting_started.py
 
 ---
 
-**Author**: David  
+**Author**: Davian R. Chin  
 **Repository**: https://github.com/dave2k77/fractional_calculus_library  
 **License**: MIT
