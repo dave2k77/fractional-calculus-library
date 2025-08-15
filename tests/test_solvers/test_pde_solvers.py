@@ -97,18 +97,18 @@ class TestFractionalDiffusionSolver:
     def test_diffusion_solver_solve_basic(self):
         """Test basic diffusion equation solving."""
         solver = FractionalDiffusionSolver()
-        
+
         # Define simple initial condition
         def initial_condition(x):
             return np.sin(np.pi * x)
-        
+
         # Define boundary conditions
         def boundary_left(t):
             return 0.0
-        
+
         def boundary_right(t):
             return 0.0
-        
+
         # Solve the equation
         t, x, u = solver.solve(
             x_span=(0, 1),
@@ -118,14 +118,14 @@ class TestFractionalDiffusionSolver:
             alpha=0.5,
             beta=2.0,
             nx=10,
-            nt=5
+            nt=5,
         )
-        
+
         # Check output shapes
         assert t.shape == (5,)
         assert x.shape == (10,)
         assert u.shape == (5, 10)  # (time_steps, spatial_points)
-        
+
         # Check boundary conditions are satisfied
         assert np.allclose(u[:, 0], 0.0, atol=1e-10)  # Left boundary
         assert np.allclose(u[:, -1], 0.0, atol=1e-10)  # Right boundary
@@ -133,19 +133,19 @@ class TestFractionalDiffusionSolver:
     def test_diffusion_solver_solve_with_source(self):
         """Test diffusion equation with source term."""
         solver = FractionalDiffusionSolver()
-        
+
         def initial_condition(x):
-            return np.exp(-x**2)
-        
+            return np.exp(-(x**2))
+
         def boundary_left(t):
             return 0.0
-        
+
         def boundary_right(t):
             return 0.0
-        
+
         def source_term(x, t, u):
             return np.zeros_like(x)
-        
+
         t, x, u = solver.solve(
             x_span=(0, 2),
             t_span=(0, 0.2),
@@ -155,9 +155,9 @@ class TestFractionalDiffusionSolver:
             beta=2.0,
             nx=15,
             nt=10,
-            source_term=source_term
+            source_term=source_term,
         )
-        
+
         assert t.shape == (10,)
         assert x.shape == (15,)
         assert u.shape == (10, 15)  # (time_steps, spatial_points)
@@ -165,19 +165,19 @@ class TestFractionalDiffusionSolver:
     def test_diffusion_solver_different_derivative_types(self):
         """Test diffusion solver with different derivative types."""
         derivative_types = ["caputo", "riemann_liouville", "grunwald_letnikov"]
-        
+
         for deriv_type in derivative_types:
             solver = FractionalDiffusionSolver(derivative_type=deriv_type)
-            
+
             def initial_condition(x):
                 return np.sin(2 * np.pi * x)
-            
+
             def boundary_left(t):
                 return 0.0
-            
+
             def boundary_right(t):
                 return 0.0
-            
+
             t, x, u = solver.solve(
                 x_span=(0, 1),
                 t_span=(0, 0.1),
@@ -186,9 +186,9 @@ class TestFractionalDiffusionSolver:
                 alpha=0.5,
                 beta=2.0,
                 nx=8,
-                nt=4
+                nt=4,
             )
-            
+
             assert u.shape == (4, 8)  # (time_steps, spatial_points)
             assert not np.any(np.isnan(u))
             assert not np.any(np.isinf(u))
@@ -196,16 +196,16 @@ class TestFractionalDiffusionSolver:
     def test_diffusion_solver_edge_cases(self):
         """Test diffusion solver with edge cases."""
         solver = FractionalDiffusionSolver()
-        
+
         def initial_condition(x):
             return np.ones_like(x)
-        
+
         def boundary_left(t):
             return 1.0
-        
+
         def boundary_right(t):
             return 1.0
-        
+
         # Test with alpha = 1 (normal diffusion)
         t, x, u = solver.solve(
             x_span=(0, 1),
@@ -215,9 +215,9 @@ class TestFractionalDiffusionSolver:
             alpha=1.0,
             beta=2.0,
             nx=5,
-            nt=3
+            nt=3,
         )
-        
+
         assert u.shape == (3, 5)  # (time_steps, spatial_points)
         assert np.allclose(u[:, 0], 1.0)  # Left boundary
         assert np.allclose(u[:, -1], 1.0)  # Right boundary
@@ -225,20 +225,20 @@ class TestFractionalDiffusionSolver:
     def test_diffusion_solver_convergence(self):
         """Test convergence of diffusion solver."""
         solver = FractionalDiffusionSolver()
-        
+
         def initial_condition(x):
             return np.sin(np.pi * x)
-        
+
         def boundary_left(t):
             return 0.0
-        
+
         def boundary_right(t):
             return 0.0
-        
+
         # Test with different grid sizes
         grid_sizes = [5, 10, 20]
         solutions = []
-        
+
         for nx in grid_sizes:
             t, x, u = solver.solve(
                 x_span=(0, 1),
@@ -248,10 +248,10 @@ class TestFractionalDiffusionSolver:
                 alpha=0.5,
                 beta=2.0,
                 nx=nx,
-                nt=5
+                nt=5,
             )
             solutions.append(u)
-        
+
         # Solutions should be consistent (not necessarily convergent due to coarse grids)
         assert len(solutions) == 3
         for u in solutions:
@@ -271,16 +271,16 @@ class TestFractionalAdvectionSolver:
     def test_advection_solver_solve_basic(self):
         """Test basic advection equation solving."""
         solver = FractionalAdvectionSolver()
-        
+
         def initial_condition(x):
-            return np.exp(-(x - 0.5)**2 / 0.01)
-        
+            return np.exp(-((x - 0.5) ** 2) / 0.01)
+
         def boundary_left(t):
             return 0.0
-        
+
         def boundary_right(t):
             return 0.0
-        
+
         t, x, u = solver.solve(
             x_span=(0, 1),
             t_span=(0, 0.1),
@@ -290,9 +290,9 @@ class TestFractionalAdvectionSolver:
             beta=1.5,  # Spatial fractional order
             velocity=1.0,
             nx=10,
-            nt=5
+            nt=5,
         )
-        
+
         assert x.shape == (10,)
         assert t.shape == (5,)
         assert u.shape == (5, 10)  # (time_steps, spatial_points)
@@ -310,19 +310,19 @@ class TestFractionalReactionDiffusionSolver:
     def test_reaction_diffusion_solver_solve_basic(self):
         """Test basic reaction-diffusion equation solving."""
         solver = FractionalReactionDiffusionSolver()
-        
+
         def initial_condition(x):
             return 0.5 * np.ones_like(x)
-        
+
         def boundary_left(t):
             return 0.0
-        
+
         def boundary_right(t):
             return 0.0
-        
+
         def reaction_term(u):
             return u * (1 - u)
-        
+
         t, x, u = solver.solve(
             x_span=(0, 1),
             t_span=(0, 0.1),
@@ -332,15 +332,12 @@ class TestFractionalReactionDiffusionSolver:
             beta=2.0,
             reaction_term=reaction_term,
             nx=10,
-            nt=5
+            nt=5,
         )
-        
+
         assert t.shape == (5,)
         assert x.shape == (10,)
         assert u.shape == (5, 10)  # (time_steps, spatial_points)
-
-
-
 
 
 class TestPDESolverIntegration:
@@ -350,19 +347,19 @@ class TestPDESolverIntegration:
         """Test that different methods give consistent results."""
         methods = ["finite_difference", "spectral"]
         solutions = []
-        
+
         for method in methods:
             solver = FractionalDiffusionSolver(method=method)
-            
+
             def initial_condition(x):
                 return np.sin(np.pi * x)
-            
+
             def boundary_left(t):
                 return 0.0
-            
+
             def boundary_right(t):
                 return 0.0
-            
+
             t, x, u = solver.solve(
                 x_span=(0, 1),
                 t_span=(0, 0.1),
@@ -371,10 +368,10 @@ class TestPDESolverIntegration:
                 alpha=0.5,
                 beta=2.0,
                 nx=8,
-                nt=4
+                nt=4,
             )
             solutions.append(u)
-        
+
         # Both methods should produce valid solutions
         for u in solutions:
             assert not np.any(np.isnan(u))
@@ -383,7 +380,7 @@ class TestPDESolverIntegration:
     def test_solver_error_handling(self):
         """Test error handling in PDE solvers."""
         solver = FractionalDiffusionSolver()
-        
+
         # Test with invalid parameters - the solver may handle these gracefully
         # so we test that it doesn't crash rather than expecting specific errors
         try:
@@ -395,7 +392,7 @@ class TestPDESolverIntegration:
                 alpha=0.5,
                 beta=2.0,
                 nx=1,  # Use valid grid size to avoid index errors
-                nt=5
+                nt=5,
             )
             # If it succeeds, check the result is valid
             t, x, u = result
@@ -409,16 +406,16 @@ class TestPDESolverIntegration:
     def test_solver_performance(self):
         """Test solver performance with larger problems."""
         solver = FractionalDiffusionSolver()
-        
+
         def initial_condition(x):
             return np.sin(np.pi * x)
-        
+
         def boundary_left(t):
             return 0.0
-        
+
         def boundary_right(t):
             return 0.0
-        
+
         # Test with very conservative parameters to ensure numerical stability
         t, x, u = solver.solve(
             x_span=(0, 1),
@@ -427,22 +424,24 @@ class TestPDESolverIntegration:
             boundary_conditions=(boundary_left, boundary_right),
             alpha=0.9,  # Close to integer order for stability
             beta=2.0,
-            nx=10,   # Very small grid
-            nt=5     # Very few time steps
+            nx=10,  # Very small grid
+            nt=5,  # Very few time steps
         )
-        
+
         assert t.shape == (5,)
         assert x.shape == (10,)
         assert u.shape == (5, 10)  # (time_steps, spatial_points)
-        
+
         # Check that solution has expected properties
         assert not np.any(np.isnan(u))
         assert not np.any(np.isinf(u))
-        
+
         # For very small time steps, the solution should be close to initial condition
         # Check that the first time step is reasonable
         initial_values = u[0, :]
-        assert np.all(initial_values >= -1.1)  # Initial condition should be sin(πx) ∈ [-1, 1]
+        assert np.all(
+            initial_values >= -1.1
+        )  # Initial condition should be sin(πx) ∈ [-1, 1]
         assert np.all(initial_values <= 1.1)
 
 

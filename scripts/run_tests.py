@@ -35,25 +35,25 @@ def run_linting():
     
     # Run flake8
     success = run_command(
-        ["flake8", "src", "--count", "--select=E9,F63,F7,F82", "--show-source", "--statistics"],
+        ["python", "-m", "flake8", "src", "--count", "--select=E9,F63,F7,F82", "--show-source", "--statistics"],
         "Flake8 syntax check"
     )
     
     if success:
         run_command(
-            ["flake8", "src", "--count", "--exit-zero", "--max-complexity=10", "--max-line-length=88", "--statistics"],
+            ["python", "-m", "flake8", "src", "--count", "--exit-zero", "--max-complexity=10", "--max-line-length=88", "--statistics"],
             "Flake8 style check"
         )
     
     # Run black check
     run_command(
-        ["black", "--check", "src", "tests"],
+        ["python", "-m", "black", "--check", "src", "tests"],
         "Black formatting check"
     )
     
     # Run mypy
     run_command(
-        ["mypy", "src", "--ignore-missing-imports"],
+        ["python", "-m", "mypy", "src", "--ignore-missing-imports"],
         "MyPy type checking"
     )
 
@@ -62,7 +62,7 @@ def run_tests(test_type="all", coverage=True, verbose=True):
     """Run tests with specified options."""
     print(f"\n🧪 Running Tests ({test_type})...")
     
-    cmd = ["pytest", "tests/"]
+    cmd = ["python", "-m", "pytest", "tests/"]
     
     if verbose:
         cmd.append("-v")
@@ -90,7 +90,7 @@ def run_benchmarks():
     
     # Run pytest benchmarks
     success = run_command(
-        ["pytest", "tests/", "-m", "benchmark", "--benchmark-only", "--benchmark-sort=mean"],
+        ["python", "-m", "pytest", "tests/", "-m", "benchmark", "--benchmark-only", "--benchmark-sort=mean"],
         "Pytest benchmarks"
     )
     

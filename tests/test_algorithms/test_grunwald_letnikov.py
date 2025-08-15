@@ -100,7 +100,7 @@ class TestGrunwaldLetnikovDerivative:
         numerical = gl.compute(f, t, h)
 
         # Analytical solution
-        analytical = t**(1-alpha) / gamma(2-alpha)
+        analytical = t ** (1 - alpha) / gamma(2 - alpha)
 
         # Check that numerical result is reasonable
         error = np.abs(numerical - analytical)
@@ -208,11 +208,11 @@ class TestGrunwaldLetnikovDerivative:
     def test_grunwald_letnikov_derivative_binomial_coefficients(self):
         """Test binomial coefficient computation."""
         gl = GrunwaldLetnikovDerivative(0.5)
-        
+
         # Test that binomial coefficients are computed correctly
         alpha = 0.5
         n = 10
-        
+
         # This should not raise an error
         result = gl.compute(np.ones(n), np.arange(n) * 0.1, 0.1)
         assert isinstance(result, np.ndarray)

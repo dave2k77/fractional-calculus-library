@@ -86,7 +86,9 @@ class GammaFunction:
 
         # Handle negative values using reflection formula
         if z < 0.5:
-            return np.pi / (np.sin(np.pi * z) * GammaFunction._gamma_numba_scalar(1 - z))
+            return np.pi / (
+                np.sin(np.pi * z) * GammaFunction._gamma_numba_scalar(1 - z)
+            )
 
         z -= 1
         x = p[0]

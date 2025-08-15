@@ -101,7 +101,7 @@ class TestRiemannLiouvilleDerivative:
         numerical = rl.compute(f, t, h)
 
         # Analytical solution
-        analytical = t**(1-alpha) / gamma(2-alpha)
+        analytical = t ** (1 - alpha) / gamma(2 - alpha)
 
         # Check that numerical result is reasonable
         error = np.abs(numerical - analytical)

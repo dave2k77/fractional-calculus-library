@@ -19,6 +19,13 @@ from src.optimisation.parallel_computing import (
     recommend_parallel_backend,
     ParallelFractionalComputing
 )
+
+
+def compute_derivative(data):
+    """Compute fractional derivative for parallel processing."""
+    f_data, t_data, alpha_data, h_data = data
+    caputo = CaputoDerivative(alpha=alpha_data)
+    return caputo.compute(f_data, t_data, h_data)
 from src.algorithms.caputo import CaputoDerivative
 
 
@@ -61,12 +68,6 @@ def parallel_backend_comparison():
             # Create parallel backend
             parallel_backend = create_parallel_backend(backend=backend)
             
-            # Define work function
-            def compute_derivative(data):
-                f_data, t_data, alpha_data, h_data = data
-                caputo = CaputoDerivative(alpha=alpha_data)
-                return caputo.compute(f_data, t_data, h_data)
-            
             # Prepare work items (multiple datasets)
             work_items = []
             for i in range(10):  # 10 different datasets
@@ -100,7 +101,10 @@ def parallel_backend_comparison():
     plt.grid(True, alpha=0.3)
     
     plt.tight_layout()
-    plt.savefig('examples/parallel_examples/backend_comparison.png', dpi=300, bbox_inches='tight')
+    import os
+    output_dir = os.path.join('examples', 'parallel_examples')
+    os.makedirs(output_dir, exist_ok=True)
+    plt.savefig(os.path.join(output_dir, 'backend_comparison.png'), dpi=300, bbox_inches='tight')
     plt.show()
     
     print("✅ Parallel backend comparison completed!")
@@ -142,18 +146,13 @@ def joblib_optimization_demo():
         
         # Time computation
         start_time = time.time()
-        # Create a wrapper function that includes alpha
-        def compute_with_alpha(f_data, t_data, h_data):
-            caputo = CaputoDerivative(alpha=alpha)
-            return caputo.compute(f_data, t_data, h_data)
         
-        results = parallel_computing.parallel_fractional_derivative(
-            compute_with_alpha,
-            [datasets] * len(datasets),  # Convert to expected format
-            [t] * len(datasets),
-            alpha,
-            h
-        )
+        # Use a simpler approach to avoid pickling issues
+        work_items = []
+        for f_data in datasets:
+            work_items.append((f_data, t, alpha, h))
+        
+        results = parallel_computing.parallel_manager.parallel_map(compute_derivative, work_items)
         end_time = time.time()
         
         timings[n_workers] = end_time - start_time

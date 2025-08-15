@@ -19,6 +19,13 @@ from src.solvers.predictor_corrector import PredictorCorrectorSolver
 from src.special.gamma_beta import gamma
 
 
+def ensure_output_dir():
+    """Ensure the output directory exists."""
+    output_dir = os.path.join('examples', 'advanced_applications')
+    os.makedirs(output_dir, exist_ok=True)
+    return output_dir
+
+
 def fractional_diffusion_equation():
     """Solve the fractional diffusion equation."""
     print("🌊 Fractional Diffusion Equation Solver")
@@ -110,7 +117,8 @@ def fractional_diffusion_equation():
     plt.colorbar(contour, ax=ax4)
     
     plt.tight_layout()
-    plt.savefig('examples/advanced_applications/fractional_diffusion.png', dpi=300, bbox_inches='tight')
+    output_dir = ensure_output_dir()
+    plt.savefig(os.path.join(output_dir, 'fractional_diffusion.png'), dpi=300, bbox_inches='tight')
     plt.show()
     
     print("✅ Fractional diffusion equation solved!")
@@ -207,7 +215,8 @@ def fractional_wave_equation():
     plt.colorbar(contour, ax=ax4)
     
     plt.tight_layout()
-    plt.savefig('examples/advanced_applications/fractional_wave.png', dpi=300, bbox_inches='tight')
+    output_dir = ensure_output_dir()
+    plt.savefig(os.path.join(output_dir, 'fractional_wave.png'), dpi=300, bbox_inches='tight')
     plt.show()
     
     print("✅ Fractional diffusion equation solved!")
@@ -361,7 +370,8 @@ def L1_L2_schemes_comparison():
     ax6.grid(True, alpha=0.3)
     
     plt.tight_layout()
-    plt.savefig('examples/advanced_applications/L1_L2_comparison.png', dpi=300, bbox_inches='tight')
+    output_dir = ensure_output_dir()
+    plt.savefig(os.path.join(output_dir, 'L1_L2_comparison.png'), dpi=300, bbox_inches='tight')
     plt.show()
     
     print("✅ L1/L2 schemes comparison completed!")
@@ -522,7 +532,8 @@ def predictor_corrector_demo():
             ax6.grid(True, alpha=0.3)
     
     plt.tight_layout()
-    plt.savefig('examples/advanced_applications/predictor_corrector.png', dpi=300, bbox_inches='tight')
+    output_dir = ensure_output_dir()
+    plt.savefig(os.path.join(output_dir, 'predictor_corrector.png'), dpi=300, bbox_inches='tight')
     plt.show()
     
     print("✅ Predictor-corrector demo completed!")
@@ -653,7 +664,8 @@ def anomalous_transport_demo():
     ax_contour.clabel(contour2, inline=True, fontsize=8)
     
     plt.tight_layout()
-    plt.savefig('examples/advanced_applications/anomalous_transport.png', dpi=300, bbox_inches='tight')
+    output_dir = ensure_output_dir()
+    plt.savefig(os.path.join(output_dir, 'anomalous_transport.png'), dpi=300, bbox_inches='tight')
     plt.show()
     
     print("✅ Anomalous transport demo completed!")
@@ -798,7 +810,8 @@ def memory_effects_demo():
     plt.colorbar(contour3, ax=ax8)
     
     plt.tight_layout()
-    plt.savefig('examples/advanced_applications/memory_effects.png', dpi=300, bbox_inches='tight')
+    output_dir = ensure_output_dir()
+    plt.savefig(os.path.join(output_dir, 'memory_effects.png'), dpi=300, bbox_inches='tight')
     plt.show()
     
     print("✅ Memory effects demo completed!")
@@ -938,7 +951,8 @@ def levy_flights_demo():
     ax_contour.clabel(contour2, inline=True, fontsize=8)
     
     plt.tight_layout()
-    plt.savefig('examples/advanced_applications/levy_flights.png', dpi=300, bbox_inches='tight')
+    output_dir = ensure_output_dir()
+    plt.savefig(os.path.join(output_dir, 'levy_flights.png'), dpi=300, bbox_inches='tight')
     plt.show()
     
     print("✅ Lévy flights demo completed!")
@@ -1081,7 +1095,8 @@ def heavy_tailed_demo():
         plt.colorbar(contour, ax=ax)
     
     plt.tight_layout()
-    plt.savefig('examples/advanced_applications/heavy_tailed.png', dpi=300, bbox_inches='tight')
+    output_dir = ensure_output_dir()
+    plt.savefig(os.path.join(output_dir, 'heavy_tailed.png'), dpi=300, bbox_inches='tight')
     plt.show()
     
     print("✅ Heavy-tailed distributions demo completed!")

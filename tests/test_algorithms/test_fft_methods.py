@@ -96,7 +96,7 @@ class TestFFTFractionalMethods:
         numerical = fft.compute_derivative(f, t, alpha)
 
         # Analytical solution
-        analytical = t**(1-alpha) / gamma(2-alpha)
+        analytical = t ** (1 - alpha) / gamma(2 - alpha)
 
         # Check that numerical result is reasonable
         error = np.abs(numerical - analytical)
@@ -199,13 +199,13 @@ class TestFFTFractionalMethods:
     def test_fft_fractional_methods_spectral_kernel(self):
         """Test spectral kernel computation."""
         fft = FFTFractionalMethods(method="spectral")
-        
+
         # Test that spectral kernel is computed correctly
         alpha = 0.5
         n = 50
         t = np.linspace(0.1, 2.0, n)
         f = np.ones(n)
-        
+
         result = fft.compute_derivative(f, t, alpha)
         assert isinstance(result, np.ndarray)
         assert len(result) == n
@@ -213,13 +213,13 @@ class TestFFTFractionalMethods:
     def test_fft_fractional_methods_convolution_kernel(self):
         """Test convolution kernel computation."""
         fft = FFTFractionalMethods(method="convolution")
-        
+
         # Test that convolution kernel is computed correctly
         alpha = 0.5
         n = 50
         t = np.linspace(0.1, 2.0, n)
         f = np.ones(n)
-        
+
         result = fft.compute_derivative(f, t, alpha)
         assert isinstance(result, np.ndarray)
         assert len(result) == n

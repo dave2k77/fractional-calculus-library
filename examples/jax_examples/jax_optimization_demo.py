@@ -49,19 +49,29 @@ def gpu_acceleration_demo():
     for method_name, method_func in methods.items():
         print(f"\n🧪 Testing {method_name}...")
         
-        # Warm-up run
-        _ = method_func(f, t, alpha, h)
-        
-        # Time the computation
-        start_time = time.time()
-        result = method_func(f, t, alpha, h)
-        end_time = time.time()
-        
-        results[method_name] = result
-        timings[method_name] = end_time - start_time
-        
-        print(f"  ⏱️  Execution time: {timings[method_name]:.4f}s")
-        print(f"  📊 Result shape: {result.shape}")
+        try:
+            # Convert JAX arrays to numpy for compatibility
+            f_np = np.array(f)
+            t_np = np.array(t)
+            h_np = float(h)
+            
+            # Warm-up run
+            _ = method_func(f_np, t_np, alpha, h_np)
+            
+            # Time the computation
+            start_time = time.time()
+            result = method_func(f_np, t_np, alpha, h_np)
+            end_time = time.time()
+            
+            results[method_name] = result
+            timings[method_name] = end_time - start_time
+            
+            print(f"  ⏱️  Execution time: {timings[method_name]:.4f}s")
+            print(f"  📊 Result shape: {result.shape}")
+        except Exception as e:
+            print(f"  ❌ {method_name} failed: {e}")
+            print(f"  ⚠️  This is expected if JAX GPU support is not available")
+            continue
     
     # Plot results
     plt.figure(figsize=(15, 10))
@@ -88,7 +98,10 @@ def gpu_acceleration_demo():
         plt.grid(True, alpha=0.3)
     
     plt.tight_layout()
-    plt.savefig('examples/jax_examples/gpu_acceleration_demo.png', dpi=300, bbox_inches='tight')
+    import os
+    output_dir = os.path.join('examples', 'jax_examples')
+    os.makedirs(output_dir, exist_ok=True)
+    plt.savefig(os.path.join(output_dir, 'gpu_acceleration_demo.png'), dpi=300, bbox_inches='tight')
     plt.show()
     
     print("✅ GPU acceleration demo completed!")
@@ -223,15 +236,25 @@ def performance_benchmark():
         timings = {}
         
         for method_name, method_func in methods.items():
-            # Warm-up
-            _ = method_func(f, t, alpha, h)
-            
-            # Time the computation
-            start_time = time.time()
-            result = method_func(f, t, alpha, h)
-            end_time = time.time()
-            
-            timings[method_name] = end_time - start_time
+            try:
+                # Convert JAX arrays to numpy for compatibility
+                f_np = np.array(f)
+                t_np = np.array(t)
+                h_np = float(h)
+                
+                # Warm-up
+                _ = method_func(f_np, t_np, alpha, h_np)
+                
+                # Time the computation
+                start_time = time.time()
+                result = method_func(f_np, t_np, alpha, h_np)
+                end_time = time.time()
+                
+                timings[method_name] = end_time - start_time
+            except Exception as e:
+                print(f"  ❌ {method_name} failed: {e}")
+                timings[method_name] = float('inf')  # Mark as failed
+                continue
         
         results[N] = timings
     
@@ -253,7 +276,10 @@ def performance_benchmark():
     plt.grid(True, alpha=0.3)
     
     plt.tight_layout()
-    plt.savefig('examples/jax_examples/performance_benchmark.png', dpi=300, bbox_inches='tight')
+    import os
+    output_dir = os.path.join('examples', 'jax_examples')
+    os.makedirs(output_dir, exist_ok=True)
+    plt.savefig(os.path.join(output_dir, 'performance_benchmark.png'), dpi=300, bbox_inches='tight')
     plt.show()
     
     print("✅ Performance benchmark completed!")

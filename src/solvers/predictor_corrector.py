@@ -195,10 +195,10 @@ class PredictorCorrectorSolver:
 
         iteration_count = 0
         max_iterations = int((tf - t0) / self.min_h) + 1000  # Safety limit
-        
+
         while t_current < tf and iteration_count < max_iterations:
             iteration_count += 1
-            
+
             # Compute solution with current step size
             t_next = min(t_current + h_current, tf)
             h_actual = t_next - t_current
@@ -229,12 +229,15 @@ class PredictorCorrectorSolver:
             else:
                 # Reject step and reduce step size
                 h_current = max(self.min_h, h_current * (self.tol / error) ** 0.25)
-                
+
                 # Safety check: if step size is at minimum and still not converging, force progress
                 if h_current <= self.min_h and error > self.tol:
                     # Force acceptance with warning
                     import warnings
-                    warnings.warn(f"Step size at minimum ({self.min_h}), forcing acceptance of step with error {error:.2e}")
+
+                    warnings.warn(
+                        f"Step size at minimum ({self.min_h}), forcing acceptance of step with error {error:.2e}"
+                    )
                     t_values.append(t_next)
                     y_values.append(y_corr)
                     t_current = t_next
