@@ -130,7 +130,12 @@ class WeylDerivative:
     def _compute_parallel(self, f: np.ndarray, x: np.ndarray, h: float) -> np.ndarray:
         """Parallel computation using chunked processing."""
         N = len(f)
-        chunk_size = N // self.parallel_config.n_jobs
+        
+        # Handle empty arrays
+        if N == 0:
+            return np.array([])
+            
+        chunk_size = max(1, N // self.parallel_config.n_jobs)
         chunks = [
             (f[i : i + chunk_size], x[i : i + chunk_size], h)
             for i in range(0, N, chunk_size)
@@ -219,10 +224,15 @@ class MarchaudDerivative:
     ) -> np.ndarray:
         """Memory-optimized computation using streaming approach."""
         N = len(f)
+        
+        # Handle empty arrays
+        if N == 0:
+            return np.array([])
+            
         result = np.zeros(N)
 
         # Use smaller chunks to reduce memory usage
-        chunk_size = min(1000, N // 4)
+        chunk_size = max(1, min(1000, N // 4))
 
         if use_parallel and self.parallel_config.enabled:
             chunks = [
@@ -544,8 +554,8 @@ class AdomianDecomposition:
         terms = []
 
         for n in range(1, n_terms + 1):
-            # Compute Adomian polynomial
-            adomian = self._compute_adomian_polynomial(equation, terms, n)
+            # Compute Adomian polynomial using the same time array
+            adomian = self._compute_adomian_polynomial(equation, terms, n, t)
 
             # Compute integral term
             integral_term = self._compute_integral_term(adomian, t, h)
@@ -570,31 +580,15 @@ class AdomianDecomposition:
 
         return terms
 
-    def _compute_single_term(
-        self, equation: Callable, t: np.ndarray, h: float, n: int
-    ) -> np.ndarray:
-        """Compute a single decomposition term."""
-        # This is a simplified implementation
-        # In practice, you would need the previous terms to compute the Adomian polynomial
-        adomian = np.zeros_like(t)
-
-        # For demonstration, use a simple approximation
-        for i in range(len(t)):
-            adomian[i] = equation(t[i], 0) * (t[i] ** n) / gamma(n + 1)
-
-        return self._compute_integral_term(adomian, t, h)
-
     def _compute_adomian_polynomial(
-        self, equation: Callable, previous_terms: List[np.ndarray], n: int
+        self, equation: Callable, previous_terms: List[np.ndarray], n: int, t: np.ndarray
     ) -> np.ndarray:
         """Compute the nth Adomian polynomial."""
-        # This is a simplified implementation
-        # The full Adomian polynomial computation is more complex
-        t = np.linspace(0, 1, len(previous_terms[0]) if previous_terms else 100)
-        adomian = np.zeros_like(t)
+        N = len(t)
+        adomian = np.zeros(N)
 
-        for i in range(len(t)):
-            # Simplified polynomial computation
+        for i in range(N):
+            # Simplified polynomial computation using the provided time array
             adomian[i] = equation(t[i], 0) * (t[i] ** n) / gamma(n + 1)
 
         return adomian
@@ -609,12 +603,28 @@ class AdomianDecomposition:
         for i in range(N):
             integral = 0.0
             for j in range(i + 1):
-                kernel = ((t[i] - t[j]) ** (self.alpha_val - 1)) / gamma(self.alpha_val)
-                integral += adomian[j] * kernel
+                # Avoid division by zero and negative powers
+                if t[i] > t[j] and self.alpha_val > 0:
+                    kernel = ((t[i] - t[j]) ** (self.alpha_val - 1)) / gamma(self.alpha_val)
+                    integral += adomian[j] * kernel
 
             result[i] = integral * h
 
         return result
+
+    def _compute_single_term(
+        self, equation: Callable, t: np.ndarray, h: float, n: int
+    ) -> np.ndarray:
+        """Compute a single decomposition term."""
+        # This is a simplified implementation
+        # In practice, you would need the previous terms to compute the Adomian polynomial
+        adomian = np.zeros_like(t)
+
+        # For demonstration, use a simple approximation
+        for i in range(len(t)):
+            adomian[i] = equation(t[i], 0) * (t[i] ** n) / gamma(n + 1)
+
+        return self._compute_integral_term(adomian, t, h)
 
 
 # Convenience functions for easy access

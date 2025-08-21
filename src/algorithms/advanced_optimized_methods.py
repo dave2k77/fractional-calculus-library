@@ -17,6 +17,17 @@ import warnings
 from src.core.definitions import FractionalOrder
 
 
+@numba_jit(nopython=True)
+def _factorial(n: int) -> int:
+    """Simple factorial function for NUMBA compatibility."""
+    if n <= 1:
+        return 1
+    result = 1
+    for i in range(2, n + 1):
+        result *= i
+    return result
+
+
 class OptimizedWeylDerivative:
     """
     Optimized Weyl derivative using simplified convolution approach.
@@ -355,7 +366,7 @@ class OptimizedAdomianDecomposition:
 
         for i in range(1, N):
             # Simplified Adomian term computation
-            term[i] = h**alpha * y[i - 1] ** n / np.math.factorial(n)
+            term[i] = h**alpha * y[i - 1] ** n / _factorial(n)
 
         return term
 
