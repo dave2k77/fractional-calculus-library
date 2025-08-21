@@ -7,7 +7,7 @@ featuring dramatic speedups and production-ready optimizations across all method
 This library provides optimized implementations of:
 - Core fractional derivatives: Caputo, Riemann-Liouville, Grünwald-Letnikov
 - Advanced methods: Weyl, Marchaud, Hadamard, Reiz-Feller derivatives
-- Special methods: Fractional Laplacian, Fractional Fourier Transform, Fractional Z-Transform
+- Special methods: Fractional Laplacian, Fractional Fourier Transform, Fractional Z-Transform, Fractional Mellin Transform
 - GPU acceleration via JAX
 - Parallel computing via NUMBA
 """

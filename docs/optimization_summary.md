@@ -21,6 +21,12 @@ This document summarizes the optimization work completed to integrate the new sp
 - **Methods**: Direct computation, FFT-based for unit circle
 - **Performance**: 0.0025s for size=1000 (FFT method)
 
+### 4. Fractional Mellin Transform
+- **Purpose**: Scale-invariant signal processing and pattern recognition
+- **Methods**: Numerical integration, analytical (special functions), FFT-based
+- **Performance**: Efficient computation with inverse transform capabilities
+- **Applications**: Image processing, quantum mechanics, fractional differential equations
+
 ## Optimized Implementations
 
 ### 1. SpecialOptimizedWeylDerivative

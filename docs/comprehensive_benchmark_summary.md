@@ -2,7 +2,7 @@
 
 ## 🎯 **Executive Summary**
 
-Our comprehensive performance benchmarking reveals **exceptional performance improvements** across all fractional calculus methods, with the most significant gains achieved through the integration of special methods (Fractional Laplacian, Fractional Fourier Transform, and Fractional Z-Transform).
+Our comprehensive performance benchmarking reveals **exceptional performance improvements** across all fractional calculus methods, with the most significant gains achieved through the integration of special methods (Fractional Laplacian, Fractional Fourier Transform, Fractional Z-Transform, and Fractional Mellin Transform).
 
 ## 🏆 **Key Performance Achievements**
 

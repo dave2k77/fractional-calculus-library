@@ -5,7 +5,7 @@
 Our **extended comprehensive performance benchmarking** now includes **ALL fractional calculus operators** in the library, providing a complete picture of performance across:
 
 - **Core Methods**: Caputo, Riemann-Liouville, Grünwald-Letnikov, Hadamard
-- **Special Methods**: Fractional Laplacian, Fractional Fourier Transform, Fractional Z-Transform
+- **Special Methods**: Fractional Laplacian, Fractional Fourier Transform, Fractional Z-Transform, Fractional Mellin Transform
 - **Advanced Methods**: Weyl, Marchaud, Reiz-Feller derivatives
 - **Optimized Versions**: All methods with performance optimizations
 
@@ -201,13 +201,13 @@ The **extended comprehensive benchmarking** demonstrates **exceptional performan
 
 ### **Complete Library Coverage**
 - **Core Methods**: Caputo, Riemann-Liouville, Grünwald-Letnikov, Hadamard ✅
-- **Special Methods**: Fractional Laplacian, FrFT, Z-Transform ✅
+- **Special Methods**: Fractional Laplacian, FrFT, Z-Transform, Mellin Transform ✅
 - **Advanced Methods**: Weyl, Marchaud, Reiz-Feller ✅
 - **Optimized Versions**: All methods with performance enhancements ✅
 
 ### **Impact**
 These optimizations transform the fractional calculus library from a research tool into a **production-ready system** capable of handling real-world applications with large datasets and real-time processing requirements.
 
-The integration of **special methods** (Fractional Laplacian, Fractional Fourier Transform, Fractional Z-Transform) and **optimized core methods** has proven to be a **game-changing optimization strategy** that enables practical applications of fractional calculus in modern computational science.
+The integration of **special methods** (Fractional Laplacian, Fractional Fourier Transform, Fractional Z-Transform, Fractional Mellin Transform) and **optimized core methods** has proven to be a **game-changing optimization strategy** that enables practical applications of fractional calculus in modern computational science.
 
 **The library now provides comprehensive coverage of all major fractional calculus operators with world-class performance!** 🏆

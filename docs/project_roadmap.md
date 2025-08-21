@@ -33,6 +33,13 @@
   - Inverse transform with contour integration
   - Performance: 0.0025s for size=1000 (FFT method)
 
+- **Fractional Mellin Transform**: Scale-invariant signal processing ⚡ **NEW**
+  - Numerical integration method
+  - Analytical method for special functions
+  - FFT-based method for efficient computation
+  - Inverse transform capabilities
+  - Applications: Image processing, pattern recognition, quantum mechanics
+
 ### 🚀 **Special Methods Optimization (COMPLETED)**
 - **SpecialOptimizedWeylDerivative**: 2.4x speedup for large arrays
   - Standard FFT approach with improved kernel computation
