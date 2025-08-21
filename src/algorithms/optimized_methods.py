@@ -18,8 +18,14 @@ from numba import jit as numba_jit, prange
 from typing import Union, Optional, Tuple, Callable, Dict, Any
 import warnings
 
-from src.core.definitions import FractionalOrder
-from src.special import gamma
+# Import from relative paths for package structure
+try:
+    from ..core.definitions import FractionalOrder
+    from ..special import gamma
+except ImportError:
+    # Fallback for direct import
+    from core.definitions import FractionalOrder
+    from special import gamma
 
 
 class OptimizedRiemannLiouville:
