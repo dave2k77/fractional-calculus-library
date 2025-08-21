@@ -168,4 +168,4 @@ The comprehensive benchmarking demonstrates **exceptional performance improvemen
 ### **Impact**
 These optimizations transform the fractional calculus library from a research tool into a **production-ready system** capable of handling real-world applications with large datasets and real-time processing requirements.
 
-The integration of special methods (Fractional Laplacian, Fractional Fourier Transform, Fractional Z-Transform) has proven to be a **game-changing optimization strategy** that enables practical applications of fractional calculus in modern computational science.
+The integration of special methods (Fractional Laplacian, Fractional Fourier Transform, Fractional Z-Transform, and Fractional Mellin Transform) has proven to be a **game-changing optimization strategy** that enables practical applications of fractional calculus in modern computational science.

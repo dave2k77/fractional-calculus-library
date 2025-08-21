@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document summarizes the optimization work completed to integrate the new special methods (Fractional Laplacian, Fractional Fourier Transform, Fractional Z-Transform) into existing fractional calculus implementations for improved performance.
+This document summarizes the optimization work completed to integrate the new special methods (Fractional Laplacian, Fractional Fourier Transform, Fractional Z-Transform, and Fractional Mellin Transform) into existing fractional calculus implementations for improved performance.
 
 ## Special Methods Implemented
 
