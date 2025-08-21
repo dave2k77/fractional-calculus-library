@@ -47,11 +47,12 @@ A **high-performance Python library** for numerical methods in fractional calcul
 
 ## 📦 Installation
 
-### Prerequisites
-- Python 3.8 or higher
-- Virtual environment (recommended)
+### From PyPI (Recommended)
+```bash
+pip install fractional-calculus-library
+```
 
-### Setup
+### From Source
 ```bash
 # Clone the repository
 git clone https://github.com/dave2k77/fractional-calculus-library.git
@@ -62,18 +63,19 @@ python -m venv venv
 .\venv\Scripts\Activate.ps1  # Windows
 source venv/bin/activate     # Linux/Mac
 
-# Install dependencies
-pip install -r requirements.txt
-
 # Install in development mode
 pip install -e .
 ```
+
+### Prerequisites
+- Python 3.8 or higher
+- Virtual environment (recommended)
 
 ## 🚀 **Quick Start**
 
 ```python
 import numpy as np
-from src.algorithms import (
+from fractional_calculus_library import (
     optimized_riemann_liouville,
     optimized_caputo,
     optimized_grunwald_letnikov,
@@ -165,7 +167,7 @@ fc_library/
 
 ```python
 import numpy as np
-from src.algorithms import (
+from fractional_calculus_library import (
     optimized_riemann_liouville,
     optimized_caputo,
     optimized_grunwald_letnikov,
