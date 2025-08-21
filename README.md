@@ -49,7 +49,7 @@ A **high-performance Python library** for numerical methods in fractional calcul
 
 ### From PyPI (Recommended)
 ```bash
-pip install fractional-calculus-library
+pip install hpfracc
 ```
 
 ### From Source
@@ -75,7 +75,7 @@ pip install -e .
 
 ```python
 import numpy as np
-from fractional_calculus_library import (
+from hpfracc import (
     optimized_riemann_liouville,
     optimized_caputo,
     optimized_grunwald_letnikov,
@@ -167,7 +167,7 @@ fc_library/
 
 ```python
 import numpy as np
-from fractional_calculus_library import (
+from hpfracc import (
     optimized_riemann_liouville,
     optimized_caputo,
     optimized_grunwald_letnikov,

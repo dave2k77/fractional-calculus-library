@@ -3,7 +3,7 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "fractional-calculus-library"
+name = "hpfracc"
 version = "0.1.0"
 description = "Optimized numerical methods for fractional calculus using JAX and NUMBA"
 authors = [
