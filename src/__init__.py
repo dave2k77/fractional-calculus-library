@@ -12,8 +12,8 @@ This library provides optimized implementations of:
 - Parallel computing via NUMBA
 """
 
-__version__ = "0.1.0"
-__author__ = "David"
+__version__ = "0.1.1"
+__author__ = "Davian Chin"
 __email__ = "dave2k77@gmail.com"
 
 # Import core optimized methods for easy access
@@ -64,9 +64,11 @@ try:
         FractionalLaplacian,
         FractionalFourierTransform,
         FractionalZTransform,
+        FractionalMellinTransform,
         fractional_laplacian,
         fractional_fourier_transform,
         fractional_z_transform,
+        fractional_mellin_transform,
     )
 except ImportError:
     pass
@@ -125,9 +127,11 @@ __all__ = [
     "FractionalLaplacian",
     "FractionalFourierTransform",
     "FractionalZTransform",
+    "FractionalMellinTransform",
     "fractional_laplacian",
     "fractional_fourier_transform",
     "fractional_z_transform",
+    "fractional_mellin_transform",
     
     # Special optimized methods
     "SpecialOptimizedWeylDerivative",

@@ -640,6 +640,207 @@ class FractionalZTransform:
         return result
 
 
+class FractionalMellinTransform:
+    """
+    Fractional Mellin Transform implementation.
+    
+    The fractional Mellin transform is defined as:
+    M_α[f](s) = ∫₀^∞ f(x) x^(s-1+α) dx
+    
+    This transform is useful for:
+    - Scale-invariant signal processing
+    - Fractional differential equations
+    - Image processing and pattern recognition
+    - Quantum mechanics applications
+    """
+    
+    def __init__(self, alpha: Union[float, FractionalOrder]):
+        """Initialize fractional Mellin transform calculator."""
+        if isinstance(alpha, (int, float)):
+            self.alpha = FractionalOrder(alpha)
+        else:
+            self.alpha = alpha
+            
+        self.alpha_val = self.alpha.alpha
+        
+        # Validate alpha range
+        if self.alpha_val < 0:
+            warnings.warn(f"Alpha should be non-negative for fractional Mellin transform. Got {self.alpha_val}")
+    
+    def transform(
+        self,
+        f: Union[Callable, np.ndarray],
+        x: Union[float, np.ndarray],
+        s: Union[complex, np.ndarray],
+        method: str = "numerical"
+    ) -> Union[complex, np.ndarray]:
+        """
+        Compute fractional Mellin transform.
+        
+        Args:
+            f: Function or array of function values
+            x: Domain points (must be positive)
+            s: Complex variable(s) for transform
+            method: Computation method ("numerical", "analytical", "fft")
+            
+        Returns:
+            Transform values
+        """
+        if callable(f):
+            if hasattr(x, "__len__"):
+                x_array = x
+            else:
+                x_max = x
+                x_array = np.logspace(-10, np.log10(x_max), 1000)
+            f_array = np.array([f(xi) for xi in x_array])
+        else:
+            f_array = f
+            if hasattr(x, "__len__"):
+                x_array = x
+            else:
+                x_array = np.arange(len(f)) * 1.0
+        
+        # Ensure x values are positive
+        if np.any(x_array <= 0):
+            raise ValueError("Domain points must be positive for Mellin transform")
+        
+        # Ensure arrays have the same length
+        min_len = min(len(f_array), len(x_array))
+        f_array = f_array[:min_len]
+        x_array = x_array[:min_len]
+        
+        if method == "numerical":
+            return self._numerical_method(f_array, x_array, s)
+        elif method == "analytical":
+            return self._analytical_method(f_array, x_array, s)
+        elif method == "fft":
+            return self._fft_method(f_array, x_array, s)
+        else:
+            raise ValueError(f"Unknown method: {method}")
+    
+    def _numerical_method(self, f: np.ndarray, x: np.ndarray, s: Union[complex, np.ndarray]) -> Union[complex, np.ndarray]:
+        """Numerical integration method."""
+        if isinstance(s, (int, float, complex)):
+            s = np.array([s])
+        
+        result = np.zeros(len(s), dtype=complex)
+        
+        for i, s_val in enumerate(s):
+            # Integrand: f(x) * x^(s-1+α)
+            integrand = f * (x ** (s_val - 1 + self.alpha_val))
+            result[i] = np.trapezoid(integrand, x)
+        
+        return result[0] if len(s) == 1 else result
+    
+    def _analytical_method(self, f: np.ndarray, x: np.ndarray, s: Union[complex, np.ndarray]) -> Union[complex, np.ndarray]:
+        """Analytical method for special functions."""
+        if isinstance(s, (int, float, complex)):
+            s = np.array([s])
+        
+        result = np.zeros(len(s), dtype=complex)
+        
+        # For exponential functions, use analytical formulas
+        for i, s_val in enumerate(s):
+            if np.allclose(f, np.exp(-x)):  # Exponential decay
+                result[i] = special.gamma(s_val + self.alpha_val)
+            elif np.allclose(f, x ** 2):  # Power function
+                if np.real(s_val + self.alpha_val) > -2:
+                    result[i] = special.gamma(s_val + self.alpha_val + 2) / (s_val + self.alpha_val + 2)
+                else:
+                    result[i] = np.inf
+            else:
+                # Fall back to numerical method
+                result[i] = self._numerical_method(f, x, s_val)
+        
+        return result[0] if len(s) == 1 else result
+    
+    def _fft_method(self, f: np.ndarray, x: np.ndarray, s: Union[complex, np.ndarray]) -> Union[complex, np.ndarray]:
+        """FFT-based method for efficient computation."""
+        if isinstance(s, (int, float, complex)):
+            s = np.array([s])
+        
+        # Use logarithmic sampling for better FFT performance
+        log_x = np.log(x)
+        log_f = f * x  # Pre-multiply by x for better numerical stability
+        
+        # Compute FFT
+        fft_result = fft(log_f)
+        
+        # Frequency domain
+        freqs = fftfreq(len(x), log_x[1] - log_x[0])
+        
+        result = np.zeros(len(s), dtype=complex)
+        
+        for i, s_val in enumerate(s):
+            # Interpolate FFT result at desired s values
+            s_interp = s_val + self.alpha_val
+            freq_idx = np.argmin(np.abs(freqs - s_interp))
+            result[i] = fft_result[freq_idx]
+        
+        return result[0] if len(s) == 1 else result
+    
+    def inverse_transform(
+        self,
+        F: Union[complex, np.ndarray],
+        s: Union[complex, np.ndarray],
+        x: Union[float, np.ndarray],
+        method: str = "numerical"
+    ) -> np.ndarray:
+        """
+        Compute inverse fractional Mellin transform.
+        
+        Args:
+            F: Transform values
+            s: Complex variable(s)
+            x: Domain points for output
+            method: Inversion method ("numerical", "fft")
+            
+        Returns:
+            Original function values
+        """
+        if method == "numerical":
+            return self._inverse_numerical(F, s, x)
+        elif method == "fft":
+            return self._inverse_fft(F, s, x)
+        else:
+            raise ValueError(f"Unknown method: {method}")
+    
+    def _inverse_numerical(self, F: Union[complex, np.ndarray], s: Union[complex, np.ndarray], x: np.ndarray) -> np.ndarray:
+        """Numerical inverse transform."""
+        if isinstance(s, (int, float, complex)):
+            s = np.array([s])
+        
+        result = np.zeros(len(x))
+        
+        for i, xi in enumerate(x):
+            # Inverse integrand: F(s) * x^(-s-α)
+            integrand = F * (xi ** (-s - self.alpha_val))
+            result[i] = np.real(np.trapezoid(integrand, s)) / (2 * np.pi * 1j)
+        
+        return result
+    
+    def _inverse_fft(self, F: Union[complex, np.ndarray], s: Union[complex, np.ndarray], x: np.ndarray) -> np.ndarray:
+        """FFT-based inverse transform."""
+        if isinstance(s, (int, float, complex)):
+            s = np.array([s])
+        
+        # Use FFT for efficient inverse computation
+        log_x = np.log(x)
+        
+        # Interpolate F at regular s intervals
+        s_min, s_max = np.real(s).min(), np.real(s).max()
+        s_regular = np.linspace(s_min, s_max, len(x))
+        F_interp = np.interp(s_regular, np.real(s), np.real(F))
+        
+        # Compute inverse FFT
+        ifft_result = ifft(F_interp)
+        
+        # Convert back to x domain
+        result = ifft_result / x
+        
+        return np.real(result)
+
+
 # Convenience functions
 def fractional_laplacian(
     f: Union[Callable, np.ndarray],
@@ -674,3 +875,15 @@ def fractional_z_transform(
     """Convenience function for fractional Z-transform."""
     calculator = FractionalZTransform(alpha)
     return calculator.transform(f, z, method)
+
+
+def fractional_mellin_transform(
+    f: Union[Callable, np.ndarray],
+    x: Union[float, np.ndarray],
+    s: Union[complex, np.ndarray],
+    alpha: Union[float, FractionalOrder],
+    method: str = "numerical"
+) -> Union[complex, np.ndarray]:
+    """Convenience function for fractional Mellin transform."""
+    calculator = FractionalMellinTransform(alpha)
+    return calculator.transform(f, x, s, method)
