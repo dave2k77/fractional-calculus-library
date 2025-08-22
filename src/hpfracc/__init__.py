@@ -73,6 +73,32 @@ try:
 except ImportError:
     pass
 
+# Import fractional integrals
+try:
+    from hpfracc.algorithms.integral_methods import (
+        RiemannLiouvilleIntegral,
+        CaputoIntegral,
+        riemann_liouville_integral,
+        caputo_integral,
+        optimized_riemann_liouville_integral,
+        optimized_caputo_integral,
+    )
+except ImportError:
+    pass
+
+# Import novel fractional derivatives
+try:
+    from hpfracc.algorithms.novel_derivatives import (
+        CaputoFabrizioDerivative,
+        AtanganaBaleanuDerivative,
+        caputo_fabrizio_derivative,
+        atangana_baleanu_derivative,
+        optimized_caputo_fabrizio_derivative,
+        optimized_atangana_baleanu_derivative,
+    )
+except ImportError:
+    pass
+
 # Import special optimized methods
 try:
     from hpfracc.algorithms.special_optimized_methods import (
@@ -132,6 +158,22 @@ __all__ = [
     "fractional_fourier_transform",
     "fractional_z_transform",
     "fractional_mellin_transform",
+    
+    # Fractional integrals
+    "RiemannLiouvilleIntegral",
+    "CaputoIntegral",
+    "riemann_liouville_integral",
+    "caputo_integral",
+    "optimized_riemann_liouville_integral",
+    "optimized_caputo_integral",
+    
+    # Novel fractional derivatives
+    "CaputoFabrizioDerivative",
+    "AtanganaBaleanuDerivative",
+    "caputo_fabrizio_derivative",
+    "atangana_baleanu_derivative",
+    "optimized_caputo_fabrizio_derivative",
+    "optimized_atangana_baleanu_derivative",
     
     # Special optimized methods
     "SpecialOptimizedWeylDerivative",
