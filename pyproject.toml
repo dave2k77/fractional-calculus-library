@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "hpfracc"
-version = "0.1.1"
+version = "0.1.2"
 description = "Optimized numerical methods for fractional calculus using JAX and NUMBA"
 authors = [
     {name = "Davian Chin", email = "dave2k77@gmail.com"}
