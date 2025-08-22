@@ -97,7 +97,7 @@ Documentation = "https://fractional-calculus-library.readthedocs.io"
 
 [tool.setuptools.packages.find]
 where = ["src"]
-include = ["*"]
+include = ["hpfracc*"]
 exclude = ["tests*", "examples*", "benchmarks*", "docs*", "scripts*", "venv*", "data*", "*.egg-info*", "__pycache__*"]
 
 [tool.setuptools.package-data]

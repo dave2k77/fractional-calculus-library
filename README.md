@@ -52,7 +52,21 @@ A **high-performance Python library** for numerical methods in fractional calcul
 pip install hpfracc
 ```
 
-### From Source
+### Using Conda (Recommended for Development)
+```bash
+# Clone the repository
+git clone https://github.com/dave2k77/fractional-calculus-library.git
+cd fractional-calculus-library
+
+# Create and activate conda environment
+conda env create -f environment.yml
+conda activate fracnn
+
+# Or activate existing environment
+conda activate fracnn
+```
+
+### From Source (Alternative)
 ```bash
 # Clone the repository
 git clone https://github.com/dave2k77/fractional-calculus-library.git
@@ -68,8 +82,8 @@ pip install -e .
 ```
 
 ### Prerequisites
-- Python 3.8 or higher
-- Virtual environment (recommended)
+- Python 3.11 or higher (3.11 recommended for stability)
+- Conda or virtual environment (recommended)
 
 ## 🚀 **Quick Start**
 
