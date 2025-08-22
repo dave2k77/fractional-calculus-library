@@ -23,9 +23,9 @@ from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
 import multiprocessing as mp
 from functools import partial
 
-from src.core.definitions import FractionalOrder
-from src.special import gamma, beta
-from src.algorithms.parallel_optimized_methods import ParallelConfig
+from hpfracc.core.definitions import FractionalOrder
+from hpfracc.special import gamma, beta
+from hpfracc.algorithms.parallel_optimized_methods import ParallelConfig
 
 
 class WeylDerivative:

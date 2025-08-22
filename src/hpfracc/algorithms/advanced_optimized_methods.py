@@ -14,7 +14,7 @@ from numba import jit as numba_jit, prange
 from typing import Union, Optional, Callable
 import warnings
 
-from src.core.definitions import FractionalOrder
+from hpfracc.core.definitions import FractionalOrder
 
 
 @numba_jit(nopython=True)

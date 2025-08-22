@@ -1,5 +1,5 @@
 """
-Fractional Calculus Library
+High-Performance Fractional Calculus Library (hpfracc)
 
 A high-performance Python library for numerical methods in fractional calculus,
 featuring dramatic speedups and production-ready optimizations across all methods.
@@ -18,7 +18,7 @@ __email__ = "dave2k77@gmail.com"
 
 # Import core optimized methods for easy access
 try:
-    from .algorithms.optimized_methods import (
+    from hpfracc.algorithms.optimized_methods import (
         OptimizedRiemannLiouville,
         OptimizedCaputo,
         OptimizedGrunwaldLetnikov,
@@ -31,7 +31,7 @@ except ImportError:
 
 # Import advanced methods
 try:
-    from .algorithms.advanced_methods import (
+    from hpfracc.algorithms.advanced_methods import (
         WeylDerivative,
         MarchaudDerivative,
         HadamardDerivative,
@@ -43,7 +43,7 @@ except ImportError:
 
 # Import optimized advanced methods
 try:
-    from .algorithms.advanced_optimized_methods import (
+    from hpfracc.algorithms.advanced_optimized_methods import (
         OptimizedWeylDerivative,
         OptimizedMarchaudDerivative,
         OptimizedHadamardDerivative,
@@ -60,7 +60,7 @@ except ImportError:
 
 # Import special methods
 try:
-    from .algorithms.special_methods import (
+    from hpfracc.algorithms.special_methods import (
         FractionalLaplacian,
         FractionalFourierTransform,
         FractionalZTransform,
@@ -75,7 +75,7 @@ except ImportError:
 
 # Import special optimized methods
 try:
-    from .algorithms.special_optimized_methods import (
+    from hpfracc.algorithms.special_optimized_methods import (
         SpecialOptimizedWeylDerivative,
         SpecialOptimizedMarchaudDerivative,
         SpecialOptimizedReizFellerDerivative,
@@ -90,7 +90,7 @@ except ImportError:
 
 # Import core definitions
 try:
-    from .core.definitions import FractionalOrder
+    from hpfracc.core.definitions import FractionalOrder
 except ImportError:
     pass
 

@@ -50,8 +50,8 @@ try:
 except ImportError:
     RAY_AVAILABLE = False
 
-from src.core.definitions import FractionalOrder
-from src.special import gamma
+from hpfracc.core.definitions import FractionalOrder
+from hpfracc.special import gamma
 
 
 class ParallelConfig:
@@ -247,7 +247,7 @@ class ParallelOptimizedRiemannLiouville:
         self, f_array: np.ndarray, t_array: np.ndarray, h: float
     ) -> np.ndarray:
         """Serial computation fallback."""
-        from src.algorithms.optimized_methods import OptimizedRiemannLiouville
+        from hpfracc.algorithms.optimized_methods import OptimizedRiemannLiouville
 
         cpu_calc = OptimizedRiemannLiouville(self.alpha)
         return cpu_calc._fft_convolution_rl_numpy(f_array, t_array, h)
@@ -334,7 +334,7 @@ class ParallelOptimizedRiemannLiouville:
         self, f_chunk: np.ndarray, t_array: np.ndarray, h: float
     ) -> np.ndarray:
         """Worker function for RL FFT computation."""
-        from src.algorithms.optimized_methods import OptimizedRiemannLiouville
+        from hpfracc.algorithms.optimized_methods import OptimizedRiemannLiouville
 
         # Create calculator for this worker
         cpu_calc = OptimizedRiemannLiouville(self.alpha)
@@ -424,7 +424,7 @@ class ParallelOptimizedCaputo:
 
     def _compute_serial(self, f_array: np.ndarray, h: float, method: str) -> np.ndarray:
         """Serial computation fallback."""
-        from src.algorithms.optimized_methods import OptimizedCaputo
+        from hpfracc.algorithms.optimized_methods import OptimizedCaputo
 
         cpu_calc = OptimizedCaputo(self.alpha)
         t_array = np.arange(len(f_array)) * h
@@ -469,7 +469,7 @@ class ParallelOptimizedCaputo:
         self, f_chunk: np.ndarray, h: float, method: str
     ) -> np.ndarray:
         """Worker function for Caputo L1 computation."""
-        from src.algorithms.optimized_methods import OptimizedCaputo
+        from hpfracc.algorithms.optimized_methods import OptimizedCaputo
 
         cpu_calc = OptimizedCaputo(self.alpha)
         t_chunk = np.arange(len(f_chunk)) * h
@@ -552,7 +552,7 @@ class ParallelOptimizedGrunwaldLetnikov:
 
     def _compute_serial(self, f_array: np.ndarray, h: float) -> np.ndarray:
         """Serial computation fallback."""
-        from src.algorithms.optimized_methods import OptimizedGrunwaldLetnikov
+        from hpfracc.algorithms.optimized_methods import OptimizedGrunwaldLetnikov
 
         cpu_calc = OptimizedGrunwaldLetnikov(self.alpha)
         return cpu_calc.compute(f_array, None, h)
@@ -590,7 +590,7 @@ class ParallelOptimizedGrunwaldLetnikov:
 
     def _worker_grunwald_letnikov(self, f_chunk: np.ndarray, h: float) -> np.ndarray:
         """Worker function for GL computation."""
-        from src.algorithms.optimized_methods import OptimizedGrunwaldLetnikov
+        from hpfracc.algorithms.optimized_methods import OptimizedGrunwaldLetnikov
 
         cpu_calc = OptimizedGrunwaldLetnikov(self.alpha)
         return cpu_calc.compute(f_chunk, None, h)
@@ -725,7 +725,7 @@ def benchmark_parallel_vs_serial(
     parallel_config = parallel_config or ParallelConfig()
 
     # Serial computation
-    from src.algorithms.optimized_methods import optimized_riemann_liouville
+    from hpfracc.algorithms.optimized_methods import optimized_riemann_liouville
 
     start_time = time.time()
     serial_result = optimized_riemann_liouville(f, t, alpha, h)
@@ -1103,7 +1103,7 @@ def memory_efficient_caputo(
             ) * sum_val
     else:
         # Use full memory for small arrays
-        from src.algorithms.optimized_methods import OptimizedCaputo
+        from hpfracc.algorithms.optimized_methods import OptimizedCaputo
 
         caputo = OptimizedCaputo(alpha)
         result = caputo.compute(f, None, h, "l1")

@@ -19,7 +19,7 @@ from scipy import special
 from scipy.fft import fft, ifft, fftfreq
 import math
 
-from src.core.definitions import FractionalOrder
+from hpfracc.core.definitions import FractionalOrder
 
 
 @numba_jit(nopython=True)

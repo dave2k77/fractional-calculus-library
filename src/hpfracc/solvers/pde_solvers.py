@@ -11,8 +11,8 @@ from scipy import linalg, sparse
 from scipy.sparse.linalg import spsolve
 import warnings
 
-from src.core.definitions import FractionalOrder
-from src.algorithms.optimized_methods import (
+from hpfracc.core.definitions import FractionalOrder
+from hpfracc.algorithms.optimized_methods import (
     optimized_caputo,
     optimized_riemann_liouville,
     optimized_grunwald_letnikov,

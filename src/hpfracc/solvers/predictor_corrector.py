@@ -10,8 +10,8 @@ from typing import Union, Optional, Tuple, Callable, Dict, Any, List
 from scipy import linalg
 import warnings
 
-from src.core.definitions import FractionalOrder
-from src.special import gamma
+from hpfracc.core.definitions import FractionalOrder
+from hpfracc.special import gamma
 
 
 class PredictorCorrectorSolver:

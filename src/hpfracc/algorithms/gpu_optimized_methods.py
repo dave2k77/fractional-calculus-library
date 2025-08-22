@@ -40,8 +40,8 @@ except ImportError:
     CUPY_AVAILABLE = False
     warnings.warn("CuPy not available. CUDA acceleration will be limited.")
 
-from src.core.definitions import FractionalOrder
-from src.special import gamma
+from hpfracc.core.definitions import FractionalOrder
+from hpfracc.special import gamma
 
 
 class GPUConfig:
@@ -319,7 +319,7 @@ class GPUOptimizedRiemannLiouville:
         self, f_array: np.ndarray, t_array: np.ndarray, h: float
     ) -> np.ndarray:
         """Fallback to CPU computation."""
-        from src.algorithms.optimized_methods import OptimizedRiemannLiouville
+        from hpfracc.algorithms.optimized_methods import OptimizedRiemannLiouville
 
         cpu_calc = OptimizedRiemannLiouville(self.alpha)
         return cpu_calc._fft_convolution_rl_numpy(f_array, t_array, h)
@@ -518,7 +518,7 @@ class GPUOptimizedCaputo:
         self, f_array: np.ndarray, h: float, method: str
     ) -> np.ndarray:
         """Fallback to CPU computation."""
-        from src.algorithms.optimized_methods import OptimizedCaputo
+        from hpfracc.algorithms.optimized_methods import OptimizedCaputo
 
         cpu_calc = OptimizedCaputo(self.alpha)
         return cpu_calc.compute(f_array, None, h, method)
@@ -683,7 +683,7 @@ class GPUOptimizedGrunwaldLetnikov:
 
     def _compute_cpu_fallback(self, f_array: np.ndarray, h: float) -> np.ndarray:
         """Fallback to CPU computation."""
-        from src.algorithms.optimized_methods import OptimizedGrunwaldLetnikov
+        from hpfracc.algorithms.optimized_methods import OptimizedGrunwaldLetnikov
 
         cpu_calc = OptimizedGrunwaldLetnikov(self.alpha)
         return cpu_calc.compute(f_array, None, h)
@@ -830,7 +830,7 @@ def benchmark_gpu_vs_cpu(
     gpu_config = gpu_config or GPUConfig()
 
     # CPU computation
-    from src.algorithms.optimized_methods import optimized_riemann_liouville
+    from hpfracc.algorithms.optimized_methods import optimized_riemann_liouville
 
     start_time = time.time()
     cpu_result = optimized_riemann_liouville(f, t, alpha, h)

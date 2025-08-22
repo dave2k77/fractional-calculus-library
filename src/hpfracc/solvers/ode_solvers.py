@@ -11,9 +11,9 @@ from scipy import integrate, interpolate
 from scipy.linalg import solve_banded
 import warnings
 
-from src.core.definitions import FractionalOrder
+from hpfracc.core.definitions import FractionalOrder
 
-from src.special import gamma
+from hpfracc.special import gamma
 
 
 class FractionalODESolver:

@@ -12,8 +12,8 @@ from typing import Union, Optional, Callable, Tuple
 import warnings
 import time
 
-from src.core.definitions import FractionalOrder
-from src.algorithms.special_methods import (
+from hpfracc.core.definitions import FractionalOrder
+from hpfracc.algorithms.special_methods import (
     FractionalLaplacian,
     FractionalFourierTransform,
     FractionalZTransform,

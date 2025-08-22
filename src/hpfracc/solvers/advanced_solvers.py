@@ -12,15 +12,15 @@ from scipy.linalg import solve_banded
 import warnings
 from enum import Enum
 
-from src.core.definitions import FractionalOrder
-from src.algorithms.optimized_methods import (
+from hpfracc.core.definitions import FractionalOrder
+from hpfracc.algorithms.optimized_methods import (
     optimized_caputo,
     optimized_riemann_liouville,
     optimized_grunwald_letnikov,
 )
-from src.special import gamma
-from src.utils.error_analysis import ErrorAnalyzer
-from src.utils.memory_management import MemoryManager
+from hpfracc.special import gamma
+from hpfracc.utils.error_analysis import ErrorAnalyzer
+from hpfracc.utils.memory_management import MemoryManager
 
 
 class ErrorControlMethod(Enum):
@@ -230,7 +230,7 @@ class AdvancedFractionalODESolver:
             warnings.warn(
                 "Advanced solver failed to make progress, falling back to basic solver"
             )
-            from src.solvers.ode_solvers import solve_fractional_ode
+            from hpfracc.solvers.ode_solvers import solve_fractional_ode
 
             t_basic, y_basic = solve_fractional_ode(
                 f, t_span, y0, alpha, method="predictor_corrector"
