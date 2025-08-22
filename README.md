@@ -66,6 +66,32 @@ conda activate fracnn
 conda activate fracnn
 ```
 
+### 🐚 **Git Bash Setup (Recommended Terminal)**
+
+For the best development experience on Windows, we recommend using **Git Bash** instead of PowerShell:
+
+1. **Install Git Bash** (if not already installed):
+   - Download from: https://git-scm.com/
+   - Install with default settings
+
+2. **VS Code/Cursor Configuration**:
+   - The project includes `.vscode/settings.json` that automatically configures Git Bash
+   - Open the project in VS Code/Cursor and Git Bash will be the default terminal
+   - The terminal will automatically activate the `fracnn` conda environment
+
+3. **Manual Git Bash Usage**:
+   ```bash
+   # Navigate to project directory
+   cd /c/Users/davia/fractional_calculus/fc_library
+   
+   # Activate conda environment
+   conda activate fracnn
+   
+   # Verify setup
+   python --version
+   conda info --envs
+   ```
+
 ### From Source (Alternative)
 ```bash
 # Clone the repository
@@ -84,6 +110,16 @@ pip install -e .
 ### Prerequisites
 - Python 3.11 or higher (3.11 recommended for stability)
 - Conda or virtual environment (recommended)
+- Git Bash (recommended for Windows users)
+
+### 🚀 **Quick Environment Setup**
+
+The project includes several activation scripts for different use cases:
+
+- **`activate_env.bat`** - Windows batch file that launches Git Bash
+- **`activate_env.sh`** - Git Bash script for conda environment activation
+- **`.bashrc`** - Automatic conda environment activation for Git Bash
+- **`.vscode/settings.json`** - VS Code/Cursor Git Bash configuration
 
 ## 🚀 **Quick Start**
 

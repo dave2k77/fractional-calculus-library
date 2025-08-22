@@ -1,11 +1,11 @@
 @echo off
-echo Activating fracnn conda environment...
-call conda activate fracnn
+echo Launching Git Bash with fracnn conda environment...
 echo.
-echo Environment activated! You can now:
-echo - Run tests: pytest
-echo - Run benchmarks: python benchmarks/comprehensive_performance_benchmark.py
-echo - Build package: python -m build
-echo - Upload to PyPI: twine upload dist/*
+echo This will open Git Bash and automatically activate the fracnn environment.
 echo.
-cmd /k
+echo If Git Bash is not installed, please install it from: https://git-scm.com/
+echo.
+pause
+
+REM Launch Git Bash with the activation script
+"C:\Program Files\Git\bin\bash.exe" --login -i -c "source activate_env.sh"
