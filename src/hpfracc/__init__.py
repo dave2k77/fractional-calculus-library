@@ -12,7 +12,7 @@ This library provides optimized implementations of:
 - Parallel computing via NUMBA
 """
 
-__version__ = "0.1.2"
+__version__ = "0.1.3"
 __author__ = "Davian Chin"
 __email__ = "dave2k77@gmail.com"
 
