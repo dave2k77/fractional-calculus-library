@@ -4,7 +4,7 @@ Simple Fractional PINO Implementation
 A Physics-Informed Neural Operator that uses fractional calculus operators
 for solving fractional differential equations.
 
-Author: David
+Author: Davian R. Chin (Department of Biomedical Engineering, University of Reading)
 Date: 2024
 """
 

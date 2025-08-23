@@ -4,7 +4,7 @@ Simple Fractional Calculus Test with hpfracc
 A simple demonstration of the hpfracc library capabilities
 for fractional calculus operations.
 
-Author: David
+Author: Davian R. Chin (Department of Biomedical Engineering, University of Reading)
 Date: 2024
 """
 

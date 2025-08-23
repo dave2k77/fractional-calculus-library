@@ -4,7 +4,7 @@ Minimal Fractional Calculus Demo
 A simple demonstration of fractional calculus concepts
 that can be used as a basis for Fractional PINO.
 
-Author: David
+Author: Davian R. Chin (Department of Biomedical Engineering, University of Reading)
 Date: 2024
 """
 

@@ -13,8 +13,9 @@ This library provides optimized implementations of:
 """
 
 __version__ = "0.2.0"
-__author__ = "Davian Chin"
-__email__ = "dave2k77@gmail.com"
+__author__ = "Davian R. Chin"
+__email__ = "d.r.chin@pgr.reading.ac.uk"
+__affiliation__ = "Department of Biomedical Engineering, University of Reading"
 
 # Import core optimized methods for easy access
 try:

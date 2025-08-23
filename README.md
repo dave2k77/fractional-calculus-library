@@ -634,6 +634,13 @@ We welcome contributions! Here's how you can help:
 - [ ] **Domain-Specific Libraries**: Specialized packages for different fields
 - [ ] **Educational Tools**: Interactive learning materials
 
+## 👨‍🔬 **Author**
+
+**Davian R. Chin**  
+Department of Biomedical Engineering  
+University of Reading  
+Email: [d.r.chin@pgr.reading.ac.uk](mailto:d.r.chin@pgr.reading.ac.uk)
+
 ## 📄 **License**
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

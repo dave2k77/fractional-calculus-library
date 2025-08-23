@@ -4,7 +4,7 @@ Quick Fractional PINO Test
 A simplified version of the Fractional PINO experiment for quick testing
 and demonstration of the hpfracc library capabilities.
 
-Author: David
+Author: Davian R. Chin (Department of Biomedical Engineering, University of Reading)
 Date: 2024
 """
 

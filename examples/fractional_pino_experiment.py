@@ -5,7 +5,7 @@ This experiment demonstrates the use of hpfracc library for implementing
 a Fractional PINO that can learn and solve fractional differential equations
 using the fractional Laplacian and fractional Fourier Transform operators.
 
-Author: David
+Author: Davian R. Chin (Department of Biomedical Engineering, University of Reading)
 Date: 2024
 """
 

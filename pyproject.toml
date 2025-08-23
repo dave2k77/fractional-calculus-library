@@ -7,11 +7,15 @@ name = "hpfracc"
 version = "0.2.0"
 description = "Optimized numerical methods for fractional calculus using JAX and NUMBA"
 authors = [
-    {name = "Davian Chin", email = "dave2k77@gmail.com"}
+    {name = "Davian R. Chin", email = "d.r.chin@pgr.reading.ac.uk"}
+]
+maintainers = [
+    {name = "Davian R. Chin", email = "d.r.chin@pgr.reading.ac.uk"}
 ]
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.8"
+keywords = ["fractional-calculus", "numerical-methods", "jax", "numba", "scientific-computing", "mathematics"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Science/Research",
