@@ -22,7 +22,7 @@ import time
 from typing import Callable
 
 # Import the new advanced methods
-from src.algorithms.advanced_methods import (
+from hpfracc.algorithms.advanced_methods import (
     WeylDerivative,
     MarchaudDerivative,
     HadamardDerivative,
@@ -34,7 +34,7 @@ from src.algorithms.advanced_methods import (
     reiz_feller_derivative,
 )
 
-from src.algorithms.advanced_optimized_methods import (
+from hpfracc.algorithms.advanced_optimized_methods import (
     OptimizedWeylDerivative,
     OptimizedMarchaudDerivative,
     OptimizedHadamardDerivative,
@@ -48,7 +48,7 @@ from src.algorithms.advanced_optimized_methods import (
 )
 
 # Updated import for consolidated structure
-from src.algorithms.parallel_optimized_methods import ParallelConfig
+from hpfracc.algorithms.parallel_optimized_methods import ParallelConfig
 
 
 def create_test_functions():

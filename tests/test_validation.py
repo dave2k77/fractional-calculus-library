@@ -4,7 +4,7 @@ Tests for validation modules.
 
 import numpy as np
 import pytest
-from src.validation.analytical_solutions import (
+from hpfracc.validation.analytical_solutions import (
     AnalyticalSolutions,
     PowerFunctionSolutions,
     ExponentialSolutions,
@@ -12,7 +12,7 @@ from src.validation.analytical_solutions import (
     get_analytical_solution,
     validate_against_analytical,
 )
-from src.validation.convergence_tests import (
+from hpfracc.validation.convergence_tests import (
     ConvergenceTester,
     ConvergenceAnalyzer,
     OrderOfAccuracy,
@@ -20,7 +20,7 @@ from src.validation.convergence_tests import (
     run_method_convergence_test,
     estimate_convergence_rate,
 )
-from src.validation.benchmarks import (
+from hpfracc.validation.benchmarks import (
     BenchmarkSuite,
     PerformanceBenchmark,
     AccuracyBenchmark,

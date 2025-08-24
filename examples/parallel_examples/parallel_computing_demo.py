@@ -15,7 +15,7 @@ import os
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
 
 # Updated imports for consolidated structure
-from src.algorithms.parallel_optimized_methods import (
+from hpfracc.algorithms.parallel_optimized_methods import (
     ParallelConfig,
     ParallelOptimizedCaputo,
     ParallelOptimizedRiemannLiouville,
@@ -25,7 +25,7 @@ from src.algorithms.parallel_optimized_methods import (
     parallel_optimized_riemann_liouville,
     parallel_optimized_grunwald_letnikov,
 )
-from src.algorithms.optimized_methods import OptimizedCaputo
+from hpfracc.algorithms.optimized_methods import OptimizedCaputo
 
 
 def compute_derivative(data):
@@ -300,7 +300,7 @@ def load_balancing_demo():
     print("\n⚖️ Load Balancing Demo")
     print("=" * 50)
 
-    from src.algorithms.parallel_optimized_methods import (
+    from hpfracc.algorithms.parallel_optimized_methods import (
         ParallelLoadBalancer as LoadBalancer,
     )
 
@@ -382,7 +382,7 @@ def memory_optimization_demo():
     print("\n💾 Memory Optimization Demo")
     print("=" * 50)
 
-    from src.optimisation.parallel_computing import NumbaMemoryOptimizer
+    from hpfracc.optimisation.parallel_computing import NumbaMemoryOptimizer
 
     # Create large test data
     grid_sizes = [1000, 2000, 5000]
@@ -437,7 +437,7 @@ def system_info_demo():
     print("\n🖥️ System Information Demo")
     print("=" * 50)
 
-    from src.optimisation.parallel_computing import get_system_info
+    from hpfracc.optimisation.parallel_computing import get_system_info
 
     # Get system information
     system_info = get_system_info()

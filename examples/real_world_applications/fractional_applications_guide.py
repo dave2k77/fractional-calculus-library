@@ -23,7 +23,7 @@ from scipy.stats import norm
 import time
 
 # Import advanced methods
-from src.algorithms.advanced_methods import (
+from hpfracc.algorithms.advanced_methods import (
     WeylDerivative,
     MarchaudDerivative,
     HadamardDerivative,
@@ -32,7 +32,7 @@ from src.algorithms.advanced_methods import (
 )
 
 # Import optimized methods
-from src.algorithms.advanced_optimized_methods import (
+from hpfracc.algorithms.advanced_optimized_methods import (
     optimized_weyl_derivative,
     optimized_marchaud_derivative,
     optimized_hadamard_derivative,

@@ -7,7 +7,7 @@ Tests the FractionalOrder, DefinitionType, and various derivative definitions.
 
 import pytest
 import numpy as np
-from src.core.definitions import (
+from hpfracc.core.definitions import (
     FractionalOrder,
     DefinitionType,
     CaputoDefinition,

@@ -4,13 +4,13 @@ Tests for utility modules.
 
 import numpy as np
 import pytest
-from src.utils.error_analysis import (
+from hpfracc.utils.error_analysis import (
     ErrorAnalyzer,
     ConvergenceAnalyzer,
     ValidationFramework,
 )
-from src.utils.memory_management import MemoryManager, CacheManager
-from src.utils.plotting import PlotManager
+from hpfracc.utils.memory_management import MemoryManager, CacheManager
+from hpfracc.utils.plotting import PlotManager
 
 
 class TestErrorAnalysis:
@@ -167,9 +167,9 @@ class TestPlotting:
 
 def test_convenience_functions():
     """Test convenience functions."""
-    from src.utils.error_analysis import compute_error_metrics, analyze_convergence
-    from src.utils.memory_management import get_memory_usage, clear_cache
-    from src.utils.plotting import setup_plotting_style
+    from hpfracc.utils.error_analysis import compute_error_metrics, analyze_convergence
+    from hpfracc.utils.memory_management import get_memory_usage, clear_cache
+    from hpfracc.utils.plotting import setup_plotting_style
 
     # Test error metrics
     numerical = np.array([1.0, 2.0, 3.0])

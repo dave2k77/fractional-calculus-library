@@ -14,10 +14,10 @@ import os
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
 
-from src.solvers.pde_solvers import FractionalDiffusionSolver
-from src.algorithms.L1_L2_schemes import L1L2Schemes
-from src.solvers.predictor_corrector import PredictorCorrectorSolver
-from src.special.gamma_beta import gamma
+from hpfracc.solvers.pde_solvers import FractionalDiffusionSolver
+from hpfracc.algorithms.L1_L2_schemes import L1L2Schemes
+from hpfracc.solvers.predictor_corrector import PredictorCorrectorSolver
+from hpfracc.special.gamma_beta import gamma
 
 
 def ensure_output_dir():

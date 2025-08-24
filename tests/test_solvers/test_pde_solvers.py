@@ -10,13 +10,13 @@ import numpy as np
 from unittest.mock import Mock, patch
 import warnings
 
-from src.solvers.pde_solvers import (
+from hpfracc.solvers.pde_solvers import (
     FractionalPDESolver,
     FractionalDiffusionSolver,
     FractionalAdvectionSolver,
     FractionalReactionDiffusionSolver,
 )
-from src.core.definitions import FractionalOrder
+from hpfracc.core.definitions import FractionalOrder
 
 
 class TestFractionalPDESolver:

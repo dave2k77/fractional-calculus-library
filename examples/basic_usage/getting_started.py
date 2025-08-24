@@ -14,7 +14,7 @@ import os
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
 
 # Updated imports for consolidated structure
-from src.algorithms.optimized_methods import (
+from hpfracc.algorithms.optimized_methods import (
     OptimizedCaputo,
     OptimizedRiemannLiouville,
     OptimizedGrunwaldLetnikov,
@@ -22,7 +22,7 @@ from src.algorithms.optimized_methods import (
     optimized_riemann_liouville,
     optimized_grunwald_letnikov,
 )
-from src.core.definitions import FractionalIntegral
+from hpfracc.core.definitions import FractionalIntegral
 
 
 def basic_fractional_derivatives():

@@ -15,13 +15,13 @@ from typing import Dict, Any, Tuple, Optional
 import warnings
 
 # Import fractional calculus components
-from src.algorithms.optimized_methods import (
+from hpfracc.algorithms.optimized_methods import (
     optimized_caputo,
     optimized_riemann_liouville,
 )
-from src.solvers import solve_advanced_fractional_ode, solve_high_order_fractional_ode
-from src.utils.plotting import PlotManager
-from src.validation import get_analytical_solution, validate_against_analytical
+from hpfracc.solvers import solve_advanced_fractional_ode, solve_high_order_fractional_ode
+from hpfracc.utils.plotting import PlotManager
+from hpfracc.validation import get_analytical_solution, validate_against_analytical
 
 
 class FractionalBlackScholesModel:

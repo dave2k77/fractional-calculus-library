@@ -1,0 +1,38 @@
+{
+  "Standard_Forward": {
+    "count": 6,
+    "avg_time": 0.02046060562133789,
+    "std_time": 0.026130693044752806,
+    "avg_memory": 1.2545572916666667,
+    "std_memory": 0.9694386430753197,
+    "avg_throughput": 5043.149849150625,
+    "std_throughput": 2093.5000889751445
+  },
+  "Adjoint_Forward": {
+    "count": 6,
+    "avg_time": 0.007029930750528972,
+    "std_time": 0.008197450314664513,
+    "avg_memory": 0.8515625,
+    "std_memory": 0.9339750354597167,
+    "avg_throughput": 12128.176526011805,
+    "std_throughput": 4824.350912997669
+  },
+  "Standard_Training": {
+    "count": 6,
+    "avg_time": 0.2565050522486369,
+    "std_time": 0.494393912133891,
+    "avg_memory": 19.134765625,
+    "std_memory": 23.47171945829747,
+    "avg_throughput": 2746.2321803293744,
+    "std_throughput": 1392.9832529093521
+  },
+  "Adjoint_Training": {
+    "count": 6,
+    "avg_time": 0.013031522432963053,
+    "std_time": 0.015438861850471568,
+    "avg_memory": 3.576171875,
+    "std_memory": 4.763119832284557,
+    "avg_throughput": 6510.731609609374,
+    "std_throughput": 2651.7491058399096
+  }
+}

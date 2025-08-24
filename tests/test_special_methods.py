@@ -14,7 +14,7 @@ import numpy as np
 import time
 from typing import Callable
 
-from src.algorithms.special_methods import (
+from hpfracc.algorithms.special_methods import (
     FractionalLaplacian,
     FractionalFourierTransform,
     FractionalZTransform,
@@ -23,7 +23,7 @@ from src.algorithms.special_methods import (
     fractional_z_transform,
 )
 
-from src.core.definitions import FractionalOrder
+from hpfracc.core.definitions import FractionalOrder
 
 
 class TestFractionalLaplacian:

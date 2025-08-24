@@ -14,7 +14,7 @@ import numpy as np
 import time
 from typing import Callable
 
-from src.algorithms.advanced_methods import (
+from hpfracc.algorithms.advanced_methods import (
     WeylDerivative,
     MarchaudDerivative,
     HadamardDerivative,
@@ -26,7 +26,7 @@ from src.algorithms.advanced_methods import (
     reiz_feller_derivative,
 )
 
-from src.algorithms.advanced_optimized_methods import (
+from hpfracc.algorithms.advanced_optimized_methods import (
     OptimizedWeylDerivative,
     OptimizedMarchaudDerivative,
     OptimizedHadamardDerivative,
@@ -39,7 +39,7 @@ from src.algorithms.advanced_optimized_methods import (
     optimized_adomian_decomposition,
 )
 
-from src.algorithms.parallel_optimized_methods import ParallelConfig
+from hpfracc.algorithms.parallel_optimized_methods import ParallelConfig
 
 
 class TestWeylDerivative:

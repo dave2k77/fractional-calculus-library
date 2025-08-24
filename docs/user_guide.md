@@ -1,593 +1,469 @@
-# User Guide - Fractional Calculus Library
-
-A comprehensive guide to using the Fractional Calculus Library for numerical methods in fractional calculus.
+# HPFRACC User Guide
 
 ## Table of Contents
-
-1. [Getting Started](#getting-started)
-2. [Basic Usage](#basic-usage)
-3. [Fractional Derivatives](#fractional-derivatives)
-4. [Fractional Integrals](#fractional-integrals)
-5. [Advanced Features](#advanced-features)
-6. [Performance Optimization](#performance-optimization)
-7. [Error Analysis and Validation](#error-analysis-and-validation)
-8. [Visualization](#visualization)
-9. [Best Practices](#best-practices)
-10. [Troubleshooting](#troubleshooting)
+1. [Installation](#installation)
+2. [Quick Start](#quick-start)
+3. [Basic Fractional Calculus](#basic-fractional-calculus)
+4. [Machine Learning Integration](#machine-learning-integration)
+5. [Performance Optimization](#performance-optimization)
+6. [Production Workflow](#production-workflow)
+7. [Benchmarking](#benchmarking)
+8. [Troubleshooting](#troubleshooting)
 
 ---
 
-## Getting Started
+## Installation
 
-### Quick Start Example
+### Prerequisites
+- Python 3.8+
+- PyTorch 2.0+
+- CUDA (optional, for GPU acceleration)
 
+### Install from Source
+```bash
+git clone https://github.com/your-username/hpfracc.git
+cd hpfracc
+pip install -e .
+```
+
+### Install Dependencies
+```bash
+pip install torch torchvision torchaudio
+pip install numpy scipy matplotlib seaborn
+pip install psutil optuna scikit-learn
+```
+
+---
+
+## Quick Start
+
+### Basic Fractional Derivative
 ```python
-import numpy as np
-from src.algorithms.optimized_methods import OptimizedCaputo, optimized_caputo
+import torch
+from hpfracc.core import fractional_derivative
 
-# Create a fractional derivative calculator
-alpha = 0.5  # Fractional order
-caputo = OptimizedCaputo(alpha)
-
-# Define time points and function values
-t = np.linspace(0.1, 2.0, 100)
-f = t**2  # Function f(t) = t²
-h = t[1] - t[0]  # Step size
+# Create input tensor
+x = torch.randn(100, 50)
 
 # Compute fractional derivative
-result = caputo.compute(f, t, h)
-print(f"Caputo derivative of order {alpha}: {result[-1]:.6f}")
-
-# Or use the function interface
-result_func = optimized_caputo(f, t, alpha, h)
-print(f"Function interface result: {result_func[-1]:.6f}")
+result = fractional_derivative(x, alpha=0.5, method="RL")
+print(f"Input shape: {x.shape}")
+print(f"Output shape: {result.shape}")
 ```
 
-### Import Structure
-
+### Simple Fractional Neural Network
 ```python
-# Core components
-from src.core.definitions import FractionalOrder
-from src.core.derivatives import FractionalDerivative
+from hpfracc.ml import FractionalNeuralNetwork, FractionalAdam
 
-# Optimized algorithms (PRIMARY implementations)
-from src.algorithms.optimized_methods import (
-    OptimizedCaputo,
-    OptimizedRiemannLiouville,
-    OptimizedGrunwaldLetnikov,
-    optimized_caputo,
-    optimized_riemann_liouville,
-    optimized_grunwald_letnikov
+# Create network
+net = FractionalNeuralNetwork(
+    input_size=100,
+    hidden_sizes=[256, 128, 64],
+    output_size=10,
+    fractional_order=0.5
 )
 
-# GPU-optimized algorithms
-from src.algorithms.gpu_optimized_methods import (
-    GPUOptimizedCaputo,
-    gpu_optimized_caputo,
-    JAXAutomaticDifferentiation
-)
+# Create optimizer
+optimizer = FractionalAdam(net.parameters(), lr=0.001)
 
-# Parallel-optimized algorithms
-from src.algorithms.parallel_optimized_methods import (
-    ParallelOptimizedCaputo,
-    parallel_optimized_caputo,
-    NumbaParallelManager
-)
-
-# Advanced methods
-from src.algorithms.advanced_methods import (
-    WeylDerivative,
-    MarchaudDerivative,
-    optimized_weyl_derivative,
-    optimized_marchaud_derivative
-)
-
-# Utilities
-from src.utils import ErrorAnalyzer, PlotManager
-from src.validation import AnalyticalSolutions, ConvergenceTester
+# Forward pass
+x = torch.randn(32, 100)  # batch_size=32, input_size=100
+output = net(x)
+print(f"Output shape: {output.shape}")
 ```
 
 ---
 
-## Basic Usage
+## Basic Fractional Calculus
 
-### Understanding Fractional Orders
+### Understanding Fractional Derivatives
+
+Fractional derivatives extend the concept of integer-order derivatives to non-integer orders. The library supports several methods:
+
+- **Riemann-Liouville (RL)**: Most general, works for 0 < α < 2
+- **Caputo**: Better for initial value problems, works for 0 < α < 1
+- **Grünwald-Letnikov (GL)**: Numerical approximation, works for 0 < α < 2
+- **Weyl**: For periodic functions
+- **Marchaud**: For functions with specific decay properties
+- **Hadamard**: Logarithmic fractional derivative
+
+### Choosing the Right Method
 
 ```python
-from src.core.definitions import FractionalOrder
+from hpfracc.core import fractional_derivative
 
-# Create fractional orders
-alpha = FractionalOrder(0.5, "derivative")  # Half-derivative
-beta = FractionalOrder(1.5, "derivative")   # 1.5-derivative
-gamma = FractionalOrder(0.3, "integral")    # 0.3-integral
+# For general purposes
+result_rl = fractional_derivative(x, alpha=0.5, method="RL")
 
-print(f"Alpha: {alpha}")  # FractionalOrder(0.5, derivative)
-print(f"Is valid: {alpha.is_valid()}")  # True
+# For initial value problems (e.g., differential equations)
+result_caputo = fractional_derivative(x, alpha=0.3, method="Caputo")
+
+# For numerical stability
+result_gl = fractional_derivative(x, alpha=0.7, method="GL")
 ```
 
-### Working with Different Methods
+### Fractional Order Validation
 
 ```python
-import numpy as np
-from src.algorithms.optimized_methods import (
-    OptimizedCaputo,
-    OptimizedRiemannLiouville,
-    optimized_caputo,
-    optimized_riemann_liouville
-)
+from hpfracc.core.definitions import FractionalOrder
 
-# Test parameters
-alpha = 0.5
-t = np.linspace(0.1, 2.0, 100)
-f = np.sin(t)
-h = t[1] - t[0]
+# Create and validate fractional order
+alpha = FractionalOrder(0.5)
+print(f"Alpha: {alpha.alpha}")
+print(f"Is valid: {alpha.is_valid}")
 
-# Compare different methods using classes
-caputo = OptimizedCaputo(alpha)
-riemann = OptimizedRiemannLiouville(alpha)
-
-result_caputo = caputo.compute(f, t, h)
-result_riemann = riemann.compute(f, t, h)
-
-print(f"Caputo: {result_caputo[-1]:.6f}")
-print(f"Riemann-Liouville: {result_riemann[-1]:.6f}")
-
-# Or use function interfaces
-result_caputo_func = optimized_caputo(f, t, alpha, h)
-result_riemann_func = optimized_riemann_liouville(f, t, alpha, h)
-
-print(f"Caputo (function): {result_caputo_func[-1]:.6f}")
-print(f"Riemann-Liouville (function): {result_riemann_func[-1]:.6f}")
+# Invalid order will raise error
+try:
+    invalid_alpha = FractionalOrder(2.5)  # Out of range for most methods
+except ValueError as e:
+    print(f"Error: {e}")
 ```
 
 ---
 
-## Fractional Derivatives
+## Machine Learning Integration
 
-### Caputo Derivative
+### Creating Fractional Neural Networks
 
-The Caputo derivative is particularly useful for initial value problems:
-
+#### Standard Network
 ```python
-from src.algorithms.optimized_methods import OptimizedCaputo
-import numpy as np
+from hpfracc.ml import FractionalNeuralNetwork
 
-# Initialize with different methods
-alpha = 0.5
-caputo_trap = OptimizedCaputo(alpha, method="trapezoidal")
-caputo_simp = OptimizedCaputo(alpha, method="simpson")
-caputo_gauss = OptimizedCaputo(alpha, method="gauss")
-
-# Test function
-t = np.linspace(0.1, 2.0, 100)
-f = np.exp(-t)  # Exponential function
-h = t[1] - t[0]
-
-# Compare methods
-result_trap = caputo_trap.compute(f, t, h)
-result_simp = caputo_simp.compute(f, t, h)
-result_gauss = caputo_gauss.compute(f, t, h)
-
-print(f"Trapezoidal: {result_trap[-1]:.6f}")
-print(f"Simpson: {result_simp[-1]:.6f}")
-print(f"Gauss: {result_gauss[-1]:.6f}")
-```
-
-### Riemann-Liouville Derivative
-
-```python
-from src.algorithms.optimized_methods import OptimizedRiemannLiouville
-
-# Initialize Riemann-Liouville derivative
-alpha = 0.7
-riemann = OptimizedRiemannLiouville(alpha, method="trapezoidal")
-
-# Test with power function (has known analytical solution)
-t = np.linspace(0.1, 2.0, 100)
-f = t**2  # f(t) = t²
-h = t[1] - t[0]
-
-result = riemann.compute(f, t, h)
-
-# Analytical solution for D^α(t²) = Γ(3)/Γ(3-α) * t^(2-α)
-import scipy.special as sp
-analytical = sp.gamma(3) / sp.gamma(3 - alpha) * t**(2 - alpha)
-
-print(f"Numerical: {result[-1]:.6f}")
-print(f"Analytical: {analytical[-1]:.6f}")
-```
-
-### Grünwald-Letnikov Derivative
-
-```python
-from src.algorithms.optimized_methods import OptimizedGrunwaldLetnikov
-
-# Initialize Grünwald-Letnikov derivative
-alpha = 0.5
-grunwald = OptimizedGrunwaldLetnikov(alpha)
-
-# Test with trigonometric function
-t = np.linspace(0.1, 2*np.pi, 200)
-f = np.sin(t)
-h = t[1] - t[0]
-
-result = grunwald.compute(f, t, h)
-
-print(f"Grünwald-Letnikov derivative: {result[-1]:.6f}")
-```
-
----
-
-## Fractional Integrals
-
-### Riemann-Liouville Integral
-
-```python
-from src.core.integrals import RiemannLiouvilleIntegral
-import numpy as np
-
-# Initialize fractional integral
-alpha = 0.5
-integral = RiemannLiouvilleIntegral(alpha)
-
-# Test function
-t = np.linspace(0.1, 2.0, 100)
-f = np.ones_like(t)  # Constant function f(t) = 1
-h = t[1] - t[0]
-
-result = integral.compute(f, t, h)
-
-# Analytical solution for I^α(1) = t^α / Γ(α+1)
-import scipy.special as sp
-analytical = t**alpha / sp.gamma(alpha + 1)
-
-print(f"Numerical: {result[-1]:.6f}")
-print(f"Analytical: {analytical[-1]:.6f}")
-```
-
----
-
-## Advanced Features
-
-### Using JAX for GPU Acceleration
-
-```python
-import jax
-import jax.numpy as jnp
-from src.optimisation.jax_implementations import JAXOptimizer
-
-# Check if GPU is available
-print(f"Available devices: {jax.devices()}")
-print(f"GPU devices: {jax.devices('gpu')}")
-
-# Initialize JAX optimizer
-optimizer = JAXOptimizer()
-
-# Convert data to JAX arrays
-t = jnp.linspace(0.1, 2.0, 1000)
-f = jnp.sin(t)
-
-# Compute with JAX acceleration
-result = optimizer.compute_caputo_derivative(f, t, alpha=0.5)
-print(f"JAX result: {result[-1]:.6f}")
-```
-
-### Parallel Computing
-
-```python
-from src.optimisation.parallel_computing import ParallelComputingManager
-import numpy as np
-
-# Initialize parallel computing manager
-parallel_manager = ParallelComputingManager()
-
-# Large dataset
-t = np.linspace(0.1, 10.0, 10000)
-f = np.sin(t) + np.cos(2*t)
-
-# Compute with parallel processing
-result = parallel_manager.compute_parallel_derivative(
-    f, t, alpha=0.5, method="caputo", n_jobs=-1
+net = FractionalNeuralNetwork(
+    input_size=100,
+    hidden_sizes=[256, 128, 64],
+    output_size=10,
+    fractional_order=0.5
 )
 
-print(f"Parallel computation completed")
-print(f"Result shape: {result.shape}")
+# The network automatically applies fractional derivatives
+# to inputs and intermediate activations
 ```
 
-### Error Analysis
-
+#### Memory-Efficient Adjoint Network
 ```python
-from src.utils.error_analysis import ErrorAnalyzer
-import numpy as np
-
-# Initialize error analyzer
-analyzer = ErrorAnalyzer()
-
-# Test with known analytical solution
-t = np.linspace(0.1, 2.0, 100)
-f = t**2  # f(t) = t²
-
-# Compute numerical result
-from src.algorithms.optimized_methods import OptimizedCaputo
-caputo = OptimizedCaputo(0.5)
-numerical = caputo.compute(f, t, t[1] - t[0])
-
-# Analytical solution
-import scipy.special as sp
-analytical = sp.gamma(3) / sp.gamma(2.5) * t**1.5
-
-# Analyze errors
-absolute_error = analyzer.absolute_error(numerical, analytical)
-relative_error = analyzer.relative_error(numerical, analytical)
-l2_error = analyzer.l2_error(numerical, analytical)
-
-print(f"Absolute error: {absolute_error:.2e}")
-print(f"Relative error: {relative_error:.2e}")
-print(f"L2 error: {l2_error:.2e}")
-```
-
-### Convergence Analysis
-
-```python
-from src.validation.convergence_tests import ConvergenceTester
-import numpy as np
-
-# Initialize convergence tester
-tester = ConvergenceTester()
-
-# Test convergence with different grid sizes
-grid_sizes = [50, 100, 200, 400, 800]
-alpha = 0.5
-
-def test_function(t):
-    return np.sin(t)
-
-# Run convergence test
-convergence_rate = tester.test_convergence(
-    test_function, alpha, grid_sizes, method="caputo"
+from hpfracc.ml.adjoint_optimization import (
+    MemoryEfficientFractionalNetwork, 
+    AdjointConfig
 )
 
-print(f"Convergence rate: {convergence_rate:.3f}")
+# Configure adjoint optimization
+adjoint_config = AdjointConfig(
+    use_adjoint=True,
+    memory_efficient=True,
+    checkpoint_frequency=5,
+    gradient_accumulation=True,
+    accumulation_steps=4
+)
+
+# Create optimized network
+net = MemoryEfficientFractionalNetwork(
+    input_size=100,
+    hidden_sizes=[512, 256, 128, 64],
+    output_size=10,
+    fractional_order=0.5,
+    adjoint_config=adjoint_config
+)
+```
+
+### Training with Fractional Optimizers
+
+```python
+import torch.nn as nn
+from hpfracc.ml import FractionalAdam, FractionalMSELoss
+
+# Loss function with fractional derivatives
+loss_fn = FractionalMSELoss(fractional_order=0.5, method="RL")
+
+# Optimizer with fractional gradient updates
+optimizer = FractionalAdam(
+    net.parameters(),
+    lr=0.001,
+    fractional_order=0.5,
+    method="RL"
+)
+
+# Training loop
+net.train()
+for epoch in range(100):
+    optimizer.zero_grad()
+    
+    # Forward pass
+    output = net(x)
+    loss = loss_fn(output, target)
+    
+    # Backward pass
+    loss.backward()
+    
+    # Update with fractional gradients
+    optimizer.step()
+    
+    if epoch % 10 == 0:
+        print(f"Epoch {epoch}, Loss: {loss.item():.4f}")
+```
+
+### Using Fractional Layers
+
+#### Convolutional Layers
+```python
+from hpfracc.ml.layers import FractionalConv1D, FractionalConv2D, LayerConfig
+from hpfracc.core.definitions import FractionalOrder
+
+# Configure layer
+config = LayerConfig(
+    fractional_order=FractionalOrder(0.5),
+    method="RL",
+    use_fractional=True,
+    activation="relu",
+    dropout=0.1
+)
+
+# 1D convolution
+conv1d = FractionalConv1D(
+    in_channels=64,
+    out_channels=128,
+    kernel_size=3,
+    config=config
+)
+
+# 2D convolution
+conv2d = FractionalConv2D(
+    in_channels=64,
+    out_channels=128,
+    kernel_size=3,
+    config=config
+)
+```
+
+#### Transformer Layer
+```python
+from hpfracc.ml.layers import FractionalTransformer
+
+transformer = FractionalTransformer(
+    d_model=512,
+    nhead=8,
+    num_encoder_layers=6,
+    num_decoder_layers=6,
+    dim_feedforward=2048,
+    dropout=0.1,
+    config=config
+)
+
+# Encoder-only mode (single input)
+x = torch.randn(32, 100, 512)  # (batch, seq_len, d_model)
+output = transformer(x)  # No target needed
+
+# Full transformer mode (encoder-decoder)
+src = torch.randn(32, 100, 512)
+tgt = torch.randn(32, 50, 512)
+output = transformer(src, tgt)
 ```
 
 ---
 
 ## Performance Optimization
 
-### Memory Management
+### Adjoint Method Benefits
+
+The adjoint method provides significant performance improvements:
+
+- **Training Speed**: Up to 19.7x faster training
+- **Memory Usage**: Up to 81% reduction in memory consumption
+- **Scalability**: Better performance on large models
+
+### Configuration Options
 
 ```python
-from src.utils.memory_management import MemoryManager, CacheManager
+from hpfracc.ml.adjoint_optimization import AdjointConfig
 
-# Initialize memory manager
-memory_manager = MemoryManager()
-cache_manager = CacheManager()
-
-# Monitor memory usage
-initial_memory = memory_manager.get_current_memory_usage()
-print(f"Initial memory: {initial_memory:.2f} MB")
-
-# Large computation
-t = np.linspace(0.1, 10.0, 50000)
-f = np.sin(t)
-
-from src.algorithms.optimized_methods import OptimizedCaputo
-caputo = OptimizedCaputo(0.5)
-result = caputo.compute(f, t, t[1] - t[0])
-
-# Check memory after computation
-final_memory = memory_manager.get_current_memory_usage()
-print(f"Final memory: {final_memory:.2f} MB")
-print(f"Memory increase: {final_memory - initial_memory:.2f} MB")
-
-# Clear cache if needed
-cache_manager.clear_cache()
-```
-
-### Benchmarking
-
-```python
-from src.validation.benchmarks import BenchmarkSuite
-import numpy as np
-
-# Initialize benchmark suite
-benchmark_suite = BenchmarkSuite()
-
-# Define test function
-def test_function(t):
-    return np.sin(t) + np.cos(2*t)
-
-# Run comprehensive benchmark
-results = benchmark_suite.run_comprehensive_benchmark(
-    test_function, alpha=0.5, grid_sizes=[100, 500, 1000]
+# Memory optimization
+memory_config = AdjointConfig(
+    use_adjoint=True,
+    memory_efficient=True,
+    checkpoint_frequency=5
 )
 
-print("Benchmark Results:")
-for method, metrics in results.items():
-    print(f"{method}: {metrics}")
+# Gradient accumulation
+accumulation_config = AdjointConfig(
+    use_adjoint=True,
+    gradient_accumulation=True,
+    accumulation_steps=8
+)
+
+# Balanced configuration
+balanced_config = AdjointConfig(
+    use_adjoint=True,
+    memory_efficient=True,
+    checkpoint_frequency=3,
+    gradient_accumulation=True,
+    accumulation_steps=4
+)
+```
+
+### When to Use Adjoint Optimization
+
+- **Use adjoint optimization when**:
+  - Training large models (>100M parameters)
+  - Limited GPU memory
+  - Need faster training times
+  - Working with long sequences
+
+- **Stick with standard methods when**:
+  - Small models (<10M parameters)
+  - Sufficient memory available
+  - Need maximum numerical precision
+  - Debugging or prototyping
+
+---
+
+## Production Workflow
+
+### Model Registry Setup
+
+```python
+from hpfracc.ml import ModelRegistry, ModelValidator
+from hpfracc.ml.workflow import DevelopmentWorkflow, ProductionWorkflow
+
+# Initialize components
+registry = ModelRegistry()
+validator = ModelValidator()
+dev_workflow = DevelopmentWorkflow(registry, validator)
+prod_workflow = ProductionWorkflow(registry, validator)
+```
+
+### Development Phase
+
+```python
+# Train and validate model
+validation_results = dev_workflow.train_model(
+    model=net,
+    train_data=(X_train, y_train),
+    val_data=(X_val, y_val),
+    epochs=100
+)
+
+# Run quality gates
+quality_result = dev_workflow.run_quality_gates(
+    model_id=model_id,
+    validation_results=validation_results
+)
+
+if quality_result["passed"]:
+    print("Model passed quality gates!")
+else:
+    print(f"Quality gate failed: {quality_result['reason']}")
+```
+
+### Production Deployment
+
+```python
+# Promote to production
+promotion_result = prod_workflow.promote_to_production(
+    model_id=model_id,
+    version="1.0.0",
+    test_data=X_test,
+    test_labels=y_test,
+    custom_metrics={},
+    force=False
+)
+
+if promotion_result["promoted"]:
+    print("Model promoted to production!")
+    
+    # Deploy model
+    deployment_result = prod_workflow.deploy_model(
+        model_id=model_id,
+        version="1.0.0",
+        deployment_config={"environment": "production"}
+    )
+else:
+    print(f"Promotion failed: {promotion_result['reason']}")
+```
+
+### Monitoring Production Models
+
+```python
+# Monitor model performance
+prod_workflow.monitor_model(
+    model_id=model_id,
+    metrics={
+        "accuracy": 0.95,
+        "latency": 0.1,
+        "throughput": 1000
+    }
+)
+
+# Get production model
+production_model = registry.reconstruct_model(model_id, "1.0.0")
+production_model.eval()
+
+# Run inference
+with torch.no_grad():
+    predictions = production_model(X_new)
 ```
 
 ---
 
-## Error Analysis and Validation
+## Benchmarking
 
-### Validation Against Analytical Solutions
+### Performance Benchmarking
 
 ```python
-from src.validation.analytical_solutions import AnalyticalSolutions
-import numpy as np
+from hpfracc.benchmarks import MLPerformanceBenchmark
 
-# Initialize analytical solutions
-analytical = AnalyticalSolutions()
-
-# Test with power function
-t = np.linspace(0.1, 2.0, 100)
-f = t**2
-
-# Get analytical solution
-analytical_result = analytical.power_function_derivative(t, 2, 0.5)
-
-# Compare with numerical result
-from src.algorithms.optimized_methods import OptimizedCaputo
-caputo = OptimizedCaputo(0.5)
-numerical_result = caputo.compute(f, t, t[1] - t[0])
-
-# Validate
-from src.validation import validate_against_analytical
-validation_result = validate_against_analytical(
-    numerical_result, analytical_result, tolerance=1e-6
+# Initialize benchmark
+benchmark = MLPerformanceBenchmark(
+    device="cuda",
+    num_runs=10,
+    warmup_runs=3
 )
 
-print(f"Validation passed: {validation_result}")
-```
-
-### Convergence Study
-
-```python
-from src.validation.convergence_tests import run_convergence_study
-import numpy as np
-
-# Define test function
-def test_function(t):
-    return np.exp(-t)
-
-# Run convergence study
-grid_sizes = [50, 100, 200, 400, 800]
-convergence_results = run_convergence_study(
-    test_function, alpha=0.5, grid_sizes=grid_sizes
+# Benchmark neural networks
+network_results = benchmark.benchmark_fractional_networks(
+    input_sizes=[50, 100, 200],
+    hidden_sizes_list=[[128, 64], [256, 128, 64]],
+    fractional_orders=[0.1, 0.5, 0.9],
+    methods=["RL", "Caputo"]
 )
 
-print("Convergence Study Results:")
-for method, rate in convergence_results.items():
-    print(f"{method}: {rate:.3f}")
-```
-
----
-
-## Visualization
-
-### Basic Plotting
-
-```python
-from src.utils.plotting import PlotManager
-import numpy as np
-import matplotlib.pyplot as plt
-
-# Initialize plot manager
-plot_manager = PlotManager()
-plot_manager.setup_plotting_style()
-
-# Generate data
-t = np.linspace(0.1, 2*np.pi, 100)
-f = np.sin(t)
-
-# Compute derivatives
-from src.algorithms.optimized_methods import OptimizedCaputo
-caputo = OptimizedCaputo(0.5)
-result = caputo.compute(f, t, t[1] - t[0])
-
-# Create comparison plot
-fig, ax = plot_manager.create_comparison_plot(
-    t, [f, result], 
-    labels=['Original Function', 'Caputo Derivative (α=0.5)'],
-    title='Fractional Derivative Example'
+# Benchmark attention mechanisms
+attention_results = benchmark.benchmark_fractional_attention(
+    batch_sizes=[16, 32, 64],
+    seq_lengths=[100, 200],
+    d_models=[256, 512],
+    fractional_orders=[0.1, 0.5, 0.9],
+    methods=["RL", "Caputo"]
 )
 
-plt.show()
+# Generate comprehensive report
+benchmark.generate_report("benchmark_results")
 ```
 
-### Error Analysis Plots
+### Interpreting Results
+
+The benchmark generates several metrics:
+
+- **Execution Time**: Wall-clock time for operations
+- **Memory Usage**: Peak memory consumption
+- **Throughput**: Samples processed per second
+- **Speedup**: Performance improvement over baseline
+
+### Performance Comparison
 
 ```python
-from src.utils.plotting import plot_error_analysis
-import numpy as np
+# Compare standard vs. adjoint methods
+standard_time = network_results["standard"]["execution_time"]
+adjoint_time = network_results["adjoint"]["execution_time"]
 
-# Generate error data
-grid_sizes = [50, 100, 200, 400, 800]
-errors = []
+speedup = standard_time / adjoint_time
+print(f"Adjoint method is {speedup:.1f}x faster")
 
-for n in grid_sizes:
-    t = np.linspace(0.1, 2.0, n)
-    f = t**2
-    
-    from src.algorithms.optimized_methods import OptimizedCaputo
-    caputo = OptimizedCaputo(0.5)
-    numerical = caputo.compute(f, t, t[1] - t[0])
-    
-    # Analytical solution
-    import scipy.special as sp
-    analytical = sp.gamma(3) / sp.gamma(2.5) * t**1.5
-    
-    # Compute error
-    from src.utils.error_analysis import ErrorAnalyzer
-    analyzer = ErrorAnalyzer()
-    error = analyzer.l2_error(numerical, analytical)
-    errors.append(error)
-
-# Plot error analysis
-plot_error_analysis(grid_sizes, errors, title='Convergence Analysis')
-plt.show()
-```
-
----
-
-## Best Practices
-
-### 1. Choose Appropriate Methods
-
-```python
-# For initial value problems: Use Caputo
-from src.algorithms.optimized_methods import OptimizedCaputo
-
-# For boundary value problems: Use Riemann-Liouville
-from src.algorithms.optimized_methods import OptimizedRiemannLiouville
-
-# For high-order derivatives: Use Grünwald-Letnikov
-from src.algorithms.optimized_methods import OptimizedGrunwaldLetnikov
-```
-
-### 2. Grid Size Selection
-
-```python
-# Rule of thumb: Use at least 100 points for basic accuracy
-# For high precision: Use 1000+ points
-# For convergence studies: Use multiple grid sizes
-
-grid_sizes = [100, 500, 1000, 2000]  # Good for convergence analysis
-```
-
-### 3. Error Control
-
-```python
-# Always validate against analytical solutions when possible
-# Use error analysis tools for numerical validation
-# Monitor convergence rates
-
-from src.utils.error_analysis import ErrorAnalyzer
-analyzer = ErrorAnalyzer()
-
-# Check multiple error metrics
-absolute_error = analyzer.absolute_error(numerical, analytical)
-relative_error = analyzer.relative_error(numerical, analytical)
-l2_error = analyzer.l2_error(numerical, analytical)
-```
-
-### 4. Performance Optimization
-
-```python
-# Use JAX for large-scale computations
-# Enable parallel processing for multiple computations
-# Monitor memory usage for large datasets
-
-# For GPU acceleration
-import jax
-if jax.devices('gpu'):
-    # Use JAX implementations
-    pass
-
-# For parallel processing
-from src.optimisation.parallel_computing import ParallelComputingManager
-parallel_manager = ParallelComputingManager()
+memory_reduction = (
+    (network_results["standard"]["memory_usage"] - 
+     network_results["adjoint"]["memory_usage"]) / 
+    network_results["standard"]["memory_usage"] * 100
+)
+print(f"Memory usage reduced by {memory_reduction:.1f}%")
 ```
 
 ---
@@ -596,69 +472,85 @@ parallel_manager = ParallelComputingManager()
 
 ### Common Issues
 
-#### Issue 1: Slow Performance
-**Problem**: Computations are taking too long
-
-**Solutions**:
+#### 1. Fractional Order Range Errors
 ```python
-# Use JAX acceleration
-from src.optimisation.jax_implementations import JAXOptimizer
-
-# Use parallel processing
-from src.optimisation.parallel_computing import ParallelComputingManager
-
-# Reduce grid size for initial testing
-t = np.linspace(0.1, 2.0, 100)  # Start with smaller grid
+# Error: "L1 scheme requires 0 < α < 1"
+# Solution: Use valid range for Caputo method
+result = fractional_derivative(x, alpha=0.5, method="Caputo")  # Valid
+# result = fractional_derivative(x, alpha=1.0, method="Caputo")  # Invalid
 ```
 
-#### Issue 2: Memory Errors
-**Problem**: Out of memory errors
-
-**Solutions**:
+#### 2. Tensor Shape Mismatches
 ```python
-# Monitor memory usage
-from src.utils.memory_management import MemoryManager
-memory_manager = MemoryManager()
-
-# Clear cache
-from src.utils.memory_management import CacheManager
-cache_manager = CacheManager()
-cache_manager.clear_cache()
-
-# Use smaller datasets
-t = np.linspace(0.1, 2.0, 1000)  # Reduce grid size
+# Error: "mat1 and mat2 shapes cannot be multiplied"
+# Solution: Ensure input dimensions match network architecture
+net = FractionalNeuralNetwork(input_size=100, ...)
+x = torch.randn(32, 100)  # batch_size=32, input_size=100
+output = net(x)
 ```
 
-#### Issue 3: Inaccurate Results
-**Problem**: Results don't match expected values
-
-**Solutions**:
+#### 3. Memory Issues
 ```python
-# Validate against analytical solutions
-from src.validation.analytical_solutions import AnalyticalSolutions
-
-# Check convergence
-from src.validation.convergence_tests import ConvergenceTester
-
-# Use different numerical methods
-caputo_trap = OptimizedCaputo(alpha, method="trapezoidal")
-caputo_simp = OptimizedCaputo(alpha, method="simpson")
+# Error: "CUDA out of memory"
+# Solution: Use adjoint optimization
+adjoint_config = AdjointConfig(
+    use_adjoint=True,
+    memory_efficient=True,
+    checkpoint_frequency=3
+)
+net = MemoryEfficientFractionalNetwork(..., adjoint_config=adjoint_config)
 ```
 
-#### Issue 4: Import Errors
-**Problem**: Module not found errors
+#### 4. Optimizer Not Updating Parameters
+```python
+# Issue: Parameters not updating during training
+# Solution: Ensure proper gradient flow
+optimizer.zero_grad()
+loss.backward()
+optimizer.step()
 
-**Solutions**:
-```bash
-# Reinstall the library
-pip install -e .
-
-# Check Python path
-python -c "import sys; print(sys.path)"
-
-# Verify installation
-python scripts/run_tests.py --type fast
+# Check gradients
+for param in net.parameters():
+    if param.grad is not None:
+        print(f"Gradient norm: {param.grad.norm()}")
 ```
+
+### Debugging Tips
+
+1. **Check Tensor Shapes**: Print shapes at each step
+2. **Verify Gradients**: Ensure gradients are computed and non-zero
+3. **Monitor Memory**: Use `torch.cuda.memory_summary()` for GPU memory
+4. **Test Components**: Test individual layers before full network
+5. **Use Small Data**: Start with small datasets for debugging
+
+### Getting Help
+
+- **Documentation**: Check the API reference for detailed information
+- **Examples**: Review the examples directory for working code
+- **Issues**: Report bugs on the GitHub repository
+- **Community**: Join discussions in the project forum
+
+---
+
+## Best Practices
+
+### Code Organization
+1. **Separate Concerns**: Keep data loading, model definition, and training separate
+2. **Configuration Files**: Use configuration files for hyperparameters
+3. **Logging**: Implement proper logging for experiments
+4. **Version Control**: Use git for model and code versioning
+
+### Performance
+1. **Profile First**: Benchmark before optimization
+2. **Use Adjoint**: Enable adjoint optimization for large models
+3. **Batch Processing**: Use appropriate batch sizes
+4. **Memory Management**: Monitor and optimize memory usage
+
+### Production
+1. **Quality Gates**: Always run quality gates before deployment
+2. **Monitoring**: Implement continuous monitoring
+3. **Rollback Plan**: Have rollback strategies ready
+4. **Documentation**: Document all production models
 
 ---
 
@@ -666,12 +558,9 @@ python scripts/run_tests.py --type fast
 
 After mastering the basics:
 
-1. **Explore Advanced Features**: Try GPU acceleration and parallel computing
-2. **Study Examples**: Check the `examples/` directory for more complex use cases
-3. **Read API Documentation**: Detailed API reference in `docs/api_reference/`
-4. **Contribute**: Join the development community
-5. **Research Applications**: Apply to your specific domain
+1. **Advanced Architectures**: Experiment with custom fractional layers
+2. **Research**: Explore novel fractional derivative methods
+3. **Applications**: Apply to your specific domain problems
+4. **Contributions**: Contribute to the library development
 
----
-
-**Note**: This user guide covers the most common use cases. For advanced features and detailed API documentation, refer to the [API Reference](api_reference/) and [Examples](examples/).
+The HPFRACC library provides a solid foundation for fractional calculus in machine learning. Start simple, experiment, and gradually explore more advanced features as you become comfortable with the basics.

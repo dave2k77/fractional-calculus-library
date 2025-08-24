@@ -10,11 +10,11 @@ import numpy as np
 from unittest.mock import Mock, patch
 import warnings
 
-from src.solvers.ode_solvers import (
+from hpfracc.solvers.ode_solvers import (
     FractionalODESolver,
     AdaptiveFractionalODESolver,
 )
-from src.core.definitions import FractionalOrder
+from hpfracc.core.definitions import FractionalOrder
 
 
 class TestFractionalODESolver:

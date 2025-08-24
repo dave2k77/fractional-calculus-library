@@ -16,7 +16,7 @@ import os
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
 
 # Updated imports for consolidated structure
-from src.algorithms.gpu_optimized_methods import (
+from hpfracc.algorithms.gpu_optimized_methods import (
     GPUOptimizedCaputo,
     GPUOptimizedRiemannLiouville,
     GPUOptimizedGrunwaldLetnikov,

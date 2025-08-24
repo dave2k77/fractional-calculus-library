@@ -6,8 +6,8 @@ This module tests the FractionalMellinTransform class and its methods.
 
 import pytest
 import numpy as np
-from src.algorithms.special_methods import FractionalMellinTransform, fractional_mellin_transform
-from src.core.definitions import FractionalOrder
+from hpfracc.algorithms.special_methods import FractionalMellinTransform, fractional_mellin_transform
+from hpfracc.core.definitions import FractionalOrder
 
 
 class TestFractionalMellinTransform:
@@ -23,8 +23,8 @@ class TestFractionalMellinTransform:
         fmt = FractionalMellinTransform(FractionalOrder(1.0))
         assert fmt.alpha_val == 1.0
         
-        # Test with negative alpha (should warn but not fail)
-        with pytest.warns(UserWarning):
+        # Test with negative alpha (should raise ValueError)
+        with pytest.raises(ValueError, match="Fractional order must be non-negative"):
             fmt = FractionalMellinTransform(-0.1)
     
     def test_numerical_method(self):

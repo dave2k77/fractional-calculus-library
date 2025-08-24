@@ -10,7 +10,7 @@ import numpy as np
 import time
 from typing import Callable
 
-from src.algorithms.special_optimized_methods import (
+from hpfracc.algorithms.special_optimized_methods import (
     SpecialOptimizedWeylDerivative,
     SpecialOptimizedMarchaudDerivative,
     SpecialOptimizedReizFellerDerivative,
@@ -21,13 +21,13 @@ from src.algorithms.special_optimized_methods import (
     unified_special_derivative,
 )
 
-from src.algorithms.advanced_methods import (
+from hpfracc.algorithms.advanced_methods import (
     WeylDerivative,
     MarchaudDerivative,
     ReizFellerDerivative,
 )
 
-from src.core.definitions import FractionalOrder
+from hpfracc.core.definitions import FractionalOrder
 
 
 class TestSpecialOptimizedWeylDerivative:

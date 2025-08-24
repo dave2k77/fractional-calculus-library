@@ -10,12 +10,12 @@ import numpy as np
 from unittest.mock import Mock, patch
 import warnings
 
-from src.solvers.predictor_corrector import (
+from hpfracc.solvers.predictor_corrector import (
     PredictorCorrectorSolver,
     AdamsBashforthMoultonSolver,
     VariableStepPredictorCorrector,
 )
-from src.core.definitions import FractionalOrder
+from hpfracc.core.definitions import FractionalOrder
 
 
 class TestPredictorCorrectorSolver:

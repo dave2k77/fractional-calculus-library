@@ -15,7 +15,7 @@ from scipy import special
 import time
 
 # Import our special methods
-from src.algorithms.special_methods import (
+from hpfracc.algorithms.special_methods import (
     FractionalLaplacian,
     FractionalFourierTransform,
     FractionalZTransform,
