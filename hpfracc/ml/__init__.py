@@ -1,93 +1,62 @@
 """
-Machine Learning Integration Module for hpfracc
+Machine Learning Integration for Fractional Calculus
 
-This module provides comprehensive ML integration for fractional calculus,
-including neural networks, attention mechanisms, loss functions, optimizers,
-and a complete development-to-production workflow.
+This module provides comprehensive ML components that integrate fractional calculus
+with neural networks, including:
 
-Features:
-- Fractional Neural Networks with various architectures
-- Fractional Graph Neural Networks (GNNs) with multi-backend support
-- Fractional Attention Mechanisms
-- Fractional Loss Functions
-- Fractional Optimizers
-- Multi-backend support (PyTorch, JAX, NUMBA)
-- Model Registry and Versioning
-- Development vs. Production Workflow
-- Quality Gates and Validation
-- Model Monitoring and Rollback
-- Fractional Neural Network Layers
-- PyTorch Autograd Integration for Fractional Derivatives
+- **Core Neural Networks**: FractionalNeuralNetwork, FractionalAttention
+- **Neural Network Layers**: FractionalConv1D, FractionalConv2D, FractionalLSTM, FractionalTransformer, FractionalPooling, FractionalBatchNorm1d
+- **Loss Functions**: FractionalMSELoss, FractionalCrossEntropyLoss, FractionalHuberLoss, and more
+- **Optimizers**: FractionalAdam, FractionalSGD, FractionalRMSprop, FractionalAdagrad, FractionalAdamW
+- **Fractional Graph Neural Networks (GNNs) with multi-backend support**
+- **Multi-backend support (PyTorch, JAX, NUMBA)**
+- **Backend Management System**: BackendManager, BackendType, unified tensor operations
+- **Unified Tensor Operations**: Cross-backend tensor manipulations
 """
 
-from .core import (
-    FractionalNeuralNetwork,
-    FractionalAttention,
-    FractionalLossFunction,
-    FractionalAutoML,
-    MLConfig,
-)
-
+# Backend Management System
 from .backends import (
     BackendManager,
     BackendType,
     get_backend_manager,
     set_backend_manager,
     get_active_backend,
-    switch_backend,
+    switch_backend
 )
 
+# Unified Tensor Operations
 from .tensor_ops import (
     TensorOps,
     get_tensor_ops,
-    create_tensor,
+    create_tensor
 )
 
-from .registry import (
-    ModelRegistry,
-    ModelVersion,
-    ModelMetadata,
-    DeploymentStatus,
+# Core ML Components
+from .core import (
+    MLConfig,
+    FractionalNeuralNetwork,
+    FractionalAttention,
+    FractionalLossFunction,
+    FractionalMSELoss,
+    FractionalCrossEntropyLoss,
+    FractionalAutoML
 )
 
-from .workflow import (
-    DevelopmentWorkflow,
-    ProductionWorkflow,
-    ModelValidator,
-    QualityGate,
-    QualityMetric,
-    QualityThreshold,
-)
-
+# Neural Network Layers
 from .layers import (
+    LayerConfig,
     FractionalConv1D,
     FractionalConv2D,
     FractionalLSTM,
     FractionalTransformer,
     FractionalPooling,
-    FractionalBatchNorm1d,
-    LayerConfig,
+    FractionalBatchNorm1d
 )
 
-from .gnn_layers import (
-    BaseFractionalGNNLayer,
-    FractionalGraphConv,
-    FractionalGraphAttention,
-    FractionalGraphPooling,
-)
-
-from .gnn_models import (
-    BaseFractionalGNN,
-    FractionalGCN,
-    FractionalGAT,
-    FractionalGraphSAGE,
-    FractionalGraphUNet,
-    FractionalGNNFactory,
-)
-
+# Loss Functions
 from .losses import (
-    FractionalMSELoss,
-    FractionalCrossEntropyLoss,
+    FractionalMSELoss as FractionalMSELoss,
+    FractionalCrossEntropyLoss as FractionalCrossEntropyLoss,
     FractionalHuberLoss,
     FractionalSmoothL1Loss,
     FractionalKLDivLoss,
@@ -100,115 +69,105 @@ from .losses import (
     FractionalTripletMarginLoss,
     FractionalCTCLoss,
     FractionalCustomLoss,
-    FractionalCombinedLoss,
+    FractionalCombinedLoss
 )
 
+# Optimizers
 from .optimizers import (
+    FractionalOptimizer,
     FractionalAdam,
     FractionalSGD,
     FractionalRMSprop,
     FractionalAdagrad,
-    FractionalAdamW,
+    FractionalAdamW
 )
 
-from .fractional_autograd import (
-    FractionalDerivativeFunction,
-    FractionalDerivativeLayer,
-    fractional_derivative,
-    rl_derivative,
-    caputo_derivative,
-    gl_derivative,
+# Fractional Graph Neural Network Components
+from .gnn_layers import (
+    BaseFractionalGNNLayer,
+    FractionalGraphConv,
+    FractionalGraphAttention,
+    FractionalGraphPooling
 )
 
+from .gnn_models import (
+    BaseFractionalGNN,
+    FractionalGCN,
+    FractionalGAT,
+    FractionalGraphSAGE,
+    FractionalGraphUNet,
+    FractionalGNNFactory
+)
+
+# Export all components
 __all__ = [
-    # Core ML components
-    "FractionalNeuralNetwork",
-    "FractionalAttention", 
-    "FractionalLossFunction",
-    "FractionalAutoML",
-    "MLConfig",
+    # Backend Management
+    'BackendManager',
+    'BackendType',
+    'get_backend_manager',
+    'set_backend_manager',
+    'get_active_backend',
+    'switch_backend',
     
-    # Backend management
-    "BackendManager",
-    "BackendType",
-    "get_backend_manager",
-    "set_backend_manager",
-    "get_active_backend",
-    "switch_backend",
+    # Tensor Operations
+    'TensorOps',
+    'get_tensor_ops',
+    'create_tensor',
     
-    # Tensor operations
-    "TensorOps",
-    "get_tensor_ops",
-    "create_tensor",
+    # Core ML Components
+    'MLConfig',
+    'FractionalNeuralNetwork',
+    'FractionalAttention',
+    'FractionalLossFunction',
+    'FractionalMSELoss',
+    'FractionalCrossEntropyLoss',
+    'FractionalAutoML',
     
-    # Model management
-    "ModelRegistry",
-    "ModelVersion",
-    "ModelMetadata",
-    "DeploymentStatus",
+    # Neural Network Layers
+    'LayerConfig',
+    'FractionalConv1D',
+    'FractionalConv2D',
+    'FractionalLSTM',
+    'FractionalTransformer',
+    'FractionalPooling',
+    'FractionalBatchNorm1d',
     
-    # Workflow management
-    "DevelopmentWorkflow",
-    "ProductionWorkflow",
-    "ModelValidator",
-    "QualityGate",
-    "QualityMetric",
-    "QualityThreshold",
-    
-    # Neural network layers
-    "FractionalConv1D",
-    "FractionalConv2D",
-    "FractionalLSTM",
-    "FractionalTransformer",
-    "FractionalPooling",
-    "FractionalBatchNorm1d",
-    "LayerConfig",
-    
-    # Graph Neural Network layers
-    "BaseFractionalGNNLayer",
-    "FractionalGraphConv",
-    "FractionalGraphAttention",
-    "FractionalGraphPooling",
-    
-    # Graph Neural Network models
-    "BaseFractionalGNN",
-    "FractionalGCN",
-    "FractionalGAT",
-    "FractionalGraphSAGE",
-    "FractionalGraphUNet",
-    "FractionalGNNFactory",
-    
-    # Loss functions
-    "FractionalMSELoss",
-    "FractionalCrossEntropyLoss",
-    "FractionalHuberLoss",
-    "FractionalSmoothL1Loss",
-    "FractionalKLDivLoss",
-    "FractionalBCELoss",
-    "FractionalNLLLoss",
-    "FractionalPoissonNLLLoss",
-    "FractionalCosineEmbeddingLoss",
-    "FractionalMarginRankingLoss",
-    "FractionalMultiMarginLoss",
-    "FractionalTripletMarginLoss",
-    "FractionalCTCLoss",
-    "FractionalCustomLoss",
-    "FractionalCombinedLoss",
+    # Loss Functions
+    'FractionalMSELoss',
+    'FractionalCrossEntropyLoss',
+    'FractionalHuberLoss',
+    'FractionalSmoothL1Loss',
+    'FractionalKLDivLoss',
+    'FractionalBCELoss',
+    'FractionalNLLLoss',
+    'FractionalPoissonNLLLoss',
+    'FractionalCosineEmbeddingLoss',
+    'FractionalMarginRankingLoss',
+    'FractionalMultiMarginLoss',
+    'FractionalTripletMarginLoss',
+    'FractionalCTCLoss',
+    'FractionalCustomLoss',
+    'FractionalCombinedLoss',
     
     # Optimizers
-    "FractionalAdam",
-    "FractionalSGD",
-    "FractionalRMSprop",
-    "FractionalAdagrad",
-    "FractionalAdamW",
+    'FractionalOptimizer',
+    'FractionalAdam',
+    'FractionalSGD',
+    'FractionalRMSprop',
+    'FractionalAdagrad',
+    'FractionalAdamW',
     
-    # Autograd integration
-    "FractionalDerivativeFunction",
-    "FractionalDerivativeLayer",
-    "fractional_derivative",
-    "rl_derivative",
-    "caputo_derivative",
-    "gl_derivative",
+    # Fractional GNN Components
+    'BaseFractionalGNNLayer',
+    'FractionalGraphConv',
+    'FractionalGraphAttention',
+    'FractionalGraphPooling',
+    'BaseFractionalGNN',
+    'FractionalGCN',
+    'FractionalGAT',
+    'FractionalGraphSAGE',
+    'FractionalGraphUNet',
+    'FractionalGNNFactory'
 ]
 
 __version__ = "0.1.0"

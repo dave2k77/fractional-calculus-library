@@ -1,8 +1,9 @@
 # HPFRACC - High-Performance Fractional Calculus Library
 
-[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
-[![PyTorch 2.0+](https://img.shields.io/badge/pytorch-2.0+-red.svg)](https://pytorch.org/)
+[![PyPI version](https://badge.fury.io/py/hpfracc.svg)](https://badge.fury.io/py/hpfracc)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![Documentation](https://img.shields.io/badge/docs-latest-brightgreen.svg)](https://hpfracc.readthedocs.io/)
 
 ## 👨‍💻 **Author & Developer**
 
@@ -12,302 +13,155 @@ University of Reading
 Email: [d.r.chin@pgr.reading.ac.uk](mailto:d.r.chin@pgr.reading.ac.uk)  
 GitHub: [@dave2k77](https://github.com/dave2k77)
 
----
+## 🚀 **Overview**
 
-**HPFRACC** is a cutting-edge Python library that brings the power of fractional calculus to modern machine learning. Built on PyTorch, it provides high-performance implementations of fractional derivatives, neural networks, and production-ready ML workflows.
+HPFRACC (High-Performance Fractional Calculus Library) is a comprehensive Python library that provides high-performance implementations of fractional calculus operations, advanced numerical methods, and machine learning integration with fractional derivatives.
 
-## 🚀 **Key Features**
+## ✨ **Key Features**
 
-### **Performance Optimization**
-- **19.7x Training Speedup** with adjoint method optimization
-- **81% Memory Reduction** for large models
-- **GPU Acceleration** with CUDA support
-- **Memory-Efficient Training** with gradient checkpointing
+### 🔬 **Core Fractional Calculus**
+- **Multiple Definitions**: Riemann-Liouville, Caputo, Grünwald-Letnikov, and more
+- **High-Performance Algorithms**: Optimized implementations for speed and accuracy
+- **GPU Acceleration**: CUDA support for large-scale computations
+- **Advanced Methods**: Mellin transforms, fractional differential equations, and special functions
 
-### **Fractional Calculus**
-- **Multiple Derivative Methods**: Riemann-Liouville, Caputo, Grünwald-Letnikov, Weyl, Marchaud, Hadamard
-- **PyTorch Integration**: Seamless autograd support
-- **Validated Implementations**: Rigorous mathematical foundations
-- **Performance Optimized**: FFT-based and numerical methods
+### 🤖 **Machine Learning Integration**
+- **Multi-Backend Support**: Seamless integration with PyTorch, JAX, and NUMBA
+- **Fractional Neural Networks**: Core networks with fractional calculus integration
+- **Fractional Attention Mechanisms**: Multi-head attention with fractional derivatives
+- **Graph Neural Networks**: Fractional GNN architectures for graph learning tasks
+- **Comprehensive ML Components**: Loss functions, optimizers, and layers (in development)
 
-### **Machine Learning Integration**
-- **Fractional Neural Networks**: Standard and memory-efficient architectures
-- **Advanced Layers**: Convolutional, LSTM, Transformer with fractional derivatives
-- **Fractional Optimizers**: Adam, SGD, RMSprop with fractional gradient updates
-- **Production Workflows**: Development-to-production ML pipeline
+### 🎯 **Performance & Usability**
+- **Cross-Platform**: Windows, macOS, and Linux support
+- **Extensive Documentation**: Comprehensive guides and examples
+- **Active Development**: Regular updates and improvements
+- **Research-Ready**: Designed for academic and industrial applications
 
-### **Production Ready**
-- **Model Registry**: Comprehensive versioning and metadata tracking
-- **Quality Gates**: Automated validation and testing
-- **Monitoring**: Continuous performance and reliability tracking
-- **Deployment**: Streamlined production deployment
+## 🏗️ **Architecture**
 
-## 📊 **Performance Benchmarks**
+### **Multi-Backend Support**
+HPFRACC provides a unified interface across multiple computation backends:
 
-Our adjoint method optimization delivers exceptional performance improvements:
+- **PyTorch**: Full-featured deep learning with GPU acceleration
+- **JAX**: High-performance numerical computing with automatic differentiation
+- **NUMBA**: JIT compilation for CPU optimization
 
-| Metric | Standard Method | Adjoint Method | Improvement |
-|--------|----------------|----------------|-------------|
-| **Training Speed** | 1.0x | **19.7x** | 🚀 **19.7x faster** |
-| **Memory Usage** | 100% | **19%** | 💾 **81% reduction** |
-| **Throughput** | 2,746 samples/s | **6,511 samples/s** | ⚡ **2.4x higher** |
+### **Core Components**
+- **Backend Management**: Automatic detection and seamless switching between backends
+- **Unified Tensor Operations**: Consistent API across all backends
+- **Fractional Calculus Integration**: Built-in fractional derivatives in all ML components
 
-## 🏗️ **Architecture Overview**
+## 📦 **Installation**
 
+### **Basic Installation**
+```bash
+pip install hpfracc
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    HPFRACC Library                          │
-├─────────────────────────────────────────────────────────────┤
-│  Core Module  │  ML Module  │  Benchmarks  │  Analytics   │
-│  ┌─────────┐  │  ┌─────────┐ │  ┌─────────┐ │  ┌─────────┐ │
-│  │Fractional│  │  │Neural   │ │  │Performance│ │  │Usage    │ │
-│  │Derivatives│  │  │Networks │ │  │Benchmarks│ │  │Analytics│ │
-│  │Optimized │  │  │Layers   │ │  │Memory   │ │  │Error    │ │
-│  │Methods   │  │  │Optimizers│ │  │Profiling│ │  │Analysis │ │
-│  └─────────┘  │  └─────────┘ │  └─────────┘ │  └─────────┘ │
-├─────────────────────────────────────────────────────────────┤
-│                    Production ML Workflow                   │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐        │
-│  │ Development │  │  Validation │  │ Production  │        │
-│  │  Training   │  │ Quality     │  │ Deployment  │        │
-│  │  Experiment │  │   Gates     │  │ Monitoring  │        │
-│  └─────────────┘  └─────────────┘  └─────────────┘        │
-└─────────────────────────────────────────────────────────────┘
+
+### **Full Installation with ML Dependencies**
+```bash
+pip install hpfracc[ml]
+```
+
+### **Development Installation**
+```bash
+git clone https://github.com/dave2k77/hpfracc.git
+cd hpfracc
+pip install -e .
 ```
 
 ## 🚀 **Quick Start**
 
-### **Installation**
-
-```bash
-# From source (recommended)
-git clone https://github.com/your-username/hpfracc.git
-cd hpfracc
-pip install -e .
-
-# Install dependencies
-pip install torch torchvision torchaudio
-pip install numpy scipy matplotlib seaborn
-pip install psutil optuna scikit-learn
-```
-
-### **Basic Usage**
-
+### **Basic Fractional Calculus**
 ```python
-import torch
-from hpfracc.core import fractional_derivative
-from hpfracc.ml import FractionalNeuralNetwork, FractionalAdam
+from hpfracc import FractionalOrder, riemann_liouville
+
+# Create fractional order
+alpha = FractionalOrder(0.5)
 
 # Compute fractional derivative
-x = torch.randn(100, 50)
-result = fractional_derivative(x, alpha=0.5, method="RL")
-
-# Create fractional neural network
-net = FractionalNeuralNetwork(
-    input_size=100,
-    hidden_sizes=[256, 128, 64],
-    output_size=10,
-    fractional_order=0.5
-)
-
-# Train with fractional optimizer
-optimizer = FractionalAdam(net.parameters(), lr=0.001)
-output = net(x)
+result = riemann_liouville(function, t, alpha)
 ```
 
-### **Advanced Usage**
-
+### **Multi-Backend Neural Networks**
 ```python
-from hpfracc.ml.adjoint_optimization import (
-    MemoryEfficientFractionalNetwork,
-    AdjointConfig
+from hpfracc.ml import BackendType, FractionalNeuralNetwork
+from hpfracc.core.definitions import FractionalOrder
+
+# Create network with JAX backend
+network = FractionalNeuralNetwork(
+    input_size=10,
+    hidden_sizes=[32, 16],
+    output_size=2,
+    fractional_order=FractionalOrder(0.5),
+    backend=BackendType.JAX
 )
 
-# Memory-efficient training
-adjoint_config = AdjointConfig(
-    use_adjoint=True,
-    memory_efficient=True,
-    checkpoint_frequency=5
-)
-
-net = MemoryEfficientFractionalNetwork(
-    input_size=200,
-    hidden_sizes=[1024, 512, 256, 128, 64],
-    output_size=20,
-    fractional_order=0.5,
-    adjoint_config=adjoint_config
-)
+# Forward pass with fractional derivatives
+output = network(input_data, use_fractional=True, method="RL")
 ```
+
+### **Fractional Attention Mechanism**
+```python
+from hpfracc.ml import FractionalAttention
+
+# Create attention with fractional calculus
+attention = FractionalAttention(
+    d_model=64,
+    n_heads=8,
+    fractional_order=FractionalOrder(0.5),
+    backend=BackendType.TORCH
+)
+
+# Apply fractional attention
+output = attention(input_sequence, method="RL")
+```
+
+## 🔧 **Current Status**
+
+### **✅ Fully Working**
+- **Core Fractional Calculus**: All mathematical operations and algorithms
+- **Backend Management**: Seamless switching between PyTorch, JAX, and NUMBA
+- **Core Neural Networks**: FractionalNeuralNetwork with multi-backend support
+- **Attention Mechanisms**: FractionalAttention with fractional derivatives
+- **Tensor Operations**: Unified API across all backends
+
+### **🚧 In Development**
+- **Advanced Layers**: Conv1D, Conv2D, LSTM, Transformer layers
+- **Loss Functions**: Comprehensive loss function library
+- **Optimizers**: Fractional gradient-based optimizers
+- **Graph Neural Networks**: Fractional GNN architectures
+
+### **📋 Planned Features**
+- **Advanced ML Components**: Complete layer and optimizer library
+- **Performance Optimization**: Backend-specific optimizations
+- **Extended GNN Support**: More graph neural network architectures
+- **Research Tools**: Benchmarking and analysis utilities
 
 ## 📚 **Documentation**
 
-- **[API Reference](docs/api_reference.md)**: Complete API documentation
-- **[User Guide](docs/user_guide.md)**: Step-by-step usage instructions
-- **[ML Integration Guide](docs/ml_integration_guide.md)**: Machine learning workflows
-- **[Model Theory](docs/model_theory.md)**: Mathematical foundations
-- **[Examples](docs/examples.md)**: Practical code examples
-
-## 🧪 **Examples**
-
-### **Fractional Derivatives**
-
-```python
-# Multiple methods
-rl_result = fractional_derivative(x, alpha=0.5, method="RL")
-caputo_result = fractional_derivative(x, alpha=0.3, method="Caputo")
-gl_result = fractional_derivative(x, alpha=0.7, method="GL")
-```
-
-### **Neural Networks**
-
-```python
-# Standard network
-net = FractionalNeuralNetwork(100, [256, 128], 10, 0.5)
-
-# Memory-efficient network
-adjoint_net = MemoryEfficientFractionalNetwork(
-    100, [512, 256, 128], 10, 0.5, adjoint_config
-)
-```
-
-### **Production Workflow**
-
-```python
-from hpfracc.ml import ModelRegistry, DevelopmentWorkflow
-
-# Register model
-registry = ModelRegistry()
-model_id = registry.register_model(model, name="MyModel", ...)
-
-# Development workflow
-dev_workflow = DevelopmentWorkflow(registry, validator)
-validation_results = dev_workflow.train_model(model, train_data, val_data)
-```
-
-## 🔬 **Research Applications**
-
-HPFRACC is designed for cutting-edge research in:
-
-- **Fractional Differential Equations**: Viscoelastic materials, anomalous diffusion
-- **Signal Processing**: Multi-scale analysis, adaptive filtering
-- **Machine Learning**: Long-range dependencies, memory effects
-- **Control Systems**: Fractional-order PID, robust control
-- **Biomedical Engineering**: ECG/EEG analysis, physiological modeling
-
-## 🏭 **Production Use Cases**
-
-- **Large-Scale Training**: Memory-efficient training of billion-parameter models
-- **Real-Time Inference**: High-throughput production serving
-- **Model Lifecycle Management**: Automated validation and deployment
-- **Performance Monitoring**: Continuous optimization and reliability tracking
-
-## 🚀 **Performance Features**
-
-### **Adjoint Method Optimization**
-- **Gradient Checkpointing**: Memory-efficient backpropagation
-- **Gradient Accumulation**: Large effective batch sizes
-- **Mixed Precision**: FP16 training for modern hardware
-- **Parallel Processing**: Multi-GPU and distributed training
-
-### **Memory Management**
-- **Selective Storage**: Only store necessary tensors
-- **Adaptive Checkpointing**: Dynamic memory optimization
-- **Garbage Collection**: Efficient memory cleanup
-- **Memory Profiling**: Detailed usage analysis
-
-## 🔧 **Installation & Setup**
-
-### **Requirements**
-
-- Python 3.8+
-- PyTorch 2.0+
-- CUDA 11.0+ (optional, for GPU acceleration)
-- 8GB+ RAM (16GB+ recommended for large models)
-
-### **Development Setup**
-
-```bash
-# Clone repository
-git clone https://github.com/your-username/hpfracc.git
-cd hpfracc
-
-# Create virtual environment
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# Install in development mode
-pip install -e .
-
-# Install development dependencies
-pip install -r requirements-dev.txt
-
-# Run tests
-pytest tests/ -v
-
-# Run benchmarks
-python -m hpfracc.benchmarks.ml_performance_benchmark
-```
-
-## 🧪 **Testing & Validation**
-
-```bash
-# Run all tests
-pytest tests/ -v --cov=hpfracc
-
-# Run specific test suites
-pytest tests/test_core.py -v
-pytest tests/test_ml_integration.py -v
-pytest tests/test_benchmarks.py -v
-
-# Performance testing
-python -m hpfracc.benchmarks.ml_performance_benchmark
-```
-
-## 📊 **Benchmarking**
-
-```python
-from hpfracc.benchmarks import MLPerformanceBenchmark
-
-# Initialize benchmark
-benchmark = MLPerformanceBenchmark(device="cuda", num_runs=10)
-
-# Benchmark networks
-results = benchmark.benchmark_fractional_networks(
-    input_sizes=[50, 100, 200],
-    hidden_sizes_list=[[128, 64], [256, 128, 64]],
-    fractional_orders=[0.1, 0.5, 0.9],
-    methods=["RL", "Caputo"]
-)
-
-# Generate report
-benchmark.generate_report("benchmark_results")
-```
+- **User Guide**: [docs/user_guide.md](docs/user_guide.md)
+- **API Reference**: [docs/api_reference.md](docs/api_reference.md)
+- **Examples**: [examples/](examples/) directory
+- **Development Guide**: [README_DEV.md](README_DEV.md)
 
 ## 🤝 **Contributing**
 
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) and [Development Guide](README_DEV.md) for details.
 
-### **Development Workflow**
-
-1. **Fork** the repository
-2. **Create** a feature branch
-3. **Implement** your changes
-4. **Test** thoroughly
-5. **Submit** a pull request
-
-### **Code Quality**
-
+### **Development Setup**
 ```bash
-# Format code
-black hpfracc/
-isort hpfracc/
+# Clone repository
+git clone https://github.com/dave2k77/hpfracc.git
+cd hpfracc
 
-# Lint code
-flake8 hpfracc/
-mypy hpfracc/
+# Create virtual environment
+conda create -n hpfracc_dev python=3.9
+conda activate hpfracc_dev
 
-# Run tests
-pytest tests/ -v --cov=hpfracc
+# Install development dependencies
+pip install -e .[dev]
 ```
 
 ## 📄 **License**
@@ -316,24 +170,16 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 **Acknowledgments**
 
-- **Mathematical Foundation**: Based on rigorous fractional calculus theory
-- **PyTorch Community**: Built on the excellent PyTorch framework
-- **Research Community**: Inspired by cutting-edge research in fractional calculus
-- **Open Source**: Made possible by the open-source community
+- **University of Reading**: Department of Biomedical Engineering
+- **Open Source Community**: Contributors and maintainers
+- **Research Community**: Academic and industrial partners
 
-## 📞 **Support & Community**
+## 📞 **Contact**
 
-- **Documentation**: [docs/](docs/) directory
-- **Issues**: [GitHub Issues](https://github.com/your-username/hpfracc/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/your-username/hpfracc/discussions)
 - **Email**: [d.r.chin@pgr.reading.ac.uk](mailto:d.r.chin@pgr.reading.ac.uk)
-
-## 🌟 **Star History**
-
-[![Star History Chart](https://api.star-history.com/svg?repos=your-username/hpfracc&type=Date)](https://star-history.com/#your-username/hpfracc&Date)
+- **GitHub**: [@dave2k77](https://github.com/dave2k77)
+- **Project**: [HPFRACC Repository](https://github.com/dave2k77/hpfracc)
 
 ---
 
-**HPFRACC** - Where Fractional Calculus Meets High-Performance Machine Learning 🚀
-
-*Built with ❤️ by the HPFRACC Team*
+**HPFRACC** - Advancing fractional calculus through high-performance computing and machine learning integration.

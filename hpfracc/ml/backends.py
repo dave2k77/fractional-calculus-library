@@ -198,7 +198,9 @@ class BackendManager:
         elif self.active_backend == BackendType.JAX:
             return jnp.array(data, **kwargs)
         elif self.active_backend == BackendType.NUMBA:
-            return numba.np.array(data, **kwargs)
+            # NUMBA works with numpy arrays
+            import numpy as np
+            return np.array(data, **kwargs)
         else:
             raise RuntimeError(f"Unknown backend: {self.active_backend}")
     

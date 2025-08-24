@@ -48,7 +48,8 @@ class TensorOps:
         elif self.backend == BackendType.JAX:
             return self.tensor_lib.zeros(shape, **kwargs)
         elif self.backend == BackendType.NUMBA:
-            return self.tensor_lib.zeros(shape, **kwargs)
+            import numpy as np
+            return np.zeros(shape, **kwargs)
         else:
             raise RuntimeError(f"Unknown backend: {self.backend}")
     
@@ -59,7 +60,8 @@ class TensorOps:
         elif self.backend == BackendType.JAX:
             return self.tensor_lib.ones(shape, **kwargs)
         elif self.backend == BackendType.NUMBA:
-            return self.tensor_lib.ones(shape, **kwargs)
+            import numpy as np
+            return np.ones(shape, **kwargs)
         else:
             raise RuntimeError(f"Unknown backend: {self.backend}")
     
@@ -70,7 +72,8 @@ class TensorOps:
         elif self.backend == BackendType.JAX:
             return self.tensor_lib.eye(n, **kwargs)
         elif self.backend == BackendType.NUMBA:
-            return self.tensor_lib.eye(n, **kwargs)
+            import numpy as np
+            return np.eye(n, **kwargs)
         else:
             raise RuntimeError(f"Unknown backend: {self.backend}")
     
@@ -81,7 +84,8 @@ class TensorOps:
         elif self.backend == BackendType.JAX:
             return self.tensor_lib.arange(start, end, step, **kwargs)
         elif self.backend == BackendType.NUMBA:
-            return self.tensor_lib.arange(start, end, step, **kwargs)
+            import numpy as np
+            return np.arange(start, end, step, **kwargs)
         else:
             raise RuntimeError(f"Unknown backend: {self.backend}")
     
@@ -92,7 +96,8 @@ class TensorOps:
         elif self.backend == BackendType.JAX:
             return self.tensor_lib.linspace(start, end, num, **kwargs)
         elif self.backend == BackendType.NUMBA:
-            return self.tensor_lib.linspace(start, end, num, **kwargs)
+            import numpy as np
+            return np.linspace(start, end, num, **kwargs)
         else:
             raise RuntimeError(f"Unknown backend: {self.backend}")
     
@@ -103,7 +108,8 @@ class TensorOps:
         elif self.backend == BackendType.JAX:
             return self.tensor_lib.stack(tensors, axis=dim)
         elif self.backend == BackendType.NUMBA:
-            return self.tensor_lib.stack(tensors, axis=dim)
+            import numpy as np
+            return np.stack(tensors, axis=dim)
         else:
             raise RuntimeError(f"Unknown backend: {self.backend}")
     
@@ -114,7 +120,8 @@ class TensorOps:
         elif self.backend == BackendType.JAX:
             return self.tensor_lib.concatenate(tensors, axis=dim)
         elif self.backend == BackendType.NUMBA:
-            return self.tensor_lib.concatenate(tensors, axis=dim)
+            import numpy as np
+            return np.concatenate(tensors, axis=dim)
         else:
             raise RuntimeError(f"Unknown backend: {self.backend}")
     
@@ -147,7 +154,8 @@ class TensorOps:
         elif self.backend == BackendType.JAX:
             return self.tensor_lib.matmul(a, b)
         elif self.backend == BackendType.NUMBA:
-            return self.tensor_lib.matmul(a, b)
+            import numpy as np
+            return np.matmul(a, b)
         else:
             raise RuntimeError(f"Unknown backend: {self.backend}")
     
@@ -168,10 +176,11 @@ class TensorOps:
         """Fallback einsum implementation for NUMBA"""
         # This is a simplified fallback - in practice, you might want to
         # implement specific einsum patterns or use a different approach
+        import numpy as np
         if equation == "ij,jk->ik":
             return self.matmul(operands[0], operands[1])
         elif equation == "i,i->":
-            return self.tensor_lib.sum(operands[0] * operands[1])
+            return np.sum(operands[0] * operands[1])
         else:
             raise NotImplementedError(f"NUMBA backend doesn't support einsum pattern: {equation}")
     
@@ -193,7 +202,8 @@ class TensorOps:
         elif self.backend == BackendType.JAX:
             return self.tensor_lib.mean(tensor, axis=dim, keepdims=keepdim)
         elif self.backend == BackendType.NUMBA:
-            return self.tensor_lib.mean(tensor, axis=dim, keepdims=keepdim)
+            import numpy as np
+            return np.mean(tensor, axis=dim, keepdims=keepdim)
         else:
             raise RuntimeError(f"Unknown backend: {self.backend}")
     
@@ -204,7 +214,8 @@ class TensorOps:
         elif self.backend == BackendType.JAX:
             return self.tensor_lib.max(tensor, axis=dim, keepdims=keepdim)
         elif self.backend == BackendType.NUMBA:
-            return self.tensor_lib.max(tensor, axis=dim, keepdims=keepdim)
+            import numpy as np
+            return np.max(tensor, axis=dim, keepdims=keepdim)
         else:
             raise RuntimeError(f"Unknown backend: {self.backend}")
     
@@ -215,7 +226,8 @@ class TensorOps:
         elif self.backend == BackendType.JAX:
             return self.tensor_lib.min(tensor, axis=dim, keepdims=keepdim)
         elif self.backend == BackendType.NUMBA:
-            return self.tensor_lib.min(tensor, axis=dim, keepdims=keepdim)
+            import numpy as np
+            return np.min(tensor, axis=dim, keepdims=keepdim)
         else:
             raise RuntimeError(f"Unknown backend: {self.backend}")
     
@@ -226,7 +238,8 @@ class TensorOps:
         elif self.backend == BackendType.JAX:
             return self.tensor_lib.linalg.norm(tensor, ord=p, axis=dim)
         elif self.backend == BackendType.NUMBA:
-            return self.tensor_lib.linalg.norm(tensor, ord=p, axis=dim)
+            import numpy as np
+            return np.linalg.norm(tensor, ord=p, axis=dim)
         else:
             raise RuntimeError(f"Unknown backend: {self.backend}")
     
@@ -235,9 +248,11 @@ class TensorOps:
         if self.backend == BackendType.TORCH:
             return self.tensor_lib.softmax(tensor, dim=dim)
         elif self.backend == BackendType.JAX:
-            return self.tensor_lib.softmax(tensor, axis=dim)
+            import jax.nn
+            return jax.nn.softmax(tensor, axis=dim)
         elif self.backend == BackendType.NUMBA:
-            return self.tensor_lib.softmax(tensor, axis=dim)
+            import numpy as np
+            return np.exp(tensor) / np.sum(np.exp(tensor), axis=dim, keepdims=True)
         else:
             raise RuntimeError(f"Unknown backend: {self.backend}")
     
@@ -248,7 +263,8 @@ class TensorOps:
         elif self.backend == BackendType.JAX:
             return self.tensor_lib.maximum(tensor, 0)
         elif self.backend == BackendType.NUMBA:
-            return self.tensor_lib.maximum(tensor, 0)
+            import numpy as np
+            return np.maximum(tensor, 0)
         else:
             raise RuntimeError(f"Unknown backend: {self.backend}")
     
@@ -259,7 +275,8 @@ class TensorOps:
         elif self.backend == BackendType.JAX:
             return 1 / (1 + self.tensor_lib.exp(-tensor))
         elif self.backend == BackendType.NUMBA:
-            return 1 / (1 + self.tensor_lib.exp(-tensor))
+            import numpy as np
+            return 1 / (1 + np.exp(-tensor))
         else:
             raise RuntimeError(f"Unknown backend: {self.backend}")
     
@@ -270,7 +287,8 @@ class TensorOps:
         elif self.backend == BackendType.JAX:
             return self.tensor_lib.tanh(tensor)
         elif self.backend == BackendType.NUMBA:
-            return self.tensor_lib.tanh(tensor)
+            import numpy as np
+            return np.tanh(tensor)
         else:
             raise RuntimeError(f"Unknown backend: {self.backend}")
     
@@ -280,15 +298,17 @@ class TensorOps:
             return tensor
         
         if self.backend == BackendType.TORCH:
-            return self.tensor_lib.dropout(tensor, p=p, training=training)
+            return self.tensor_lib.dropout(tensor, p=p, train=training)
         elif self.backend == BackendType.JAX:
             # JAX doesn't have built-in dropout, implement manually
-            key = self.tensor_lib.random.PRNGKey(0)  # You might want to pass a proper key
-            mask = self.tensor_lib.random.bernoulli(key, 1 - p, tensor.shape)
+            import jax.random as random
+            key = random.PRNGKey(0)  # You might want to pass a proper key
+            mask = random.bernoulli(key, 1 - p, tensor.shape)
             return tensor * mask / (1 - p)
         elif self.backend == BackendType.NUMBA:
             # NUMBA doesn't have built-in dropout, implement manually
-            mask = self.tensor_lib.random.random(tensor.shape) > p
+            import numpy as np
+            mask = np.random.random(tensor.shape) > p
             return tensor * mask / (1 - p)
         else:
             raise RuntimeError(f"Unknown backend: {self.backend}")
