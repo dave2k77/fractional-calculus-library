@@ -110,3 +110,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 *This changelog is maintained by the HPFRACC development team.*
+
+**Development Team:**
+- **Davian R. Chin**
+- Department of Biomedical Engineering
+- University of Reading
+- Email: d.r.chin@pgr.reading.ac.uk

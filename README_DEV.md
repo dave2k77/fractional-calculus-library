@@ -2,6 +2,14 @@
 
 This document is for developers and contributors working on the HPFRACC library. For user documentation, see the main [README.md](README.md) and [docs/](docs/) directory.
 
+## 👨‍💻 **Development Team**
+
+**Davian R. Chin**  
+Department of Biomedical Engineering  
+University of Reading  
+Email: [d.r.chin@pgr.reading.ac.uk](mailto:d.r.chin@pgr.reading.ac.uk)  
+GitHub: [@dave2k77](https://github.com/dave2k77)
+
 ## 🏗️ **Project Structure**
 
 ```
@@ -541,7 +549,7 @@ When reporting issues:
 ### **Contact**
 
 - **Email**: [d.r.chin@pgr.reading.ac.uk](mailto:d.r.chin@pgr.reading.ac.uk)
-- **GitHub**: [@your-username](https://github.com/your-username)
+- **GitHub**: [@dave2k77](https://github.com/dave2k77)
 
 ## 🎯 **Development Goals**
 
