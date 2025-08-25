@@ -113,6 +113,9 @@ Homepage = "https://github.com/dave2k77/fractional_calculus_library"
 Repository = "https://github.com/dave2k77/fractional_calculus_library.git"
 Documentation = "https://fractional-calculus-library.readthedocs.io"
 "Bug Tracker" = "https://github.com/dave2k77/fractional_calculus_library/issues"
+"Source Code" = "https://github.com/dave2k77/fractional_calculus_library"
+"Download" = "https://github.com/dave2k77/fractional_calculus_library/releases"
+"Academic Contact" = "mailto:d.r.chin@pgr.reading.ac.uk"
 
 [tool.setuptools.packages.find]
 where = ["."]

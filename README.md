@@ -3,7 +3,7 @@
 [![PyPI version](https://badge.fury.io/py/hpfracc.svg)](https://badge.fury.io/py/hpfracc)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
-[![Documentation](https://img.shields.io/badge/docs-latest-brightgreen.svg)](https://hpfracc.readthedocs.io/)
+[![Documentation](https://img.shields.io/badge/docs-latest-brightgreen.svg)](https://fractional-calculus-library.readthedocs.io/)
 
 ## 👨‍💻 **Author & Developer**
 
@@ -159,6 +159,8 @@ output = gnn(node_features, edge_index)
 - **Extended GNN Support**: Additional graph neural network architectures and graph types
 
 ## 📚 **Documentation**
+
+**📖 [Full Documentation on ReadTheDocs](https://fractional-calculus-library.readthedocs.io)**
 
 - **User Guide**: [docs/user_guide.md](docs/user_guide.md)
 - **API Reference**: [docs/api_reference.md](docs/api_reference.md)
