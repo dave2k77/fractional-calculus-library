@@ -26,15 +26,3 @@ sphinx:
 formats:
   - pdf
   - epub
-
-# Additional build options
-build_jobs: 2
-
-# Environment variables
-environment:
-  PYTHONPATH: "."
-
-# Submodules
-submodules:
-  include:
-    - docs
