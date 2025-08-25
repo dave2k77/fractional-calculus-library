@@ -80,6 +80,10 @@ class BaseFractionalGNNLayer(ABC):
             return self._numba_fractional_derivative(x, alpha)
         else:
             raise RuntimeError(f"Unknown backend: {self.backend}")
+
+    def __call__(self, *args, **kwargs):
+        """Callable layer wrapper"""
+        return self.forward(*args, **kwargs)
     
     def _torch_fractional_derivative(self, x: Any, alpha: float) -> Any:
         """PyTorch implementation of fractional derivative"""
@@ -436,8 +440,12 @@ class FractionalGraphAttention(BaseFractionalGNNLayer):
         activation: str = "relu",
         dropout: float = 0.1,
         bias: bool = True,
-        backend: Optional[BackendType] = None
+        backend: Optional[BackendType] = None,
+        **kwargs
     ):
+        # Support num_heads alias for compatibility
+        if 'num_heads' in kwargs:
+            heads = kwargs['num_heads']
         self.heads = heads
         self.training = True  # Add training attribute
         super().__init__(
@@ -687,8 +695,12 @@ class FractionalGraphPooling(BaseFractionalGNNLayer):
         fractional_order: Union[float, FractionalOrder] = 0.5,
         method: str = "RL",
         use_fractional: bool = True,
-        backend: Optional[BackendType] = None
+        backend: Optional[BackendType] = None,
+        **kwargs
     ):
+        # Support ratio alias for compatibility
+        if 'ratio' in kwargs:
+            pooling_ratio = kwargs['ratio']
         self.pooling_ratio = pooling_ratio
         super().__init__(
             in_channels, in_channels, fractional_order, method,

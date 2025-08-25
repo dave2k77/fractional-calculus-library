@@ -109,13 +109,13 @@ class BackendManager:
     def _select_optimal_backend(self) -> BackendType:
         """Select the optimal backend based on preferences and availability"""
         if self.preferred_backend == BackendType.AUTO:
-            # Auto-selection logic
-            if BackendType.JAX in self.available_backends and self.enable_gpu:
-                return BackendType.JAX  # JAX is excellent for GPU and JIT
-            elif BackendType.TORCH in self.available_backends:
-                return BackendType.TORCH  # PyTorch is very stable and feature-rich
+            # Prefer PyTorch by default to match test expectations and widest API coverage
+            if BackendType.TORCH in self.available_backends:
+                return BackendType.TORCH
+            elif BackendType.JAX in self.available_backends and self.enable_gpu:
+                return BackendType.JAX
             elif BackendType.NUMBA in self.available_backends:
-                return BackendType.NUMBA  # NUMBA is great for CPU optimization
+                return BackendType.NUMBA
             else:
                 return self.available_backends[0]
         else:

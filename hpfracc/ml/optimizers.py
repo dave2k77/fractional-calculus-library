@@ -117,9 +117,10 @@ class SimpleFractionalOptimizer(ABC):
         """Perform a single optimization step"""
         pass
     
-    def zero_grad(self, params: List[Any]) -> None:
+    def zero_grad(self, params: Optional[List[Any]] = None) -> None:
         """Zero the gradients of all optimized tensors (if supported by backend)"""
         # This is a simplified version - in practice, gradients are managed by the training loop
+        # Accept optional params to match torch-like API
         pass
 
 
@@ -198,16 +199,19 @@ class SimpleFractionalAdam(SimpleFractionalOptimizer):
     """
     
     def __init__(self, 
+                 params=None,
                  lr: float = 0.001,
                  betas: tuple = (0.9, 0.999),
                  eps: float = 1e-8,
                  fractional_order: float = 0.5, 
                  method: str = "RL", 
                  use_fractional: bool = True, 
-                 backend: Optional[BackendType] = None):
+                 backend: Optional[BackendType] = None, *args, **kwargs):
+        # Accept params as first argument to match torch-like signature in tests
         super().__init__(lr, fractional_order, method, use_fractional, backend)
         self.betas = betas
         self.eps = eps
+        self.params = params  # Store parameters for step() method
     
     def _initialize_param_state(self, param) -> Dict[str, Any]:
         """Initialize state for a single parameter"""
@@ -222,8 +226,23 @@ class SimpleFractionalAdam(SimpleFractionalOptimizer):
         state['step'] = 0
         return state
     
-    def step(self, params: List[Any], gradients: List[Any]) -> None:
+    def step(self, params: Optional[List[Any]] = None, gradients: Optional[List[Any]] = None) -> None:
         """Perform a single optimization step with fractional gradients"""
+        # Use stored params if none provided
+        if params is None:
+            params = self.params
+        if params is None:
+            raise ValueError("No parameters provided for optimization step")
+        
+        # For torch-like API, gradients are computed via autograd and stored in param.grad
+        if gradients is None:
+            gradients = []
+            for param in params:
+                if hasattr(param, 'grad') and param.grad is not None:
+                    gradients.append(param.grad)
+                else:
+                    gradients.append(None)
+        
         if len(params) != len(gradients):
             raise ValueError("Number of parameters must match number of gradients")
         

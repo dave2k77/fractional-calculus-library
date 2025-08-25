@@ -60,7 +60,7 @@ solution = solver.solve(lambda x, t: x**2 + t, initial_condition=lambda x: x)
 
 ### Core Concepts
 
-* [**Model Theory**](model_theory.md) - Mathematical foundations and theoretical background
+* [**Model Theory**](model_theory.rst) - Mathematical foundations and theoretical background
 * [**User Guide**](user_guide.md) - Getting started and basic usage patterns
 
 ### API Reference

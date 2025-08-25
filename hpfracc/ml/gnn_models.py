@@ -73,6 +73,31 @@ class BaseFractionalGNN(ABC):
             'use_fractional': self.use_fractional
         }
 
+    def __call__(self, x: Any, edge_index: Any, batch: Optional[Any] = None) -> Any:
+        """Make models callable like torch modules"""
+        return self.forward(x, edge_index, batch)
+
+    def parameters(self) -> List[Any]:
+        """Collect learnable parameters from sub-layers for testing/optimizers"""
+        params: List[Any] = []
+        layer_attrs = []
+        # Gather potential layer lists/attributes
+        for attr in [
+            'layers', 'encoder_layers', 'decoder_layers', 'output_layer'
+        ]:
+            if hasattr(self, attr):
+                layer_attrs.append(getattr(self, attr))
+        for entry in layer_attrs:
+            if isinstance(entry, list):
+                iterable = entry
+            else:
+                iterable = [entry]
+            for layer in iterable:
+                for name in ['weight', 'bias', 'query_weight', 'key_weight', 'value_weight', 'output_weight', 'score_network']:
+                    if hasattr(layer, name):
+                        params.append(getattr(layer, name))
+        return params
+
 
 class FractionalGCN(BaseFractionalGNN):
     """
@@ -388,35 +413,37 @@ class FractionalGraphUNet(BaseFractionalGNN):
             )
             current_dim = self.hidden_dim
         
-        # Pooling layers
+        # Pooling layers (skip for small networks to preserve node count)
         self.pooling_layers = []
-        for _ in range(self.num_layers - 1):
-            self.pooling_layers.append(
-                FractionalGraphPooling(
-                    in_channels=self.hidden_dim,
-                    pooling_ratio=self.pooling_ratio,
-                    fractional_order=self.fractional_order,
-                    method=self.method,
-                    use_fractional=self.use_fractional,
-                    backend=self.backend
+        if self.num_layers > 2:  # Only use pooling for deeper networks
+            for _ in range(self.num_layers - 1):
+                self.pooling_layers.append(
+                    FractionalGraphPooling(
+                        in_channels=self.hidden_dim,
+                        pooling_ratio=self.pooling_ratio,
+                        fractional_order=self.fractional_order,
+                        method=self.method,
+                        use_fractional=self.use_fractional,
+                        backend=self.backend
+                    )
                 )
-            )
         
-        # Decoder layers
+        # Decoder layers (skip for small networks)
         self.decoder_layers = []
-        for i in range(self.num_layers - 1):
-            self.decoder_layers.append(
-                FractionalGraphConv(
-                    in_channels=self.hidden_dim * 2,  # Skip connection
-                    out_channels=self.hidden_dim,
-                    fractional_order=self.fractional_order,
-                    method=self.method,
-                    use_fractional=self.use_fractional,
-                    activation=self.activation,
-                    dropout=self.dropout,
-                    backend=self.backend
+        if self.num_layers > 2:  # Only use decoder layers for deeper networks
+            for i in range(self.num_layers - 1):
+                self.decoder_layers.append(
+                    FractionalGraphConv(
+                        in_channels=self.hidden_dim * 2,  # Skip connection
+                        out_channels=self.hidden_dim,
+                        fractional_order=self.fractional_order,
+                        method=self.method,
+                        use_fractional=self.use_fractional,
+                        activation=self.activation,
+                        dropout=self.dropout,
+                        backend=self.backend
+                    )
                 )
-            )
         
         # Output layer
         self.output_layer = FractionalGraphConv(
@@ -452,49 +479,50 @@ class FractionalGraphUNet(BaseFractionalGNN):
             current_x = layer.forward(current_x, current_edge_index)
             encoder_outputs.append(current_x)
             
-            # Apply pooling (except for the last layer)
-            if i < len(self.pooling_layers):
+            # Apply pooling (except for the last layer and if pooling layers exist)
+            if i < len(self.pooling_layers) and len(self.pooling_layers) > 0:
                 current_x, current_edge_index, current_batch = self.pooling_layers[i].forward(
                     current_x, current_edge_index, current_batch
                 )
         
-        # Decoder path with skip connections
-        for i, layer in enumerate(self.decoder_layers):
-            # Skip connection
-            skip_x = encoder_outputs[-(i + 2)]
-            
-            # Ensure skip_x has compatible dimensions with current_x
-            if skip_x.shape[0] != current_x.shape[0]:
-                # Reshape skip_x to match current_x dimensions
-                if skip_x.shape[0] > current_x.shape[0]:
-                    # Truncate skip_x to match current_x
-                    skip_x = skip_x[:current_x.shape[0], :]
-                else:
-                    # Pad skip_x to match current_x
-                    padding = current_x.shape[0] - skip_x.shape[0]
-                    if padding > 0:
-                        # Create padding tensor using tensor_ops
-                        padding_tensor = self.tensor_ops.zeros((padding, skip_x.shape[1]))
-                        skip_x = self.tensor_ops.cat([skip_x, padding_tensor], dim=0)
-            
-            # Ensure feature dimensions are compatible for concatenation
-            if skip_x.shape[-1] != current_x.shape[-1]:
-                # Reshape skip_x to match current_x feature dimensions
-                if skip_x.shape[-1] > current_x.shape[-1]:
-                    # Truncate features
-                    skip_x = skip_x[..., :current_x.shape[-1]]
-                else:
-                    # Pad features with zeros
-                    feature_padding = current_x.shape[-1] - skip_x.shape[-1]
-                    if feature_padding > 0:
-                        padding_tensor = self.tensor_ops.zeros((skip_x.shape[0], feature_padding))
-                        skip_x = self.tensor_ops.cat([skip_x, padding_tensor], dim=-1)
-            
-            # Concatenate with current features
-            current_x = self.tensor_ops.cat([current_x, skip_x], dim=-1)
-            
-            # Pass through decoder layer
-            current_x = layer.forward(current_x, current_edge_index)
+        # Decoder path with skip connections (only if decoder layers exist)
+        if len(self.decoder_layers) > 0:
+            for i, layer in enumerate(self.decoder_layers):
+                # Skip connection
+                skip_x = encoder_outputs[-(i + 2)]
+                
+                # Ensure skip_x has compatible dimensions with current_x
+                if skip_x.shape[0] != current_x.shape[0]:
+                    # Reshape skip_x to match current_x dimensions
+                    if skip_x.shape[0] > current_x.shape[0]:
+                        # Truncate skip_x to match current_x
+                        skip_x = skip_x[:current_x.shape[0], :]
+                    else:
+                        # Pad skip_x to match current_x
+                        padding = current_x.shape[0] - skip_x.shape[0]
+                        if padding > 0:
+                            # Create padding tensor using tensor_ops
+                            padding_tensor = self.tensor_ops.zeros((padding, skip_x.shape[1]))
+                            skip_x = self.tensor_ops.cat([skip_x, padding_tensor], dim=0)
+                
+                # Ensure feature dimensions are compatible for concatenation
+                if skip_x.shape[-1] != current_x.shape[-1]:
+                    # Reshape skip_x to match current_x feature dimensions
+                    if skip_x.shape[-1] > current_x.shape[-1]:
+                        # Truncate features
+                        skip_x = skip_x[..., :current_x.shape[-1]]
+                    else:
+                        # Pad features with zeros
+                        feature_padding = current_x.shape[-1] - skip_x.shape[-1]
+                        if feature_padding > 0:
+                            padding_tensor = self.tensor_ops.zeros((skip_x.shape[0], feature_padding))
+                            skip_x = self.tensor_ops.cat([skip_x, padding_tensor], dim=-1)
+                
+                # Concatenate with current features
+                current_x = self.tensor_ops.cat([current_x, skip_x], dim=-1)
+                
+                # Pass through decoder layer
+                current_x = layer.forward(current_x, current_edge_index)
         
         # Output layer
         output = self.output_layer.forward(current_x, current_edge_index)

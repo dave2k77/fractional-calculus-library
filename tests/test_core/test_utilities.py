@@ -104,14 +104,14 @@ class TestMathematicalUtilities:
     def test_hypergeometric_series(self):
         """Test hypergeometric series function."""
         # Test basic case
-        result = hypergeometric_series(1, 1, 1, 0.5, max_terms=10)
+        result = interm = hypergeometric_series(1, 1, 1, 0.5, max_terms=10)
         assert np.isfinite(result)
         assert result > 0
         
         # Test convergence
-        result1 = hypergeometric_series(1, 1, 1, 0.5, max_terms=5)
-        result2 = hypergeometric_series(1, 1, 1, 0.5, max_terms=10)
-        assert abs(result2 - result1) < 1e-6
+        result = hypergeometric_series(1, 1, 1, 0.5, max_terms=5)
+        # result2 = hypergeometric_series(1, 1, 1, 0.5, max_terms=10)
+        assert abs(interm - result) < 1e-6
     
     def test_bessel_functions(self):
         """Test Bessel function implementations."""

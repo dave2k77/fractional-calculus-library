@@ -69,7 +69,11 @@ class FractionalNeuralNetwork:
         self.dropout_rate = dropout
         
         # Set backend
-        self.backend = backend or self.config.backend or get_backend_manager().active_backend
+        # Resolve backend; treat AUTO as active backend
+        resolved_backend = backend or self.config.backend or get_backend_manager().active_backend
+        if resolved_backend == BackendType.AUTO:
+            resolved_backend = get_backend_manager().active_backend
+        self.backend = resolved_backend
         self.tensor_ops = get_tensor_ops(self.backend)
         
         # Initialize fractional derivative calculators
@@ -83,6 +87,13 @@ class FractionalNeuralNetwork:
         
         # Initialize weights
         self._initialize_weights()
+
+    def parameters(self) -> List[Any]:
+        """Return list of learnable parameters for compatibility with optimizers/tests"""
+        params: List[Any] = []
+        params.extend(self.weights)
+        params.extend(self.biases)
+        return params
     
     def _build_network(self):
         """Build the network architecture using the current backend"""
@@ -117,8 +128,10 @@ class FractionalNeuralNetwork:
                 # Initialize weights with proper random data
                 if self.backend == BackendType.TORCH:
                     import torch
-                    weight = torch.randn(layer['in_features'], layer['out_features'], dtype=torch.float32)
-                    bias = torch.zeros(layer['out_features'], dtype=torch.float32)
+                    weight = torch.randn(
+                        layer['in_features'], layer['out_features'], dtype=torch.float32, requires_grad=True
+                    )
+                    bias = torch.zeros(layer['out_features'], dtype=torch.float32, requires_grad=True)
                 elif self.backend == BackendType.JAX:
                     import jax.random as random
                     import jax.numpy as jnp

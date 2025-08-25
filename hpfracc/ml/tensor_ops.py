@@ -21,7 +21,11 @@ class TensorOps:
     
     def __init__(self, backend: Optional[BackendType] = None):
         self.backend_manager = get_backend_manager()
-        self.backend = backend or self.backend_manager.active_backend
+        # Normalize AUTO to currently active backend to avoid Unknown backend errors
+        resolved_backend = backend or self.backend_manager.active_backend
+        if resolved_backend == BackendType.AUTO:
+            resolved_backend = self.backend_manager.active_backend
+        self.backend = resolved_backend
         self.tensor_lib = self.backend_manager.get_tensor_lib()
     
     def create_tensor(self, data: Any, **kwargs) -> Any:

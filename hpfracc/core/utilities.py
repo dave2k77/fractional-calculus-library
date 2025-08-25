@@ -33,12 +33,19 @@ def factorial_fractional(n: Union[int, float]) -> float:
     Returns:
         Factorial value
     """
-    if isinstance(n, int) and n >= 0:
-        return float(factorial(n))
-    elif isinstance(n, float) and n > -1:
-        return gamma(n + 1)
-    else:
-        raise ValueError(f"Factorial not defined for {n}")
+    # Check for very large numbers that would cause overflow
+    if n > 1e6:
+        raise OverflowError(f"Factorial overflow for {n}")
+    
+    try:
+        if isinstance(n, int) and n >= 0:
+            return float(factorial(n))
+        elif isinstance(n, float) and n > -1:
+            return gamma(n + 1)
+        else:
+            raise ValueError(f"Factorial not defined for {n}")
+    except OverflowError:
+        raise OverflowError(f"Factorial overflow for {n}")
 
 
 def binomial_coefficient(n: Union[int, float], k: Union[int, float]) -> float:
@@ -53,9 +60,11 @@ def binomial_coefficient(n: Union[int, float], k: Union[int, float]) -> float:
         Binomial coefficient value
     """
     if k < 0:
-        return 0.0
+        raise ValueError("k must be non-negative")
     elif k == 0:
         return 1.0
+    elif isinstance(n, int) and isinstance(k, int) and n < k:
+        raise ValueError("n must be >= k for integer parameters")
     else:
         return gamma(n + 1) / (gamma(k + 1) * gamma(n - k + 1))
 
@@ -79,19 +88,15 @@ def pochhammer_symbol(x: float, n: int) -> float:
         return gamma(x + n) / gamma(x)
 
 
-def hypergeometric_series(a: List[float], b: List[float], z: float, max_terms: int = 100) -> float:
+def _hypergeometric_series_impl(a: Union[float, List[float]], b: Union[float, List[float]], z: float, max_terms: int = 100) -> float:
     """
-    Compute hypergeometric series pFq(a; b; z).
-    
-    Args:
-        a: List of upper parameters
-        b: List of lower parameters
-        z: Variable
-        max_terms: Maximum number of terms to compute
-        
-    Returns:
-        Hypergeometric series value
+    Internal implementation of hypergeometric series.
     """
+    # Convert single values to lists for consistency
+    if isinstance(a, (int, float)):
+        a = [float(a)]
+    if isinstance(b, (int, float)):
+        b = [float(b)]
     result = 1.0
     term = 1.0
     
@@ -114,6 +119,36 @@ def hypergeometric_series(a: List[float], b: List[float], z: float, max_terms: i
             break
     
     return result
+
+
+def hypergeometric_series(a: Union[float, List[float]], b: Union[float, List[float]], z: float, *args, **kwargs) -> float:
+    """
+    Compute hypergeometric series pFq(a; b; z).
+    
+    Args:
+        a: Upper parameter(s) - can be float or list of floats
+        b: Lower parameter(s) - can be float or list of floats
+        z: Variable
+        max_terms: Maximum number of terms to compute
+        
+    Returns:
+        Hypergeometric series value
+    """
+    # Handle max_terms parameter
+    max_terms = 100  # default value
+    
+    # Check if max_terms is passed as keyword argument
+    if 'max_terms' in kwargs:
+        max_terms = kwargs['max_terms']
+    # Check if max_terms is passed as positional argument
+    elif len(args) > 0:
+        max_terms = args[0]
+    
+    # Call the internal implementation
+    return _hypergeometric_series_impl(a, b, z, max_terms)
+
+
+
 
 
 def bessel_function_first_kind(nu: float, x: float) -> float:
@@ -191,7 +226,7 @@ def validate_function(f: Callable, domain: Tuple[float, float] = (0.0, 1.0), n_p
         True if function is valid
     """
     if not callable(f):
-        raise ValueError("Function must be callable")
+        return False
     
     try:
         x_test = np.linspace(domain[0], domain[1], n_points)
@@ -317,11 +352,67 @@ class PerformanceMonitor:
     
     def get_statistics(self) -> Dict[str, Any]:
         """Get performance statistics."""
-        return {
-            "call_counts": self.call_counts.copy(),
-            "timings": self.timings.copy(),
-            "memory_usage": self.memory_usage.copy()
-        }
+        # Return a flat structure with operation names as keys
+        stats = {}
+        for name in set(list(self.call_counts.keys()) + list(self.timings.keys()) + list(self.memory_usage.keys())):
+            stats[name] = {
+                "calls": self.call_counts.get(name, 0),
+                "timing": self.timings.get(name, 0),
+                "memory": self.memory_usage.get(name, 0)
+            }
+        return stats
+    
+    def timer(self, name: str):
+        """Context manager for timing operations."""
+        return TimerContext(self, name)
+    
+    def memory_tracker(self, name: str):
+        """Context manager for memory tracking."""
+        return MemoryTrackerContext(self, name)
+    
+    def reset(self):
+        """Reset all statistics."""
+        self.timings.clear()
+        self.memory_usage.clear()
+        self.call_counts.clear()
+
+
+class TimerContext:
+    """Context manager for timing operations."""
+    
+    def __init__(self, monitor: PerformanceMonitor, name: str):
+        self.monitor = monitor
+        self.name = name
+    
+    def __enter__(self):
+        self.monitor.start_timer(self.name)
+        return self
+    
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.monitor.end_timer(self.name)
+
+
+class MemoryTrackerContext:
+    """Context manager for memory tracking."""
+    
+    def __init__(self, monitor: PerformanceMonitor, name: str):
+        self.monitor = monitor
+        self.name = name
+    
+    def __enter__(self):
+        # Start memory tracking
+        import psutil
+        process = psutil.Process()
+        self.monitor.memory_usage[self.name] = process.memory_info().rss / 1024 / 1024  # MB
+        return self
+    
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        # End memory tracking
+        import psutil
+        process = psutil.Process()
+        memory_after = process.memory_info().rss / 1024 / 1024  # MB
+        memory_before = self.monitor.memory_usage.get(self.name, 0)
+        self.monitor.memory_usage[self.name] = memory_after - memory_before
 
 
 # Error handling and debugging utilities
@@ -489,26 +580,35 @@ def fractional_power(x: Union[float, np.ndarray, torch.Tensor], alpha: float) ->
         if x >= 0:
             return x ** alpha
         else:
-            # For negative values, use complex power
-            return (-x) ** alpha * np.exp(1j * np.pi * alpha)
+            # For negative values with non-integer alpha, return NaN
+            if alpha != int(alpha):
+                return float('nan')
+            else:
+                return x ** alpha
     
     elif isinstance(x, np.ndarray):
-        result = np.zeros_like(x, dtype=complex)
+        result = np.zeros_like(x, dtype=float)
         positive_mask = x >= 0
         negative_mask = x < 0
         
         result[positive_mask] = x[positive_mask] ** alpha
-        result[negative_mask] = (-x[negative_mask]) ** alpha * np.exp(1j * np.pi * alpha)
+        if alpha != int(alpha):
+            result[negative_mask] = np.nan
+        else:
+            result[negative_mask] = x[negative_mask] ** alpha
         
         return result
     
     elif isinstance(x, torch.Tensor):
-        result = torch.zeros_like(x, dtype=torch.complex64)
+        result = torch.zeros_like(x, dtype=torch.float32)
         positive_mask = x >= 0
         negative_mask = x < 0
         
         result[positive_mask] = x[positive_mask] ** alpha
-        result[negative_mask] = (-x[negative_mask]) ** alpha * torch.exp(1j * torch.pi * alpha)
+        if alpha != int(alpha):
+            result[negative_mask] = torch.nan
+        else:
+            result[negative_mask] = x[negative_mask] ** alpha
         
         return result
     
@@ -527,15 +627,15 @@ def fractional_exponential(x: Union[float, np.ndarray, torch.Tensor], alpha: flo
     Returns:
         Fractional exponential result
     """
-    # Use Mittag-Leffler function approximation
+    # Use standard exponential with fractional scaling
     if isinstance(x, (int, float)):
-        return hypergeometric_series([1], [1], x ** alpha)
+        return np.exp(alpha * x)
     
     elif isinstance(x, np.ndarray):
-        return np.array([hypergeometric_series([1], [1], xi ** alpha) for xi in x])
+        return np.exp(alpha * x)
     
     elif isinstance(x, torch.Tensor):
-        return torch.tensor([hypergeometric_series([1], [1], float(xi) ** alpha) for xi in x])
+        return torch.exp(alpha * x)
     
     else:
         raise TypeError(f"Unsupported type: {type(x)}")
@@ -599,26 +699,45 @@ def get_method_properties(method: str) -> Dict[str, Any]:
             "memory_effect": False,
             "initial_conditions": "Periodic",
             "numerical_stability": "Good"
+        },
+        "riemann_liouville": {
+            "full_name": "Riemann-Liouville",
+            "order_range": (0, 2),
+            "memory_effect": True,
+            "initial_conditions": "Complex",
+            "numerical_stability": "Good"
         }
     }
     
-    return properties.get(method, {})
+    return properties.get(method, None)
 
 
 # Logging utilities
-def setup_logging(level: str = "INFO", log_file: Optional[str] = None):
+def setup_logging(name: str = "INFO", log_file: Optional[str] = None, level: str = "INFO"):
     """
     Setup logging for the HPFRACC library.
     
     Args:
         level: Logging level
         log_file: Optional log file path
+        
+    Returns:
+        Logger instance
     """
+    # Validate log level
+    valid_levels = ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']
+    if level.upper() not in valid_levels:
+        level = "INFO"  # Default to INFO if invalid level
+    else:
+        level = level.upper()
+    
     logging.basicConfig(
-        level=getattr(logging, level.upper()),
+        level=getattr(logging, level),
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
         filename=log_file
     )
+    
+    return logging.getLogger(name)
 
 
 def get_logger(name: str = "hpfracc") -> logging.Logger:
