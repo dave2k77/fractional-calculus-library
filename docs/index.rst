@@ -76,6 +76,7 @@ Examples & Tutorials
 ~~~~~~~~~~~~~~~~~~~
 
 * :doc:`examples` - Comprehensive code examples and use cases
+* :doc:`scientific_tutorials` - Advanced scientific tutorials and research applications
 * :doc:`ml_integration_guide` - Machine learning workflows and best practices
 
 Development & Testing
@@ -149,5 +150,6 @@ Getting Help
    user_guide
    api_reference
    examples
+   scientific_tutorials
    model_theory
    testing_status

@@ -71,6 +71,7 @@ solution = solver.solve(lambda x, t: x**2 + t, initial_condition=lambda x: x)
 ### Examples & Tutorials
 
 * [**Examples Gallery**](examples.md) - Comprehensive code examples and use cases
+* [**Scientific Tutorials**](scientific_tutorials.md) - Advanced scientific tutorials and research applications
 * [**ML Integration Guide**](ml_integration_guide.md) - Machine learning workflows and best practices
 
 ### Development & Testing
