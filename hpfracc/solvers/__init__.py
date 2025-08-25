@@ -1,76 +1,105 @@
 """
 Solvers Module
 
-This module provides comprehensive solvers for fractional differential equations,
-including ODE solvers, PDE solvers, and advanced predictor-corrector methods.
+This module provides various numerical and analytical solvers for fractional differential equations:
+- ODE solvers
+- PDE solvers
+- Advanced solvers
+- Predictor-corrector methods
+- Homotopy Perturbation Method (HPM)
+- Variational Iteration Method (VIM)
 """
 
-# Import ODE solvers
 from .ode_solvers import (
     FractionalODESolver,
-    AdaptiveFractionalODESolver,
-    solve_fractional_ode,
-    solve_fractional_system,
+    AdamsBashforthMoulton,
+    FractionalEuler,
+    FractionalRungeKutta,
+    solve_fractional_ode
 )
 
-# Import PDE solvers
 from .pde_solvers import (
     FractionalPDESolver,
     FractionalDiffusionSolver,
+    FractionalWaveSolver,
     FractionalAdvectionSolver,
-    FractionalReactionDiffusionSolver,
-    solve_fractional_diffusion,
-    solve_fractional_advection,
-    solve_fractional_reaction_diffusion,
+    solve_fractional_pde
 )
 
-# Import predictor-corrector methods
+from .advanced_solvers import (
+    AdaptiveSolver,
+    MultiStepSolver,
+    ImplicitSolver,
+    ExplicitSolver,
+    solve_adaptive_fractional
+)
+
 from .predictor_corrector import (
     PredictorCorrectorSolver,
-    AdamsBashforthMoultonSolver,
-    VariableStepPredictorCorrector,
-    solve_predictor_corrector,
-    solve_adams_bashforth_moulton,
-    solve_variable_step_predictor_corrector,
+    AdamsPredictorCorrector,
+    FractionalPredictorCorrector,
+    solve_predictor_corrector
 )
 
-# Import advanced solvers
-from .advanced_solvers import (
-    AdvancedFractionalODESolver,
-    HighOrderFractionalSolver,
-    ErrorControlMethod,
-    AdaptiveMethod,
-    solve_advanced_fractional_ode,
-    solve_high_order_fractional_ode,
+from .homotopy_perturbation import (
+    HomotopyPerturbationMethod,
+    HPMFractionalDiffusion,
+    HPMFractionalWave,
+    validate_hpm_solution,
+    hpm_convergence_analysis
 )
 
-# Define what gets imported with "from solvers import *"
+from .variational_iteration import (
+    VariationalIterationMethod,
+    VIMFractionalDiffusion,
+    VIMFractionalWave,
+    VIMFractionalAdvection,
+    validate_vim_solution,
+    vim_convergence_analysis,
+    compare_hpm_vim
+)
+
 __all__ = [
-    # ODE solvers
-    "FractionalODESolver",
-    "AdaptiveFractionalODESolver",
-    "solve_fractional_ode",
-    "solve_fractional_system",
-    # PDE solvers
-    "FractionalPDESolver",
-    "FractionalDiffusionSolver",
-    "FractionalAdvectionSolver",
-    "FractionalReactionDiffusionSolver",
-    "solve_fractional_diffusion",
-    "solve_fractional_advection",
-    "solve_fractional_reaction_diffusion",
-    # Predictor-corrector methods
-    "PredictorCorrectorSolver",
-    "AdamsBashforthMoultonSolver",
-    "VariableStepPredictorCorrector",
-    "solve_predictor_corrector",
-    "solve_adams_bashforth_moulton",
-    "solve_variable_step_predictor_corrector",
-    # Advanced solvers
-    "AdvancedFractionalODESolver",
-    "HighOrderFractionalSolver",
-    "ErrorControlMethod",
-    "AdaptiveMethod",
-    "solve_advanced_fractional_ode",
-    "solve_high_order_fractional_ode",
+    # ODE Solvers
+    'FractionalODESolver',
+    'AdamsBashforthMoulton',
+    'FractionalEuler',
+    'FractionalRungeKutta',
+    'solve_fractional_ode',
+    
+    # PDE Solvers
+    'FractionalPDESolver',
+    'FractionalDiffusionSolver',
+    'FractionalWaveSolver',
+    'FractionalAdvectionSolver',
+    'solve_fractional_pde',
+    
+    # Advanced Solvers
+    'AdaptiveSolver',
+    'MultiStepSolver',
+    'ImplicitSolver',
+    'ExplicitSolver',
+    'solve_adaptive_fractional',
+    
+    # Predictor-Corrector Methods
+    'PredictorCorrectorSolver',
+    'AdamsPredictorCorrector',
+    'FractionalPredictorCorrector',
+    'solve_predictor_corrector',
+    
+    # Homotopy Perturbation Method
+    'HomotopyPerturbationMethod',
+    'HPMFractionalDiffusion',
+    'HPMFractionalWave',
+    'validate_hpm_solution',
+    'hpm_convergence_analysis',
+    
+    # Variational Iteration Method
+    'VariationalIterationMethod',
+    'VIMFractionalDiffusion',
+    'VIMFractionalWave',
+    'VIMFractionalAdvection',
+    'validate_vim_solution',
+    'vim_convergence_analysis',
+    'compare_hpm_vim'
 ]

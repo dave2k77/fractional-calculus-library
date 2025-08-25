@@ -1,61 +1,73 @@
 """
-Special functions for fractional calculus.
+Special Functions Module
 
-This module provides optimized implementations of special functions
-that are fundamental to fractional calculus, including:
+This module provides special mathematical functions used in fractional calculus:
 - Gamma and Beta functions
-- Mittag-Leffler function
 - Binomial coefficients
+- Mittag-Leffler functions
+- Fractional Green's functions
 """
 
-from .gamma_beta import GammaFunction, BetaFunction, gamma, beta, log_gamma, log_beta
-
-from .mittag_leffler import (
-    MittagLefflerFunction,
-    MittagLefflerMatrix,
-    mittag_leffler,
-    mittag_leffler_derivative,
-    mittag_leffler_matrix,
-    exponential,
-    cosine_fractional,
-    sinc_fractional,
+from .gamma_beta import (
+    gamma_function,
+    beta_function,
+    incomplete_gamma,
+    incomplete_beta,
+    log_gamma
 )
 
 from .binomial_coeffs import (
-    BinomialCoefficients,
-    GrunwaldLetnikovCoefficients,
-    binomial,
-    binomial_fractional,
-    grunwald_letnikov_coefficients,
-    grunwald_letnikov_weighted_coefficients,
-    pascal_triangle,
-    fractional_pascal_triangle,
+    binomial_coefficient,
+    generalized_binomial,
+    multinomial_coefficient,
+    stirling_numbers
+)
+
+from .mittag_leffler import (
+    mittag_leffler_function,
+    mittag_leffler_derivative,
+    generalized_mittag_leffler,
+    three_parameter_mittag_leffler
+)
+
+from .greens_function import (
+    FractionalGreensFunction,
+    FractionalDiffusionGreensFunction,
+    FractionalWaveGreensFunction,
+    FractionalAdvectionGreensFunction,
+    create_fractional_greens_function,
+    greens_function_properties,
+    validate_greens_function,
+    greens_function_convolution
 )
 
 __all__ = [
     # Gamma and Beta functions
-    "GammaFunction",
-    "BetaFunction",
-    "gamma",
-    "beta",
-    "log_gamma",
-    "log_beta",
-    # Mittag-Leffler function
-    "MittagLefflerFunction",
-    "MittagLefflerMatrix",
-    "mittag_leffler",
-    "mittag_leffler_derivative",
-    "mittag_leffler_matrix",
-    "exponential",
-    "cosine_fractional",
-    "sinc_fractional",
+    'gamma_function',
+    'beta_function', 
+    'incomplete_gamma',
+    'incomplete_beta',
+    'log_gamma',
+    
     # Binomial coefficients
-    "BinomialCoefficients",
-    "GrunwaldLetnikovCoefficients",
-    "binomial",
-    "binomial_fractional",
-    "grunwald_letnikov_coefficients",
-    "grunwald_letnikov_weighted_coefficients",
-    "pascal_triangle",
-    "fractional_pascal_triangle",
+    'binomial_coefficient',
+    'generalized_binomial',
+    'multinomial_coefficient',
+    'stirling_numbers',
+    
+    # Mittag-Leffler functions
+    'mittag_leffler_function',
+    'mittag_leffler_derivative',
+    'generalized_mittag_leffler',
+    'three_parameter_mittag_leffler',
+    
+    # Green's functions
+    'FractionalGreensFunction',
+    'FractionalDiffusionGreensFunction',
+    'FractionalWaveGreensFunction',
+    'FractionalAdvectionGreensFunction',
+    'create_fractional_greens_function',
+    'greens_function_properties',
+    'validate_greens_function',
+    'greens_function_convolution'
 ]
