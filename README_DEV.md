@@ -24,6 +24,10 @@ hpfracc/
 │   │   ├── __init__.py
 │   │   ├── layers.py          # Fractional neural network layers
 │   │   ├── networks.py        # Neural network architectures
+│   │   ├── gnn_layers.py      # Fractional GNN layers (GCN, GAT, GraphSAGE, Pooling)
+│   │   ├── gnn_models.py      # Complete GNN architectures
+│   │   ├── tensor_ops.py      # Unified tensor operations across backends
+│   │   ├── backends.py        # Backend management (PyTorch, JAX, NUMBA)
 │   │   ├── optimizers.py      # Fractional optimizers
 │   │   ├── losses.py          # Fractional loss functions
 │   │   ├── registry.py        # Model registry system
@@ -68,6 +72,8 @@ hpfracc/
 - Git
 - Virtual environment tool (venv, conda, etc.)
 - PyTorch 2.0+ with CUDA support (recommended)
+- JAX (optional, for JAX backend support)
+- NUMBA (optional, for NUMBA backend support)
 
 ### **Development Setup**
 
@@ -88,6 +94,57 @@ pip install -r requirements-dev.txt
 
 # Verify installation
 python -c "import hpfracc; print('Installation successful!')"
+```
+
+## 🧠 **Graph Neural Networks (GNNs)**
+
+### **Overview**
+
+The HPFRACC library now includes a complete implementation of Fractional Graph Neural Networks with multi-backend support. All GNN architectures are fully functional across PyTorch, JAX, and NUMBA backends.
+
+### **Available GNN Models**
+
+- **GCN (Graph Convolutional Network)**: Standard graph convolution with fractional calculus
+- **GAT (Graph Attention Network)**: Multi-head attention mechanism for graphs
+- **GraphSAGE**: Scalable inductive learning for large graphs
+- **Graph U-Net**: Hierarchical architecture with skip connections
+
+### **Backend Support**
+
+All GNN models work seamlessly across:
+- **PyTorch**: Full-featured deep learning with GPU acceleration
+- **JAX**: High-performance numerical computing with automatic differentiation
+- **NUMBA**: JIT compilation for CPU optimization
+
+### **Quick GNN Example**
+
+```python
+from hpfracc.ml import FractionalGNNFactory, BackendType
+from hpfracc.core.definitions import FractionalOrder
+
+# Create GNN with fractional calculus
+gnn = FractionalGNNFactory.create_model(
+    model_type='gcn',
+    input_dim=16,
+    hidden_dim=32,
+    output_dim=4,
+    fractional_order=FractionalOrder(0.5),
+    backend=BackendType.JAX
+)
+
+# Forward pass
+output = gnn(node_features, edge_index)
+```
+
+### **Running GNN Demo**
+
+```bash
+# Activate environment
+source ml_env/Scripts/activate  # Windows
+# source ml_env/bin/activate     # Linux/Mac
+
+# Run GNN demo
+python examples/fractional_gnn_demo.py
 ```
 
 ### **Development Dependencies**
@@ -555,6 +612,8 @@ When reporting issues:
 
 ### **Short Term (Next 3 months)**
 
+- [x] **Graph Neural Networks**: Complete GNN implementation with multi-backend support
+- [x] **Backend Compatibility**: Ensure PyTorch, JAX, and NUMBA all work seamlessly
 - [ ] **Performance Optimization**: Further optimize adjoint methods
 - [ ] **GPU Support**: Improve CUDA implementations
 - [ ] **Testing**: Increase test coverage to >95%

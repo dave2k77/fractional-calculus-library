@@ -3,8 +3,9 @@
 ## Table of Contents
 1. [Core Module](#core-module)
 2. [ML Module](#ml-module)
-3. [Benchmarks Module](#benchmarks-module)
-4. [Analytics Module](#analytics-module)
+3. [Graph Neural Networks](#graph-neural-networks)
+4. [Benchmarks Module](#benchmarks-module)
+5. [Analytics Module](#analytics-module)
 
 ---
 
@@ -299,6 +300,137 @@ Production workflow for model deployment and monitoring.
 - `promote_to_production(model_id, version, test_data, test_labels, custom_metrics, force=False)`: Promote model to production
 - `deploy_model(model_id, version, deployment_config)`: Deploy a model
 - `monitor_model(model_id, metrics)`: Monitor production model
+
+---
+
+## Graph Neural Networks
+
+### GNN Factory
+
+#### `FractionalGNNFactory`
+Factory class for creating fractional GNN models.
+
+**Static Methods:**
+- `create_model(model_type, input_dim, hidden_dim, output_dim, **kwargs)`: Create GNN model
+- `get_available_models()`: Get list of available model types
+- `get_model_info(model_type)`: Get information about a specific model type
+
+**Example:**
+```python
+from hpfracc.ml import FractionalGNNFactory, BackendType
+from hpfracc.core.definitions import FractionalOrder
+
+# Create GCN model
+gcn = FractionalGNNFactory.create_model(
+    model_type='gcn',
+    input_dim=16,
+    hidden_dim=32,
+    output_dim=4,
+    fractional_order=FractionalOrder(0.5),
+    backend=BackendType.TORCH
+)
+```
+
+### Available GNN Models
+
+#### `FractionalGCN(input_dim, hidden_dim, output_dim, num_layers=3, fractional_order=0.5, method="RL", use_fractional=True, activation="relu", dropout=0.1, backend=None)`
+Graph Convolutional Network with fractional calculus integration.
+
+**Parameters:**
+- `input_dim` (int): Input feature dimension
+- `hidden_dim` (int): Hidden layer dimension
+- `output_dim` (int): Output dimension
+- `num_layers` (int): Number of layers
+- `fractional_order` (Union[float, FractionalOrder]): Fractional order
+- `method` (str): Fractional derivative method
+- `use_fractional` (bool): Whether to use fractional derivatives
+- `activation` (str): Activation function
+- `dropout` (float): Dropout rate
+- `backend` (Optional[BackendType]): Computation backend
+
+#### `FractionalGAT(input_dim, hidden_dim, output_dim, num_layers=3, num_heads=8, fractional_order=0.5, method="RL", use_fractional=True, activation="relu", dropout=0.1, backend=None)`
+Graph Attention Network with fractional calculus integration.
+
+**Parameters:**
+- `input_dim` (int): Input feature dimension
+- `hidden_dim` (int): Hidden layer dimension
+- `output_dim` (int): Output dimension
+- `num_layers` (int): Number of layers
+- `num_heads` (int): Number of attention heads
+- `fractional_order` (Union[float, FractionalOrder]): Fractional order
+- `method` (str): Fractional derivative method
+- `use_fractional` (bool): Whether to use fractional derivatives
+- `activation` (str): Activation function
+- `dropout` (float): Dropout rate
+- `backend` (Optional[BackendType]): Computation backend
+
+#### `FractionalGraphSAGE(input_dim, hidden_dim, output_dim, num_layers=3, num_samples=25, fractional_order=0.5, method="RL", use_fractional=True, activation="relu", dropout=0.1, backend=None)`
+GraphSAGE network with fractional calculus integration.
+
+**Parameters:**
+- `input_dim` (int): Input feature dimension
+- `hidden_dim` (int): Hidden layer dimension
+- `output_dim` (int): Output dimension
+- `num_layers` (int): Number of layers
+- `num_samples` (int): Number of neighbor samples
+- `fractional_order` (Union[float, FractionalOrder]): Fractional order
+- `method` (str): Fractional derivative method
+- `use_fractional` (bool): Whether to use fractional derivatives
+- `activation` (str): Activation function
+- `dropout` (float): Dropout rate
+- `backend` (Optional[BackendType]): Computation backend
+
+#### `FractionalGraphUNet(input_dim, hidden_dim, output_dim, num_layers=4, pooling_ratio=0.5, fractional_order=0.5, method="RL", use_fractional=True, activation="relu", dropout=0.1, backend=None)`
+Graph U-Net with fractional calculus integration.
+
+**Parameters:**
+- `input_dim` (int): Input feature dimension
+- `hidden_dim` (int): Hidden layer dimension
+- `output_dim` (int): Output dimension
+- `num_layers` (int): Number of layers
+- `pooling_ratio` (float): Pooling ratio for hierarchical structure
+- `fractional_order` (Union[float, FractionalOrder]): Fractional order
+- `method` (str): Fractional derivative method
+- `use_fractional` (bool): Whether to use fractional derivatives
+- `activation` (str): Activation function
+- `dropout` (float): Dropout rate
+- `backend` (Optional[BackendType]): Computation backend
+
+### Backend Support
+
+All GNN models support multiple computation backends:
+
+- **PyTorch** (`BackendType.TORCH`): Full-featured deep learning with GPU acceleration
+- **JAX** (`BackendType.JAX`): High-performance numerical computing with automatic differentiation
+- **NUMBA** (`BackendType.NUMBA`): JIT compilation for CPU optimization
+
+### Usage Example
+
+```python
+from hpfracc.ml import FractionalGNNFactory, BackendType
+from hpfracc.core.definitions import FractionalOrder
+import torch
+
+# Create synthetic graph data
+num_nodes = 100
+num_features = 16
+node_features = torch.randn(num_nodes, num_features)
+edge_index = torch.randint(0, num_nodes, (2, 200))
+
+# Create GNN model
+gnn = FractionalGNNFactory.create_model(
+    model_type='gcn',
+    input_dim=num_features,
+    hidden_dim=32,
+    output_dim=4,
+    fractional_order=FractionalOrder(0.5),
+    backend=BackendType.TORCH
+)
+
+# Forward pass
+output = gnn(node_features, edge_index)
+print(f"Output shape: {output.shape}")
+```
 
 ---
 

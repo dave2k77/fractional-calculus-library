@@ -3,11 +3,12 @@
 ## Table of Contents
 1. [Basic Fractional Calculus](#basic-fractional-calculus)
 2. [Neural Network Examples](#neural-network-examples)
-3. [Advanced Architectures](#advanced-architectures)
-4. [Training Examples](#training-examples)
-5. [Production Workflow Examples](#production-workflow-examples)
-6. [Performance Benchmarking](#performance-benchmarking)
-7. [Real-World Applications](#real-world-applications)
+3. [Graph Neural Network Examples](#graph-neural-network-examples)
+4. [Advanced Architectures](#advanced-architectures)
+5. [Training Examples](#training-examples)
+6. [Production Workflow Examples](#production-workflow-examples)
+7. [Performance Benchmarking](#performance-benchmarking)
+8. [Real-World Applications](#real-world-applications)
 
 ---
 
@@ -246,6 +247,205 @@ def adjoint_network_example():
 
 # Run example
 adjoint_net = adjoint_network_example()
+```
+
+---
+
+## Graph Neural Network Examples
+
+### Basic GNN Usage
+
+```python
+from hpfracc.ml import FractionalGNNFactory, BackendType
+from hpfracc.core.definitions import FractionalOrder
+import torch
+
+def basic_gnn_example():
+    """Basic example of using fractional GNNs"""
+    
+    # Create synthetic graph data
+    num_nodes = 100
+    num_features = 16
+    num_classes = 4
+    
+    # Node features
+    node_features = torch.randn(num_nodes, num_features)
+    
+    # Edge index (random graph)
+    edge_index = torch.randint(0, num_nodes, (2, 200))
+    
+    # Create GNN model
+    gnn = FractionalGNNFactory.create_model(
+        model_type='gcn',
+        input_dim=num_features,
+        hidden_dim=32,
+        output_dim=num_classes,
+        fractional_order=FractionalOrder(0.5),
+        backend=BackendType.TORCH
+    )
+    
+    # Forward pass
+    output = gnn(node_features, edge_index)
+    
+    print(f"Input features: {node_features.shape}")
+    print(f"Edge index: {edge_index.shape}")
+    print(f"Output: {output.shape}")
+    
+    return gnn, output
+
+# Run example
+gnn, output = basic_gnn_example()
+```
+
+### Multi-Backend GNN Testing
+
+```python
+def multi_backend_gnn_example():
+    """Test GNNs across all backends"""
+    
+    # Test data
+    num_nodes = 50
+    num_features = 8
+    num_classes = 2
+    
+    node_features = torch.randn(num_nodes, num_features)
+    edge_index = torch.randint(0, num_nodes, (2, 100))
+    
+    # Test all backends
+    backends = [BackendType.TORCH, BackendType.JAX, BackendType.NUMBA]
+    models = ['gcn', 'gat', 'sage', 'unet']
+    
+    results = {}
+    
+    for backend in backends:
+        print(f"\nTesting {backend.value} backend...")
+        results[backend.value] = {}
+        
+        for model_type in models:
+            try:
+                # Create model
+                gnn = FractionalGNNFactory.create_model(
+                    model_type=model_type,
+                    input_dim=num_features,
+                    hidden_dim=16,
+                    output_dim=num_classes,
+                    fractional_order=FractionalOrder(0.5),
+                    backend=backend
+                )
+                
+                # Forward pass
+                output = gnn(node_features, edge_index)
+                
+                results[backend.value][model_type] = {
+                    'status': 'success',
+                    'output_shape': output.shape
+                }
+                
+                print(f"  {model_type.upper()}: ✅ Success - {output.shape}")
+                
+            except Exception as e:
+                results[backend.value][model_type] = {
+                    'status': 'error',
+                    'error': str(e)
+                }
+                print(f"  {model_type.upper()}: ❌ Error - {e}")
+    
+    return results
+
+# Run example
+results = multi_backend_gnn_example()
+```
+
+### GNN with Different Fractional Orders
+
+```python
+def fractional_order_gnn_example():
+    """Demonstrate fractional calculus effects in GNNs"""
+    
+    # Test data
+    num_nodes = 200
+    num_features = 16
+    num_classes = 4
+    
+    node_features = torch.randn(num_nodes, num_features)
+    edge_index = torch.randint(0, num_nodes, (2, 600))
+    
+    # Test different fractional orders
+    fractional_orders = [0.0, 0.25, 0.5, 0.75, 1.0]
+    
+    results = {}
+    
+    for alpha in fractional_orders:
+        print(f"\nTesting α = {alpha}")
+        
+        # Create GNN
+        gnn = FractionalGNNFactory.create_model(
+            model_type='gcn',
+            input_dim=num_features,
+            hidden_dim=32,
+            output_dim=num_classes,
+            fractional_order=FractionalOrder(alpha),
+            backend=BackendType.TORCH
+        )
+        
+        # Forward pass
+        output = gnn(node_features, edge_index)
+        
+        # Analyze output statistics
+        mean_val = output.mean().item()
+        std_val = output.std().item()
+        min_val = output.min().item()
+        max_val = output.max().item()
+        
+        results[alpha] = {
+            'mean': mean_val,
+            'std': std_val,
+            'range': [min_val, max_val]
+        }
+        
+        print(f"  Mean: {mean_val:.4f}")
+        print(f"  Std: {std_val:.4f}")
+        print(f"  Range: [{min_val:.4f}, {max_val:.4f}]")
+    
+    return results
+
+# Run example
+fractional_results = fractional_order_gnn_example()
+```
+
+### Running the GNN Demo
+
+```python
+def run_gnn_demo():
+    """Run the comprehensive GNN demo"""
+    
+    import subprocess
+    import sys
+    
+    try:
+        # Run the demo script
+        result = subprocess.run([
+            sys.executable, 
+            'examples/fractional_gnn_demo.py'
+        ], capture_output=True, text=True, check=True)
+        
+        print("GNN Demo Output:")
+        print(result.stdout)
+        
+        if result.stderr:
+            print("Errors:")
+            print(result.stderr)
+            
+        return True
+        
+    except subprocess.CalledProcessError as e:
+        print(f"Demo failed with error code {e.returncode}")
+        print("Output:", e.stdout)
+        print("Errors:", e.stderr)
+        return False
+
+# Run demo (uncomment to run)
+# success = run_gnn_demo()
 ```
 
 ---

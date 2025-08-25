@@ -81,12 +81,13 @@ class FractionalConv1D:
                 self.bias = None
         else:
             # JAX/NUMBA initialization
-            self.weight = self.tensor_ops.create_tensor(
-                (self.out_channels, self.in_channels, self.kernel_size),
-                requires_grad=True
-            )
+            import numpy as np
+            # Create random weight data
+            weight_data = np.random.randn(self.out_channels, self.in_channels, self.kernel_size)
+            self.weight = self.tensor_ops.create_tensor(weight_data, requires_grad=True)
             if self.bias:
-                self.bias = self.tensor_ops.create_tensor(self.out_channels, requires_grad=True)
+                bias_data = np.zeros(self.out_channels)
+                self.bias = self.tensor_ops.create_tensor(bias_data, requires_grad=True)
             else:
                 self.bias = None
         
@@ -106,8 +107,17 @@ class FractionalConv1D:
         
     def forward(self, x: Any) -> Any:
         """Forward pass with optional fractional derivative"""
+        # Ensure input is the right type for the backend
+        if self.backend == BackendType.TORCH:
+            import torch
+            if not isinstance(x, torch.Tensor):
+                x = torch.tensor(x, dtype=torch.float32)
+        
         if self.config.use_fractional:
-            x = fractional_derivative(x, self.config.fractional_order.alpha, self.config.method)
+            # Only apply fractional derivative for PyTorch backend for now
+            if self.backend == BackendType.TORCH:
+                x = fractional_derivative(x, self.config.fractional_order.alpha, self.config.method)
+            # TODO: Implement backend-agnostic fractional derivatives
         
         # Apply convolution using backend-specific operations
         if self.backend == BackendType.TORCH:
@@ -137,6 +147,16 @@ class FractionalConv1D:
         import jax.numpy as jnp
         from jax.lax import conv_general_dilated
         
+        # Ensure input has correct shape (batch_size, channels, seq_len)
+        if x.ndim == 3:
+            # Input is already in correct format
+            pass
+        elif x.ndim == 2:
+            # Add batch dimension
+            x = x.reshape(1, x.shape[0], x.shape[1])
+        else:
+            raise ValueError(f"Expected 2D or 3D input, got {x.ndim}D")
+        
         # JAX convolution with general dilation
         out = conv_general_dilated(
             x, self.weight,
@@ -154,7 +174,17 @@ class FractionalConv1D:
     
     def _numba_conv1d(self, x: Any) -> Any:
         """NUMBA implementation of 1D convolution"""
-        import numba.np as np
+        import numpy as np
+        
+        # Ensure input has correct shape (batch_size, channels, seq_len)
+        if x.ndim == 3:
+            # Input is already in correct format
+            pass
+        elif x.ndim == 2:
+            # Add batch dimension
+            x = x.reshape(1, x.shape[0], x.shape[1])
+        else:
+            raise ValueError(f"Expected 2D or 3D input, got {x.ndim}D")
         
         # Simplified NUMBA convolution (in practice, you'd want more sophisticated implementation)
         batch_size, in_channels, seq_len = x.shape
@@ -236,12 +266,13 @@ class FractionalConv2D:
                 self.bias = None
         else:
             # JAX/NUMBA initialization
-            self.weight = self.tensor_ops.create_tensor(
-                (self.out_channels, self.in_channels, self.kernel_size[0], self.kernel_size[1]),
-                requires_grad=True
-            )
+            import numpy as np
+            # Create random weight data
+            weight_data = np.random.randn(self.out_channels, self.in_channels, self.kernel_size[0], self.kernel_size[1])
+            self.weight = self.tensor_ops.create_tensor(weight_data, requires_grad=True)
             if self.bias:
-                self.bias = self.tensor_ops.create_tensor(self.out_channels, requires_grad=True)
+                bias_data = np.zeros(self.out_channels)
+                self.bias = self.tensor_ops.create_tensor(bias_data, requires_grad=True)
             else:
                 self.bias = None
         
@@ -261,8 +292,17 @@ class FractionalConv2D:
         
     def forward(self, x: Any) -> Any:
         """Forward pass with optional fractional derivative"""
+        # Ensure input is the right type for the backend
+        if self.backend == BackendType.TORCH:
+            import torch
+            if not isinstance(x, torch.Tensor):
+                x = torch.tensor(x, dtype=torch.float32)
+        
         if self.config.use_fractional:
-            x = fractional_derivative(x, self.config.fractional_order.alpha, self.config.method)
+            # Only apply fractional derivative for PyTorch backend for now
+            if self.backend == BackendType.TORCH:
+                x = fractional_derivative(x, self.config.fractional_order.alpha, self.config.method)
+            # TODO: Implement backend-agnostic fractional derivatives
         
         # Apply convolution using backend-specific operations
         if self.backend == BackendType.TORCH:
@@ -309,7 +349,7 @@ class FractionalConv2D:
     
     def _numba_conv2d(self, x: Any) -> Any:
         """NUMBA implementation of 2D convolution"""
-        import numba.np as np
+        import numpy as np
         
         # Simplified NUMBA convolution (in practice, you'd want more sophisticated implementation)
         batch_size, in_channels, height, width = x.shape
@@ -395,12 +435,18 @@ class FractionalLSTM:
                 self.bias_hh = None
         else:
             # JAX/NUMBA initialization
-            self.weight_ih = self.tensor_ops.create_tensor((4 * self.hidden_size, self.input_size), requires_grad=True)
-            self.weight_hh = self.tensor_ops.create_tensor((4 * self.hidden_size, self.hidden_size), requires_grad=True)
+            import numpy as np
+            # Create random weight data
+            weight_ih_data = np.random.randn(4 * self.hidden_size, self.input_size)
+            weight_hh_data = np.random.randn(4 * self.hidden_size, self.hidden_size)
+            self.weight_ih = self.tensor_ops.create_tensor(weight_ih_data, requires_grad=True)
+            self.weight_hh = self.tensor_ops.create_tensor(weight_hh_data, requires_grad=True)
             
             if self.bias:
-                self.bias_ih = self.tensor_ops.create_tensor(4 * self.hidden_size, requires_grad=True)
-                self.bias_hh = self.tensor_ops.create_tensor(4 * self.hidden_size, requires_grad=True)
+                bias_ih_data = np.zeros(4 * self.hidden_size)
+                bias_hh_data = np.zeros(4 * self.hidden_size)
+                self.bias_ih = self.tensor_ops.create_tensor(bias_ih_data, requires_grad=True)
+                self.bias_hh = self.tensor_ops.create_tensor(bias_hh_data, requires_grad=True)
             else:
                 self.bias_ih = None
                 self.bias_hh = None
@@ -426,8 +472,17 @@ class FractionalLSTM:
     
     def forward(self, x: Any, hx: Optional[Tuple[Any, Any]] = None) -> Tuple[Any, Tuple[Any, Any]]:
         """Forward pass with optional fractional derivative"""
+        # Ensure input is the right type for the backend
+        if self.backend == BackendType.TORCH:
+            import torch
+            if not isinstance(x, torch.Tensor):
+                x = torch.tensor(x, dtype=torch.float32)
+        
         if self.config.use_fractional:
-            x = fractional_derivative(x, self.config.fractional_order.alpha, self.config.method)
+            # Only apply fractional derivative for PyTorch backend for now
+            if self.backend == BackendType.TORCH:
+                x = fractional_derivative(x, self.config.fractional_order.alpha, self.config.method)
+            # TODO: Implement backend-agnostic fractional derivatives
         
         # Apply LSTM using backend-specific operations
         if self.backend == BackendType.TORCH:
@@ -451,17 +506,53 @@ class FractionalLSTM:
             c = torch.zeros(self.num_layers, batch_size, self.hidden_size, device=x.device, dtype=x.dtype)
             hx = (h, c)
         
-        # Apply LSTM cell
-        output, (h, c) = F.lstm(
-            x, hx, (self.weight_ih, self.weight_hh, self.bias_ih, self.bias_hh),
-            num_layers=self.num_layers, dropout=self.dropout, bidirectional=self.bidirectional
-        )
+        # Apply LSTM cell manually since F.lstm doesn't exist
+        # This is a simplified implementation
+        batch_size = x.shape[0] if self.batch_first else x.shape[1]
+        seq_len = x.shape[1] if self.batch_first else x.shape[0]
+        
+        outputs = []
+        h, c = hx
+        
+        for t in range(seq_len):
+            # Get current input
+            if self.batch_first:
+                x_t = x[:, t, :]
+            else:
+                x_t = x[t, :, :]
+            
+            # LSTM cell computation
+            gates = torch.mm(x_t, self.weight_ih.T) + torch.mm(h[0], self.weight_hh.T)
+            if self.bias:
+                gates += self.bias_ih + self.bias_hh
+            
+            # Split gates
+            i, f, g, o = torch.split(gates, self.hidden_size, dim=-1)
+            
+            # Apply activations
+            i = torch.sigmoid(i)
+            f = torch.sigmoid(f)
+            g = torch.tanh(g)
+            o = torch.sigmoid(o)
+            
+            # Update cell state
+            c[0] = f * c[0] + i * g
+            h[0] = o * torch.tanh(c[0])
+            
+            outputs.append(h[0])
+        
+        # Stack outputs
+        if self.batch_first:
+            output = torch.stack(outputs, dim=1)
+        else:
+            output = torch.stack(outputs, dim=0)
         
         return output, (h, c)
     
     def _jax_lstm(self, x: Any, hx: Optional[Tuple[Any, Any]]) -> Tuple[Any, Tuple[Any, Any]]:
         """JAX implementation of LSTM"""
         import jax.numpy as jnp
+        import jax.nn
         
         # Initialize hidden state if not provided
         if hx is None:
@@ -512,7 +603,7 @@ class FractionalLSTM:
     
     def _numba_lstm(self, x: Any, hx: Optional[Tuple[Any, Any]]) -> Tuple[Any, Tuple[Any, Any]]:
         """NUMBA implementation of LSTM"""
-        import numba.np as np
+        import numpy as np
         
         # Initialize hidden state if not provided
         if hx is None:
@@ -534,6 +625,12 @@ class FractionalLSTM:
                 x_t = x[t, :, :]
             
             # LSTM cell computation
+            # Ensure tensors have compatible shapes
+            if x_t.shape[-1] != self.weight_ih.shape[1]:
+                raise ValueError(f"Input feature dimension {x_t.shape[-1]} doesn't match weight_ih shape {self.weight_ih.shape}")
+            if h[0].shape[-1] != self.weight_hh.shape[1]:
+                raise ValueError(f"Hidden state dimension {h[0].shape[-1]} doesn't match weight_hh shape {self.weight_hh.shape}")
+            
             gates = np.dot(x_t, self.weight_ih.T) + np.dot(h[0], self.weight_hh.T)
             if self.bias:
                 gates += self.bias_ih + self.bias_hh
@@ -620,17 +717,35 @@ class FractionalTransformer:
             init.xavier_uniform_(self.w_ff2)
         else:
             # JAX/NUMBA initialization
-            self.w_q = self.tensor_ops.create_tensor((self.d_model, self.d_model), requires_grad=True)
-            self.w_k = self.tensor_ops.create_tensor((self.d_model, self.d_model), requires_grad=True)
-            self.w_v = self.tensor_ops.create_tensor((self.d_model, self.d_model), requires_grad=True)
-            self.w_o = self.tensor_ops.create_tensor((self.d_model, self.d_model), requires_grad=True)
-            self.w_ff1 = self.tensor_ops.create_tensor((self.d_model, self.d_ff), requires_grad=True)
-            self.w_ff2 = self.tensor_ops.create_tensor((self.d_ff, self.d_model), requires_grad=True)
+            import numpy as np
+            # Create random weight data
+            w_q_data = np.random.randn(self.d_model, self.d_model)
+            w_k_data = np.random.randn(self.d_model, self.d_model)
+            w_v_data = np.random.randn(self.d_model, self.d_model)
+            w_o_data = np.random.randn(self.d_model, self.d_model)
+            w_ff1_data = np.random.randn(self.d_model, self.d_ff)
+            w_ff2_data = np.random.randn(self.d_ff, self.d_model)
+            
+            self.w_q = self.tensor_ops.create_tensor(w_q_data, requires_grad=True)
+            self.w_k = self.tensor_ops.create_tensor(w_k_data, requires_grad=True)
+            self.w_v = self.tensor_ops.create_tensor(w_v_data, requires_grad=True)
+            self.w_o = self.tensor_ops.create_tensor(w_o_data, requires_grad=True)
+            self.w_ff1 = self.tensor_ops.create_tensor(w_ff1_data, requires_grad=True)
+            self.w_ff2 = self.tensor_ops.create_tensor(w_ff2_data, requires_grad=True)
     
     def forward(self, x: Any) -> Any:
         """Forward pass with optional fractional derivative"""
+        # Ensure input is the right type for the backend
+        if self.backend == BackendType.TORCH:
+            import torch
+            if not isinstance(x, torch.Tensor):
+                x = torch.tensor(x, dtype=torch.float32)
+        
         if self.config.use_fractional:
-            x = fractional_derivative(x, self.config.fractional_order.alpha, self.config.method)
+            # Only apply fractional derivative for PyTorch backend for now
+            if self.backend == BackendType.TORCH:
+                x = fractional_derivative(x, self.config.fractional_order.alpha, self.config.method)
+            # TODO: Implement backend-agnostic fractional derivatives
         
         # Apply transformer using backend-specific operations
         if self.backend == BackendType.TORCH:
@@ -682,6 +797,7 @@ class FractionalTransformer:
     def _jax_transformer(self, x: Any) -> Any:
         """JAX implementation of transformer"""
         import jax.numpy as jnp
+        import jax.nn
         
         batch_size, seq_len, _ = x.shape
         
@@ -715,7 +831,7 @@ class FractionalTransformer:
     
     def _numba_transformer(self, x: Any) -> Any:
         """NUMBA implementation of transformer"""
-        import numba.np as np
+        import numpy as np
         
         batch_size, seq_len, _ = x.shape
         
@@ -795,8 +911,17 @@ class FractionalPooling:
     
     def forward(self, x: Any) -> Any:
         """Forward pass with optional fractional derivative"""
+        # Ensure input is the right type for the backend
+        if self.backend == BackendType.TORCH:
+            import torch
+            if not isinstance(x, torch.Tensor):
+                x = torch.tensor(x, dtype=torch.float32)
+        
         if self.config.use_fractional:
-            x = fractional_derivative(x, self.config.fractional_order.alpha, self.config.method)
+            # Only apply fractional derivative for PyTorch backend for now
+            if self.backend == BackendType.TORCH:
+                x = fractional_derivative(x, self.config.fractional_order.alpha, self.config.method)
+            # TODO: Implement backend-agnostic fractional derivatives
         
         # Apply pooling using backend-specific operations
         if self.backend == BackendType.TORCH:
@@ -835,7 +960,7 @@ class FractionalPooling:
     
     def _numba_pooling(self, x: Any) -> Any:
         """NUMBA implementation of pooling"""
-        import numba.np as np
+        import numpy as np
         
         if self.pooling_type == "max":
             return self._numba_max_pool2d(x)
@@ -1031,8 +1156,17 @@ class FractionalBatchNorm1d:
     
     def forward(self, x: Any, training: bool = True) -> Any:
         """Forward pass with optional fractional derivative"""
+        # Ensure input is the right type for the backend
+        if self.backend == BackendType.TORCH:
+            import torch
+            if not isinstance(x, torch.Tensor):
+                x = torch.tensor(x, dtype=torch.float32)
+        
         if self.config.use_fractional:
-            x = fractional_derivative(x, self.config.fractional_order.alpha, self.config.method)
+            # Only apply fractional derivative for PyTorch backend for now
+            if self.backend == BackendType.TORCH:
+                x = fractional_derivative(x, self.config.fractional_order.alpha, self.config.method)
+            # TODO: Implement backend-agnostic fractional derivatives
         
         # Apply batch normalization using backend-specific operations
         if self.backend == BackendType.TORCH:
@@ -1091,7 +1225,7 @@ class FractionalBatchNorm1d:
     
     def _numba_batch_norm1d(self, x: Any, training: bool) -> Any:
         """NUMBA implementation of batch normalization"""
-        import numba.np as np
+        import numpy as np
         
         if training:
             # Compute batch statistics

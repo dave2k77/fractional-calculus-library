@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "hpfracc"
-version = "1.1.0"
-description = "Optimized numerical methods for fractional calculus using JAX and NUMBA"
+version = "1.1.2"
+description = "High-Performance Fractional Calculus Library with Machine Learning Integration and Graph Neural Networks"
 authors = [
     {name = "Davian R. Chin", email = "d.r.chin@pgr.reading.ac.uk"}
 ]
@@ -15,7 +15,7 @@ maintainers = [
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.8"
-keywords = ["fractional-calculus", "numerical-methods", "jax", "numba", "scientific-computing", "mathematics"]
+keywords = ["fractional-calculus", "numerical-methods", "machine-learning", "graph-neural-networks", "jax", "pytorch", "numba", "scientific-computing", "mathematics", "deep-learning"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Science/Research",
@@ -43,6 +43,9 @@ dependencies = [
     "jax>=0.4.0",
     "jaxlib>=0.4.0",
     "optax>=0.1.0",  # JAX optimization library
+    
+    # PyTorch for deep learning and neural networks
+    "torch>=1.12.0",
     
     # NUMBA for JIT compilation and parallel computing
     "numba>=0.56.0",
@@ -95,6 +98,13 @@ docs = [
 gpu = [
     "cupy>=10.0.0",  # CUDA acceleration
     "cudf>=21.0.0",  # GPU DataFrame
+]
+
+ml = [
+    "torch>=1.12.0",  # PyTorch for deep learning
+    "jax>=0.4.0",     # JAX for numerical computing
+    "jaxlib>=0.4.0",  # JAX backend
+    "numba>=0.56.0",  # NUMBA for JIT compilation
 ]
 
 [project.urls]

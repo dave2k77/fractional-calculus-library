@@ -194,12 +194,32 @@ class BackendManager:
     def create_tensor(self, data: Any, **kwargs) -> Any:
         """Create a tensor in the active backend"""
         if self.active_backend == BackendType.TORCH:
+            # Ensure consistent dtype for PyTorch
+            if 'dtype' not in kwargs:
+                # Preserve integer types for classification targets
+                if hasattr(data, 'dtype') and 'int' in str(data.dtype):
+                    kwargs['dtype'] = torch.long
+                else:
+                    kwargs['dtype'] = torch.float32
             return torch.tensor(data, **kwargs)
         elif self.active_backend == BackendType.JAX:
+            # Ensure consistent dtype for JAX
+            if 'dtype' not in kwargs:
+                # Preserve integer types for classification targets
+                if hasattr(data, 'dtype') and 'int' in str(data.dtype):
+                    kwargs['dtype'] = jnp.int32
+                else:
+                    kwargs['dtype'] = jnp.float32
             return jnp.array(data, **kwargs)
         elif self.active_backend == BackendType.NUMBA:
             # NUMBA works with numpy arrays
             import numpy as np
+            if 'dtype' not in kwargs:
+                # Preserve integer types for classification targets
+                if hasattr(data, 'dtype') and 'int' in str(data.dtype):
+                    kwargs['dtype'] = np.int32
+                else:
+                    kwargs['dtype'] = np.float32
             return np.array(data, **kwargs)
         else:
             raise RuntimeError(f"Unknown backend: {self.active_backend}")

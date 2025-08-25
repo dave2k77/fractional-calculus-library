@@ -4,12 +4,13 @@
 1. [Overview](#overview)
 2. [Getting Started with ML](#getting-started-with-ml)
 3. [Fractional Neural Networks](#fractional-neural-networks)
-4. [Advanced Architectures](#advanced-architectures)
-5. [Training and Optimization](#training-and-optimization)
-6. [Model Management](#model-management)
-7. [Production Deployment](#production-deployment)
-8. [Performance Tuning](#performance-tuning)
-9. [Best Practices](#best-practices)
+4. [Graph Neural Networks](#graph-neural-networks)
+5. [Advanced Architectures](#advanced-architectures)
+6. [Training and Optimization](#training-and-optimization)
+7. [Model Management](#model-management)
+8. [Production Deployment](#production-deployment)
+9. [Performance Tuning](#performance-tuning)
+10. [Best Practices](#best-practices)
 
 ---
 
@@ -181,6 +182,148 @@ class CustomFractionalNet(nn.Module):
         
         return x
 ```
+
+---
+
+## Graph Neural Networks
+
+### Overview
+
+HPFRACC provides a comprehensive implementation of Fractional Graph Neural Networks with multi-backend support. All GNN architectures integrate fractional calculus seamlessly and work across PyTorch, JAX, and NUMBA backends.
+
+### Available GNN Models
+
+#### 1. **GCN (Graph Convolutional Network)**
+Standard graph convolution with fractional calculus integration.
+
+```python
+from hpfracc.ml import FractionalGNNFactory, BackendType
+from hpfracc.core.definitions import FractionalOrder
+
+# Create GCN
+gcn = FractionalGNNFactory.create_model(
+    model_type='gcn',
+    input_dim=16,
+    hidden_dim=32,
+    output_dim=4,
+    fractional_order=FractionalOrder(0.5),
+    backend=BackendType.TORCH
+)
+
+# Forward pass
+output = gcn(node_features, edge_index)
+```
+
+#### 2. **GAT (Graph Attention Network)**
+Multi-head attention mechanism for graphs with fractional derivatives.
+
+```python
+# Create GAT
+gat = FractionalGNNFactory.create_model(
+    model_type='gat',
+    input_dim=16,
+    hidden_dim=32,
+    output_dim=4,
+    num_layers=3,
+    num_heads=8,
+    fractional_order=FractionalOrder(0.5),
+    backend=BackendType.JAX
+)
+
+# Forward pass
+output = gat(node_features, edge_index)
+```
+
+#### 3. **GraphSAGE**
+Scalable inductive learning for large graphs.
+
+```python
+# Create GraphSAGE
+sage = FractionalGNNFactory.create_model(
+    model_type='sage',
+    input_dim=16,
+    hidden_dim=32,
+    output_dim=4,
+    num_layers=3,
+    num_samples=25,
+    fractional_order=FractionalOrder(0.5),
+    backend=BackendType.NUMBA
+)
+
+# Forward pass
+output = sage(node_features, edge_index)
+```
+
+#### 4. **Graph U-Net**
+Hierarchical architecture with skip connections and fractional calculus.
+
+```python
+# Create Graph U-Net
+unet = FractionalGNNFactory.create_model(
+    model_type='unet',
+    input_dim=16,
+    hidden_dim=32,
+    output_dim=4,
+    num_layers=4,
+    pooling_ratio=0.5,
+    fractional_order=FractionalOrder(0.5),
+    backend=BackendType.TORCH
+)
+
+# Forward pass
+output = unet(node_features, edge_index)
+```
+
+### Backend Support
+
+All GNN models work seamlessly across:
+
+- **PyTorch**: Full-featured deep learning with GPU acceleration
+- **JAX**: High-performance numerical computing with automatic differentiation  
+- **NUMBA**: JIT compilation for CPU optimization
+
+### Multi-Backend Example
+
+```python
+from hpfracc.ml import BackendType
+
+# Test across all backends
+backends = [BackendType.TORCH, BackendType.JAX, BackendType.NUMBA]
+
+for backend in backends:
+    print(f"Testing {backend.value} backend...")
+    
+    # Create model
+    model = FractionalGNNFactory.create_model(
+        model_type='gcn',
+        input_dim=16,
+        hidden_dim=32,
+        output_dim=4,
+        fractional_order=FractionalOrder(0.5),
+        backend=backend
+    )
+    
+    # Forward pass
+    output = model(node_features, edge_index)
+    print(f"Output shape: {output.shape}")
+```
+
+### Running the GNN Demo
+
+```bash
+# Activate environment
+source ml_env/Scripts/activate  # Windows
+# source ml_env/bin/activate     # Linux/Mac
+
+# Run GNN demo
+python examples/fractional_gnn_demo.py
+```
+
+The demo will:
+- Test all GNN models across all backends
+- Benchmark performance
+- Demonstrate fractional calculus effects
+- Generate performance comparison charts
 
 ---
 

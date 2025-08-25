@@ -388,7 +388,15 @@ class FractionalAttention:
         # Compute attention scores
         # k needs to be transposed to (batch_size, n_heads, d_k, seq_len) for matmul
         k_t = self.tensor_ops.transpose(k, (0, 1, 3, 2))
-        scores = self.tensor_ops.matmul(q, k_t) / np.sqrt(self.d_k)
+        # Use tensor_ops for sqrt to maintain dtype consistency
+        # Ensure d_k is the same dtype as the input tensors
+        if self.backend == BackendType.TORCH:
+            import torch
+            d_k_tensor = torch.tensor(self.d_k, dtype=torch.float32)
+        else:
+            d_k_tensor = self.tensor_ops.create_tensor(self.d_k)
+        d_k_sqrt = self.tensor_ops.sqrt(d_k_tensor)
+        scores = self.tensor_ops.matmul(q, k_t) / d_k_sqrt
         attention_weights = self.tensor_ops.softmax(scores, dim=-1)
         attention_weights = self.tensor_ops.dropout(attention_weights, p=self.dropout_rate, training=True)
         
@@ -463,6 +471,11 @@ class FractionalAttention:
         output = self.tensor_ops.matmul(context, self.w_o)
         
         # Residual connection and layer normalization (simplified)
+        # Ensure consistent dtype for residual connection
+        if self.backend == BackendType.TORCH:
+            import torch
+            if x.dtype != output.dtype:
+                output = output.to(x.dtype)
         output = x + output
         
         return output

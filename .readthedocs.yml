@@ -1,0 +1,56 @@
+# ReadTheDocs configuration file
+# This file configures how ReadTheDocs builds your documentation
+
+version: 2
+
+# Build documentation in the environment specified by the requirements file
+build:
+  os: ubuntu-22.04
+  tools:
+    python: "3.9"
+
+# Build documentation using pip
+python:
+  version: "3.9"
+  install:
+    - method: pip
+      path: .
+      extra_requirements:
+        - docs
+  pip_install: true
+
+# Build documentation from the docs/ directory
+sphinx:
+  configuration: docs/conf.py
+  fail_on_warning: false
+
+# Build documentation in the docs/ directory
+formats:
+  - pdf
+  - epub
+
+# Additional build options
+build_jobs: 2
+
+# Environment variables
+environment:
+  PYTHONPATH: "."
+
+# Submodules
+submodules:
+  include:
+    - docs
+
+# Additional requirements for building
+python.install.extra_requirements:
+  - docs
+  - dev
+
+# Build documentation with additional options
+sphinx:
+  configuration: docs/conf.py
+  fail_on_warning: false
+  # Additional build options
+  build_args:
+    - "-W"
+    - "--keep-going"

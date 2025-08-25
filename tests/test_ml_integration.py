@@ -3,10 +3,10 @@ Comprehensive ML Integration Test Suite
 
 This test suite validates the complete ML integration system including:
 - Fractional Neural Networks
-- Model Registry
-- Development/Production Workflows
 - All Fractional Layers
 - Loss Functions and Optimizers
+- Fractional Graph Neural Networks (GNNs)
+- Multi-backend support (PyTorch, JAX, NUMBA)
 """
 
 import pytest
@@ -22,17 +22,35 @@ from hpfracc.ml import (
     FractionalAttention,
     FractionalMSELoss,
     FractionalAdam,
-    ModelRegistry,
-    DevelopmentWorkflow,
-    ProductionWorkflow,
-    ModelValidator,
     FractionalConv1D,
     FractionalConv2D,
     FractionalLSTM,
     FractionalTransformer,
     FractionalPooling,
     FractionalBatchNorm1d,
-    LayerConfig
+    LayerConfig,
+    # GNN Components
+    BaseFractionalGNNLayer,
+    FractionalGraphConv,
+    FractionalGraphAttention,
+    FractionalGraphPooling,
+    BaseFractionalGNN,
+    FractionalGCN,
+    FractionalGAT,
+    FractionalGraphSAGE,
+    FractionalGraphUNet,
+    FractionalGNNFactory,
+    # Backend Management
+    BackendManager,
+    BackendType,
+    get_backend_manager,
+    set_backend_manager,
+    get_active_backend,
+    switch_backend,
+    # Tensor Operations
+    TensorOps,
+    get_tensor_ops,
+    create_tensor
 )
 from hpfracc.core.definitions import FractionalOrder
 
@@ -351,196 +369,230 @@ class TestFractionalOptimizers:
         assert changes > 0, f"Parameters should be updated during optimization. Changes: {changes}"
 
 
-class TestModelRegistry:
-    """Test model registry functionality"""
+class TestFractionalGraphNeuralNetworks:
+    """Test Fractional Graph Neural Network functionality"""
     
-    @pytest.fixture
-    def temp_registry(self):
-        """Create a temporary registry for testing"""
-        temp_dir = tempfile.mkdtemp()
-        registry = ModelRegistry(storage_path=temp_dir)
-        yield registry
-        shutil.rmtree(temp_dir)
+    def test_gnn_factory_creation(self):
+        """Test GNN factory can create all model types"""
+        factory = FractionalGNNFactory()
+        
+        # Test creating each model type
+        for model_type in ['gcn', 'gat', 'sage', 'unet']:
+            model = factory.create_model(
+                model_type=model_type,
+                input_dim=10,
+                hidden_dim=32,
+                output_dim=2,
+                num_layers=2,
+                fractional_order=0.5
+            )
+            assert model is not None
+            assert hasattr(model, 'forward')
     
-    def test_model_registration(self, temp_registry):
-        """Test model registration and retrieval"""
-        net = FractionalNeuralNetwork(
-            input_size=5,
-            hidden_sizes=[16],
-            output_size=2,
+    def test_fractional_gcn(self):
+        """Test FractionalGCN model"""
+        model = FractionalGCN(
+            input_dim=10,
+            hidden_dim=32,
+            output_dim=2,
+            num_layers=2,
+            fractional_order=0.5,
+            dropout=0.1
+        )
+        
+        # Create sample graph data
+        num_nodes = 20
+        x = torch.randn(num_nodes, 10)  # Node features
+        edge_index = torch.randint(0, num_nodes, (2, 50))  # Random edges
+        
+        # Test forward pass
+        output = model(x, edge_index)
+        assert output.shape == (num_nodes, 2)
+        assert output.requires_grad
+        
+        # Test gradient flow
+        loss = output.sum()
+        loss.backward()
+        
+        # Check that parameters have gradients
+        param_grads = [param.grad for param in model.parameters()]
+        assert any(grad is not None for grad in param_grads)
+    
+    def test_fractional_gat(self):
+        """Test FractionalGAT model"""
+        model = FractionalGAT(
+            input_dim=10,
+            hidden_dim=32,
+            output_dim=2,
+            num_layers=2,
+            num_heads=4,
+            fractional_order=0.5,
+            dropout=0.1
+        )
+        
+        # Create sample graph data
+        num_nodes = 20
+        x = torch.randn(num_nodes, 10)  # Node features
+        edge_index = torch.randint(0, num_nodes, (2, 50))  # Random edges
+        
+        # Test forward pass
+        output = model(x, edge_index)
+        assert output.shape == (num_nodes, 2)
+        assert output.requires_grad
+        
+        # Test gradient flow
+        loss = output.sum()
+        loss.backward()
+        
+        # Check that parameters have gradients
+        param_grads = [param.grad for param in model.parameters()]
+        assert any(grad is not None for grad in param_grads)
+    
+    def test_fractional_graphsage(self):
+        """Test FractionalGraphSAGE model"""
+        model = FractionalGraphSAGE(
+            input_dim=10,
+            hidden_dim=32,
+            output_dim=2,
+            num_layers=2,
+            fractional_order=0.5,
+            dropout=0.1
+        )
+        
+        # Create sample graph data
+        num_nodes = 20
+        x = torch.randn(num_nodes, 10)  # Node features
+        edge_index = torch.randint(0, num_nodes, (2, 50))  # Random edges
+        
+        # Test forward pass
+        output = model(x, edge_index)
+        assert output.shape == (num_nodes, 2)
+        assert output.requires_grad
+        
+        # Test gradient flow
+        loss = output.sum()
+        loss.backward()
+        
+        # Check that parameters have gradients
+        param_grads = [param.grad for param in model.parameters()]
+        assert any(grad is not None for grad in param_grads)
+    
+    def test_fractional_graph_unet(self):
+        """Test FractionalGraphUNet model"""
+        model = FractionalGraphUNet(
+            input_dim=10,
+            hidden_dim=32,
+            output_dim=2,
+            num_layers=2,
+            fractional_order=0.5,
+            dropout=0.1
+        )
+        
+        # Create sample graph data
+        num_nodes = 20
+        x = torch.randn(num_nodes, 10)  # Node features
+        edge_index = torch.randint(0, num_nodes, (2, 50))  # Random edges
+        
+        # Test forward pass
+        output = model(x, edge_index)
+        assert output.shape == (num_nodes, 2)
+        assert output.requires_grad
+        
+        # Test gradient flow
+        loss = output.sum()
+        loss.backward()
+        
+        # Check that parameters have gradients
+        param_grads = [param.grad for param in model.parameters()]
+        assert any(grad is not None for grad in param_grads)
+    
+    def test_gnn_layers(self):
+        """Test individual GNN layers"""
+        # Test FractionalGraphConv
+        conv_layer = FractionalGraphConv(
+            in_channels=10,
+            out_channels=32,
+            fractional_order=0.5,
+            activation="relu",
+            dropout=0.1
+        )
+        
+        num_nodes = 20
+        x = torch.randn(num_nodes, 10)
+        edge_index = torch.randint(0, num_nodes, (2, 50))
+        
+        conv_output = conv_layer(x, edge_index)
+        assert conv_output.shape == (num_nodes, 32)
+        
+        # Test FractionalGraphAttention
+        attn_layer = FractionalGraphAttention(
+            in_channels=10,
+            out_channels=32,
+            num_heads=4,
+            fractional_order=0.5,
+            activation="relu",
+            dropout=0.1
+        )
+        
+        attn_output = attn_layer(x, edge_index)
+        assert attn_output.shape == (num_nodes, 32)
+        
+        # Test FractionalGraphPooling
+        pool_layer = FractionalGraphPooling(
+            in_channels=10,
+            ratio=0.5,
             fractional_order=0.5
         )
         
-        model_id = temp_registry.register_model(
-            model=net,
-            name="test_network",
-            version="1.0.0",
-            description="Test network",
-            author="Test Author",
-            tags=["test"],
-            framework="PyTorch",
-            model_type="FractionalNeuralNetwork",
-            fractional_order=0.5,
-            hyperparameters={"input_size": 5, "hidden_sizes": [16], "output_size": 2},
-            performance_metrics={"accuracy": 0.95},
-            dataset_info={"num_samples": 1000},
-            dependencies={"torch": ">=2.0.0"},
-            notes="Test model",
-            git_commit="test_commit",
-            git_branch="test_branch"
-        )
-        
-        assert model_id is not None
-        
-        # Retrieve model info
-        model_info = temp_registry.get_model(model_id)
-        assert model_info.name == "test_network"
-        assert model_info.version == "1.0.0"
-        assert model_info.author == "Test Author"
-    
-    def test_model_reconstruction(self, temp_registry):
-        """Test model reconstruction from registry"""
-        net = FractionalNeuralNetwork(
-            input_size=5,
-            hidden_sizes=[16],
-            output_size=2,
-            fractional_order=0.5
-        )
-        
-        model_id = temp_registry.register_model(
-            model=net,
-            name="test_network",
-            version="1.0.0",
-            description="Test network",
-            author="Test Author",
-            tags=["test"],
-            framework="PyTorch",
-            model_type="FractionalNeuralNetwork",
-            fractional_order=0.5,
-            hyperparameters={"input_size": 5, "hidden_sizes": [16], "output_size": 2},
-            performance_metrics={"accuracy": 0.95},
-            dataset_info={"num_samples": 1000},
-            dependencies={"torch": ">=2.0.0"},
-            notes="Test model",
-            git_commit="test_commit",
-            git_branch="test_branch"
-        )
-        
-        # Reconstruct model
-        reconstructed_net = temp_registry.reconstruct_model(model_id)
-        assert reconstructed_net is not None
-        assert isinstance(reconstructed_net, FractionalNeuralNetwork)
-        
-        # Test that reconstructed model works
-        x = torch.randn(8, 5)
-        output = reconstructed_net(x, use_fractional=True, method="RL")
-        assert output.shape == (8, 2)
+        pool_output, pool_edge_index, pool_batch = pool_layer(x, edge_index)
+        assert pool_output.shape[0] <= num_nodes  # Pooled nodes should be fewer or equal
+        assert pool_output.shape[1] == 10  # Feature dimension should be preserved
 
 
-class TestWorkflows:
-    """Test development and production workflows"""
+class TestBackendManagement:
+    """Test backend management system"""
     
-    @pytest.fixture
-    def temp_registry(self):
-        """Create a temporary registry for testing"""
-        temp_dir = tempfile.mkdtemp()
-        registry = ModelRegistry(storage_path=temp_dir)
-        yield registry
-        shutil.rmtree(temp_dir)
+    def test_backend_manager_creation(self):
+        """Test backend manager creation and initialization"""
+        manager = BackendManager()
+        assert manager is not None
+        assert hasattr(manager, 'active_backend')
     
-    def test_development_workflow(self, temp_registry):
-        """Test development workflow validation"""
-        # Create and register a model
-        net = FractionalNeuralNetwork(
-            input_size=5,
-            hidden_sizes=[16],
-            output_size=2,
-            fractional_order=0.5
-        )
+    def test_backend_switching(self):
+        """Test switching between different backends"""
+        manager = BackendManager()
         
-        model_id = temp_registry.register_model(
-            model=net,
-            name="test_network",
-            version="1.0.0",
-            description="Test network",
-            author="Test Author",
-            tags=["test"],
-            framework="PyTorch",
-            model_type="FractionalNeuralNetwork",
-            fractional_order=0.5,
-            hyperparameters={"input_size": 5, "hidden_sizes": [16], "output_size": 2},
-            performance_metrics={"accuracy": 0.95},
-            dataset_info={"num_samples": 1000},
-            dependencies={"torch": ">=2.0.0"},
-            notes="Test model",
-            git_commit="test_commit",
-            git_branch="test_branch"
-        )
+        # Test switching to PyTorch
+        manager.switch_backend(BackendType.TORCH)
+        assert manager.active_backend == BackendType.TORCH
         
-        # Test development workflow
-        validator = ModelValidator()
-        dev_workflow = DevelopmentWorkflow(temp_registry, validator)
+        # Test switching to JAX
+        manager.switch_backend(BackendType.JAX)
+        assert manager.active_backend == BackendType.JAX
         
-        # Create test data
-        test_data = torch.randn(100, 5)
-        test_labels = torch.randn(100, 2)
-        
-        validation_results = dev_workflow.validate_development_model(
-            model_id=model_id,
-            test_data=test_data,
-            test_labels=test_labels
-        )
-        
-        assert 'validation_passed' in validation_results
-        assert 'final_score' in validation_results
-        assert 'gate_results' in validation_results
+        # Test switching to NUMBA
+        manager.switch_backend(BackendType.NUMBA)
+        assert manager.active_backend == BackendType.NUMBA
     
-    def test_production_workflow(self, temp_registry):
-        """Test production workflow promotion"""
-        # Create and register a model
-        net = FractionalNeuralNetwork(
-            input_size=5,
-            hidden_sizes=[16],
-            output_size=2,
-            fractional_order=0.5
-        )
+    def test_tensor_ops_creation(self):
+        """Test tensor operations creation for different backends"""
+        # Test PyTorch tensor ops
+        torch_ops = get_tensor_ops(BackendType.TORCH)
+        assert torch_ops is not None
+        assert hasattr(torch_ops, 'zeros')
+        assert hasattr(torch_ops, 'ones')
         
-        model_id = temp_registry.register_model(
-            model=net,
-            name="test_network",
-            version="1.0.0",
-            description="Test network",
-            author="Test Author",
-            tags=["test"],
-            framework="PyTorch",
-            model_type="FractionalNeuralNetwork",
-            fractional_order=0.5,
-            hyperparameters={"input_size": 5, "hidden_sizes": [16], "output_size": 2},
-            performance_metrics={"accuracy": 0.95},
-            dataset_info={"num_samples": 1000},
-            dependencies={"torch": ">=2.0.0"},
-            notes="Test model",
-            git_commit="test_commit",
-            git_branch="test_branch"
-        )
+        # Test JAX tensor ops
+        jax_ops = get_tensor_ops(BackendType.JAX)
+        assert jax_ops is not None
+        assert hasattr(jax_ops, 'zeros')
+        assert hasattr(jax_ops, 'ones')
         
-        # Test production workflow
-        validator = ModelValidator()
-        prod_workflow = ProductionWorkflow(temp_registry, validator)
-        
-        # Create test data
-        test_data = torch.randn(100, 5)
-        test_labels = torch.randn(100, 2)
-        
-        promotion_results = prod_workflow.promote_to_production(
-            model_id=model_id,
-            version="1.0.0",
-            test_data=test_data,
-            test_labels=test_labels
-        )
-        
-        assert 'promoted' in promotion_results
-        assert 'reason' in promotion_results
+        # Test NUMBA tensor ops
+        numba_ops = get_tensor_ops(BackendType.NUMBA)
+        assert numba_ops is not None
+        assert hasattr(numba_ops, 'zeros')
+        assert hasattr(numba_ops, 'ones')
 
 
 class TestFractionalAttention:

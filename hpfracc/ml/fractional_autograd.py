@@ -91,7 +91,7 @@ def _riemann_liouville_forward(x: torch.Tensor, alpha: float) -> torch.Tensor:
         return x
     
     if alpha == 1:
-        return torch.gradient(x, dim=-1)[0]
+        return torch.gradient(x, dim=(-1,))[0]
     
     # For non-integer alpha, use a simplified approximation
     # This is a placeholder - in practice, you'd want a more sophisticated method
@@ -101,7 +101,7 @@ def _riemann_liouville_forward(x: torch.Tensor, alpha: float) -> torch.Tensor:
     # This preserves the computation graph while providing a reasonable approximation
     if alpha > 0 and alpha < 1:
         # Use a weighted combination of the original signal and its gradient
-        gradient = torch.gradient(x, dim=-1)[0]
+        gradient = torch.gradient(x, dim=(-1,))[0]
         result = (1 - alpha) * x + alpha * gradient
     elif alpha > 1:
         # For alpha > 1, apply multiple derivatives
@@ -109,9 +109,9 @@ def _riemann_liouville_forward(x: torch.Tensor, alpha: float) -> torch.Tensor:
         fractional_part = alpha - n
         result = x
         for _ in range(n):
-            result = torch.gradient(result, dim=-1)[0]
+            result = torch.gradient(result, dim=(-1,))[0]
         if fractional_part > 0:
-            gradient = torch.gradient(result, dim=-1)[0]
+            gradient = torch.gradient(result, dim=(-1,))[0]
             result = (1 - fractional_part) * result + fractional_part * gradient
     
     return result
@@ -127,14 +127,14 @@ def _caputo_forward(x: torch.Tensor, alpha: float) -> torch.Tensor:
         return x
     
     if alpha == 1:
-        return torch.gradient(x, dim=-1)[0]
+        return torch.gradient(x, dim=(-1,))[0]
     
     # For non-integer alpha, use a simplified approximation
     result = x.clone()
     
     if alpha > 0 and alpha < 1:
         # Use a weighted combination of the original signal and its gradient
-        gradient = torch.gradient(x, dim=-1)[0]
+        gradient = torch.gradient(x, dim=(-1,))[0]
         result = (1 - alpha) * x + alpha * gradient
     elif alpha > 1:
         # For alpha > 1, apply multiple derivatives
@@ -142,9 +142,9 @@ def _caputo_forward(x: torch.Tensor, alpha: float) -> torch.Tensor:
         fractional_part = alpha - n
         result = x
         for _ in range(n):
-            result = torch.gradient(result, dim=-1)[0]
+            result = torch.gradient(result, dim=(-1,))[0]
         if fractional_part > 0:
-            gradient = torch.gradient(result, dim=-1)[0]
+            gradient = torch.gradient(result, dim=(-1,))[0]
             result = (1 - fractional_part) * result + fractional_part * gradient
     
     return result
@@ -158,16 +158,15 @@ def _grunwald_letnikov_forward(x: torch.Tensor, alpha: float) -> torch.Tensor:
     """
     if alpha == 0:
         return x
-    
     if alpha == 1:
-        return torch.gradient(x, dim=-1)[0]
+        return torch.gradient(x, dim=(-1,))[0]
     
     # For non-integer alpha, use a simplified approximation
     result = x.clone()
     
     if alpha > 0 and alpha < 1:
         # Use a weighted combination of the original signal and its gradient
-        gradient = torch.gradient(x, dim=-1)[0]
+        gradient = torch.gradient(x, dim=(-1,))[0]
         result = (1 - alpha) * x + alpha * gradient
     elif alpha > 1:
         # For alpha > 1, apply multiple derivatives
@@ -175,9 +174,9 @@ def _grunwald_letnikov_forward(x: torch.Tensor, alpha: float) -> torch.Tensor:
         fractional_part = alpha - n
         result = x
         for _ in range(n):
-            result = torch.gradient(result, dim=-1)[0]
+            result = torch.gradient(result, dim=(-1,))[0]
         if fractional_part > 0:
-            gradient = torch.gradient(result, dim=-1)[0]
+            gradient = torch.gradient(result, dim=(-1,))[0]
             result = (1 - fractional_part) * result + fractional_part * gradient
     
     return result
@@ -190,20 +189,20 @@ def _riemann_liouville_backward(grad_output: torch.Tensor, x: torch.Tensor, alph
     
     if alpha == 1:
         # For first derivative, the adjoint is -gradient
-        return -torch.gradient(grad_output, dim=-1)[0]
+        return -torch.gradient(grad_output, dim=(-1,))[0]
     
     # Simplified backward pass
     if alpha > 0 and alpha < 1:
-        gradient_grad = torch.gradient(grad_output, dim=-1)[0]
+        gradient_grad = torch.gradient(grad_output, dim=(-1,))[0]
         return (1 - alpha) * grad_output - alpha * gradient_grad
     elif alpha > 1:
         n = int(alpha)
         fractional_part = alpha - n
         result = grad_output
         for _ in range(n):
-            result = -torch.gradient(result, dim=-1)[0]
+            result = -torch.gradient(result, dim=(-1,))[0]
         if fractional_part > 0:
-            gradient_grad = torch.gradient(result, dim=-1)[0]
+            gradient_grad = torch.gradient(result, dim=(-1,))[0]
             result = (1 - fractional_part) * result - fractional_part * gradient_grad
         return result
     

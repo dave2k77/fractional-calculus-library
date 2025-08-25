@@ -449,12 +449,12 @@ class FractionalGraphUNet(BaseFractionalGNN):
         current_batch = batch
         
         for i, layer in enumerate(self.encoder_layers):
-            current_x = layer(current_x, current_edge_index)
+            current_x = layer.forward(current_x, current_edge_index)
             encoder_outputs.append(current_x)
             
             # Apply pooling (except for the last layer)
             if i < len(self.pooling_layers):
-                current_x, current_edge_index, current_batch = self.pooling_layers[i](
+                current_x, current_edge_index, current_batch = self.pooling_layers[i].forward(
                     current_x, current_edge_index, current_batch
                 )
         
@@ -463,14 +463,41 @@ class FractionalGraphUNet(BaseFractionalGNN):
             # Skip connection
             skip_x = encoder_outputs[-(i + 2)]
             
+            # Ensure skip_x has compatible dimensions with current_x
+            if skip_x.shape[0] != current_x.shape[0]:
+                # Reshape skip_x to match current_x dimensions
+                if skip_x.shape[0] > current_x.shape[0]:
+                    # Truncate skip_x to match current_x
+                    skip_x = skip_x[:current_x.shape[0], :]
+                else:
+                    # Pad skip_x to match current_x
+                    padding = current_x.shape[0] - skip_x.shape[0]
+                    if padding > 0:
+                        # Create padding tensor using tensor_ops
+                        padding_tensor = self.tensor_ops.zeros((padding, skip_x.shape[1]))
+                        skip_x = self.tensor_ops.cat([skip_x, padding_tensor], dim=0)
+            
+            # Ensure feature dimensions are compatible for concatenation
+            if skip_x.shape[-1] != current_x.shape[-1]:
+                # Reshape skip_x to match current_x feature dimensions
+                if skip_x.shape[-1] > current_x.shape[-1]:
+                    # Truncate features
+                    skip_x = skip_x[..., :current_x.shape[-1]]
+                else:
+                    # Pad features with zeros
+                    feature_padding = current_x.shape[-1] - skip_x.shape[-1]
+                    if feature_padding > 0:
+                        padding_tensor = self.tensor_ops.zeros((skip_x.shape[0], feature_padding))
+                        skip_x = self.tensor_ops.cat([skip_x, padding_tensor], dim=-1)
+            
             # Concatenate with current features
             current_x = self.tensor_ops.cat([current_x, skip_x], dim=-1)
             
             # Pass through decoder layer
-            current_x = layer(current_x, current_edge_index)
+            current_x = layer.forward(current_x, current_edge_index)
         
         # Output layer
-        output = self.output_layer(current_x, current_edge_index)
+        output = self.output_layer.forward(current_x, current_edge_index)
         
         return output
 

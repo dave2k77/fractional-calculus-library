@@ -118,6 +118,25 @@ attention = FractionalAttention(
 output = attention(input_sequence, method="RL")
 ```
 
+### **Fractional Graph Neural Networks**
+```python
+from hpfracc.ml import FractionalGNNFactory, BackendType
+from hpfracc.core.definitions import FractionalOrder
+
+# Create GNN with fractional calculus
+gnn = FractionalGNNFactory.create_model(
+    model_type='gcn',  # Options: 'gcn', 'gat', 'sage', 'unet'
+    input_dim=16,
+    hidden_dim=32,
+    output_dim=4,
+    fractional_order=FractionalOrder(0.5),
+    backend=BackendType.JAX
+)
+
+# Forward pass on graph data
+output = gnn(node_features, edge_index)
+```
+
 ## 🔧 **Current Status**
 
 ### **✅ Fully Working**
@@ -126,18 +145,18 @@ output = attention(input_sequence, method="RL")
 - **Core Neural Networks**: FractionalNeuralNetwork with multi-backend support
 - **Attention Mechanisms**: FractionalAttention with fractional derivatives
 - **Tensor Operations**: Unified API across all backends
+- **Graph Neural Networks**: Complete GNN architectures (GCN, GAT, GraphSAGE, U-Net)
 
 ### **🚧 In Development**
 - **Advanced Layers**: Conv1D, Conv2D, LSTM, Transformer layers
 - **Loss Functions**: Comprehensive loss function library
 - **Optimizers**: Fractional gradient-based optimizers
-- **Graph Neural Networks**: Fractional GNN architectures
 
 ### **📋 Planned Features**
 - **Advanced ML Components**: Complete layer and optimizer library
 - **Performance Optimization**: Backend-specific optimizations
-- **Extended GNN Support**: More graph neural network architectures
 - **Research Tools**: Benchmarking and analysis utilities
+- **Extended GNN Support**: Additional graph neural network architectures and graph types
 
 ## 📚 **Documentation**
 

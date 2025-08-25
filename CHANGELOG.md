@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.2] - 2024-12-19
+
+### Fixed
+- **Graph Neural Networks (GNNs) - Complete Implementation**
+  - ✅ **GCN**: Fixed tensor dimension handling and activation functions across all backends
+  - ✅ **GAT**: Resolved activation function compatibility and attention mechanism issues
+  - ✅ **GraphSAGE**: Fixed backend-specific tensor operations and initialization
+  - ✅ **Graph U-Net**: Resolved skip connection dimension mismatches and pooling operations
+  - ✅ **Multi-Backend Support**: All GNN models now work seamlessly across PyTorch, JAX, and NUMBA
+  - ✅ **Fractional Calculus Integration**: Fixed α=1.0 (first derivative) implementation across all backends
+  - ✅ **Tensor Operations**: Added missing operations (repeat, clip, unsqueeze, expand, gather, squeeze)
+  - ✅ **Activation Functions**: Fixed "identity" activation handling across all backends
+
+### Technical Improvements
+- **Backend Compatibility**: Standardized parameter naming and operation signatures
+- **Error Handling**: Added robust fallbacks and validation for tensor operations
+- **Performance**: Consistent performance across all backends and GNN architectures
+- **Documentation**: Comprehensive GNN documentation and examples
+
+### Testing Results
+- **All GNN Models**: ✅ Working across PyTorch, JAX, and NUMBA backends
+- **Performance**: Consistent benchmarking results across all backends
+- **Fractional Orders**: All fractional calculus effects working correctly
+
+---
+
 ## [1.1.1] - 2024-12-19
 
 ### Added

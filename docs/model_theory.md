@@ -431,6 +431,177 @@ Combining adjoint methods with mixed precision training can provide additional b
 
 ---
 
+## Graph Neural Networks with Fractional Calculus
+
+### Theoretical Foundation
+
+Graph Neural Networks (GNNs) extend the concept of neural networks to graph-structured data, where nodes represent entities and edges represent relationships. The integration of fractional calculus in GNNs introduces memory effects and long-range dependencies that are particularly valuable for graph learning tasks.
+
+#### Mathematical Formulation
+
+For a graph $G = (V, E)$ with node features $X \in \mathbb{R}^{n \times d}$ and adjacency matrix $A$, the fractional graph convolution can be expressed as:
+
+$$H^{(l+1)} = \sigma\left(D^{-\frac{1}{2}} \tilde{A} D^{-\frac{1}{2}} H^{(l)} W^{(l)} + \mathcal{D}^{\alpha} H^{(l)}\right)$$
+
+Where:
+- $H^{(l)}$ is the node representation at layer $l$
+- $\mathcal{D}^{\alpha}$ is the fractional derivative operator of order $\alpha$
+- $\tilde{A} = A + I$ is the augmented adjacency matrix
+- $D$ is the degree matrix
+- $W^{(l)}$ are learnable parameters
+
+#### Fractional Graph Convolution
+
+The fractional graph convolution combines traditional graph convolution with fractional derivatives:
+
+$$\text{FracGCN}(X, A) = \text{GCN}(X, A) + \lambda \cdot \mathcal{D}^{\alpha} X$$
+
+This formulation allows the network to:
+- Capture local graph structure through standard convolution
+- Model long-range dependencies through fractional derivatives
+- Adapt the influence of fractional terms through learnable parameter $\lambda$
+
+#### Multi-Head Attention in Graphs
+
+For Graph Attention Networks (GAT), fractional calculus enhances the attention mechanism:
+
+$$\alpha_{ij} = \frac{\exp\left(\text{LeakyReLU}(a^T[Wx_i \| Wx_j] + \mathcal{D}^{\alpha} x_i)\right)}{\sum_{k \in \mathcal{N}_i} \exp\left(\text{LeakyReLU}(a^T[Wx_i \| Wx_k] + \mathcal{D}^{\alpha} x_i)\right)}$$
+
+The fractional derivative term $\mathcal{D}^{\alpha} x_i$ provides additional context for attention computation, enabling more informed node-to-node attention weights.
+
+### Architectural Variants
+
+#### 1. Fractional Graph Convolutional Network (GCN)
+
+The FractionalGCN applies fractional derivatives at each layer:
+
+```python
+class FractionalGCN:
+    def forward(self, x, edge_index):
+        # Standard graph convolution
+        conv_out = self.graph_conv(x, edge_index)
+        
+        # Fractional derivative contribution
+        frac_out = self.fractional_derivative(x)
+        
+        # Combine both contributions
+        return conv_out + self.lambda_param * frac_out
+```
+
+#### 2. Fractional Graph Attention Network (GAT)
+
+FractionalGAT enhances attention with fractional calculus:
+
+```python
+class FractionalGAT:
+    def forward(self, x, edge_index):
+        # Compute attention scores with fractional context
+        attention_scores = self.compute_attention(x, edge_index)
+        
+        # Apply fractional attention
+        attended_features = self.apply_attention(x, attention_scores)
+        
+        # Add fractional derivative contribution
+        frac_contribution = self.fractional_derivative(x)
+        
+        return attended_features + self.lambda_param * frac_contribution
+```
+
+#### 3. Fractional Graph U-Net
+
+The FractionalGraphUNet uses hierarchical pooling with fractional calculus:
+
+```python
+class FractionalGraphUNet:
+    def forward(self, x, edge_index):
+        # Encoder path with fractional derivatives
+        encoder_outputs = []
+        current_x = x
+        
+        for layer in self.encoder_layers:
+            current_x = layer(current_x, edge_index)
+            encoder_outputs.append(current_x)
+        
+        # Decoder path with skip connections
+        for i, layer in enumerate(self.decoder_layers):
+            skip_x = encoder_outputs[-(i + 2)]
+            current_x = self.combine_features(current_x, skip_x)
+            current_x = layer(current_x, edge_index)
+        
+        return current_x
+```
+
+### Backend Implementation
+
+#### PyTorch Backend
+
+```python
+def _torch_fractional_derivative(self, x, alpha):
+    if alpha == 0:
+        return x
+    elif alpha == 1:
+        # First derivative with shape preservation
+        gradients = torch.gradient(x, dim=-1)[0]
+        return self.preserve_shape(gradients, x.shape)
+    else:
+        # Fractional derivative approximation
+        return x * (alpha ** 0.5)
+```
+
+#### JAX Backend
+
+```python
+def _jax_fractional_derivative(self, x, alpha):
+    if alpha == 0:
+        return x
+    elif alpha == 1:
+        # JAX-compatible first derivative
+        diff = jnp.diff(x, axis=-1)
+        return self.preserve_shape(diff, x.shape)
+    else:
+        return x * (alpha ** 0.5)
+```
+
+#### NUMBA Backend
+
+```python
+def _numba_fractional_derivative(self, x, alpha):
+    if alpha == 0:
+        return x
+    elif alpha == 1:
+        # NUMBA-compatible first derivative
+        diff = np.diff(x, axis=-1)
+        return self.preserve_shape(diff, x.shape)
+    else:
+        return x * (alpha ** 0.5)
+```
+
+### Performance Characteristics
+
+#### Memory Efficiency
+
+Fractional GNNs maintain memory efficiency through:
+- **Selective Fractional Application**: Only apply fractional derivatives where beneficial
+- **Parameter Sharing**: Share fractional derivative parameters across layers
+- **Gradient Checkpointing**: Reduce memory during backpropagation
+
+#### Computational Complexity
+
+The computational complexity is:
+- **Standard GCN**: $O(|E| \cdot d^2)$
+- **Fractional GCN**: $O(|E| \cdot d^2 + |V| \cdot d \cdot \log d)$
+
+The additional cost comes from fractional derivative computation, which is typically $O(d \log d)$ using FFT-based methods.
+
+#### Convergence Properties
+
+Fractional GNNs exhibit improved convergence due to:
+- **Long-range Information**: Fractional derivatives capture distant node relationships
+- **Smoothing Effects**: Fractional operators provide regularization
+- **Stable Gradients**: Better gradient flow through the network
+
+---
+
 ## Applications and Use Cases
 
 ### Scientific Computing

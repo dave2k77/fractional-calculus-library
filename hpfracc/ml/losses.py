@@ -43,7 +43,13 @@ class FractionalLossFunction(ABC):
         Returns:
             Tensor with fractional derivative applied
         """
-        return fractional_derivative(x, self.fractional_order.alpha, self.method)
+        # Only apply fractional derivative for PyTorch backend for now
+        if self.backend == BackendType.TORCH:
+            return fractional_derivative(x, self.fractional_order.alpha, self.method)
+        else:
+            # TODO: Implement backend-agnostic fractional derivatives
+            # For now, return the input unchanged
+            return x
     
     @abstractmethod
     def compute_loss(self, predictions: Any, targets: Any) -> Any:
@@ -82,6 +88,10 @@ class FractionalLossFunction(ABC):
         
         # Compute the base loss
         return self.compute_loss(predictions, targets)
+    
+    def __call__(self, predictions: Any, targets: Any, use_fractional: bool = True) -> Any:
+        """Make the loss function callable"""
+        return self.forward(predictions, targets, use_fractional)
 
 
 class FractionalMSELoss(FractionalLossFunction):
@@ -93,7 +103,13 @@ class FractionalMSELoss(FractionalLossFunction):
     
     def compute_loss(self, predictions: Any, targets: Any) -> Any:
         if self.backend == BackendType.TORCH:
+            import torch
             import torch.nn.functional as F
+            # Ensure inputs are PyTorch tensors
+            if not isinstance(predictions, torch.Tensor):
+                predictions = torch.tensor(predictions, dtype=torch.float32)
+            if not isinstance(targets, torch.Tensor):
+                targets = torch.tensor(targets, dtype=torch.float32)
             return F.mse_loss(predictions, targets, reduction=self.reduction)
         else:
             # JAX/NUMBA implementation

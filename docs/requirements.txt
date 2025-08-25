@@ -1,0 +1,30 @@
+# Documentation build requirements for HPFRACC
+# These are the minimum versions required for building docs
+
+# Core Sphinx
+sphinx>=4.0.0
+sphinx-rtd-theme>=1.0.0
+
+# Markdown support
+myst-parser>=0.18.0
+
+# Enhanced features
+sphinx-autodoc-typehints>=1.12.0
+sphinx-autobuild>=2021.3.14
+
+# Math support
+sphinx-math-dollar>=1.2.1
+
+# Code highlighting
+pygments>=2.10.0
+
+# Image handling
+pillow>=8.0.0
+
+# Jupyter notebook support (optional)
+nbsphinx>=0.8.0
+ipykernel>=6.0.0
+
+# Development tools
+black>=22.0.0
+flake8>=4.0.0

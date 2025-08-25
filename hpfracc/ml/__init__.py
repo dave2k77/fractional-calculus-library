@@ -77,9 +77,7 @@ from .optimizers import (
     FractionalOptimizer,
     FractionalAdam,
     FractionalSGD,
-    FractionalRMSprop,
-    FractionalAdagrad,
-    FractionalAdamW
+    FractionalRMSprop
 )
 
 # Fractional Graph Neural Network Components
@@ -154,8 +152,6 @@ __all__ = [
     'FractionalAdam',
     'FractionalSGD',
     'FractionalRMSprop',
-    'FractionalAdagrad',
-    'FractionalAdamW',
     
     # Fractional GNN Components
     'BaseFractionalGNNLayer',
