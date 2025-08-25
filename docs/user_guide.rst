@@ -1,3 +1,4 @@
+"""
 User Guide
 ==========
 
@@ -42,6 +43,9 @@ Quick Start
 Basic Fractional Calculus Operations
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+Fractional Derivatives
+^^^^^^^^^^^^^^^^^^^^^
+
 .. code-block:: python
 
    from hpfracc.core.definitions import FractionalOrder
@@ -65,6 +69,63 @@ Basic Fractional Calculus Operations
    print(f"Fractional derivative of sin(x) with order {alpha}:")
    print(result[:5])  # Show first 5 values
 
+Fractional Integrals
+^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: python
+
+   from hpfracc.core.definitions import FractionalOrder
+   from hpfracc.core.integrals import create_fractional_integral
+   import numpy as np
+
+   # Define fractional order
+   alpha = FractionalOrder(0.5)
+
+   # Create a test function
+   def f(x):
+       return x**2
+
+   # Create fractional integral
+   fractional_integral = create_fractional_integral(alpha, method="RL")
+
+   # Compute fractional integral
+   x = np.linspace(0, 5, 100)
+   result = fractional_integral(f, x)
+
+   print(f"Fractional integral of x² with order {alpha}:")
+   print(result[:5])  # Show first 5 values
+
+Special Functions
+^^^^^^^^^^^^^^^^
+
+.. code-block:: python
+
+   from hpfracc.special import (
+       gamma_function, beta_function, binomial_coefficient,
+       mittag_leffler_function
+   )
+   import numpy as np
+
+   # Gamma function
+   x = 2.5
+   gamma_val = gamma_function(x)
+   print(f"Γ({x}) = {gamma_val}")
+
+   # Beta function
+   a, b = 2.0, 3.0
+   beta_val = beta_function(a, b)
+   print(f"B({a}, {b}) = {beta_val}")
+
+   # Binomial coefficient
+   n, k = 5, 2
+   binomial_val = binomial_coefficient(n, k)
+   print(f"({n} choose {k}) = {binomial_val}")
+
+   # Mittag-Leffler function
+   alpha, z = 0.5, 1.0
+   ml_val = mittag_leffler_function(alpha, z)
+   print(f"E_{alpha}({z}) = {ml_val}")
+
 Backend Management
 ~~~~~~~~~~~~~~~~~
 
@@ -85,6 +146,351 @@ HPFRACC supports multiple computation backends:
    current = BackendManager.get_current_backend()
    print(f"Current backend: {current}")
 
+Core Features
+------------
+
+Fractional Derivatives
+~~~~~~~~~~~~~~~~~~~~~
+
+HPFRACC provides multiple definitions of fractional derivatives:
+
+**Riemann-Liouville Definition:**
+
+.. code-block:: python
+
+   from hpfracc.core.derivatives import create_fractional_derivative
+   from hpfracc.core.definitions import FractionalOrder
+
+   # Create Riemann-Liouville fractional derivative
+   alpha = FractionalOrder(0.5)
+   rl_deriv = create_fractional_derivative(alpha, method="RL")
+
+   # Apply to function
+   def f(x):
+       return np.sin(x)
+   
+   x = np.linspace(0, 2*np.pi, 100)
+   result = rl_deriv(f, x)
+
+**Caputo Definition:**
+
+.. code-block:: python
+
+   # Create Caputo fractional derivative
+   caputo_deriv = create_fractional_derivative(alpha, method="Caputo")
+   result = caputo_deriv(f, x)
+
+**Grünwald-Letnikov Definition:**
+
+.. code-block:: python
+
+   # Create Grünwald-Letnikov fractional derivative
+   gl_deriv = create_fractional_derivative(alpha, method="GL")
+   result = gl_deriv(f, x)
+
+Fractional Integrals
+~~~~~~~~~~~~~~~~~~~
+
+HPFRACC supports various types of fractional integrals:
+
+**Riemann-Liouville Integral:**
+
+.. code-block:: python
+
+   from hpfracc.core.integrals import create_fractional_integral
+
+   # Create Riemann-Liouville fractional integral
+   alpha = FractionalOrder(0.5)
+   rl_integral = create_fractional_integral(alpha, method="RL")
+
+   # Apply to function
+   def f(x):
+       return x**2
+   
+   x = np.linspace(0, 5, 100)
+   result = rl_integral(f, x)
+
+**Caputo Integral:**
+
+.. code-block:: python
+
+   # Create Caputo fractional integral
+   caputo_integral = create_fractional_integral(alpha, method="Caputo")
+   result = caputo_integral(f, x)
+
+**Weyl Integral:**
+
+.. code-block:: python
+
+   # Create Weyl fractional integral
+   weyl_integral = create_fractional_integral(alpha, method="Weyl")
+   result = weyl_integral(f, x)
+
+**Hadamard Integral:**
+
+.. code-block:: python
+
+   # Create Hadamard fractional integral (requires x > 1)
+   hadamard_integral = create_fractional_integral(alpha, method="Hadamard")
+   x_hadamard = np.linspace(1.1, 5, 100)  # Must be > 1
+   result = hadamard_integral(f, x_hadamard)
+
+Special Functions
+~~~~~~~~~~~~~~~~
+
+**Gamma and Beta Functions:**
+
+.. code-block:: python
+
+   from hpfracc.special import gamma_function, beta_function
+
+   # Gamma function
+   x = np.linspace(0.1, 5, 100)
+   gamma_vals = [gamma_function(xi) for xi in x]
+
+   # Beta function
+   a, b = 2.0, 3.0
+   beta_val = beta_function(a, b)
+
+**Binomial Coefficients:**
+
+.. code-block:: python
+
+   from hpfracc.special import binomial_coefficient, generalized_binomial
+
+   # Standard binomial coefficient
+   n, k = 5, 2
+   binomial_val = binomial_coefficient(n, k)
+
+   # Fractional binomial coefficient
+   alpha = 0.5
+   frac_binomial_val = generalized_binomial(alpha, k)
+
+**Mittag-Leffler Functions:**
+
+.. code-block:: python
+
+   from hpfracc.special import mittag_leffler_function
+
+   # One-parameter Mittag-Leffler function
+   alpha = 0.5
+   z = np.linspace(-5, 5, 100)
+   ml_vals = [mittag_leffler_function(alpha, zi) for zi in z]
+
+Fractional Green's Functions
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+HPFRACC provides Green's functions for fractional differential equations:
+
+**Diffusion Green's Function:**
+
+.. code-block:: python
+
+   from hpfracc.special.greens_function import FractionalDiffusionGreensFunction
+
+   # Create diffusion Green's function
+   alpha = 0.5
+   D = 1.0  # Diffusion coefficient
+   diffusion_gf = FractionalDiffusionGreensFunction(alpha, D)
+
+   # Compute Green's function
+   x = np.linspace(-5, 5, 100)
+   t = np.linspace(0.1, 2, 50)
+   X, T = np.meshgrid(x, t)
+   
+   green_function = np.array([[diffusion_gf.compute(xi, ti) for xi in x] for ti in t])
+
+**Wave Green's Function:**
+
+.. code-block:: python
+
+   from hpfracc.special.greens_function import FractionalWaveGreensFunction
+
+   # Create wave Green's function
+   alpha = 0.5
+   c = 1.0  # Wave speed
+   wave_gf = FractionalWaveGreensFunction(alpha, c)
+
+   # Compute Green's function
+   green_function = np.array([[wave_gf.compute(xi, ti) for xi in x] for ti in t])
+
+**Advection Green's Function:**
+
+.. code-block:: python
+
+   from hpfracc.special.greens_function import FractionalAdvectionGreensFunction
+
+   # Create advection Green's function
+   alpha = 0.5
+   v = 1.0  # Advection velocity
+   advection_gf = FractionalAdvectionGreensFunction(alpha, v)
+
+   # Compute Green's function
+   green_function = np.array([[advection_gf.compute(xi, ti) for xi in x] for ti in t])
+
+Analytical Methods
+~~~~~~~~~~~~~~~~~
+
+**Homotopy Perturbation Method (HPM):**
+
+.. code-block:: python
+
+   from hpfracc.solvers.homotopy_perturbation import HomotopyPerturbationMethod
+
+   # Define the fractional differential equation
+   # D^α u + u = f(t), where f(t) = t^2
+   def source_function(t):
+       return t**2
+
+   def initial_condition(t):
+       return 0.0
+
+   # Create HPM solver
+   alpha = 0.5
+   hpm_solver = HomotopyPerturbationMethod(alpha)
+
+   # Solve the equation
+   t = np.linspace(0, 2, 100)
+   solution = hpm_solver.solve(
+       source_function=source_function,
+       initial_condition=initial_condition,
+       t_span=t,
+       max_iterations=5
+   )
+
+   # Analyze convergence
+   convergence = hpm_solver.analyze_convergence(
+       source_function=source_function,
+       initial_condition=initial_condition,
+       t_span=t,
+       max_iterations=10
+   )
+
+**Variational Iteration Method (VIM):**
+
+.. code-block:: python
+
+   from hpfracc.solvers.variational_iteration import VariationalIterationMethod
+
+   # Define the fractional differential equation
+   # D^α u + u^2 = f(t), where f(t) = 1
+   def source_function(t):
+       return np.ones_like(t)
+
+   def initial_condition(t):
+       return 0.0
+
+   def nonlinear_term(u):
+       return u**2
+
+   # Create VIM solver
+   alpha = 0.5
+   vim_solver = VariationalIterationMethod(alpha)
+
+   # Solve the equation
+   t = np.linspace(0, 2, 100)
+   solution = vim_solver.solve(
+       source_function=source_function,
+       initial_condition=initial_condition,
+       nonlinear_term=nonlinear_term,
+       t_span=t,
+       max_iterations=5
+   )
+
+   # Analyze convergence
+   convergence = vim_solver.analyze_convergence(
+       source_function=source_function,
+       initial_condition=initial_condition,
+       t_span=t,
+       max_iterations=10
+   )
+
+Mathematical Utilities
+~~~~~~~~~~~~~~~~~~~~~
+
+HPFRACC provides various mathematical utilities:
+
+**Validation Functions:**
+
+.. code-block:: python
+
+   from hpfracc.core.utilities import (
+       validate_fractional_order, validate_function,
+       validate_tensor_input
+   )
+
+   # Validate fractional order
+   is_valid = validate_fractional_order(0.5)  # True
+   is_valid = validate_fractional_order(-1.0)  # False
+
+   # Validate function
+   def test_func(x):
+       return x**2
+   
+   is_valid = validate_function(test_func)  # True
+   is_valid = validate_function("not a function")  # False
+
+   # Validate tensor input
+   import numpy as np
+   tensor = np.random.randn(10, 5)
+   is_valid = validate_tensor_input(tensor)  # True
+
+**Mathematical Functions:**
+
+.. code-block:: python
+
+   from hpfracc.core.utilities import (
+       factorial_fractional, binomial_coefficient,
+       pochhammer_symbol, hypergeometric_series
+   )
+
+   # Fractional factorial
+   x = 2.5
+   factorial_val = factorial_fractional(x)
+
+   # Binomial coefficient
+   n, k = 5, 2
+   binomial_val = binomial_coefficient(n, k)
+
+   # Pochhammer symbol
+   a, n = 0.5, 3
+   pochhammer_val = pochhammer_symbol(a, n)
+
+   # Hypergeometric series
+   a, b, c, z = 1, 1, 1, 0.5
+   hypergeometric_val = hypergeometric_series(a, b, c, z)
+
+**Performance Monitoring:**
+
+.. code-block:: python
+
+   from hpfracc.core.utilities import (
+       timing_decorator, memory_usage_decorator,
+       PerformanceMonitor
+   )
+
+   # Timing decorator
+   @timing_decorator
+   def expensive_function(n):
+       return sum(i**2 for i in range(n))
+
+   result = expensive_function(10000)
+
+   # Memory usage decorator
+   @memory_usage_decorator
+   def memory_intensive_function(n):
+       return np.random.randn(n, n)
+
+   result = memory_intensive_function(1000)
+
+   # Performance monitor
+   monitor = PerformanceMonitor()
+   
+   with monitor.timer("computation"):
+       result = expensive_function(10000)
+   
+   print(f"Computation time: {monitor.get_timing('computation')}")
+
 Fractional Neural Networks
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -100,383 +506,498 @@ Create and use fractional neural networks:
    # Create a fractional neural network
    model = FractionalNeuralNetwork(
        input_dim=10,
-       hidden_dims=[32, 16],
+       hidden_dims=[64, 32, 16],
        output_dim=1,
        fractional_order=FractionalOrder(0.5),
-       backend=BackendType.TORCH
+       activation='relu',
+       dropout_rate=0.2
    )
 
    # Generate sample data
-   X = np.random.randn(100, 10)
-   y = np.random.randn(100, 1)
+   X = np.random.randn(1000, 10)
+   y = np.sum(X**2, axis=1) + 0.1 * np.random.randn(1000)
 
-   # Forward pass
-   output = model.forward(X)
-   print(f"Output shape: {output.shape}")
+   # Train the model
+   history = model.fit(
+       X, y,
+       epochs=100,
+       batch_size=32,
+       learning_rate=0.001,
+       verbose=True
+   )
+
+   # Make predictions
+   predictions = model.predict(X)
 
 Graph Neural Networks
 ~~~~~~~~~~~~~~~~~~~~
 
-Use fractional Graph Neural Networks:
+Work with fractional graph neural networks:
 
 .. code-block:: python
 
-   from hpfracc.ml import FractionalGNNFactory
+   from hpfracc.ml.gnn_layers import FractionalGraphConvolution
    from hpfracc.core.definitions import FractionalOrder
-   from hpfracc.ml.backends import BackendType
    import numpy as np
+   import networkx as nx
 
-   # Create a fractional GCN
-   gnn = FractionalGNNFactory.create_model(
-       model_type='gcn',
-       input_dim=16,
-       hidden_dim=32,
-       output_dim=4,
-       fractional_order=FractionalOrder(0.5),
-       backend=BackendType.JAX
+   # Create a graph
+   G = nx.erdos_renyi_graph(20, 0.3)
+   adj_matrix = nx.adjacency_matrix(G).toarray()
+   
+   # Create node features
+   node_features = np.random.randn(20, 5)
+   
+   # Create fractional graph convolution layer
+   fractional_order = FractionalOrder(0.5)
+   fgc_layer = FractionalGraphConvolution(
+       input_dim=5,
+       output_dim=3,
+       fractional_order=fractional_order,
+       activation='relu'
    )
-
-   # Generate graph data
-   num_nodes = 50
-   node_features = np.random.randn(num_nodes, 16)
-   edge_index = np.random.randint(0, num_nodes, (2, 100))
-
-   # Forward pass
-   output = gnn.forward(node_features, edge_index)
-   print(f"GNN output shape: {output.shape}")
-
-Core Concepts
-------------
-
-Fractional Orders
-~~~~~~~~~~~~~~~~
-
-Fractional orders define the degree of differentiation:
-
-.. code-block:: python
-
-   from hpfracc.core.definitions import FractionalOrder
-
-   # Integer order (classical derivative)
-   order_1 = FractionalOrder(1.0)
    
-   # Fractional order (fractional derivative)
-   order_half = FractionalOrder(0.5)
-   
-   # Negative order (fractional integral)
-   order_neg = FractionalOrder(-0.5)
-
-   print(f"Order 1.0: {order_1}")
-   print(f"Order 0.5: {order_half}")
-   print(f"Order -0.5: {order_neg}")
-
-Fractional Derivative Methods
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-HPFRACC supports multiple fractional derivative definitions:
-
-.. code-block:: python
-
-   from hpfracc.core.derivatives import create_fractional_derivative
-   from hpfracc.core.definitions import FractionalOrder
-   import numpy as np
-
-   alpha = FractionalOrder(0.5)
-   x = np.linspace(0, 1, 50)
-
-   # Riemann-Liouville definition
-   rl_deriv = create_fractional_derivative(alpha, method="RL")
-   
-   # Caputo definition
-   caputo_deriv = create_fractional_derivative(alpha, method="Caputo")
-   
-   # Grünwald-Letnikov definition
-   gl_deriv = create_fractional_derivative(alpha, method="GL")
-
-   def test_function(x):
-       return np.exp(-x)
-
-   # Compare different methods
-   result_rl = rl_deriv(test_function, x)
-   result_caputo = caputo_deriv(test_function, x)
-   result_gl = gl_deriv(test_function, x)
-
-Backend Types
-~~~~~~~~~~~~
-
-HPFRACC supports three main computation backends:
-
-**PyTorch Backend**
-- Full neural network support
-- GPU acceleration
-- Automatic differentiation
-- Rich ecosystem
-
-**JAX Backend**
-- Functional programming
-- GPU/TPU acceleration
-- JIT compilation
-- High performance
-
-**NUMBA Backend**
-- JIT compilation
-- CPU optimization
-- Lightweight
-- Easy deployment
+   # Apply fractional graph convolution
+   output_features = fgc_layer(adj_matrix, node_features)
 
 Advanced Usage
 -------------
 
-Custom Fractional Derivatives
+Error Analysis and Validation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Create custom fractional derivative implementations:
+**Numerical Error Analysis:**
 
 .. code-block:: python
 
-   from hpfracc.core.derivatives import BaseFractionalDerivative
+   from hpfracc.core.derivatives import create_fractional_derivative
    from hpfracc.core.definitions import FractionalOrder
    import numpy as np
 
-   class CustomFractionalDerivative(BaseFractionalDerivative):
-       def __init__(self, order: FractionalOrder):
-           super().__init__(order)
-           
-       def compute(self, func, x):
-           # Custom implementation
-           # This is a simplified example
-           h = x[1] - x[0]
-           n = len(x)
-           result = np.zeros_like(x)
-           
-           for i in range(n):
-               # Custom computation logic
-               result[i] = func(x[i]) * (h ** self.order.value)
-               
-           return result
+   def analytical_solution(x, alpha):
+       """Analytical solution for D^α sin(x)."""
+       return np.sin(x + alpha * np.pi / 2)
 
-   # Use custom derivative
-   custom_deriv = CustomFractionalDerivative(FractionalOrder(0.5))
-   x = np.linspace(0, 1, 100)
-   result = custom_deriv.compute(lambda x: np.sin(x), x)
+   # Compare numerical and analytical solutions
+   x = np.linspace(0, 2*np.pi, 100)
+   alpha = 0.5
+   
+   # Numerical solution
+   deriv = create_fractional_derivative(FractionalOrder(alpha), method="RL")
+   numerical = deriv(lambda x: np.sin(x), x)
+   
+   # Analytical solution
+   analytical = analytical_solution(x, alpha)
+   
+   # Compute error
+   error = np.mean(np.abs((numerical - analytical) / analytical))
+   print(f"Relative error: {error:.6f}")
+
+**Convergence Analysis:**
+
+.. code-block:: python
+
+   from hpfracc.solvers.homotopy_perturbation import HomotopyPerturbationMethod
+
+   # Analyze convergence of HPM
+   def source_function(t):
+       return t**2
+
+   def initial_condition(t):
+       return 0.0
+
+   alpha = 0.5
+   hpm_solver = HomotopyPerturbationMethod(alpha)
+   t = np.linspace(0, 2, 100)
+
+   convergence = hpm_solver.analyze_convergence(
+       source_function=source_function,
+       initial_condition=initial_condition,
+       t_span=t,
+       max_iterations=10
+   )
+
+   print(f"Final residual: {convergence['final_residual']:.6f}")
+   print(f"Convergence rate: {convergence['convergence_rate']:.6f}")
 
 Performance Optimization
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-Optimize performance for large-scale computations:
+**GPU Acceleration:**
 
 .. code-block:: python
 
    from hpfracc.ml.backends import BackendManager, BackendType
-   import numpy as np
+   from hpfracc.core.derivatives import create_fractional_derivative
+   from hpfracc.core.definitions import FractionalOrder
    import time
 
-   # Benchmark different backends
-   def benchmark_backend(backend_type):
-       BackendManager.set_backend(backend_type)
+   def benchmark_cpu_vs_gpu(data_size):
+       # Generate data
+       x = np.linspace(0, 10, data_size)
+       signal = np.sin(2*np.pi*x) + 0.1*np.random.randn(data_size)
        
-       # Large dataset
-       X = np.random.randn(10000, 100)
+       # CPU computation
+       BackendManager.set_backend(BackendType.NUMPY)
+       deriv_cpu = create_fractional_derivative(FractionalOrder(0.5), method="RL")
        
        start_time = time.time()
-       # Perform computation
-       result = np.sum(X, axis=1)
-       end_time = time.time()
+       result_cpu = deriv_cpu(lambda x: signal, x)
+       cpu_time = time.time() - start_time
        
-       return end_time - start_time
+       # GPU computation (if available)
+       if BackendManager.is_backend_available(BackendType.TORCH):
+           BackendManager.set_backend(BackendType.TORCH)
+           deriv_gpu = create_fractional_derivative(FractionalOrder(0.5), method="RL")
+           
+           start_time = time.time()
+           result_gpu = deriv_gpu(lambda x: signal, x)
+           gpu_time = time.time() - start_time
+           
+           print(f"CPU time: {cpu_time:.4f}s")
+           print(f"GPU time: {gpu_time:.4f}s")
+           print(f"Speedup: {cpu_time/gpu_time:.2f}x")
 
-   # Compare performance
-   torch_time = benchmark_backend(BackendType.TORCH)
-   jax_time = benchmark_backend(BackendType.JAX)
-   numba_time = benchmark_backend(BackendType.NUMBA)
-
-   print(f"PyTorch: {torch_time:.4f}s")
-   print(f"JAX: {jax_time:.4f}s")
-   print(f"NUMBA: {numba_time:.4f}s")
-
-Error Handling
--------------
-
-Handle common errors and exceptions:
-
-.. code-block:: python
-
-   from hpfracc.core.definitions import FractionalOrder
-   from hpfracc.ml.backends import BackendManager, BackendType
-
-   # Invalid fractional order
-   try:
-       invalid_order = FractionalOrder(-2.0)  # Should raise error
-   except ValueError as e:
-       print(f"Error: {e}")
-
-   # Backend not available
-   try:
-       BackendManager.set_backend(BackendType.TORCH)
-       if not BackendManager.is_backend_available(BackendType.TORCH):
-           print("PyTorch backend not available")
-   except Exception as e:
-       print(f"Backend error: {e}")
-
-Best Practices
--------------
-
-Code Organization
-~~~~~~~~~~~~~~~~
-
-Organize your HPFRACC code effectively:
+**Memory Optimization:**
 
 .. code-block:: python
 
-   # 1. Import organization
+   from hpfracc.core.utilities import memory_usage_decorator
    import numpy as np
-   import matplotlib.pyplot as plt
-   
-   from hpfracc.core.definitions import FractionalOrder
+
+   @memory_usage_decorator
+   def memory_intensive_computation(data_size):
+       # Generate large dataset
+       x = np.linspace(0, 10, data_size)
+       signal = np.sin(2*np.pi*x) + 0.1*np.random.randn(data_size)
+       
+       # Create multiple fractional derivatives
+       derivatives = []
+       for alpha in [0.1, 0.3, 0.5, 0.7, 0.9]:
+           from hpfracc.core.derivatives import create_fractional_derivative
+           from hpfracc.core.definitions import FractionalOrder
+           deriv = create_fractional_derivative(FractionalOrder(alpha), method="RL")
+           result = deriv(lambda x: signal, x)
+           derivatives.append(result)
+       
+       return derivatives
+
+   # Test memory usage
+   result = memory_intensive_computation(10000)
+
+Signal Processing Applications
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**Fractional Signal Processing:**
+
+.. code-block:: python
+
    from hpfracc.core.derivatives import create_fractional_derivative
-   from hpfracc.ml import FractionalNeuralNetwork
-   from hpfracc.ml.backends import BackendManager, BackendType
+   from hpfracc.core.definitions import FractionalOrder
+   import numpy as np
+   from scipy.fft import fft, fftfreq
 
-   # 2. Configuration
-   class Config:
-       FRACTIONAL_ORDER = 0.5
-       BACKEND = BackendType.JAX
-       INPUT_DIM = 10
-       HIDDEN_DIMS = [32, 16]
-       OUTPUT_DIM = 1
+   # Generate test signal
+   t = np.linspace(0, 10, 1000)
+   signal = np.sin(2*np.pi*t) + 0.5*np.sin(4*np.pi*t) + 0.1*np.random.randn(len(t))
 
-   # 3. Setup
-   BackendManager.set_backend(Config.BACKEND)
-   alpha = FractionalOrder(Config.FRACTIONAL_ORDER)
+   # Apply fractional derivatives
+   alpha_values = [0.1, 0.3, 0.5, 0.7, 0.9]
+   derivatives = {}
 
-   # 4. Model creation
-   model = FractionalNeuralNetwork(
-       input_dim=Config.INPUT_DIM,
-       hidden_dims=Config.HIDDEN_DIMS,
-       output_dim=Config.OUTPUT_DIM,
-       fractional_order=alpha
+   for alpha in alpha_values:
+       deriv = create_fractional_derivative(FractionalOrder(alpha), method="RL")
+       derivatives[alpha] = deriv(lambda x: signal, t)
+
+   # Frequency domain analysis
+   fft_original = np.abs(fft(signal))
+   fft_derivatives = {}
+   
+   for alpha in alpha_values:
+       fft_derivatives[alpha] = np.abs(fft(derivatives[alpha]))
+
+Image Processing Applications
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**Fractional Image Processing:**
+
+.. code-block:: python
+
+   from hpfracc.core.derivatives import create_fractional_derivative
+   from hpfracc.core.definitions import FractionalOrder
+   import numpy as np
+   from scipy import ndimage
+
+   # Create a test image
+   x, y = np.meshgrid(np.linspace(-2, 2, 100), np.linspace(-2, 2, 100))
+   image = np.sin(x) * np.cos(y) + 0.1 * np.random.randn(100, 100)
+
+   # Apply fractional derivatives in x and y directions
+   alpha = 0.5
+   deriv_x = create_fractional_derivative(FractionalOrder(alpha), method="RL")
+   deriv_y = create_fractional_derivative(FractionalOrder(alpha), method="RL")
+
+   # Compute fractional gradients
+   gradient_x = np.zeros_like(image)
+   gradient_y = np.zeros_like(image)
+   
+   for i in range(image.shape[0]):
+       gradient_x[i, :] = deriv_x(lambda x: image[i, :], np.arange(image.shape[1]))
+   
+   for j in range(image.shape[1]):
+       gradient_y[:, j] = deriv_y(lambda y: image[:, j], np.arange(image.shape[0]))
+
+   # Compute gradient magnitude
+   gradient_magnitude = np.sqrt(gradient_x**2 + gradient_y**2)
+
+Configuration and Settings
+-------------------------
+
+Precision Settings
+~~~~~~~~~~~~~~~~~
+
+.. code-block:: python
+
+   from hpfracc.core.utilities import (
+       get_default_precision, set_default_precision,
+       get_available_methods, get_method_properties
    )
 
-Memory Management
-~~~~~~~~~~~~~~~~
+   # Get current precision settings
+   precision = get_default_precision()
+   print(f"Current precision: {precision}")
 
-Optimize memory usage for large computations:
+   # Set precision
+   set_default_precision(64)  # Use 64-bit precision
 
-.. code-block:: python
+   # Get available methods
+   methods = get_available_methods()
+   print(f"Available methods: {methods}")
 
-   import gc
-   import numpy as np
-   from hpfracc.ml.backends import BackendManager, BackendType
+   # Get method properties
+   properties = get_method_properties("riemann_liouville")
+   print(f"Riemann-Liouville properties: {properties}")
 
-   # Use JAX for memory efficiency
-   BackendManager.set_backend(BackendType.JAX)
-
-   # Process data in batches
-   def process_in_batches(data, batch_size=1000):
-       results = []
-       for i in range(0, len(data), batch_size):
-           batch = data[i:i+batch_size]
-           # Process batch
-           result = np.sum(batch, axis=1)
-           results.append(result)
-           
-           # Clear memory
-           del batch
-           gc.collect()
-       
-       return np.concatenate(results)
-
-   # Large dataset
-   large_data = np.random.randn(100000, 100)
-   results = process_in_batches(large_data)
-
-Debugging
----------
-
-Debug HPFRACC applications effectively:
+Logging Configuration
+~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: python
 
-   import logging
-   from hpfracc.ml.backends import BackendManager
+   from hpfracc.core.utilities import setup_logging, get_logger
 
-   # Enable debug logging
-   logging.basicConfig(level=logging.DEBUG)
-   logger = logging.getLogger(__name__)
+   # Setup logging
+   logger = setup_logging(level="INFO", log_file="hpfracc.log")
 
-   # Debug backend information
-   logger.debug(f"Available backends: {BackendManager.get_available_backends()}")
-   logger.debug(f"Current backend: {BackendManager.get_current_backend()}")
+   # Get logger for specific module
+   logger = get_logger("hpfracc.core.derivatives")
 
-   # Debug model parameters
-   def debug_model(model):
-       logger.debug(f"Model type: {type(model)}")
-       logger.debug(f"Input dimension: {model.input_dim}")
-       logger.debug(f"Output dimension: {model.output_dim}")
-       logger.debug(f"Fractional order: {model.fractional_order}")
+   # Use logger
+   logger.info("Starting fractional derivative computation")
+   logger.debug("Computing with alpha=0.5")
+   logger.warning("Large data size detected")
+   logger.error("Computation failed")
 
 Troubleshooting
 --------------
 
-Common Issues and Solutions
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+Common Issues
+~~~~~~~~~~~~
 
-**Issue: Backend not available**
+**Import Errors:**
+
 .. code-block:: python
 
-   # Solution: Check and install dependencies
+   # If you get import errors, check your installation
+   import hpfracc
+   print(hpfracc.__version__)
+
+   # Check available backends
    from hpfracc.ml.backends import BackendManager
-   
    available = BackendManager.get_available_backends()
-   print(f"Available: {available}")
-   
-   # Install missing backend
-   # pip install torch  # for PyTorch
-   # pip install jax jaxlib  # for JAX
-   # pip install numba  # for NUMBA
+   print(f"Available backends: {available}")
 
-**Issue: Memory errors with large datasets**
+**Memory Issues:**
+
 .. code-block:: python
 
-   # Solution: Use batch processing
-   def process_large_dataset(data, batch_size=1000):
+   # For large computations, use memory-efficient processing
+   from hpfracc.core.utilities import memory_usage_decorator
+   import gc
+
+   @memory_usage_decorator
+   def process_large_data(data, chunk_size=1000):
        results = []
-       for i in range(0, len(data), batch_size):
-           batch = data[i:i+batch_size]
-           # Process batch
-           results.append(process_batch(batch))
+       for i in range(0, len(data), chunk_size):
+           chunk = data[i:i+chunk_size]
+           # Process chunk
+           chunk_result = process_chunk(chunk)
+           results.append(chunk_result)
+           
+           # Clear memory
+           del chunk
+           gc.collect()
+       
        return np.concatenate(results)
 
-**Issue: Slow performance**
+**Performance Issues:**
+
 .. code-block:: python
 
-   # Solution: Choose appropriate backend
-   from hpfracc.ml.backends import BackendType
+   # Use GPU acceleration when available
+   from hpfracc.ml.backends import BackendManager, BackendType
+
+   # Try different backends
+   backends_to_try = [BackendType.TORCH, BackendType.JAX, BackendType.NUMBA]
    
-   # For GPU acceleration
-   BackendManager.set_backend(BackendType.TORCH)  # or BackendType.JAX
+   for backend in backends_to_try:
+       if BackendManager.is_backend_available(backend):
+           BackendManager.set_backend(backend)
+           print(f"Using backend: {backend}")
+           break
+
+**Validation Errors:**
+
+.. code-block:: python
+
+   from hpfracc.core.utilities import validate_fractional_order, validate_function
+
+   # Validate inputs before computation
+   alpha = 0.5
+   if not validate_fractional_order(alpha):
+       raise ValueError(f"Invalid fractional order: {alpha}")
+
+   def f(x):
+       return x**2
    
-   # For CPU optimization
-   BackendManager.set_backend(BackendType.NUMBA)
+   if not validate_function(f):
+       raise ValueError("Invalid function")
 
-Getting Help
------------
+Best Practices
+-------------
 
-If you encounter issues:
+**Code Organization:**
 
-1. **Check the documentation**: Visit the full documentation at https://fractional-calculus-library.readthedocs.io
-2. **Search existing issues**: Check GitHub issues for similar problems
-3. **Create a new issue**: Report bugs or request features on GitHub
-4. **Contact support**: Email d.r.chin@pgr.reading.ac.uk for academic inquiries
+.. code-block:: python
 
-Next Steps
-----------
+   # Organize your code with proper imports
+   import numpy as np
+   from hpfracc.core.definitions import FractionalOrder
+   from hpfracc.core.derivatives import create_fractional_derivative
+   from hpfracc.core.integrals import create_fractional_integral
+   from hpfracc.special import gamma_function, mittag_leffler_function
 
-Now that you're familiar with the basics:
+   # Use consistent naming conventions
+   alpha = FractionalOrder(0.5)
+   x = np.linspace(0, 10, 100)
+   
+   # Create reusable functions
+   def compute_fractional_derivative(f, alpha, method="RL"):
+       deriv = create_fractional_derivative(alpha, method=method)
+       return deriv(f, x)
 
-1. **Explore Examples**: Check the examples directory for practical applications
-2. **Read API Reference**: Understand all available functions and classes
-3. **Study Model Theory**: Learn the mathematical foundations
-4. **Contribute**: Help improve the library by contributing code or documentation
+**Error Handling:**
 
-For advanced usage, see the :doc:`api_reference` and :doc:`examples` sections.
+.. code-block:: python
+
+   import numpy as np
+   from hpfracc.core.utilities import validate_fractional_order
+
+   def safe_fractional_derivative(f, alpha, method="RL"):
+       """Safely compute fractional derivative with error handling."""
+       try:
+           # Validate inputs
+           if not validate_fractional_order(alpha):
+               raise ValueError(f"Invalid fractional order: {alpha}")
+           
+           # Create derivative
+           from hpfracc.core.derivatives import create_fractional_derivative
+           from hpfracc.core.definitions import FractionalOrder
+           
+           deriv = create_fractional_derivative(FractionalOrder(alpha), method=method)
+           
+           # Compute result
+           x = np.linspace(0, 10, 100)
+           result = deriv(f, x)
+           
+           return result
+           
+       except Exception as e:
+           print(f"Error computing fractional derivative: {e}")
+           return None
+
+**Performance Optimization:**
+
+.. code-block:: python
+
+   from hpfracc.core.utilities import timing_decorator
+   from hpfracc.ml.backends import BackendManager, BackendType
+
+   @timing_decorator
+   def optimized_computation(data, alpha, method="RL"):
+       """Optimized computation with backend selection."""
+       # Choose best available backend
+       if BackendManager.is_backend_available(BackendType.TORCH):
+           BackendManager.set_backend(BackendType.TORCH)
+       elif BackendManager.is_backend_available(BackendType.JAX):
+           BackendManager.set_backend(BackendType.JAX)
+       else:
+           BackendManager.set_backend(BackendType.NUMPY)
+       
+       # Perform computation
+       from hpfracc.core.derivatives import create_fractional_derivative
+       from hpfracc.core.definitions import FractionalOrder
+       
+       deriv = create_fractional_derivative(FractionalOrder(alpha), method=method)
+       return deriv(lambda x: data, np.arange(len(data)))
+
+**Documentation and Testing:**
+
+.. code-block:: python
+
+   def well_documented_function(f, alpha, method="RL"):
+       """
+       Compute fractional derivative with comprehensive documentation.
+       
+       Parameters:
+       -----------
+       f : callable
+           Function to differentiate
+       alpha : float
+           Fractional order (0 < alpha < 2)
+       method : str, optional
+           Method to use ("RL", "Caputo", "GL")
+       
+       Returns:
+       --------
+       numpy.ndarray
+           Fractional derivative values
+       
+       Raises:
+       -------
+       ValueError
+           If alpha is not in valid range
+       TypeError
+           If f is not callable
+       
+       Examples:
+       --------
+       >>> def f(x): return np.sin(x)
+       >>> result = well_documented_function(f, 0.5)
+       """
+       # Input validation
+       if not validate_fractional_order(alpha):
+           raise ValueError(f"Invalid fractional order: {alpha}")
+       
+       if not validate_function(f):
+           raise TypeError("f must be callable")
+       
+       # Computation
+       from hpfracc.core.derivatives import create_fractional_derivative
+       from hpfracc.core.definitions import FractionalOrder
+       
+       deriv = create_fractional_derivative(FractionalOrder(alpha), method=method)
+       x = np.linspace(0, 10, 100)
+       return deriv(f, x)
+
+This comprehensive user guide covers all the major features of HPFRACC, from basic usage to advanced applications. For more detailed examples and tutorials, see the Examples & Tutorials section.
+"""

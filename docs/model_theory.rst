@@ -104,388 +104,459 @@ where :math:`F(\omega)` is the Fourier transform of :math:`f(t)`.
 Marchaud Fractional Derivative
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Defined for functions with specific decay properties:
+Defined for functions that vanish at infinity:
 
 .. math::
 
-   D^\alpha f(t) = \frac{\alpha}{\Gamma(1-\alpha)} \int_0^{\infty} \frac{f(t) - f(t-\tau)}{\tau^{\alpha+1}} d\tau
+   D^\alpha f(t) = \frac{\alpha}{\Gamma(1-\alpha)} \int_0^{\infty} \frac{f(t) - f(t-\tau)}{\tau^{1+\alpha}} d\tau
 
 Hadamard Fractional Derivative
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Logarithmic fractional derivative:
+Uses logarithmic kernels and is defined as:
 
 .. math::
 
-   D^\alpha f(t) = \frac{1}{\Gamma(1-\alpha)} \frac{d}{dt} \int_1^t \left(\ln\frac{t}{\tau}\right)^{-\alpha} \frac{f(\tau)}{\tau} d\tau
+   D^\alpha f(t) = \frac{1}{\Gamma(n-\alpha)} \left(t \frac{d}{dt}\right)^n \int_1^t \left(\ln\frac{t}{\tau}\right)^{n-\alpha-1} \frac{f(\tau)}{\tau} d\tau
 
-Implementation Methods
----------------------
+Fractional Integrals
+-------------------
 
-Numerical Algorithms
-~~~~~~~~~~~~~~~~~~~
+Riemann-Liouville Fractional Integral
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Riemann-Liouville Implementation
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. code-block:: python
-
-   def riemann_liouville_derivative(x, alpha):
-       """
-       Compute Riemann-Liouville fractional derivative using FFT method
-       
-       For smooth functions, this method provides excellent accuracy
-       and computational efficiency.
-       """
-       # Convert to frequency domain
-       X = torch.fft.fft(x)
-       
-       # Apply fractional derivative in frequency domain
-       n = x.shape[-1]
-       omega = 2 * torch.pi * torch.fft.fftfreq(n, d=1.0)
-       
-       # Handle zero frequency case
-       omega[0] = 1e-10
-       
-       # Apply (iω)^α filter
-       filter_response = (1j * omega) ** alpha
-       Y = X * filter_response
-       
-       # Convert back to time domain
-       return torch.fft.ifft(Y).real
-
-The FFT-based implementation leverages the frequency domain representation:
+The Riemann-Liouville fractional integral of order :math:`\alpha` is defined as:
 
 .. math::
 
-   \mathcal{F}\{D^\alpha f(t)\} = (i\omega)^\alpha \mathcal{F}\{f(t)\}
+   I^\alpha f(t) = \frac{1}{\Gamma(\alpha)} \int_0^t (t-\tau)^{\alpha-1} f(\tau) d\tau
 
-Caputo Implementation
-^^^^^^^^^^^^^^^^^^^^
+**Properties:**
+- **Linearity**: :math:`I^\alpha(af + bg) = aI^\alpha f + bI^\alpha g`
+- **Semigroup**: :math:`I^\alpha(I^\beta f) = I^{\alpha+\beta}f`
+- **Commutativity**: :math:`I^\alpha(I^\beta f) = I^\beta(I^\alpha f)`
+- **Zero Order**: :math:`I^0 f(t) = f(t)`
 
-.. code-block:: python
+Caputo Fractional Integral
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
-   def caputo_derivative(x, alpha):
-       """
-       Compute Caputo fractional derivative using L1 scheme
-       
-       This method is particularly suitable for initial value problems
-       and provides good numerical stability.
-       """
-       if alpha <= 0 or alpha >= 1:
-           raise ValueError("L1 scheme requires 0 < α < 1")
-       
-       n = x.shape[-1]
-       result = torch.zeros_like(x)
-       
-       # L1 scheme coefficients
-       for k in range(1, n):
-           # Compute weights for L1 scheme
-           weight = ((k + 1)**(1 - alpha) - k**(1 - alpha)) / (1 - alpha)
-           result[k] = weight * (x[k] - x[k-1])
-       
-       return result
-
-The L1 scheme approximates the Caputo derivative as:
+For :math:`0 < \alpha < 1`, the Caputo fractional integral equals the Riemann-Liouville integral:
 
 .. math::
 
-   D^\alpha f(t_k) \approx \frac{1}{\Gamma(1-\alpha)} \sum_{j=0}^{k-1} w_{k,j} (f_{j+1} - f_j)
+   I^\alpha_C f(t) = I^\alpha f(t)
 
-where the weights :math:`w_{k,j}` are computed as:
+Weyl Fractional Integral
+~~~~~~~~~~~~~~~~~~~~~~~
+
+Suitable for functions defined on the entire real line:
 
 .. math::
 
-   w_{k,j} = \frac{(k-j+1)^{1-\alpha} - (k-j)^{1-\alpha}}{1-\alpha}
+   I^\alpha_W f(t) = \frac{1}{\Gamma(\alpha)} \int_{-\infty}^t (t-\tau)^{\alpha-1} f(\tau) d\tau
 
-Grünwald-Letnikov Implementation
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Hadamard Fractional Integral
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. code-block:: python
+Uses logarithmic kernels:
 
-   def grunwald_letnikov_derivative(x, alpha):
-       """
-       Compute Grünwald-Letnikov fractional derivative
-       
-       This method provides a direct numerical approximation
-       and is stable for a wide range of fractional orders.
-       """
-       n = x.shape[-1]
-       result = torch.zeros_like(x)
-       
-       # Compute Grünwald-Letnikov weights
-       weights = compute_grunwald_weights(alpha, n)
-       
-       # Apply convolution
-       for k in range(n):
-           for j in range(k + 1):
-               if k - j < len(weights):
-                   result[k] += weights[k - j] * x[j]
-       
-       return result
+.. math::
 
-The Grünwald-Letnikov weights are computed recursively:
+   I^\alpha_H f(t) = \frac{1}{\Gamma(\alpha)} \int_1^t \left(\ln\frac{t}{\tau}\right)^{\alpha-1} \frac{f(\tau)}{\tau} d\tau
+
+**Note**: Requires :math:`t > 1` for the integral to be well-defined.
+
+Special Functions in Fractional Calculus
+---------------------------------------
+
+Gamma Function
+~~~~~~~~~~~~~
+
+The gamma function is fundamental to fractional calculus:
+
+.. math::
+
+   \Gamma(z) = \int_0^{\infty} t^{z-1} e^{-t} dt
+
+**Properties:**
+- :math:`\Gamma(n+1) = n!` for positive integers :math:`n`
+- :math:`\Gamma(z+1) = z\Gamma(z)` (recurrence relation)
+- :math:`\Gamma(1/2) = \sqrt{\pi}`
+
+Beta Function
+~~~~~~~~~~~~
+
+The beta function is defined as:
+
+.. math::
+
+   B(x, y) = \int_0^1 t^{x-1} (1-t)^{y-1} dt = \frac{\Gamma(x)\Gamma(y)}{\Gamma(x+y)}
+
+Mittag-Leffler Function
+~~~~~~~~~~~~~~~~~~~~~~
+
+The Mittag-Leffler function is a generalization of the exponential function:
+
+.. math::
+
+   E_\alpha(z) = \sum_{k=0}^{\infty} \frac{z^k}{\Gamma(\alpha k + 1)}
+
+**Special Cases:**
+- :math:`E_1(z) = e^z` (exponential function)
+- :math:`E_2(z) = \cosh(\sqrt{z})` (hyperbolic cosine)
+
+Two-Parameter Mittag-Leffler Function:
+
+.. math::
+
+   E_{\alpha,\beta}(z) = \sum_{k=0}^{\infty} \frac{z^k}{\Gamma(\alpha k + \beta)}
+
+Binomial Coefficients
+~~~~~~~~~~~~~~~~~~~~
+
+Fractional binomial coefficients are defined as:
+
+.. math::
+
+   \binom{\alpha}{k} = \frac{\Gamma(\alpha + 1)}{\Gamma(k + 1)\Gamma(\alpha - k + 1)}
+
+**Properties:**
+- :math:`\binom{\alpha}{0} = 1`
+- :math:`\binom{\alpha}{1} = \alpha`
+- :math:`\binom{\alpha}{k} = 0` for :math:`k > \alpha` when :math:`\alpha` is a non-negative integer
+
+Fractional Green's Functions
+---------------------------
+
+Green's functions are fundamental solutions to differential equations. In fractional calculus, they play a crucial role in solving fractional differential equations.
+
+Fractional Diffusion Green's Function
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+For the fractional diffusion equation:
+
+.. math::
+
+   \frac{\partial^\alpha u}{\partial t^\alpha} = D \frac{\partial^2 u}{\partial x^2}
+
+The Green's function is:
+
+.. math::
+
+   G(x, t) = \frac{1}{2\sqrt{\pi D t^\alpha}} E_{\alpha/2,1}\left(-\frac{x^2}{4Dt^\alpha}\right)
+
+where :math:`E_{\alpha/2,1}` is the Mittag-Leffler function.
+
+Fractional Wave Green's Function
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+For the fractional wave equation:
+
+.. math::
+
+   \frac{\partial^{2\alpha} u}{\partial t^{2\alpha}} = c^2 \frac{\partial^2 u}{\partial x^2}
+
+The Green's function is:
+
+.. math::
+
+   G(x, t) = \frac{1}{2c} E_{2\alpha,1}\left(-\frac{|x|}{ct^\alpha}\right)
+
+Fractional Advection Green's Function
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+For the fractional advection equation:
+
+.. math::
+
+   \frac{\partial^\alpha u}{\partial t^\alpha} + v \frac{\partial u}{\partial x} = 0
+
+The Green's function is:
+
+.. math::
+
+   G(x, t) = \frac{1}{v} E_{\alpha,1}\left(-\frac{x}{vt^\alpha}\right) H(x)
+
+where :math:`H(x)` is the Heaviside step function.
+
+Analytical Methods for Fractional Differential Equations
+------------------------------------------------------
+
+Homotopy Perturbation Method (HPM)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The Homotopy Perturbation Method is a powerful analytical technique for solving nonlinear fractional differential equations. It combines the advantages of homotopy theory and perturbation methods.
+
+**Basic Idea:**
+Construct a homotopy :math:`H(v, p)` that continuously deforms from a simple problem to the original problem:
+
+.. math::
+
+   H(v, p) = (1-p)[L(v) - L(u_0)] + p[A(v) - f(r)] = 0
+
+where:
+- :math:`p \in [0,1]` is the embedding parameter
+- :math:`L` is a linear operator
+- :math:`A` is a nonlinear operator
+- :math:`u_0` is an initial approximation
+- :math:`f(r)` is the source term
+
+**Solution Process:**
+1. Assume the solution as a power series in :math:`p`:
+   .. math::
+      v = v_0 + p v_1 + p^2 v_2 + \cdots
+
+2. Substitute into the homotopy equation
+3. Collect terms of the same power of :math:`p`
+4. Solve the resulting system of equations
+5. Set :math:`p = 1` to obtain the final solution
+
+**Advantages:**
+- No need for linearization or discretization
+- Provides analytical solutions
+- Works for both linear and nonlinear problems
+- Converges rapidly for many problems
+
+Variational Iteration Method (VIM)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The Variational Iteration Method is an iterative technique that uses Lagrange multipliers to construct correction functionals.
+
+**Basic Formulation:**
+For a general fractional differential equation:
+
+.. math::
+
+   D^\alpha u + N(u) = g(t)
+
+The correction functional is:
+
+.. math::
+
+   u_{n+1}(t) = u_n(t) + \int_0^t \lambda(\tau) [D^\alpha u_n(\tau) + N(\tilde{u}_n(\tau)) - g(\tau)] d\tau
+
+where:
+- :math:`\lambda(\tau)` is the Lagrange multiplier
+- :math:`\tilde{u}_n(\tau)` is the restricted variation
+- :math:`N(u)` is the nonlinear operator
+
+**Lagrange Multiplier:**
+For :math:`D^\alpha u + N(u) = g(t)`, the Lagrange multiplier is:
+
+.. math::
+
+   \lambda(\tau) = \frac{(-1)^m (t-\tau)^{\alpha-1}}{\Gamma(\alpha)}
+
+**Iteration Process:**
+1. Start with an initial approximation :math:`u_0(t)`
+2. Compute the Lagrange multiplier
+3. Construct the correction functional
+4. Solve for :math:`u_{n+1}(t)`
+5. Repeat until convergence
+
+**Advantages:**
+- No need for linearization
+- Provides analytical solutions
+- Works for both linear and nonlinear problems
+- Self-correcting iterative process
+
+Numerical Methods and Implementation
+-----------------------------------
+
+Discretization Schemes
+~~~~~~~~~~~~~~~~~~~~~
+
+**Grunwald-Letnikov Discretization:**
+For numerical computation, we use the Grünwald-Letnikov approximation:
+
+.. math::
+
+   D^\alpha f(t_n) \approx h^{-\alpha} \sum_{k=0}^n w_k^{(\alpha)} f(t_{n-k})
+
+where the weights :math:`w_k^{(\alpha)}` are computed recursively:
 
 .. math::
 
    w_0^{(\alpha)} = 1, \quad w_k^{(\alpha)} = \left(1 - \frac{\alpha + 1}{k}\right) w_{k-1}^{(\alpha)}
 
-Neural Network Integration
--------------------------
+**L1 Discretization:**
+For Caputo derivatives, the L1 scheme provides better accuracy:
+
+.. math::
+
+   D^\alpha f(t_n) \approx \frac{1}{\Gamma(2-\alpha)h^\alpha} \sum_{k=0}^{n-1} b_k [f(t_{n-k}) - f(t_{n-k-1})]
+
+where:
+.. math::
+
+   b_k = (k+1)^{1-\alpha} - k^{1-\alpha}
+
+Numerical Integration
+~~~~~~~~~~~~~~~~~~~~
+
+**Trapezoidal Rule for Fractional Integrals:**
+For the Riemann-Liouville integral:
+
+.. math::
+
+   I^\alpha f(t_n) \approx \frac{h^\alpha}{\Gamma(\alpha+1)} \sum_{k=0}^n w_k f(t_k)
+
+where the weights :math:`w_k` are computed using the trapezoidal rule.
+
+**Simpson's Rule:**
+For higher accuracy, Simpson's rule can be applied:
+
+.. math::
+
+   I^\alpha f(t_n) \approx \frac{h^\alpha}{\Gamma(\alpha+1)} \sum_{k=0}^n w_k f(t_k)
+
+with appropriate weight coefficients.
+
+Error Analysis and Convergence
+-----------------------------
+
+Truncation Error
+~~~~~~~~~~~~~~~
+
+**Grunwald-Letnikov Error:**
+The truncation error for the Grünwald-Letnikov approximation is:
+
+.. math::
+
+   |E_n| \leq Ch^{2-\alpha} \max_{t \in [0,T]} |f''(t)|
+
+**L1 Scheme Error:**
+For the L1 scheme, the error bound is:
+
+.. math::
+
+   |E_n| \leq Ch^{2-\alpha} \max_{t \in [0,T]} |f''(t)|
+
+Convergence Analysis
+~~~~~~~~~~~~~~~~~~~
+
+**HPM Convergence:**
+The HPM solution converges if:
+
+.. math::
+
+   \lim_{n \to \infty} \|u_{n+1} - u_n\| = 0
+
+**VIM Convergence:**
+The VIM solution converges if the correction functional is contractive:
+
+.. math::
+
+   \|u_{n+1} - u_n\| \leq \rho \|u_n - u_{n-1}\|
+
+where :math:`\rho < 1` is the contraction factor.
+
+Stability Analysis
+~~~~~~~~~~~~~~~~~
+
+**Numerical Stability:**
+For the Grünwald-Letnikov scheme, stability requires:
+
+.. math::
+
+   |1 - \lambda h^\alpha| \leq 1
+
+where :math:`\lambda` is the eigenvalue of the spatial discretization.
+
+Applications in Machine Learning
+-------------------------------
 
 Fractional Neural Networks
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Fractional derivatives can be integrated into neural networks in several ways:
-
-1. **Fractional Activation Functions**: Using fractional derivatives of activation functions
-2. **Fractional Loss Functions**: Incorporating fractional derivatives in loss computation
-3. **Fractional Layers**: Creating specialized layers that compute fractional derivatives
-
-Fractional Activation Functions
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-For a given activation function :math:`\sigma(x)`, the fractional derivative is:
+**Fractional Gradient Descent:**
+The fractional gradient descent update rule is:
 
 .. math::
 
-   D^\alpha \sigma(x) = \frac{1}{\Gamma(1-\alpha)} \int_0^x \frac{\sigma'(t)}{(x-t)^\alpha} dt
+   \theta_{t+1} = \theta_t - \eta D^\alpha L(\theta_t)
 
-Common fractional activation functions include:
+where :math:`L(\theta)` is the loss function and :math:`\alpha` controls the memory effects.
 
-- **Fractional ReLU**: :math:`D^\alpha \text{ReLU}(x) = \frac{x^{1-\alpha}}{\Gamma(2-\alpha)} H(x)`
-- **Fractional Sigmoid**: :math:`D^\alpha \sigma(x) = \frac{1}{\Gamma(1-\alpha)} \int_0^x \frac{\sigma(t)(1-\sigma(t))}{(x-t)^\alpha} dt`
-- **Fractional Tanh**: :math:`D^\alpha \tanh(x) = \frac{1}{\Gamma(1-\alpha)} \int_0^x \frac{\text{sech}^2(t)}{(x-t)^\alpha} dt`
+**Advantages:**
+- Better convergence for non-convex optimization
+- Memory effects help escape local minima
+- Improved generalization in some cases
 
-Fractional Loss Functions
-^^^^^^^^^^^^^^^^^^^^^^^
+Graph Neural Networks
+~~~~~~~~~~~~~~~~~~~~
 
-Fractional derivatives can be incorporated into loss functions to capture long-range dependencies:
-
-.. math::
-
-   \mathcal{L}_\text{fractional} = \mathcal{L}_\text{standard} + \lambda \|D^\alpha f_\theta(x) - D^\alpha y\|^2
-
-where :math:`\lambda` is a regularization parameter and :math:`f_\theta` is the neural network.
-
-Adjoint Method Optimization
---------------------------
-
-Automatic Differentiation
-~~~~~~~~~~~~~~~~~~~~~~~
-
-For gradient-based optimization, we need to compute gradients of fractional derivatives. The adjoint method provides an efficient way to compute these gradients.
-
-Forward Pass
-^^^^^^^^^^^
-
-The forward pass computes the fractional derivative:
-
-.. math::
-
-   y = D^\alpha f(x)
-
-Backward Pass
-^^^^^^^^^^^^
-
-The adjoint method computes the gradient:
-
-.. math::
-
-   \frac{\partial \mathcal{L}}{\partial x} = \frac{\partial \mathcal{L}}{\partial y} \cdot \frac{\partial y}{\partial x}
-
-For fractional derivatives, this involves computing the adjoint operator:
-
-.. math::
-
-   \frac{\partial D^\alpha f(x)}{\partial x} = D^\alpha \frac{\partial f(x)}{\partial x}
-
-Implementation in PyTorch
-^^^^^^^^^^^^^^^^^^^^^^^
-
-.. code-block:: python
-
-   class FractionalDerivative(torch.autograd.Function):
-       @staticmethod
-       def forward(ctx, x, alpha):
-           ctx.alpha = alpha
-           # Compute fractional derivative
-           result = compute_fractional_derivative(x, alpha)
-           ctx.save_for_backward(x, result)
-           return result
-       
-       @staticmethod
-       def backward(ctx, grad_output):
-           x, result = ctx.saved_tensors
-           alpha = ctx.alpha
-           
-           # Compute adjoint (gradient of fractional derivative)
-           grad_input = compute_adjoint_fractional_derivative(grad_output, alpha)
-           return grad_input, None
-
-Performance Analysis
--------------------
-
-Computational Complexity
-~~~~~~~~~~~~~~~~~~~~~~~
-
-The computational complexity of different methods:
-
-1. **FFT-based (Riemann-Liouville)**: :math:`O(n \log n)`
-2. **L1 scheme (Caputo)**: :math:`O(n^2)`
-3. **Grünwald-Letnikov**: :math:`O(n^2)`
-
-Memory Requirements
-~~~~~~~~~~~~~~~~~~
-
-Memory requirements for different implementations:
-
-- **FFT-based**: :math:`O(n)` (in-place FFT possible)
-- **L1 scheme**: :math:`O(n)` (sequential computation)
-- **Grünwald-Letnikov**: :math:`O(n)` (weight storage)
-
-Accuracy Analysis
-~~~~~~~~~~~~~~~~
-
-The accuracy of different methods depends on the fractional order :math:`\alpha`:
-
-- **FFT-based**: Best for smooth functions, :math:`\alpha \in (0, 2)`
-- **L1 scheme**: Good for :math:`\alpha \in (0, 1)`, stable for initial value problems
-- **Grünwald-Letnikov**: Stable for :math:`\alpha \in (0, 2)`, good for discrete data
-
-Applications and Use Cases
--------------------------
-
-Signal Processing
-~~~~~~~~~~~~~~~~
-
-Fractional derivatives are useful in signal processing for:
-
-1. **Edge Detection**: Fractional derivatives can detect edges at different scales
-2. **Noise Reduction**: Fractional smoothing operators
-3. **Feature Extraction**: Capturing long-range dependencies in signals
-
-The fractional derivative of a signal :math:`f(t)` can be written as:
-
-.. math::
-
-   D^\alpha f(t) = \frac{1}{\Gamma(1-\alpha)} \int_0^t \frac{f'(\tau)}{(t-\tau)^\alpha} d\tau
-
-Image Processing
-~~~~~~~~~~~~~~~
-
-In image processing, fractional derivatives are used for:
-
-1. **Texture Analysis**: Capturing texture patterns at different scales
-2. **Edge Enhancement**: Enhancing edges while preserving smooth regions
-3. **Noise Suppression**: Adaptive noise reduction
-
-For 2D images, the fractional gradient is:
-
-.. math::
-
-   \nabla^\alpha f(x,y) = \left(\frac{\partial^\alpha f}{\partial x^\alpha}, \frac{\partial^\alpha f}{\partial y^\alpha}\right)
-
-Machine Learning Applications
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-1. **Time Series Forecasting**: Capturing long-range dependencies
-2. **Graph Neural Networks**: Fractional graph convolutions
-3. **Attention Mechanisms**: Fractional attention weights
-
-Fractional Graph Convolutions
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-For graph neural networks, fractional graph convolutions can be defined as:
+**Fractional Graph Convolution:**
+The fractional graph convolution is defined as:
 
 .. math::
 
    H^{(l+1)} = \sigma\left(D^{-\alpha/2} A D^{-\alpha/2} H^{(l)} W^{(l)}\right)
 
-where :math:`D` is the degree matrix, :math:`A` is the adjacency matrix, and :math:`\alpha` is the fractional order.
+where:
+- :math:`A` is the adjacency matrix
+- :math:`D` is the degree matrix
+- :math:`\alpha` controls the fractional order
+- :math:`W^{(l)}` are learnable weights
 
-Fractional Attention
-^^^^^^^^^^^^^^^^^^^
+**Properties:**
+- Captures long-range dependencies in graphs
+- Provides smoothness control
+- Better performance on large graphs
 
-Fractional attention mechanisms can be implemented as:
-
-.. math::
-
-   \text{Attention}(Q, K, V) = \text{softmax}\left(\frac{D^\alpha(QK^T)}{\sqrt{d_k}}\right)V
-
-where :math:`D^\alpha` is applied element-wise to the attention scores.
-
-Theoretical Guarantees
----------------------
-
-Convergence Analysis
+Attention Mechanisms
 ~~~~~~~~~~~~~~~~~~~
 
-For neural networks with fractional derivatives, convergence can be analyzed using:
+**Fractional Attention:**
+The fractional attention mechanism is:
 
 .. math::
 
-   \|f_{n+1} - f^*\| \leq C \|f_n - f^*\|^{1+\alpha}
+   \text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right) D^\alpha V
 
-where :math:`C` is a constant and :math:`\alpha` is the fractional order.
+where :math:`D^\alpha` is the fractional derivative operator.
 
-Stability Analysis
-~~~~~~~~~~~~~~~~~
+**Benefits:**
+- Enhanced memory capacity
+- Better handling of long sequences
+- Improved interpretability
 
-The stability of fractional neural networks can be analyzed using Lyapunov theory:
+Performance Optimization
+-----------------------
 
-.. math::
+GPU Acceleration
+~~~~~~~~~~~~~~~
 
-   V(x) = \frac{1}{2} \|x\|^2, \quad \dot{V}(x) = x^T D^\alpha x
+**CUDA Implementation:**
+The library provides GPU-accelerated implementations using CUDA:
 
-For stability, we require :math:`\dot{V}(x) < 0` for all :math:`x \neq 0`.
+- Parallel computation of fractional derivatives
+- Efficient memory management
+- Optimized kernels for different data types
 
-Error Bounds
-~~~~~~~~~~~
+**Memory Optimization:**
+- Streaming computation for large datasets
+- Shared memory usage for repeated calculations
+- Efficient data transfer between CPU and GPU
 
-The approximation error for fractional derivatives can be bounded as:
+Parallel Processing
+~~~~~~~~~~~~~~~~~~
 
-.. math::
+**Multi-threading:**
+- Parallel computation across multiple CPU cores
+- Thread-safe implementations
+- Load balancing for irregular workloads
 
-   \|D^\alpha f - D^\alpha_h f\| \leq Ch^p
-
-where :math:`h` is the step size, :math:`p` is the order of accuracy, and :math:`C` is a constant.
-
-Future Directions
------------------
-
-Research Areas
-~~~~~~~~~~~~~
-
-1. **Adaptive Fractional Orders**: Learning optimal fractional orders for different tasks
-2. **Multi-scale Analysis**: Combining fractional derivatives at multiple scales
-3. **Quantum Fractional Calculus**: Extending to quantum computing frameworks
-
-Open Problems
-~~~~~~~~~~~~
-
-1. **Optimal Fractional Orders**: Determining the best fractional order for specific applications
-2. **Computational Efficiency**: Developing more efficient algorithms for fractional derivatives
-3. **Theoretical Understanding**: Better understanding of the theoretical properties of fractional neural networks
-
-Conclusion
-----------
-
-Fractional calculus provides a powerful framework for extending traditional neural networks with non-local operators and memory effects. The HPFRACC library implements efficient numerical methods for computing fractional derivatives and integrates them seamlessly with modern deep learning frameworks.
-
-The combination of theoretical rigor and practical implementation makes fractional calculus a valuable tool for machine learning applications that require capturing long-range dependencies and non-local behavior.
+**Distributed Computing:**
+- MPI-based distributed memory parallelization
+- Scalable algorithms for large-scale problems
+- Fault-tolerant implementations
 
 References
 ----------
 
-This documentation is based on extensive research in fractional calculus and its applications in machine learning. The following references provide the theoretical foundation and implementation details:
-
-Foundational Fractional Calculus
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. [Podlubny1999] Podlubny, I. (1999). *Fractional Differential Equations*. Academic Press.
-
-.. [Samko1993] Samko, S. G., Kilbas, A. A., & Marichev, O. I. (1993). *Fractional Integrals and Derivatives: Theory and Applications*. Gordon and Breach Science Publishers.
+Historical Development
+~~~~~~~~~~~~~~~~~~~~~
 
 .. [Oldham1974] Oldham, K. B., & Spanier, J. (1974). *The Fractional Calculus*. Academic Press.
 
@@ -561,6 +632,26 @@ Applications in Machine Learning
 .. [Zhang2020] Zhang, L., Peng, H., Wu, B., & Wang, J. (2020). Fractional-order gradient descent learning of BP neural networks with Caputo derivative. *Neural Networks*, 69, 60-68.
 
 .. [Li2021] Li, C., & Zeng, F. (2021). *Numerical Methods for Fractional Calculus*. Chapman & Hall/CRC.
+
+Analytical Methods
+~~~~~~~~~~~~~~~~~
+
+.. [He2006] He, J. H. (2006). Homotopy perturbation method for solving boundary value problems. *Physics Letters A*, 350(1-2), 87-88.
+
+.. [He2003] He, J. H. (2003). Homotopy perturbation method: a new nonlinear analytical technique. *Applied Mathematics and Computation*, 135(1), 73-79.
+
+.. [He1999] He, J. H. (1999). Variational iteration method - a kind of non-linear analytical technique: some examples. *International Journal of Non-Linear Mechanics*, 34(4), 699-708.
+
+.. [He2007] He, J. H. (2007). Variational iteration method - some recent results and new interpretations. *Journal of Computational and Applied Mathematics*, 207(1), 3-17.
+
+Green's Functions
+~~~~~~~~~~~~~~~~
+
+.. [Cole2009] Cole, K. D., Beck, J. V., Haji-Sheikh, A., & Litkouhi, B. (2009). *Heat Conduction Using Green's Functions*. CRC Press.
+
+.. [Roach2000] Roach, G. F. (2000). *Green's Functions*. Cambridge University Press.
+
+.. [Stakgold2011] Stakgold, I., & Holst, M. J. (2011). *Green's Functions and Boundary Value Problems*. John Wiley & Sons.
 
 Recent Advances and Future Directions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

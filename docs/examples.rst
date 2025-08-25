@@ -1,3 +1,4 @@
+"""
 Examples & Tutorials
 ===================
 
@@ -51,6 +52,408 @@ Compute fractional derivatives using different methods:
    plt.grid(True)
    plt.show()
 
+Fractional Integral Computation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Compute fractional integrals using different methods:
+
+.. code-block:: python
+
+   import numpy as np
+   import matplotlib.pyplot as plt
+   from hpfracc.core.definitions import FractionalOrder
+   from hpfracc.core.integrals import create_fractional_integral
+
+   # Define test function
+   def test_function(x):
+       return x**2
+
+   # Create different fractional integrals
+   alpha = FractionalOrder(0.5)
+   x = np.linspace(0, 5, 100)
+
+   # Riemann-Liouville
+   rl_integral = create_fractional_integral(alpha, method="RL")
+   result_rl = rl_integral(test_function, x)
+
+   # Caputo
+   caputo_integral = create_fractional_integral(alpha, method="Caputo")
+   result_caputo = caputo_integral(test_function, x)
+
+   # Weyl
+   weyl_integral = create_fractional_integral(alpha, method="Weyl")
+   result_weyl = weyl_integral(test_function, x)
+
+   # Hadamard (requires x > 1)
+   hadamard_integral = create_fractional_integral(alpha, method="Hadamard")
+   x_hadamard = np.linspace(1.1, 5, 100)
+   result_hadamard = hadamard_integral(test_function, x_hadamard)
+
+   # Plot results
+   plt.figure(figsize=(15, 10))
+   
+   plt.subplot(2, 2, 1)
+   plt.plot(x, test_function(x), label='Original: x²', linewidth=2)
+   plt.plot(x, result_rl, label='Riemann-Liouville (α=0.5)', linewidth=2)
+   plt.xlabel('x')
+   plt.ylabel('f(x)')
+   plt.title('Riemann-Liouville Fractional Integral')
+   plt.legend()
+   plt.grid(True)
+   
+   plt.subplot(2, 2, 2)
+   plt.plot(x, test_function(x), label='Original: x²', linewidth=2)
+   plt.plot(x, result_caputo, label='Caputo (α=0.5)', linewidth=2)
+   plt.xlabel('x')
+   plt.ylabel('f(x)')
+   plt.title('Caputo Fractional Integral')
+   plt.legend()
+   plt.grid(True)
+   
+   plt.subplot(2, 2, 3)
+   plt.plot(x, test_function(x), label='Original: x²', linewidth=2)
+   plt.plot(x, result_weyl, label='Weyl (α=0.5)', linewidth=2)
+   plt.xlabel('x')
+   plt.ylabel('f(x)')
+   plt.title('Weyl Fractional Integral')
+   plt.legend()
+   plt.grid(True)
+   
+   plt.subplot(2, 2, 4)
+   plt.plot(x_hadamard, test_function(x_hadamard), label='Original: x²', linewidth=2)
+   plt.plot(x_hadamard, result_hadamard, label='Hadamard (α=0.5)', linewidth=2)
+   plt.xlabel('x')
+   plt.ylabel('f(x)')
+   plt.title('Hadamard Fractional Integral')
+   plt.legend()
+   plt.grid(True)
+   
+   plt.tight_layout()
+   plt.show()
+
+Special Functions
+~~~~~~~~~~~~~~~~
+
+Working with special functions in fractional calculus:
+
+.. code-block:: python
+
+   import numpy as np
+   import matplotlib.pyplot as plt
+   from hpfracc.special import (
+       gamma_function, beta_function, binomial_coefficient,
+       mittag_leffler_function, generalized_binomial
+   )
+
+   # Gamma function
+   x = np.linspace(0.1, 5, 100)
+   gamma_vals = [gamma_function(xi) for xi in x]
+
+   # Beta function
+   y = np.linspace(0.1, 3, 50)
+   X, Y = np.meshgrid(x[:50], y)
+   beta_vals = np.array([[beta_function(xi, yi) for xi in x[:50]] for yi in y])
+
+   # Binomial coefficients
+   n_vals = np.arange(0, 10)
+   alpha = 0.5
+   binomial_frac = [generalized_binomial(alpha, n) for n in n_vals]
+
+   # Mittag-Leffler function
+   z = np.linspace(-5, 5, 100)
+   ml_vals = [mittag_leffler_function(0.5, zi) for zi in z]
+
+   # Plot results
+   plt.figure(figsize=(15, 10))
+   
+   plt.subplot(2, 2, 1)
+   plt.plot(x, gamma_vals, linewidth=2)
+   plt.xlabel('x')
+   plt.ylabel('Γ(x)')
+   plt.title('Gamma Function')
+   plt.grid(True)
+   
+   plt.subplot(2, 2, 2)
+   plt.contourf(X, Y, beta_vals, levels=20)
+   plt.colorbar(label='B(x, y)')
+   plt.xlabel('x')
+   plt.ylabel('y')
+   plt.title('Beta Function')
+   
+   plt.subplot(2, 2, 3)
+   plt.stem(n_vals, binomial_frac)
+   plt.xlabel('n')
+   plt.ylabel('(α choose n)')
+   plt.title(f'Fractional Binomial Coefficients (α={alpha})')
+   plt.grid(True)
+   
+   plt.subplot(2, 2, 4)
+   plt.plot(z, ml_vals, linewidth=2)
+   plt.xlabel('z')
+   plt.ylabel('E₀.₅(z)')
+   plt.title('Mittag-Leffler Function E₀.₅(z)')
+   plt.grid(True)
+   
+   plt.tight_layout()
+   plt.show()
+
+Fractional Green's Functions
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Using fractional Green's functions for solving differential equations:
+
+.. code-block:: python
+
+   import numpy as np
+   import matplotlib.pyplot as plt
+   from hpfracc.special.greens_function import (
+       FractionalDiffusionGreensFunction,
+       FractionalWaveGreensFunction,
+       FractionalAdvectionGreensFunction
+   )
+
+   # Parameters
+   alpha = 0.5
+   D = 1.0  # Diffusion coefficient
+   c = 1.0  # Wave speed
+   v = 1.0  # Advection velocity
+
+   # Create Green's functions
+   diffusion_gf = FractionalDiffusionGreensFunction(alpha, D)
+   wave_gf = FractionalWaveGreensFunction(alpha, c)
+   advection_gf = FractionalAdvectionGreensFunction(alpha, v)
+
+   # Spatial and temporal grids
+   x = np.linspace(-5, 5, 200)
+   t = np.linspace(0.1, 2, 100)
+   X, T = np.meshgrid(x, t)
+
+   # Compute Green's functions
+   diffusion_result = np.array([[diffusion_gf.compute(xi, ti) for xi in x] for ti in t])
+   wave_result = np.array([[wave_gf.compute(xi, ti) for xi in x] for ti in t])
+   advection_result = np.array([[advection_gf.compute(xi, ti) for xi in x] for ti in t])
+
+   # Plot results
+   plt.figure(figsize=(15, 5))
+   
+   plt.subplot(1, 3, 1)
+   plt.contourf(X, T, diffusion_result, levels=20)
+   plt.colorbar(label='G(x, t)')
+   plt.xlabel('x')
+   plt.ylabel('t')
+   plt.title(f'Fractional Diffusion Green\'s Function (α={alpha})')
+   
+   plt.subplot(1, 3, 2)
+   plt.contourf(X, T, wave_result, levels=20)
+   plt.colorbar(label='G(x, t)')
+   plt.xlabel('x')
+   plt.ylabel('t')
+   plt.title(f'Fractional Wave Green\'s Function (α={alpha})')
+   
+   plt.subplot(1, 3, 3)
+   plt.contourf(X, T, advection_result, levels=20)
+   plt.colorbar(label='G(x, t)')
+   plt.xlabel('x')
+   plt.ylabel('t')
+   plt.title(f'Fractional Advection Green\'s Function (α={alpha})')
+   
+   plt.tight_layout()
+   plt.show()
+
+Analytical Methods: Homotopy Perturbation Method
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Solving fractional differential equations using HPM:
+
+.. code-block:: python
+
+   import numpy as np
+   import matplotlib.pyplot as plt
+   from hpfracc.solvers.homotopy_perturbation import HomotopyPerturbationMethod
+
+   # Define the fractional differential equation
+   # D^α u + u = f(t), where f(t) = t^2
+   def source_function(t):
+       return t**2
+
+   def initial_condition(t):
+       return 0.0
+
+   # Create HPM solver
+   alpha = 0.5
+   hpm_solver = HomotopyPerturbationMethod(alpha)
+
+   # Solve the equation
+   t = np.linspace(0, 2, 100)
+   solution = hpm_solver.solve(
+       source_function=source_function,
+       initial_condition=initial_condition,
+       t_span=t,
+       max_iterations=5
+   )
+
+   # Plot solution
+   plt.figure(figsize=(10, 6))
+   plt.plot(t, solution, 'b-', linewidth=2, label=f'HPM Solution (α={alpha})')
+   plt.plot(t, source_function(t), 'r--', linewidth=2, label='Source Function f(t) = t²')
+   plt.xlabel('t')
+   plt.ylabel('u(t)')
+   plt.title('Solution of Fractional Differential Equation using HPM')
+   plt.legend()
+   plt.grid(True)
+   plt.show()
+
+   # Analyze convergence
+   convergence = hpm_solver.analyze_convergence(
+       source_function=source_function,
+       initial_condition=initial_condition,
+       t_span=t,
+       max_iterations=10
+   )
+   
+   print("Convergence Analysis:")
+   print(f"Final residual: {convergence['final_residual']:.6f}")
+   print(f"Convergence rate: {convergence['convergence_rate']:.6f}")
+
+Analytical Methods: Variational Iteration Method
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Solving fractional differential equations using VIM:
+
+.. code-block:: python
+
+   import numpy as np
+   import matplotlib.pyplot as plt
+   from hpfracc.solvers.variational_iteration import VariationalIterationMethod
+
+   # Define the fractional differential equation
+   # D^α u + u^2 = f(t), where f(t) = 1
+   def source_function(t):
+       return np.ones_like(t)
+
+   def initial_condition(t):
+       return 0.0
+
+   def nonlinear_term(u):
+       return u**2
+
+   # Create VIM solver
+   alpha = 0.5
+   vim_solver = VariationalIterationMethod(alpha)
+
+   # Solve the equation
+   t = np.linspace(0, 2, 100)
+   solution = vim_solver.solve(
+       source_function=source_function,
+       initial_condition=initial_condition,
+       nonlinear_term=nonlinear_term,
+       t_span=t,
+       max_iterations=5
+   )
+
+   # Plot solution
+   plt.figure(figsize=(10, 6))
+   plt.plot(t, solution, 'g-', linewidth=2, label=f'VIM Solution (α={alpha})')
+   plt.plot(t, source_function(t), 'r--', linewidth=2, label='Source Function f(t) = 1')
+   plt.xlabel('t')
+   plt.ylabel('u(t)')
+   plt.title('Solution of Nonlinear Fractional Differential Equation using VIM')
+   plt.legend()
+   plt.grid(True)
+   plt.show()
+
+   # Compare HPM and VIM
+   hpm_solver = HomotopyPerturbationMethod(alpha)
+   hpm_solution = hpm_solver.solve(
+       source_function=source_function,
+       initial_condition=initial_condition,
+       t_span=t,
+       max_iterations=5
+   )
+
+   plt.figure(figsize=(10, 6))
+   plt.plot(t, hpm_solution, 'b-', linewidth=2, label='HPM Solution')
+   plt.plot(t, solution, 'g-', linewidth=2, label='VIM Solution')
+   plt.xlabel('t')
+   plt.ylabel('u(t)')
+   plt.title('Comparison of HPM and VIM Solutions')
+   plt.legend()
+   plt.grid(True)
+   plt.show()
+
+Mathematical Utilities
+~~~~~~~~~~~~~~~~~~~~~
+
+Using mathematical utilities for validation and computation:
+
+.. code-block:: python
+
+   import numpy as np
+   import matplotlib.pyplot as plt
+   from hpfracc.core.utilities import (
+       factorial_fractional, binomial_coefficient, pochhammer_symbol,
+       validate_fractional_order, validate_function,
+       timing_decorator, memory_usage_decorator
+   )
+
+   # Fractional factorial
+   x = np.linspace(0.1, 5, 100)
+   factorial_vals = [factorial_fractional(xi) for xi in x]
+
+   # Binomial coefficients
+   n_vals = np.arange(0, 10)
+   k_vals = np.arange(0, 10)
+   binomial_matrix = np.array([[binomial_coefficient(n, k) for k in k_vals] for n in n_vals])
+
+   # Pochhammer symbol
+   pochhammer_vals = [pochhammer_symbol(0.5, xi) for xi in x]
+
+   # Validation examples
+   print("Validation Examples:")
+   print(f"Valid fractional order 0.5: {validate_fractional_order(0.5)}")
+   print(f"Invalid fractional order -1: {validate_fractional_order(-1)}")
+
+   def test_func(x):
+       return x**2
+   
+   print(f"Valid function: {validate_function(test_func)}")
+   print(f"Invalid function: {validate_function('not a function')}")
+
+   # Performance monitoring
+   @timing_decorator
+   @memory_usage_decorator
+   def expensive_computation(n):
+       return sum(i**2 for i in range(n))
+
+   result = expensive_computation(10000)
+
+   # Plot results
+   plt.figure(figsize=(15, 5))
+   
+   plt.subplot(1, 3, 1)
+   plt.plot(x, factorial_vals, linewidth=2)
+   plt.xlabel('x')
+   plt.ylabel('x!')
+   plt.title('Fractional Factorial Function')
+   plt.grid(True)
+   
+   plt.subplot(1, 3, 2)
+   plt.imshow(binomial_matrix, cmap='viridis', aspect='auto')
+   plt.colorbar(label='(n choose k)')
+   plt.xlabel('k')
+   plt.ylabel('n')
+   plt.title('Binomial Coefficients Matrix')
+   
+   plt.subplot(1, 3, 3)
+   plt.plot(x, pochhammer_vals, linewidth=2)
+   plt.xlabel('x')
+   plt.ylabel('(0.5)_x')
+   plt.title('Pochhammer Symbol (0.5)_x')
+   plt.grid(True)
+   
+   plt.tight_layout()
+   plt.show()
+
 Backend Comparison
 ~~~~~~~~~~~~~~~~~
 
@@ -98,26 +501,33 @@ Compare performance across different backends:
    for backend in backends:
        if BackendManager.is_backend_available(backend):
            time_taken = benchmark_backend(backend)
-           results[backend.value] = time_taken
-           print(f"{backend.value}: {time_taken:.4f}s")
-       else:
-           print(f"{backend.value}: Not available")
+           results[backend.name] = time_taken
+           print(f"{backend.name}: {time_taken:.4f} seconds")
 
-   # Plot results
+   # Plot comparison
    if results:
        plt.figure(figsize=(8, 6))
-       plt.bar(results.keys(), results.values())
+       backend_names = list(results.keys())
+       times = list(results.values())
+       
+       plt.bar(backend_names, times, color=['blue', 'green', 'red'])
        plt.ylabel('Time (seconds)')
        plt.title('Backend Performance Comparison')
+       plt.xticks(rotation=45)
+       
+       for i, v in enumerate(times):
+           plt.text(i, v + 0.001, f'{v:.4f}s', ha='center', va='bottom')
+       
+       plt.tight_layout()
        plt.show()
 
-Neural Network Examples
-----------------------
+Advanced Examples
+----------------
 
-Fractional Neural Network Training
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Fractional Neural Networks
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Train a fractional neural network on a simple regression task:
+Create and train a fractional neural network:
 
 .. code-block:: python
 
@@ -125,271 +535,306 @@ Train a fractional neural network on a simple regression task:
    import matplotlib.pyplot as plt
    from hpfracc.ml import FractionalNeuralNetwork
    from hpfracc.core.definitions import FractionalOrder
-   from hpfracc.ml.backends import BackendType
+   from sklearn.model_selection import train_test_split
+   from sklearn.preprocessing import StandardScaler
 
    # Generate synthetic data
    np.random.seed(42)
-   X = np.random.randn(1000, 5)
-   y = np.sum(X, axis=1, keepdims=True) + 0.1 * np.random.randn(1000, 1)
+   X = np.random.randn(1000, 10)
+   y = np.sum(X**2, axis=1) + 0.1 * np.random.randn(1000)
 
    # Split data
-   train_size = int(0.8 * len(X))
-   X_train, X_test = X[:train_size], X[train_size:]
-   y_train, y_test = y[:train_size], y[train_size:]
+   X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-   # Create model
+   # Scale features
+   scaler = StandardScaler()
+   X_train_scaled = scaler.fit_transform(X_train)
+   X_test_scaled = scaler.transform(X_test)
+
+   # Create fractional neural network
    model = FractionalNeuralNetwork(
-       input_dim=5,
-       hidden_dims=[32, 16],
+       input_dim=10,
+       hidden_dims=[64, 32, 16],
        output_dim=1,
        fractional_order=FractionalOrder(0.5),
-       backend=BackendType.JAX
+       activation='relu',
+       dropout_rate=0.2
    )
 
-   # Simple training loop
-   learning_rate = 0.01
-   epochs = 100
-   train_losses = []
-   test_losses = []
+   # Train the model
+   history = model.fit(
+       X_train_scaled, y_train,
+       validation_data=(X_test_scaled, y_test),
+       epochs=100,
+       batch_size=32,
+       learning_rate=0.001,
+       verbose=True
+   )
 
-   for epoch in range(epochs):
-       # Forward pass
-       train_pred = model.forward(X_train)
-       test_pred = model.forward(X_test)
-       
-       # Compute losses (MSE)
-       train_loss = np.mean((train_pred - y_train) ** 2)
-       test_loss = np.mean((test_pred - y_test) ** 2)
-       
-       train_losses.append(train_loss)
-       test_losses.append(test_loss)
-       
-       if epoch % 10 == 0:
-           print(f"Epoch {epoch}: Train Loss = {train_loss:.4f}, Test Loss = {test_loss:.4f}")
-
-   # Plot training progress
-   plt.figure(figsize=(10, 6))
-   plt.plot(train_losses, label='Training Loss')
-   plt.plot(test_losses, label='Test Loss')
+   # Plot training history
+   plt.figure(figsize=(12, 4))
+   
+   plt.subplot(1, 2, 1)
+   plt.plot(history['loss'], label='Training Loss')
+   plt.plot(history['val_loss'], label='Validation Loss')
    plt.xlabel('Epoch')
-   plt.ylabel('Mean Squared Error')
-   plt.title('Training Progress')
+   plt.ylabel('Loss')
+   plt.title('Training History')
    plt.legend()
    plt.grid(True)
-   plt.show()
-
-   # Plot predictions
-   plt.figure(figsize=(10, 6))
-   plt.scatter(y_test, test_pred, alpha=0.6)
-   plt.plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], 'r--', lw=2)
-   plt.xlabel('True Values')
-   plt.ylabel('Predictions')
-   plt.title('Model Predictions vs True Values')
-   plt.grid(True)
-   plt.show()
-
-Graph Neural Network Examples
----------------------------
-
-Node Classification with Fractional GCN
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Classify nodes in a graph using fractional Graph Convolutional Networks:
-
-.. code-block:: python
-
-   import numpy as np
-   import matplotlib.pyplot as plt
-   from hpfracc.ml import FractionalGNNFactory
-   from hpfracc.core.definitions import FractionalOrder
-   from hpfracc.ml.backends import BackendType
-
-   # Generate synthetic graph data
-   np.random.seed(42)
-   num_nodes = 100
-   num_features = 16
-   num_classes = 4
-
-   # Node features
-   node_features = np.random.randn(num_nodes, num_features)
-
-   # Generate edges (random graph)
-   num_edges = 200
-   edge_index = np.random.randint(0, num_nodes, (2, num_edges))
-
-   # Node labels (random for demonstration)
-   node_labels = np.random.randint(0, num_classes, num_nodes)
-
-   # Create fractional GCN
-   gnn = FractionalGNNFactory.create_model(
-       model_type='gcn',
-       input_dim=num_features,
-       hidden_dim=32,
-       output_dim=num_classes,
-       fractional_order=FractionalOrder(0.5),
-       backend=BackendType.TORCH
-   )
-
-   # Forward pass
-   output = gnn.forward(node_features, edge_index)
-   predictions = np.argmax(output, axis=1)
-
-   # Calculate accuracy
-   accuracy = np.mean(predictions == node_labels)
-   print(f"Node Classification Accuracy: {accuracy:.4f}")
-
-   # Visualize results
-   plt.figure(figsize=(12, 5))
-
-   # Original labels
-   plt.subplot(1, 2, 1)
-   scatter = plt.scatter(node_features[:, 0], node_features[:, 1], 
-                        c=node_labels, cmap='viridis', alpha=0.7)
-   plt.colorbar(scatter)
-   plt.title('Original Node Labels')
-   plt.xlabel('Feature 1')
-   plt.ylabel('Feature 2')
-
-   # Predicted labels
+   
    plt.subplot(1, 2, 2)
-   scatter = plt.scatter(node_features[:, 0], node_features[:, 1], 
-                        c=predictions, cmap='viridis', alpha=0.7)
-   plt.colorbar(scatter)
-   plt.title('Predicted Node Labels')
-   plt.xlabel('Feature 1')
-   plt.ylabel('Feature 2')
-
+   plt.plot(history['accuracy'], label='Training Accuracy')
+   plt.plot(history['val_accuracy'], label='Validation Accuracy')
+   plt.xlabel('Epoch')
+   plt.ylabel('Accuracy')
+   plt.title('Accuracy History')
+   plt.legend()
+   plt.grid(True)
+   
    plt.tight_layout()
    plt.show()
 
-Graph Attention Network Example
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   # Make predictions
+   y_pred = model.predict(X_test_scaled)
+   
+   # Plot predictions vs actual
+   plt.figure(figsize=(8, 6))
+   plt.scatter(y_test, y_pred, alpha=0.6)
+   plt.plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], 'r--', lw=2)
+   plt.xlabel('Actual Values')
+   plt.ylabel('Predicted Values')
+   plt.title('Predictions vs Actual Values')
+   plt.grid(True)
+   plt.show()
 
-Use fractional Graph Attention Networks for node classification:
+Graph Neural Networks with Fractional Calculus
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Implement fractional graph convolutions:
 
 .. code-block:: python
 
    import numpy as np
    import matplotlib.pyplot as plt
-   from hpfracc.ml import FractionalGNNFactory
+   import networkx as nx
+   from hpfracc.ml.gnn_layers import FractionalGraphConvolution
    from hpfracc.core.definitions import FractionalOrder
-   from hpfracc.ml.backends import BackendType
 
-   # Generate synthetic graph data
+   # Create a random graph
    np.random.seed(42)
-   num_nodes = 50
-   num_features = 8
-   num_classes = 3
-
-   # Node features
-   node_features = np.random.randn(num_nodes, num_features)
-
-   # Generate edges with some structure
-   edge_index = []
-   for i in range(num_nodes):
-       # Connect to 3-5 random neighbors
-       num_neighbors = np.random.randint(3, 6)
-       neighbors = np.random.choice(num_nodes, num_neighbors, replace=False)
-       for neighbor in neighbors:
-           if i != neighbor:
-               edge_index.append([i, neighbor])
+   G = nx.erdos_renyi_graph(20, 0.3)
+   adj_matrix = nx.adjacency_matrix(G).toarray()
    
-   edge_index = np.array(edge_index).T
-
-   # Node labels (based on feature clustering)
-   from sklearn.cluster import KMeans
-   kmeans = KMeans(n_clusters=num_classes, random_state=42)
-   node_labels = kmeans.fit_predict(node_features)
-
-   # Create fractional GAT
-   gat = FractionalGNNFactory.create_model(
-       model_type='gat',
-       input_dim=num_features,
-       hidden_dim=16,
-       output_dim=num_classes,
-       fractional_order=FractionalOrder(0.5),
-       backend=BackendType.JAX
+   # Create node features
+   node_features = np.random.randn(20, 5)
+   
+   # Create fractional graph convolution layer
+   fractional_order = FractionalOrder(0.5)
+   fgc_layer = FractionalGraphConvolution(
+       input_dim=5,
+       output_dim=3,
+       fractional_order=fractional_order,
+       activation='relu'
    )
-
-   # Forward pass
-   output = gat.forward(node_features, edge_index)
-   predictions = np.argmax(output, axis=1)
-
-   # Calculate accuracy
-   accuracy = np.mean(predictions == node_labels)
-   print(f"GAT Node Classification Accuracy: {accuracy:.4f}")
-
-   # Visualize attention patterns (simplified)
-   plt.figure(figsize=(10, 6))
-   plt.scatter(node_features[:, 0], node_features[:, 1], 
-              c=node_labels, cmap='viridis', s=100, alpha=0.7)
    
-   # Draw edges
-   for i in range(edge_index.shape[1]):
-       src, dst = edge_index[:, i]
-       plt.plot([node_features[src, 0], node_features[dst, 0]], 
-                [node_features[src, 1], node_features[dst, 1]], 
-                'k-', alpha=0.1, linewidth=0.5)
+   # Apply fractional graph convolution
+   output_features = fgc_layer(adj_matrix, node_features)
    
-   plt.title('Graph Structure with Node Labels')
-   plt.xlabel('Feature 1')
-   plt.ylabel('Feature 2')
-   plt.colorbar()
+   # Visualize the graph with node features
+   plt.figure(figsize=(15, 5))
+   
+   # Original graph
+   plt.subplot(1, 3, 1)
+   pos = nx.spring_layout(G)
+   nx.draw(G, pos, with_labels=True, node_color='lightblue', 
+           node_size=500, font_size=10, font_weight='bold')
+   plt.title('Original Graph')
+   
+   # Node features before convolution
+   plt.subplot(1, 3, 2)
+   nx.draw(G, pos, with_labels=True, 
+           node_color=node_features[:, 0], 
+           node_size=500, font_size=10, font_weight='bold',
+           cmap=plt.cm.viridis)
+   plt.title('Node Features (Before)')
+   
+   # Node features after convolution
+   plt.subplot(1, 3, 3)
+   nx.draw(G, pos, with_labels=True, 
+           node_color=output_features[:, 0], 
+           node_size=500, font_size=10, font_weight='bold',
+           cmap=plt.cm.viridis)
+   plt.title('Node Features (After Fractional Convolution)')
+   
+   plt.tight_layout()
    plt.show()
 
-Advanced Examples
-----------------
-
-Fractional Attention Mechanism
+Signal Processing Applications
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Implement and use fractional attention mechanisms:
+Apply fractional derivatives to signal processing:
 
 .. code-block:: python
 
    import numpy as np
    import matplotlib.pyplot as plt
-   from hpfracc.ml.attention import FractionalAttention
+   from hpfracc.core.derivatives import create_fractional_derivative
    from hpfracc.core.definitions import FractionalOrder
-   from hpfracc.ml.backends import BackendType
 
-   # Generate sequence data
-   seq_length = 20
-   d_model = 64
-   batch_size = 4
+   # Generate test signal
+   t = np.linspace(0, 10, 1000)
+   signal = np.sin(2*np.pi*t) + 0.5*np.sin(4*np.pi*t) + 0.1*np.random.randn(len(t))
 
-   # Input sequence
-   input_sequence = np.random.randn(batch_size, seq_length, d_model)
+   # Create fractional derivatives
+   alpha_values = [0.1, 0.3, 0.5, 0.7, 0.9]
+   derivatives = {}
 
-   # Create fractional attention
-   attention = FractionalAttention(
-       d_model=d_model,
-       n_heads=8,
-       fractional_order=FractionalOrder(0.5),
-       backend=BackendType.TORCH
-   )
+   for alpha in alpha_values:
+       deriv = create_fractional_derivative(FractionalOrder(alpha), method="RL")
+       derivatives[alpha] = deriv(lambda x: signal, t)
 
-   # Apply attention
-   output = attention.forward(input_sequence, method="RL")
-   attention_weights = attention.get_attention_weights()
-
-   print(f"Input shape: {input_sequence.shape}")
-   print(f"Output shape: {output.shape}")
-   print(f"Attention weights shape: {attention_weights.shape}")
-
-   # Visualize attention weights for first batch
-   plt.figure(figsize=(10, 8))
-   plt.imshow(attention_weights[0, 0], cmap='viridis', aspect='auto')
-   plt.colorbar()
-   plt.title('Attention Weights (First Head, First Batch)')
-   plt.xlabel('Key Position')
-   plt.ylabel('Query Position')
+   # Plot results
+   plt.figure(figsize=(15, 10))
+   
+   plt.subplot(2, 1, 1)
+   plt.plot(t, signal, 'k-', linewidth=2, label='Original Signal')
+   plt.xlabel('Time')
+   plt.ylabel('Amplitude')
+   plt.title('Original Signal')
+   plt.legend()
+   plt.grid(True)
+   
+   plt.subplot(2, 1, 2)
+   for alpha in alpha_values:
+       plt.plot(t, derivatives[alpha], linewidth=2, label=f'α = {alpha}')
+   plt.xlabel('Time')
+   plt.ylabel('Amplitude')
+   plt.title('Fractional Derivatives')
+   plt.legend()
+   plt.grid(True)
+   
+   plt.tight_layout()
    plt.show()
 
-Multi-Backend Comparison
-~~~~~~~~~~~~~~~~~~~~~~~~
+   # Frequency domain analysis
+   from scipy.fft import fft, fftfreq
+   
+   # Compute FFT of original signal and derivatives
+   fft_original = np.abs(fft(signal))
+   fft_derivatives = {}
+   
+   for alpha in alpha_values:
+       fft_derivatives[alpha] = np.abs(fft(derivatives[alpha]))
+   
+   # Plot frequency domain
+   freqs = fftfreq(len(t), t[1] - t[0])
+   positive_freqs = freqs[:len(freqs)//2]
+   
+   plt.figure(figsize=(12, 8))
+   
+   plt.subplot(2, 1, 1)
+   plt.plot(positive_freqs, fft_original[:len(positive_freqs)], 'k-', linewidth=2, label='Original')
+   plt.xlabel('Frequency')
+   plt.ylabel('Magnitude')
+   plt.title('Frequency Domain - Original Signal')
+   plt.legend()
+   plt.grid(True)
+   
+   plt.subplot(2, 1, 2)
+   for alpha in alpha_values:
+       plt.plot(positive_freqs, fft_derivatives[alpha][:len(positive_freqs)], 
+                linewidth=2, label=f'α = {alpha}')
+   plt.xlabel('Frequency')
+   plt.ylabel('Magnitude')
+   plt.title('Frequency Domain - Fractional Derivatives')
+   plt.legend()
+   plt.grid(True)
+   
+   plt.tight_layout()
+   plt.show()
 
-Compare different backends for the same computation:
+Image Processing with Fractional Derivatives
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Apply fractional derivatives to image processing:
+
+.. code-block:: python
+
+   import numpy as np
+   import matplotlib.pyplot as plt
+   from scipy import ndimage
+   from hpfracc.core.derivatives import create_fractional_derivative
+   from hpfracc.core.definitions import FractionalOrder
+
+   # Create a test image
+   x, y = np.meshgrid(np.linspace(-2, 2, 100), np.linspace(-2, 2, 100))
+   image = np.sin(x) * np.cos(y) + 0.1 * np.random.randn(100, 100)
+
+   # Apply fractional derivatives in x and y directions
+   alpha = 0.5
+   deriv_x = create_fractional_derivative(FractionalOrder(alpha), method="RL")
+   deriv_y = create_fractional_derivative(FractionalOrder(alpha), method="RL")
+
+   # Compute fractional gradients
+   gradient_x = np.zeros_like(image)
+   gradient_y = np.zeros_like(image)
+   
+   for i in range(image.shape[0]):
+       gradient_x[i, :] = deriv_x(lambda x: image[i, :], np.arange(image.shape[1]))
+   
+   for j in range(image.shape[1]):
+       gradient_y[:, j] = deriv_y(lambda y: image[:, j], np.arange(image.shape[0]))
+
+   # Compute gradient magnitude
+   gradient_magnitude = np.sqrt(gradient_x**2 + gradient_y**2)
+
+   # Plot results
+   plt.figure(figsize=(15, 10))
+   
+   plt.subplot(2, 3, 1)
+   plt.imshow(image, cmap='gray')
+   plt.title('Original Image')
+   plt.axis('off')
+   
+   plt.subplot(2, 3, 2)
+   plt.imshow(gradient_x, cmap='gray')
+   plt.title(f'Fractional Gradient X (α={alpha})')
+   plt.axis('off')
+   
+   plt.subplot(2, 3, 3)
+   plt.imshow(gradient_y, cmap='gray')
+   plt.title(f'Fractional Gradient Y (α={alpha})')
+   plt.axis('off')
+   
+   plt.subplot(2, 3, 4)
+   plt.imshow(gradient_magnitude, cmap='gray')
+   plt.title(f'Gradient Magnitude (α={alpha})')
+   plt.axis('off')
+   
+   plt.subplot(2, 3, 5)
+   plt.imshow(np.abs(gradient_x) + np.abs(gradient_y), cmap='gray')
+   plt.title(f'Sum of Absolute Gradients (α={alpha})')
+   plt.axis('off')
+   
+   plt.subplot(2, 3, 6)
+   # Edge detection using threshold
+   threshold = np.percentile(gradient_magnitude, 90)
+   edges = gradient_magnitude > threshold
+   plt.imshow(edges, cmap='gray')
+   plt.title(f'Edge Detection (α={alpha})')
+   plt.axis('off')
+   
+   plt.tight_layout()
+   plt.show()
+
+Performance Optimization Examples
+--------------------------------
+
+GPU Acceleration
+~~~~~~~~~~~~~~~
+
+Demonstrate GPU acceleration for large-scale computations:
 
 .. code-block:: python
 
@@ -397,419 +842,321 @@ Compare different backends for the same computation:
    import time
    import matplotlib.pyplot as plt
    from hpfracc.ml.backends import BackendManager, BackendType
-   from hpfracc.ml import FractionalNeuralNetwork
+   from hpfracc.core.derivatives import create_fractional_derivative
    from hpfracc.core.definitions import FractionalOrder
 
-   def benchmark_model(backend_type, data_sizes):
-       """Benchmark model performance across different data sizes."""
-       BackendManager.set_backend(backend_type)
+   def benchmark_cpu_vs_gpu(data_sizes):
+       """Benchmark CPU vs GPU performance."""
+       results = {'CPU': [], 'GPU': []}
        
-       times = []
        for size in data_sizes:
-           # Create model
-           model = FractionalNeuralNetwork(
-               input_dim=10,
-               hidden_dims=[32, 16],
-               output_dim=1,
-               fractional_order=FractionalOrder(0.5)
-           )
-           
            # Generate data
-           X = np.random.randn(size, 10)
+           x = np.linspace(0, 10, size)
+           signal = np.sin(2*np.pi*x) + 0.1*np.random.randn(size)
            
-           # Warm up
-           for _ in range(5):
-               _ = model.forward(X)
+           # CPU computation
+           BackendManager.set_backend(BackendType.NUMPY)
+           deriv_cpu = create_fractional_derivative(FractionalOrder(0.5), method="RL")
            
-           # Benchmark
            start_time = time.time()
-           for _ in range(50):
-               _ = model.forward(X)
-           end_time = time.time()
+           result_cpu = deriv_cpu(lambda x: signal, x)
+           cpu_time = time.time() - start_time
+           results['CPU'].append(cpu_time)
            
-           times.append(end_time - start_time)
+           # GPU computation (if available)
+           if BackendManager.is_backend_available(BackendType.TORCH):
+               BackendManager.set_backend(BackendType.TORCH)
+               deriv_gpu = create_fractional_derivative(FractionalOrder(0.5), method="RL")
+               
+               start_time = time.time()
+               result_gpu = deriv_gpu(lambda x: signal, x)
+               gpu_time = time.time() - start_time
+               results['GPU'].append(gpu_time)
+           else:
+               results['GPU'].append(None)
        
-       return times
+       return results
 
-   # Test parameters
-   data_sizes = [100, 500, 1000, 2000, 5000]
-   backends = [BackendType.TORCH, BackendType.JAX, BackendType.NUMBA]
-   
-   results = {}
-   
-   for backend in backends:
-       if BackendManager.is_backend_available(backend):
-           print(f"Testing {backend.value}...")
-           times = benchmark_model(backend, data_sizes)
-           results[backend.value] = times
-       else:
-           print(f"{backend.value} not available")
+   # Run benchmark
+   data_sizes = [1000, 5000, 10000, 50000, 100000]
+   benchmark_results = benchmark_cpu_vs_gpu(data_sizes)
 
    # Plot results
-   plt.figure(figsize=(12, 8))
+   plt.figure(figsize=(10, 6))
    
-   for backend, times in results.items():
-       plt.plot(data_sizes, times, marker='o', label=backend, linewidth=2)
+   plt.plot(data_sizes, benchmark_results['CPU'], 'b-o', linewidth=2, label='CPU')
+   if any(result is not None for result in benchmark_results['GPU']):
+       gpu_times = [t if t is not None else 0 for t in benchmark_results['GPU']]
+       plt.plot(data_sizes, gpu_times, 'r-s', linewidth=2, label='GPU')
    
    plt.xlabel('Data Size')
    plt.ylabel('Time (seconds)')
-   plt.title('Backend Performance Comparison')
+   plt.title('CPU vs GPU Performance Comparison')
    plt.legend()
    plt.grid(True)
    plt.xscale('log')
    plt.yscale('log')
    plt.show()
 
-Real-World Applications
-----------------------
+Memory Optimization
+~~~~~~~~~~~~~~~~~~
 
-Signal Processing with Fractional Derivatives
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Apply fractional calculus to signal processing:
+Demonstrate memory-efficient computations:
 
 .. code-block:: python
 
    import numpy as np
+   import psutil
    import matplotlib.pyplot as plt
-   from hpfracc.core.definitions import FractionalOrder
+   from hpfracc.core.utilities import memory_usage_decorator
    from hpfracc.core.derivatives import create_fractional_derivative
-   from scipy import signal
-
-   # Generate noisy signal
-   t = np.linspace(0, 10, 1000)
-   clean_signal = np.sin(2 * np.pi * 1.5 * t) + 0.5 * np.sin(2 * np.pi * 3 * t)
-   noisy_signal = clean_signal + 0.1 * np.random.randn(len(t))
-
-   # Create fractional derivatives
-   orders = [0.25, 0.5, 0.75, 1.0]
-   derivatives = {}
-
-   for order in orders:
-       alpha = FractionalOrder(order)
-       deriv = create_fractional_derivative(alpha, method="RL")
-       derivatives[order] = deriv(noisy_signal, t)
-
-   # Plot results
-   plt.figure(figsize=(15, 10))
-
-   # Original signal
-   plt.subplot(2, 2, 1)
-   plt.plot(t, clean_signal, label='Clean Signal', linewidth=2)
-   plt.plot(t, noisy_signal, label='Noisy Signal', alpha=0.7)
-   plt.title('Original Signal')
-   plt.legend()
-   plt.grid(True)
-
-   # Fractional derivatives
-   for i, order in enumerate(orders):
-       plt.subplot(2, 2, i + 2)
-       plt.plot(t, derivatives[order], linewidth=2)
-       plt.title(f'Fractional Derivative (α={order})')
-       plt.grid(True)
-
-   plt.tight_layout()
-   plt.show()
-
-   # Frequency domain analysis
-   plt.figure(figsize=(12, 8))
-   
-   for order in orders:
-       # Compute FFT
-       fft_result = np.fft.fft(derivatives[order])
-       freqs = np.fft.fftfreq(len(t), t[1] - t[0])
-       
-       # Plot magnitude spectrum
-       plt.semilogy(freqs[:len(freqs)//2], 
-                   np.abs(fft_result[:len(freqs)//2]), 
-                   label=f'α={order}', linewidth=2)
-   
-   plt.xlabel('Frequency (Hz)')
-   plt.ylabel('Magnitude')
-   plt.title('Frequency Domain Analysis')
-   plt.legend()
-   plt.grid(True)
-   plt.show()
-
-Image Processing with Fractional Filters
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Apply fractional calculus to image processing:
-
-.. code-block:: python
-
-   import numpy as np
-   import matplotlib.pyplot as plt
-   from hpfracc.core.definitions import FractionalOrder
-   from hpfracc.core.derivatives import create_fractional_derivative
-   from scipy import ndimage
-
-   # Generate test image
-   x = np.linspace(-5, 5, 100)
-   y = np.linspace(-5, 5, 100)
-   X, Y = np.meshgrid(x, y)
-   
-   # Create a test image (Gaussian + noise)
-   image = np.exp(-(X**2 + Y**2) / 2) + 0.1 * np.random.randn(100, 100)
-
-   # Apply fractional derivatives along rows
-   orders = [0.25, 0.5, 0.75, 1.0]
-   filtered_images = {}
-
-   for order in orders:
-       alpha = FractionalOrder(order)
-       deriv = create_fractional_derivative(alpha, method="RL")
-       
-       # Apply to each row
-       filtered = np.zeros_like(image)
-       for i in range(image.shape[0]):
-           filtered[i, :] = deriv(image[i, :], x)
-       
-       filtered_images[order] = filtered
-
-   # Plot results
-   plt.figure(figsize=(15, 10))
-
-   # Original image
-   plt.subplot(2, 3, 1)
-   plt.imshow(image, cmap='gray')
-   plt.title('Original Image')
-   plt.colorbar()
-
-   # Filtered images
-   for i, order in enumerate(orders):
-       plt.subplot(2, 3, i + 2)
-       plt.imshow(filtered_images[order], cmap='gray')
-       plt.title(f'Fractional Filter (α={order})')
-       plt.colorbar()
-
-   plt.tight_layout()
-   plt.show()
-
-   # Cross-section comparison
-   plt.figure(figsize=(12, 8))
-   center_row = image.shape[0] // 2
-   
-   plt.plot(x, image[center_row, :], label='Original', linewidth=2)
-   for order in orders:
-       plt.plot(x, filtered_images[order][center_row, :], 
-                label=f'α={order}', linewidth=2)
-   
-   plt.xlabel('Position')
-   plt.ylabel('Intensity')
-   plt.title('Cross-section Comparison')
-   plt.legend()
-   plt.grid(True)
-   plt.show()
-
-Performance Optimization Examples
--------------------------------
-
-Memory-Efficient Processing
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Process large datasets efficiently:
-
-.. code-block:: python
-
-   import numpy as np
-   import gc
-   import time
-   from hpfracc.ml.backends import BackendManager, BackendType
-   from hpfracc.ml import FractionalNeuralNetwork
    from hpfracc.core.definitions import FractionalOrder
 
-   def process_large_dataset_efficiently(data, batch_size=1000):
-       """Process large dataset in batches to manage memory."""
-       results = []
-       num_batches = len(data) // batch_size + (1 if len(data) % batch_size else 0)
+   @memory_usage_decorator
+   def memory_intensive_computation(data_size):
+       """Perform memory-intensive computation."""
+       # Generate large dataset
+       x = np.linspace(0, 10, data_size)
+       signal = np.sin(2*np.pi*x) + 0.1*np.random.randn(data_size)
        
-       for i in range(num_batches):
-           start_idx = i * batch_size
-           end_idx = min((i + 1) * batch_size, len(data))
-           batch = data[start_idx:end_idx]
-           
-           # Process batch
-           batch_result = np.sum(batch, axis=1)
-           results.append(batch_result)
-           
-           # Clear memory
-           del batch
-           gc.collect()
-           
-           if i % 10 == 0:
-               print(f"Processed batch {i+1}/{num_batches}")
+       # Create multiple fractional derivatives
+       derivatives = []
+       for alpha in [0.1, 0.3, 0.5, 0.7, 0.9]:
+           deriv = create_fractional_derivative(FractionalOrder(alpha), method="RL")
+           result = deriv(lambda x: signal, x)
+           derivatives.append(result)
        
-       return np.concatenate(results)
+       return derivatives
 
-   # Test with large dataset
-   large_data = np.random.randn(50000, 100)
-   
-   print("Processing large dataset...")
-   start_time = time.time()
-   results = process_large_dataset_efficiently(large_data)
-   end_time = time.time()
-   
-   print(f"Processing time: {end_time - start_time:.2f}s")
-   print(f"Result shape: {results.shape}")
+   # Test different data sizes
+   data_sizes = [1000, 5000, 10000, 50000]
+   memory_usage = []
+
+   for size in data_sizes:
+       result = memory_intensive_computation(size)
+       memory_usage.append(result)
+
+   # Plot memory usage
+   plt.figure(figsize=(10, 6))
+   plt.plot(data_sizes, memory_usage, 'g-o', linewidth=2)
+   plt.xlabel('Data Size')
+   plt.ylabel('Memory Usage (MB)')
+   plt.title('Memory Usage vs Data Size')
+   plt.grid(True)
+   plt.show()
 
 Parallel Processing
 ~~~~~~~~~~~~~~~~~~
 
-Use multiple backends for parallel processing:
+Demonstrate parallel processing capabilities:
 
 .. code-block:: python
 
    import numpy as np
-   import multiprocessing as mp
-   from hpfracc.ml.backends import BackendType
+   import time
+   import matplotlib.pyplot as plt
+   from multiprocessing import Pool, cpu_count
+   from hpfracc.core.derivatives import create_fractional_derivative
    from hpfracc.core.definitions import FractionalOrder
 
-   def process_chunk(chunk_data, backend_type):
-       """Process a chunk of data with specified backend."""
-       from hpfracc.ml.backends import BackendManager
-       from hpfracc.ml import FractionalNeuralNetwork
-       
-       BackendManager.set_backend(backend_type)
-       
-       model = FractionalNeuralNetwork(
-           input_dim=chunk_data.shape[1],
-           hidden_dims=[16],
-           output_dim=1,
-           fractional_order=FractionalOrder(0.5)
-       )
-       
-       return model.forward(chunk_data)
+   def parallel_fractional_derivative(args):
+       """Compute fractional derivative for a subset of data."""
+       data, alpha, method = args
+       deriv = create_fractional_derivative(FractionalOrder(alpha), method=method)
+       return deriv(lambda x: data, np.arange(len(data)))
 
-   def parallel_processing(data, num_processes=4):
-       """Process data in parallel using multiple backends."""
-       chunk_size = len(data) // num_processes
-       chunks = [data[i:i+chunk_size] for i in range(0, len(data), chunk_size)]
+   def benchmark_parallel_vs_sequential(data_size, num_processes):
+       """Benchmark parallel vs sequential computation."""
+       # Generate data
+       x = np.linspace(0, 10, data_size)
+       signal = np.sin(2*np.pi*x) + 0.1*np.random.randn(data_size)
        
-       backends = [BackendType.TORCH, BackendType.JAX, BackendType.NUMBA, BackendType.TORCH]
+       # Sequential computation
+       start_time = time.time()
+       sequential_results = []
+       for alpha in [0.1, 0.3, 0.5, 0.7, 0.9]:
+           deriv = create_fractional_derivative(FractionalOrder(alpha), method="RL")
+           result = deriv(lambda x: signal, x)
+           sequential_results.append(result)
+       sequential_time = time.time() - start_time
        
-       with mp.Pool(num_processes) as pool:
-           results = pool.starmap(process_chunk, 
-                                 zip(chunks, backends[:len(chunks)]))
+       # Parallel computation
+       start_time = time.time()
+       with Pool(num_processes) as pool:
+           args = [(signal, alpha, "RL") for alpha in [0.1, 0.3, 0.5, 0.7, 0.9]]
+           parallel_results = pool.map(parallel_fractional_derivative, args)
+       parallel_time = time.time() - start_time
        
-       return np.concatenate(results)
+       return sequential_time, parallel_time
 
-   # Test parallel processing
-   test_data = np.random.randn(1000, 10)
-   print("Testing parallel processing...")
+   # Run benchmark
+   data_sizes = [1000, 5000, 10000, 50000]
+   num_processes = min(4, cpu_count())
    
-   result = parallel_processing(test_data)
-   print(f"Result shape: {result.shape}")
+   sequential_times = []
+   parallel_times = []
+   
+   for size in data_sizes:
+       seq_time, par_time = benchmark_parallel_vs_sequential(size, num_processes)
+       sequential_times.append(seq_time)
+       parallel_times.append(par_time)
 
-Interactive Examples
--------------------
+   # Plot results
+   plt.figure(figsize=(10, 6))
+   plt.plot(data_sizes, sequential_times, 'b-o', linewidth=2, label='Sequential')
+   plt.plot(data_sizes, parallel_times, 'r-s', linewidth=2, label=f'Parallel ({num_processes} processes)')
+   plt.xlabel('Data Size')
+   plt.ylabel('Time (seconds)')
+   plt.title('Sequential vs Parallel Performance')
+   plt.legend()
+   plt.grid(True)
+   plt.xscale('log')
+   plt.yscale('log')
+   plt.show()
 
-Jupyter Notebook Integration
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Error Analysis and Validation
+----------------------------
 
-For interactive examples, you can use Jupyter notebooks. Here's a template:
+Numerical Error Analysis
+~~~~~~~~~~~~~~~~~~~~~~~
+
+Analyze numerical errors in fractional calculus computations:
 
 .. code-block:: python
 
-   # %matplotlib inline
    import numpy as np
    import matplotlib.pyplot as plt
+   from hpfracc.core.derivatives import create_fractional_derivative
    from hpfracc.core.definitions import FractionalOrder
-   from hpfracc.ml import FractionalNeuralNetwork
-   from hpfracc.ml.backends import BackendManager, BackendType
 
-   # Interactive parameter adjustment
-   def interactive_fractional_network(alpha=0.5, backend='jax'):
-       """Create and test a fractional neural network with interactive parameters."""
+   def analytical_solution(x, alpha):
+       """Analytical solution for D^α sin(x)."""
+       # For sin(x), D^α sin(x) = sin(x + απ/2)
+       return np.sin(x + alpha * np.pi / 2)
+
+   def numerical_error_analysis():
+       """Analyze numerical errors for different methods and orders."""
+       x = np.linspace(0, 2*np.pi, 100)
+       alpha_values = [0.1, 0.3, 0.5, 0.7, 0.9]
+       methods = ["RL", "Caputo", "GL"]
        
-       # Set backend
-       backend_map = {'torch': BackendType.TORCH, 
-                     'jax': BackendType.JAX, 
-                     'numba': BackendType.NUMBA}
-       BackendManager.set_backend(backend_map[backend])
+       errors = {method: [] for method in methods}
        
-       # Create model
-       model = FractionalNeuralNetwork(
-           input_dim=5,
-           hidden_dims=[32, 16],
-           output_dim=1,
-           fractional_order=FractionalOrder(alpha)
+       for alpha in alpha_values:
+           analytical = analytical_solution(x, alpha)
+           
+           for method in methods:
+               deriv = create_fractional_derivative(FractionalOrder(alpha), method=method)
+               numerical = deriv(lambda x: np.sin(x), x)
+               
+               # Compute relative error
+               error = np.mean(np.abs((numerical - analytical) / analytical))
+               errors[method].append(error)
+       
+       return alpha_values, errors
+
+   # Run error analysis
+   alpha_values, errors = numerical_error_analysis()
+
+   # Plot results
+   plt.figure(figsize=(12, 8))
+   
+   for method, error_list in errors.items():
+       plt.semilogy(alpha_values, error_list, 'o-', linewidth=2, label=method)
+   
+   plt.xlabel('Fractional Order α')
+   plt.ylabel('Relative Error')
+   plt.title('Numerical Error Analysis for Different Methods')
+   plt.legend()
+   plt.grid(True)
+   plt.show()
+
+Convergence Analysis
+~~~~~~~~~~~~~~~~~~~
+
+Analyze convergence of iterative methods:
+
+.. code-block:: python
+
+   import numpy as np
+   import matplotlib.pyplot as plt
+   from hpfracc.solvers.homotopy_perturbation import HomotopyPerturbationMethod
+   from hpfracc.solvers.variational_iteration import VariationalIterationMethod
+
+   def convergence_analysis():
+       """Analyze convergence of HPM and VIM methods."""
+       # Define test problem
+       def source_function(t):
+           return t**2
+       
+       def initial_condition(t):
+           return 0.0
+       
+       t = np.linspace(0, 2, 100)
+       alpha = 0.5
+       
+       # HPM convergence
+       hpm_solver = HomotopyPerturbationMethod(alpha)
+       hpm_convergence = hpm_solver.analyze_convergence(
+           source_function=source_function,
+           initial_condition=initial_condition,
+           t_span=t,
+           max_iterations=10
        )
        
-       # Test data
-       X = np.random.randn(100, 5)
-       output = model.forward(X)
+       # VIM convergence
+       vim_solver = VariationalIterationMethod(alpha)
+       vim_convergence = vim_solver.analyze_convergence(
+           source_function=source_function,
+           initial_condition=initial_condition,
+           t_span=t,
+           max_iterations=10
+       )
        
-       # Plot results
-       plt.figure(figsize=(10, 6))
-       plt.hist(output.flatten(), bins=30, alpha=0.7)
-       plt.title(f'Output Distribution (α={alpha}, Backend={backend})')
-       plt.xlabel('Output Value')
-       plt.ylabel('Frequency')
-       plt.show()
-       
-       return model, output
+       return hpm_convergence, vim_convergence
 
-   # Example usage
-   model, output = interactive_fractional_network(alpha=0.7, backend='jax')
+   # Run convergence analysis
+   hpm_conv, vim_conv = convergence_analysis()
 
-For more interactive examples, see the Jupyter notebooks in the `examples/` directory.
+   # Plot convergence
+   plt.figure(figsize=(12, 8))
+   
+   plt.subplot(2, 2, 1)
+   plt.semilogy(hpm_conv['residuals'], 'b-o', linewidth=2, label='HPM')
+   plt.xlabel('Iteration')
+   plt.ylabel('Residual')
+   plt.title('HPM Convergence')
+   plt.legend()
+   plt.grid(True)
+   
+   plt.subplot(2, 2, 2)
+   plt.semilogy(vim_conv['residuals'], 'r-s', linewidth=2, label='VIM')
+   plt.xlabel('Iteration')
+   plt.ylabel('Residual')
+   plt.title('VIM Convergence')
+   plt.legend()
+   plt.grid(True)
+   
+   plt.subplot(2, 2, 3)
+   plt.plot(hpm_conv['solutions'][-1], 'b-', linewidth=2, label='HPM Final Solution')
+   plt.plot(vim_conv['solutions'][-1], 'r--', linewidth=2, label='VIM Final Solution')
+   plt.xlabel('t')
+   plt.ylabel('u(t)')
+   plt.title('Final Solutions Comparison')
+   plt.legend()
+   plt.grid(True)
+   
+   plt.subplot(2, 2, 4)
+   plt.plot(hpm_conv['convergence_rates'], 'b-o', linewidth=2, label='HPM')
+   plt.plot(vim_conv['convergence_rates'], 'r-s', linewidth=2, label='VIM')
+   plt.xlabel('Iteration')
+   plt.ylabel('Convergence Rate')
+   plt.title('Convergence Rates')
+   plt.legend()
+   plt.grid(True)
+   
+   plt.tight_layout()
+   plt.show()
 
-Troubleshooting Examples
------------------------
-
-Common Error Solutions
-~~~~~~~~~~~~~~~~~~~~~
-
-**Handling Backend Errors**
-.. code-block:: python
-
-   from hpfracc.ml.backends import BackendManager, BackendType
-
-   def safe_backend_usage():
-       """Safely use backends with error handling."""
-       backends_to_try = [BackendType.JAX, BackendType.TORCH, BackendType.NUMBA]
-       
-       for backend in backends_to_try:
-           try:
-               if BackendManager.is_backend_available(backend):
-                   BackendManager.set_backend(backend)
-                   print(f"Successfully set backend to {backend.value}")
-                   return backend
-           except Exception as e:
-               print(f"Failed to set {backend.value}: {e}")
-       
-       print("No backends available!")
-       return None
-
-   # Usage
-   backend = safe_backend_usage()
-
-**Memory Management**
-.. code-block:: python
-
-   import gc
-   import numpy as np
-
-   def memory_efficient_processing(data, chunk_size=1000):
-       """Process data in chunks to manage memory."""
-       results = []
-       
-       for i in range(0, len(data), chunk_size):
-           chunk = data[i:i+chunk_size]
-           
-           # Process chunk
-           chunk_result = np.sum(chunk, axis=1)
-           results.append(chunk_result)
-           
-           # Clear memory
-           del chunk
-           gc.collect()
-       
-       return np.concatenate(results)
-
-   # Test with large data
-   large_data = np.random.randn(10000, 100)
-   result = memory_efficient_processing(large_data)
-
-For more examples and detailed tutorials, visit the GitHub repository and check the `examples/` directory for additional code samples and Jupyter notebooks.
+These examples demonstrate the comprehensive capabilities of the HPFRACC library, from basic fractional calculus operations to advanced applications in machine learning, signal processing, and numerical analysis. Each example includes visualization and analysis tools to help users understand the behavior and performance of fractional calculus methods.
+"""

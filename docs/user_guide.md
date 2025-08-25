@@ -4,11 +4,12 @@
 1. [Installation](#installation)
 2. [Quick Start](#quick-start)
 3. [Basic Fractional Calculus](#basic-fractional-calculus)
-4. [Machine Learning Integration](#machine-learning-integration)
-5. [Performance Optimization](#performance-optimization)
-6. [Production Workflow](#production-workflow)
-7. [Benchmarking](#benchmarking)
+4. [Core Features](#core-features)
+5. [Machine Learning Integration](#machine-learning-integration)
+6. [Advanced Usage](#advanced-usage)
+7. [Configuration and Settings](#configuration-and-settings)
 8. [Troubleshooting](#troubleshooting)
+9. [Best Practices](#best-practices)
 
 ---
 
@@ -16,44 +17,67 @@
 
 ### Prerequisites
 - Python 3.8+
-- PyTorch 2.0+
+- PyTorch 2.0+ (for ML features)
 - CUDA (optional, for GPU acceleration)
 
-### Install from Source
+### Basic Installation
 ```bash
-git clone https://github.com/your-username/hpfracc.git
-cd hpfracc
-pip install -e .
+pip install hpfracc
 ```
 
-### Install Dependencies
+### Full Installation with ML Dependencies
 ```bash
-pip install torch torchvision torchaudio
-pip install numpy scipy matplotlib seaborn
-pip install psutil optuna scikit-learn
+pip install hpfracc[ml]
+```
+
+### Development Installation
+```bash
+pip install hpfracc[dev]
 ```
 
 ---
 
 ## Quick Start
 
-### Basic Fractional Derivative
-```python
-import torch
-from hpfracc.core import fractional_derivative
+### Basic Fractional Calculus Operations
 
-# Create input tensor
-x = torch.randn(100, 50)
+```python
+import numpy as np
+from hpfracc.core.definitions import FractionalOrder
+from hpfracc.core.derivatives import create_fractional_derivative
+from hpfracc.core.integrals import create_fractional_integral
+from hpfracc.special import gamma, beta, mittag_leffler
+
+# Create fractional order
+alpha = FractionalOrder(0.5)
+
+# Create derivative operator
+derivative = create_fractional_derivative(alpha, method="RL")
+
+# Create integral operator
+integral = create_fractional_integral(alpha, method="RL")
+
+# Define a function
+def f(x):
+    return x**2
 
 # Compute fractional derivative
-result = fractional_derivative(x, alpha=0.5, method="RL")
-print(f"Input shape: {x.shape}")
-print(f"Output shape: {result.shape}")
+x = np.linspace(0, 5, 100)
+result_derivative = derivative(f, x)
+
+# Compute fractional integral
+result_integral = integral(f, x)
+
+# Compute special functions
+gamma_val = gamma(5.5)
+beta_val = beta(2.5, 3.5)
+ml_val = mittag_leffler(0.5, 1.0, 2.0)
 ```
 
 ### Simple Fractional Neural Network
 ```python
-from hpfracc.ml import FractionalNeuralNetwork, FractionalAdam
+import torch
+from hpfracc.ml import FractionalNeuralNetwork
 
 # Create network
 net = FractionalNeuralNetwork(
@@ -62,9 +86,6 @@ net = FractionalNeuralNetwork(
     output_size=10,
     fractional_order=0.5
 )
-
-# Create optimizer
-optimizer = FractionalAdam(net.parameters(), lr=0.001)
 
 # Forward pass
 x = torch.randn(32, 100)  # batch_size=32, input_size=100
@@ -76,7 +97,7 @@ print(f"Output shape: {output.shape}")
 
 ## Basic Fractional Calculus
 
-### Understanding Fractional Derivatives
+### Fractional Derivatives
 
 Fractional derivatives extend the concept of integer-order derivatives to non-integer orders. The library supports several methods:
 
@@ -87,383 +108,367 @@ Fractional derivatives extend the concept of integer-order derivatives to non-in
 - **Marchaud**: For functions with specific decay properties
 - **Hadamard**: Logarithmic fractional derivative
 
-### Choosing the Right Method
-
 ```python
-from hpfracc.core import fractional_derivative
+from hpfracc.core.derivatives import create_fractional_derivative
 
 # For general purposes
-result_rl = fractional_derivative(x, alpha=0.5, method="RL")
+derivative_rl = create_fractional_derivative(0.5, method="RL")
 
-# For initial value problems (e.g., differential equations)
-result_caputo = fractional_derivative(x, alpha=0.3, method="Caputo")
+# For initial value problems
+derivative_caputo = create_fractional_derivative(0.3, method="Caputo")
 
-# For numerical stability
-result_gl = fractional_derivative(x, alpha=0.7, method="GL")
+# Compute derivatives
+def f(x):
+    return x**2
+
+x = np.linspace(0, 5, 100)
+result_rl = derivative_rl(f, x)
+result_caputo = derivative_caputo(f, x)
 ```
 
-### Fractional Order Validation
+### Fractional Integrals
+
+The library supports various fractional integral definitions:
+
+- **Riemann-Liouville**: Most general fractional integral
+- **Caputo**: Related to Caputo derivative
+- **Weyl**: For periodic functions
+- **Hadamard**: Logarithmic fractional integral
 
 ```python
-from hpfracc.core.definitions import FractionalOrder
+from hpfracc.core.integrals import create_fractional_integral
 
-# Create and validate fractional order
-alpha = FractionalOrder(0.5)
-print(f"Alpha: {alpha.alpha}")
-print(f"Is valid: {alpha.is_valid}")
+# Create integral operators
+integral_rl = create_fractional_integral(0.5, method="RL")
+integral_caputo = create_fractional_integral(0.5, method="Caputo")
+integral_weyl = create_fractional_integral(0.5, method="Weyl")
+integral_hadamard = create_fractional_integral(0.5, method="Hadamard")
 
-# Invalid order will raise error
-try:
-    invalid_alpha = FractionalOrder(2.5)  # Out of range for most methods
-except ValueError as e:
-    print(f"Error: {e}")
+# Compute integrals
+def f(x):
+    return x**2
+
+x = np.linspace(0, 5, 100)
+result_rl = integral_rl(f, x)
+result_caputo = integral_caputo(f, x)
+```
+
+### Special Functions
+
+The library provides comprehensive special function implementations:
+
+```python
+from hpfracc.special import gamma, beta, mittag_leffler, binomial
+
+# Gamma function
+gamma_val = gamma(5.5)
+
+# Beta function
+beta_val = beta(2.5, 3.5)
+
+# Mittag-Leffler function (one-parameter)
+ml_1 = mittag_leffler(0.5, 1.0)
+
+# Mittag-Leffler function (two-parameter)
+ml_2 = mittag_leffler(0.5, 1.0, 2.0)
+
+# Binomial coefficients
+binom_std = binomial(10, 5)
+binom_frac = binomial(10.5, 5.2)
+```
+
+---
+
+## Core Features
+
+### Fractional Derivatives
+
+The library provides a unified interface for fractional derivatives:
+
+```python
+from hpfracc.core.derivatives import create_fractional_derivative
+
+# Create derivative operator
+derivative = create_fractional_derivative(0.5, method="RL")
+
+# Use with different functions
+def f1(x):
+    return x**2
+
+def f2(x):
+    return np.sin(x)
+
+x = np.linspace(0, 5, 100)
+result1 = derivative(f1, x)
+result2 = derivative(f2, x)
+```
+
+### Fractional Integrals
+
+Comprehensive fractional integral support:
+
+```python
+from hpfracc.core.integrals import create_fractional_integral
+
+# Create integral operators for different methods
+integral_rl = create_fractional_integral(0.5, method="RL")
+integral_caputo = create_fractional_integral(0.5, method="Caputo")
+integral_weyl = create_fractional_integral(0.5, method="Weyl")
+integral_hadamard = create_fractional_integral(0.5, method="Hadamard")
+
+# Note: Hadamard integral requires x > 1
+x_hadamard = np.linspace(1.1, 5, 100)
+result_hadamard = integral_hadamard(lambda x: x**2, x_hadamard)
+```
+
+### Special Functions
+
+Complete special function library:
+
+```python
+from hpfracc.special import gamma, beta, mittag_leffler, binomial
+
+# Gamma function with validation
+gamma_val = gamma(5.5)
+
+# Beta function
+beta_val = beta(2.5, 3.5)
+
+# Mittag-Leffler functions
+ml_1 = mittag_leffler(0.5, 1.0)  # One-parameter
+ml_2 = mittag_leffler(0.5, 1.0, 2.0)  # Two-parameter
+
+# Binomial coefficients
+binom_std = binomial(10, 5)  # Standard
+binom_frac = binomial(10.5, 5.2)  # Fractional
+```
+
+### Fractional Green's Functions
+
+Green's functions for fractional differential equations:
+
+```python
+from hpfracc.special.greens_function import (
+    FractionalDiffusionGreenFunction,
+    FractionalWaveGreenFunction,
+    FractionalAdvectionGreenFunction
+)
+
+# Diffusion Green's function
+diffusion_gf = FractionalDiffusionGreenFunction(alpha=0.5, D=1.0)
+x, t = np.meshgrid(np.linspace(0, 5, 50), np.linspace(0, 2, 20))
+G_diffusion = diffusion_gf(x, t)
+
+# Wave Green's function
+wave_gf = FractionalWaveGreenFunction(alpha=1.5, c=1.0)
+G_wave = wave_gf(x, t)
+
+# Advection Green's function
+advection_gf = FractionalAdvectionGreenFunction(alpha=0.7, v=1.0)
+G_advection = advection_gf(x, t)
+```
+
+### Analytical Methods
+
+Homotopy Perturbation Method (HPM) and Variational Iteration Method (VIM):
+
+```python
+from hpfracc.solvers import HomotopyPerturbationSolver, VariationalIterationSolver
+
+# HPM solver
+hpm_solver = HomotopyPerturbationSolver()
+
+# Define the equation: D^α u + u = f(x,t)
+def equation(x, t, u):
+    return u(x, t) + x**2 + t
+
+def initial_condition(x):
+    return x
+
+# Solve with HPM
+solution_hpm = hpm_solver.solve(equation, initial_condition)
+
+# VIM solver
+vim_solver = VariationalIterationSolver()
+
+# Solve with VIM
+solution_vim = vim_solver.solve(equation, initial_condition)
+```
+
+### Mathematical Utilities
+
+Comprehensive mathematical utilities:
+
+```python
+from hpfracc.core.utilities import (
+    validate_fractional_order,
+    validate_function,
+    factorial_fractional,
+    binomial_coefficient,
+    pochhammer_symbol,
+    timing_decorator,
+    memory_usage_decorator
+)
+
+# Validation functions
+is_valid = validate_fractional_order(0.5)
+is_valid_func = validate_function(lambda x: x**2)
+
+# Mathematical functions
+fact_frac = factorial_fractional(5.5)
+binom_coeff = binomial_coefficient(10, 5)
+poch = pochhammer_symbol(5.5, 3)
+
+# Performance monitoring
+@timing_decorator
+@memory_usage_decorator
+def my_function(x):
+    return x**2
 ```
 
 ---
 
 ## Machine Learning Integration
 
-### Creating Fractional Neural Networks
+### Fractional Neural Networks
 
-#### Standard Network
 ```python
+import torch
 from hpfracc.ml import FractionalNeuralNetwork
 
+# Create fractional neural network
 net = FractionalNeuralNetwork(
     input_size=100,
     hidden_sizes=[256, 128, 64],
     output_size=10,
+    fractional_order=0.5,
+    activation='relu'
+)
+
+# Training
+optimizer = torch.optim.Adam(net.parameters(), lr=0.001)
+criterion = torch.nn.CrossEntropyLoss()
+
+# Fit the model
+x_train = torch.randn(1000, 100)
+y_train = torch.randint(0, 10, (1000,))
+
+net.fit(x_train, y_train, optimizer, criterion, epochs=100)
+
+# Predictions
+x_test = torch.randn(100, 100)
+predictions = net.predict(x_test)
+```
+
+### Graph Neural Networks
+
+```python
+import torch
+from hpfracc.ml import FractionalGraphConvolution
+
+# Create fractional graph convolution layer
+conv_layer = FractionalGraphConvolution(
+    in_channels=10,
+    out_channels=32,
     fractional_order=0.5
 )
 
-# The network automatically applies fractional derivatives
-# to inputs and intermediate activations
+# Apply to graph data
+x = torch.randn(100, 10)  # Node features
+edge_index = torch.randint(0, 100, (2, 200))  # Edge connections
+output = conv_layer(x, edge_index)
 ```
 
-#### Memory-Efficient Adjoint Network
+---
+
+## Advanced Usage
+
+### Error Analysis and Validation
+
 ```python
-from hpfracc.ml.adjoint_optimization import (
-    MemoryEfficientFractionalNetwork, 
-    AdjointConfig
-)
+from hpfracc.core.utilities import validate_fractional_order
+from hpfracc.analytics import analyze_convergence, estimate_error
 
-# Configure adjoint optimization
-adjoint_config = AdjointConfig(
-    use_adjoint=True,
-    memory_efficient=True,
-    checkpoint_frequency=5,
-    gradient_accumulation=True,
-    accumulation_steps=4
-)
+# Validate parameters
+is_valid = validate_fractional_order(0.5)
 
-# Create optimized network
-net = MemoryEfficientFractionalNetwork(
-    input_size=100,
-    hidden_sizes=[512, 256, 128, 64],
+# Analyze convergence
+convergence_analysis = analyze_convergence(solutions, analytical_solution)
+
+# Estimate error
+error_estimate = estimate_error(numerical_solution, analytical_solution)
+```
+
+### Performance Optimization
+
+```python
+from hpfracc.core.backend_manager import BackendManager
+
+# Switch backends
+backend_manager = BackendManager()
+backend_manager.set_backend('pytorch')  # or 'jax', 'numba'
+
+# GPU acceleration (if available)
+if torch.cuda.is_available():
+    device = torch.device('cuda')
+    model = model.to(device)
+```
+
+### Signal Processing
+
+```python
+import numpy as np
+from hpfracc.core.derivatives import create_fractional_derivative
+
+# Fractional filtering
+derivative = create_fractional_derivative(0.5, method="RL")
+
+# Apply to signal
+signal = np.sin(2 * np.pi * 10 * np.linspace(0, 1, 1000))
+filtered_signal = derivative(lambda x: signal[int(x * len(signal))], 
+                           np.linspace(0, 1, 1000))
+```
+
+### Image Processing
+
+```python
+import torch
+from hpfracc.ml import FractionalNeuralNetwork
+
+# Fractional image processing
+net = FractionalNeuralNetwork(
+    input_size=784,  # 28x28 image
+    hidden_sizes=[512, 256],
     output_size=10,
-    fractional_order=0.5,
-    adjoint_config=adjoint_config
-)
-```
-
-### Training with Fractional Optimizers
-
-```python
-import torch.nn as nn
-from hpfracc.ml import FractionalAdam, FractionalMSELoss
-
-# Loss function with fractional derivatives
-loss_fn = FractionalMSELoss(fractional_order=0.5, method="RL")
-
-# Optimizer with fractional gradient updates
-optimizer = FractionalAdam(
-    net.parameters(),
-    lr=0.001,
-    fractional_order=0.5,
-    method="RL"
+    fractional_order=0.5
 )
 
-# Training loop
-net.train()
-for epoch in range(100):
-    optimizer.zero_grad()
-    
-    # Forward pass
-    output = net(x)
-    loss = loss_fn(output, target)
-    
-    # Backward pass
-    loss.backward()
-    
-    # Update with fractional gradients
-    optimizer.step()
-    
-    if epoch % 10 == 0:
-        print(f"Epoch {epoch}, Loss: {loss.item():.4f}")
-```
-
-### Using Fractional Layers
-
-#### Convolutional Layers
-```python
-from hpfracc.ml.layers import FractionalConv1D, FractionalConv2D, LayerConfig
-from hpfracc.core.definitions import FractionalOrder
-
-# Configure layer
-config = LayerConfig(
-    fractional_order=FractionalOrder(0.5),
-    method="RL",
-    use_fractional=True,
-    activation="relu",
-    dropout=0.1
-)
-
-# 1D convolution
-conv1d = FractionalConv1D(
-    in_channels=64,
-    out_channels=128,
-    kernel_size=3,
-    config=config
-)
-
-# 2D convolution
-conv2d = FractionalConv2D(
-    in_channels=64,
-    out_channels=128,
-    kernel_size=3,
-    config=config
-)
-```
-
-#### Transformer Layer
-```python
-from hpfracc.ml.layers import FractionalTransformer
-
-transformer = FractionalTransformer(
-    d_model=512,
-    nhead=8,
-    num_encoder_layers=6,
-    num_decoder_layers=6,
-    dim_feedforward=2048,
-    dropout=0.1,
-    config=config
-)
-
-# Encoder-only mode (single input)
-x = torch.randn(32, 100, 512)  # (batch, seq_len, d_model)
-output = transformer(x)  # No target needed
-
-# Full transformer mode (encoder-decoder)
-src = torch.randn(32, 100, 512)
-tgt = torch.randn(32, 50, 512)
-output = transformer(src, tgt)
+# Process image
+image = torch.randn(1, 784)  # Flattened image
+processed = net(image)
 ```
 
 ---
 
-## Performance Optimization
+## Configuration and Settings
 
-### Adjoint Method Benefits
-
-The adjoint method provides significant performance improvements:
-
-- **Training Speed**: Up to 19.7x faster training
-- **Memory Usage**: Up to 81% reduction in memory consumption
-- **Scalability**: Better performance on large models
-
-### Configuration Options
+### Precision Settings
 
 ```python
-from hpfracc.ml.adjoint_optimization import AdjointConfig
+from hpfracc.core.utilities import set_precision
 
-# Memory optimization
-memory_config = AdjointConfig(
-    use_adjoint=True,
-    memory_efficient=True,
-    checkpoint_frequency=5
-)
-
-# Gradient accumulation
-accumulation_config = AdjointConfig(
-    use_adjoint=True,
-    gradient_accumulation=True,
-    accumulation_steps=8
-)
-
-# Balanced configuration
-balanced_config = AdjointConfig(
-    use_adjoint=True,
-    memory_efficient=True,
-    checkpoint_frequency=3,
-    gradient_accumulation=True,
-    accumulation_steps=4
-)
+# Set precision for computations
+set_precision('double')  # or 'single', 'extended'
 ```
 
-### When to Use Adjoint Optimization
-
-- **Use adjoint optimization when**:
-  - Training large models (>100M parameters)
-  - Limited GPU memory
-  - Need faster training times
-  - Working with long sequences
-
-- **Stick with standard methods when**:
-  - Small models (<10M parameters)
-  - Sufficient memory available
-  - Need maximum numerical precision
-  - Debugging or prototyping
-
----
-
-## Production Workflow
-
-### Model Registry Setup
+### Logging Configuration
 
 ```python
-from hpfracc.ml import ModelRegistry, ModelValidator
-from hpfracc.ml.workflow import DevelopmentWorkflow, ProductionWorkflow
+import logging
+from hpfracc.core.utilities import setup_logging
 
-# Initialize components
-registry = ModelRegistry()
-validator = ModelValidator()
-dev_workflow = DevelopmentWorkflow(registry, validator)
-prod_workflow = ProductionWorkflow(registry, validator)
-```
-
-### Development Phase
-
-```python
-# Train and validate model
-validation_results = dev_workflow.train_model(
-    model=net,
-    train_data=(X_train, y_train),
-    val_data=(X_val, y_val),
-    epochs=100
-)
-
-# Run quality gates
-quality_result = dev_workflow.run_quality_gates(
-    model_id=model_id,
-    validation_results=validation_results
-)
-
-if quality_result["passed"]:
-    print("Model passed quality gates!")
-else:
-    print(f"Quality gate failed: {quality_result['reason']}")
-```
-
-### Production Deployment
-
-```python
-# Promote to production
-promotion_result = prod_workflow.promote_to_production(
-    model_id=model_id,
-    version="1.0.0",
-    test_data=X_test,
-    test_labels=y_test,
-    custom_metrics={},
-    force=False
-)
-
-if promotion_result["promoted"]:
-    print("Model promoted to production!")
-    
-    # Deploy model
-    deployment_result = prod_workflow.deploy_model(
-        model_id=model_id,
-        version="1.0.0",
-        deployment_config={"environment": "production"}
-    )
-else:
-    print(f"Promotion failed: {promotion_result['reason']}")
-```
-
-### Monitoring Production Models
-
-```python
-# Monitor model performance
-prod_workflow.monitor_model(
-    model_id=model_id,
-    metrics={
-        "accuracy": 0.95,
-        "latency": 0.1,
-        "throughput": 1000
-    }
-)
-
-# Get production model
-production_model = registry.reconstruct_model(model_id, "1.0.0")
-production_model.eval()
-
-# Run inference
-with torch.no_grad():
-    predictions = production_model(X_new)
-```
-
----
-
-## Benchmarking
-
-### Performance Benchmarking
-
-```python
-from hpfracc.benchmarks import MLPerformanceBenchmark
-
-# Initialize benchmark
-benchmark = MLPerformanceBenchmark(
-    device="cuda",
-    num_runs=10,
-    warmup_runs=3
-)
-
-# Benchmark neural networks
-network_results = benchmark.benchmark_fractional_networks(
-    input_sizes=[50, 100, 200],
-    hidden_sizes_list=[[128, 64], [256, 128, 64]],
-    fractional_orders=[0.1, 0.5, 0.9],
-    methods=["RL", "Caputo"]
-)
-
-# Benchmark attention mechanisms
-attention_results = benchmark.benchmark_fractional_attention(
-    batch_sizes=[16, 32, 64],
-    seq_lengths=[100, 200],
-    d_models=[256, 512],
-    fractional_orders=[0.1, 0.5, 0.9],
-    methods=["RL", "Caputo"]
-)
-
-# Generate comprehensive report
-benchmark.generate_report("benchmark_results")
-```
-
-### Interpreting Results
-
-The benchmark generates several metrics:
-
-- **Execution Time**: Wall-clock time for operations
-- **Memory Usage**: Peak memory consumption
-- **Throughput**: Samples processed per second
-- **Speedup**: Performance improvement over baseline
-
-### Performance Comparison
-
-```python
-# Compare standard vs. adjoint methods
-standard_time = network_results["standard"]["execution_time"]
-adjoint_time = network_results["adjoint"]["execution_time"]
-
-speedup = standard_time / adjoint_time
-print(f"Adjoint method is {speedup:.1f}x faster")
-
-memory_reduction = (
-    (network_results["standard"]["memory_usage"] - 
-     network_results["adjoint"]["memory_usage"]) / 
-    network_results["standard"]["memory_usage"] * 100
-)
-print(f"Memory usage reduced by {memory_reduction:.1f}%")
+# Setup logging
+setup_logging(level=logging.INFO)
 ```
 
 ---
@@ -472,95 +477,43 @@ print(f"Memory usage reduced by {memory_reduction:.1f}%")
 
 ### Common Issues
 
-#### 1. Fractional Order Range Errors
-```python
-# Error: "L1 scheme requires 0 < α < 1"
-# Solution: Use valid range for Caputo method
-result = fractional_derivative(x, alpha=0.5, method="Caputo")  # Valid
-# result = fractional_derivative(x, alpha=1.0, method="Caputo")  # Invalid
-```
+1. **Import Errors**: Ensure all dependencies are installed
+2. **Memory Issues**: Use batch processing for large datasets
+3. **GPU Memory**: Implement gradient checkpointing
+4. **Numerical Issues**: Use higher precision for critical calculations
 
-#### 2. Tensor Shape Mismatches
-```python
-# Error: "mat1 and mat2 shapes cannot be multiplied"
-# Solution: Ensure input dimensions match network architecture
-net = FractionalNeuralNetwork(input_size=100, ...)
-x = torch.randn(32, 100)  # batch_size=32, input_size=100
-output = net(x)
-```
+### Performance Issues
 
-#### 3. Memory Issues
-```python
-# Error: "CUDA out of memory"
-# Solution: Use adjoint optimization
-adjoint_config = AdjointConfig(
-    use_adjoint=True,
-    memory_efficient=True,
-    checkpoint_frequency=3
-)
-net = MemoryEfficientFractionalNetwork(..., adjoint_config=adjoint_config)
-```
-
-#### 4. Optimizer Not Updating Parameters
-```python
-# Issue: Parameters not updating during training
-# Solution: Ensure proper gradient flow
-optimizer.zero_grad()
-loss.backward()
-optimizer.step()
-
-# Check gradients
-for param in net.parameters():
-    if param.grad is not None:
-        print(f"Gradient norm: {param.grad.norm()}")
-```
-
-### Debugging Tips
-
-1. **Check Tensor Shapes**: Print shapes at each step
-2. **Verify Gradients**: Ensure gradients are computed and non-zero
-3. **Monitor Memory**: Use `torch.cuda.memory_summary()` for GPU memory
-4. **Test Components**: Test individual layers before full network
-5. **Use Small Data**: Start with small datasets for debugging
-
-### Getting Help
-
-- **Documentation**: Check the API reference for detailed information
-- **Examples**: Review the examples directory for working code
-- **Issues**: Report bugs on the GitHub repository
-- **Community**: Join discussions in the project forum
+- Use GPU acceleration when available
+- Implement batch processing for large datasets
+- Use appropriate backend for your use case
+- Monitor memory usage with `memory_usage_decorator`
 
 ---
 
 ## Best Practices
 
 ### Code Organization
-1. **Separate Concerns**: Keep data loading, model definition, and training separate
-2. **Configuration Files**: Use configuration files for hyperparameters
-3. **Logging**: Implement proper logging for experiments
-4. **Version Control**: Use git for model and code versioning
+
+- Use validation functions for input parameters
+- Implement proper error handling
+- Use performance monitoring decorators
+- Follow the library's API conventions
 
 ### Performance
-1. **Profile First**: Benchmark before optimization
-2. **Use Adjoint**: Enable adjoint optimization for large models
-3. **Batch Processing**: Use appropriate batch sizes
-4. **Memory Management**: Monitor and optimize memory usage
 
-### Production
-1. **Quality Gates**: Always run quality gates before deployment
-2. **Monitoring**: Implement continuous monitoring
-3. **Rollback Plan**: Have rollback strategies ready
-4. **Documentation**: Document all production models
+- Choose appropriate fractional order and method
+- Use GPU acceleration for large computations
+- Implement batch processing for ML workflows
+- Monitor memory usage and optimize accordingly
+
+### Validation
+
+- Always validate fractional orders
+- Compare with analytical solutions when available
+- Use convergence analysis for iterative methods
+- Implement comprehensive testing
 
 ---
 
-## Next Steps
-
-After mastering the basics:
-
-1. **Advanced Architectures**: Experiment with custom fractional layers
-2. **Research**: Explore novel fractional derivative methods
-3. **Applications**: Apply to your specific domain problems
-4. **Contributions**: Contribute to the library development
-
-The HPFRACC library provides a solid foundation for fractional calculus in machine learning. Start simple, experiment, and gradually explore more advanced features as you become comfortable with the basics.
+For more detailed information, see the [API Reference](api_reference.md) and [Examples](examples.md).

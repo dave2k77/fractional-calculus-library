@@ -9,22 +9,19 @@ This module provides the fundamental components of the HPFRACC library:
 
 from .definitions import (
     FractionalOrder,
-    FractionalType,
-    FractionalMethod,
-    FractionalBackend,
+    DefinitionType,
+    FractionalDefinition,
     validate_fractional_order
 )
 
 from .derivatives import (
     create_fractional_derivative,
-    riemann_liouville_derivative,
-    caputo_derivative,
-    grunwald_letnikov_derivative,
-    weyl_derivative,
-    marchaud_derivative,
-    hadamard_derivative,
-    fractional_derivative_properties,
-    validate_fractional_derivative
+    create_derivative_operator,
+    BaseFractionalDerivative,
+    FractionalDerivativeOperator,
+    FractionalDerivativeFactory,
+    FractionalDerivativeChain,
+    FractionalDerivativeProperties
 )
 
 from .integrals import (
@@ -60,9 +57,6 @@ from .utilities import (
     PerformanceMonitor,
     
     # Error handling
-    FractionalCalculusError,
-    ConvergenceError,
-    ValidationError,
     safe_divide,
     check_numerical_stability,
     
@@ -87,21 +81,18 @@ from .utilities import (
 __all__ = [
     # Definitions
     'FractionalOrder',
-    'FractionalType',
-    'FractionalMethod',
-    'FractionalBackend',
+    'DefinitionType',
+    'FractionalDefinition',
     'validate_fractional_order',
     
     # Derivatives
     'create_fractional_derivative',
-    'riemann_liouville_derivative',
-    'caputo_derivative',
-    'grunwald_letnikov_derivative',
-    'weyl_derivative',
-    'marchaud_derivative',
-    'hadamard_derivative',
-    'fractional_derivative_properties',
-    'validate_fractional_derivative',
+    'create_derivative_operator',
+    'BaseFractionalDerivative',
+    'FractionalDerivativeOperator',
+    'FractionalDerivativeFactory',
+    'FractionalDerivativeChain',
+    'FractionalDerivativeProperties',
     
     # Integrals
     'create_fractional_integral',

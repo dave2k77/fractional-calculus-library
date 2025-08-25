@@ -16,7 +16,7 @@ from typing import Union, Callable, Optional, Tuple
 from scipy.special import gamma
 from scipy.integrate import quad
 
-from .definitions import FractionalOrder, FractionalType
+from .definitions import FractionalOrder, DefinitionType
 from .derivatives import create_fractional_derivative
 
 
@@ -46,8 +46,8 @@ class FractionalIntegral:
     
     def _validate_parameters(self):
         """Validate fractional order and method parameters."""
-        if self.alpha.alpha <= 0:
-            raise ValueError(f"Fractional order must be positive, got {self.alpha.alpha}")
+        if self.alpha.alpha < 0:
+            raise ValueError(f"Fractional order must be non-negative, got {self.alpha.alpha}")
         
         if self.method not in ["RL", "Caputo", "Weyl", "Hadamard"]:
             raise ValueError(f"Unknown method: {self.method}")
@@ -55,6 +55,10 @@ class FractionalIntegral:
     def __call__(self, f: Callable, x: Union[float, np.ndarray, torch.Tensor]) -> Union[float, np.ndarray, torch.Tensor]:
         """Compute fractional integral of function f at point(s) x."""
         raise NotImplementedError("Subclasses must implement __call__")
+    
+    def __repr__(self):
+        """String representation of the fractional integral."""
+        return f"FractionalIntegral(alpha={self.alpha.alpha}, method='{self.method}')"
 
 
 class RiemannLiouvilleIntegral(FractionalIntegral):
@@ -95,6 +99,10 @@ class RiemannLiouvilleIntegral(FractionalIntegral):
         """Compute fractional integral at a scalar point."""
         if x <= 0:
             return 0.0
+        
+        # Handle zero order case
+        if self.alpha.alpha == 0:
+            return f(x)
         
         def integrand(tau):
             return (x - tau) ** (self.alpha.alpha - 1) * f(tau)

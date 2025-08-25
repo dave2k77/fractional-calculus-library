@@ -2,20 +2,24 @@
 
 Welcome to the **HPFRACC** (High-Performance Fractional Calculus) documentation!
 
-## 🚀 What is HPFRACC?
+## What is HPFRACC?
 
 **HPFRACC** is a cutting-edge Python library that provides high-performance implementations of fractional calculus operations with seamless machine learning integration and state-of-the-art Graph Neural Networks (GNNs).
 
-### ✨ Key Features
+### Key Features
 
-- **🔬 Advanced Fractional Calculus**: Riemann-Liouville, Caputo, Grünwald-Letnikov definitions
-- **🧠 Machine Learning Integration**: Native PyTorch, JAX, and NUMBA support
-- **🌐 Graph Neural Networks**: GCN, GAT, GraphSAGE, and Graph U-Net architectures
-- **⚡ High Performance**: Optimized algorithms with GPU acceleration support
-- **🔄 Multi-Backend**: Seamless switching between computation backends
-- **📊 Comprehensive Analytics**: Built-in performance monitoring and error analysis
+* **Advanced Fractional Calculus**: Riemann-Liouville, Caputo, Grünwald-Letnikov definitions
+* **Fractional Integrals**: Riemann-Liouville, Caputo, Weyl, and Hadamard integrals
+* **Special Functions**: Gamma, Beta, Mittag-Leffler, and Binomial coefficients
+* **Fractional Green's Functions**: For diffusion, wave, and advection equations
+* **Analytical Methods**: Homotopy Perturbation Method (HPM) and Variational Iteration Method (VIM)
+* **Machine Learning Integration**: Native PyTorch, JAX, and NUMBA support
+* **Graph Neural Networks**: GCN, GAT, GraphSAGE, and Graph U-Net architectures
+* **High Performance**: Optimized algorithms with GPU acceleration support
+* **Multi-Backend**: Seamless switching between computation backends
+* **Comprehensive Analytics**: Built-in performance monitoring and error analysis
 
-## 🎯 Quick Start
+## Quick Start
 
 ### Installation
 
@@ -34,85 +38,93 @@ pip install hpfracc[dev]
 
 ```python
 from hpfracc.core.definitions import FractionalOrder
-from hpfracc.ml import FractionalGCN
+from hpfracc.core.integrals import create_fractional_integral
+from hpfracc.special import gamma, beta, mittag_leffler
+from hpfracc.solvers import HomotopyPerturbationSolver
 import numpy as np
 
-# Create a fractional GNN
-model = FractionalGCN(
-    input_dim=10,
-    hidden_dim=32,
-    output_dim=2,
-    fractional_order=FractionalOrder(0.5)
-)
+# Create a fractional integral
+integral = create_fractional_integral(0.5, method="RL")
 
-# Process graph data
-x = np.random.randn(100, 10)  # Node features
-edge_index = np.random.randint(0, 100, (2, 200))  # Edge connections
-output = model.forward(x, edge_index)
+# Compute special functions
+result = gamma(5.5)
+beta_val = beta(2.5, 3.5)
+ml_result = mittag_leffler(0.5, 1.0, 2.0)
+
+# Solve fractional differential equation with HPM
+solver = HomotopyPerturbationSolver()
+solution = solver.solve(lambda x, t: x**2 + t, initial_condition=lambda x: x)
 ```
 
-## 📚 Documentation Sections
+## Documentation Sections
 
-### 🧮 Core Concepts
-- [**Model Theory**](model_theory.md) - Mathematical foundations and theoretical background
-- [**User Guide**](user_guide.md) - Getting started and basic usage patterns
+### Core Concepts
 
-### 🔧 API Reference
-- [**Core API**](api_reference.md) - Main library functions and classes
-- [**Advanced Methods**](api_reference/advanced_methods_api.md) - Specialized algorithms and optimizations
+* [**Model Theory**](model_theory.md) - Mathematical foundations and theoretical background
+* [**User Guide**](user_guide.md) - Getting started and basic usage patterns
 
-### 🎓 Examples & Tutorials
-- [**Examples Gallery**](examples.md) - Comprehensive code examples and use cases
-- [**ML Integration Guide**](ml_integration_guide.md) - Machine learning workflows and best practices
+### API Reference
 
-### 🧪 Development & Testing
-- [**Testing Status**](testing_status.md) - Current test coverage and validation status
+* [**Core API**](api_reference.md) - Main library functions and classes
+* [**Advanced Methods**](api_reference/advanced_methods_api.md) - Specialized algorithms and optimizations
 
-## 🌟 Why Choose HPFRACC?
+### Examples & Tutorials
 
-### **Academic Excellence**
-- Developed at the University of Reading, Department of Biomedical Engineering
-- Peer-reviewed algorithms and implementations
-- Comprehensive mathematical validation
+* [**Examples Gallery**](examples.md) - Comprehensive code examples and use cases
+* [**ML Integration Guide**](ml_integration_guide.md) - Machine learning workflows and best practices
 
-### **Production Ready**
-- Extensive test coverage (>95%)
-- Performance benchmarking and optimization
-- Multi-platform compatibility
+### Development & Testing
 
-### **Active Development**
-- Regular updates and improvements
-- Community-driven feature development
-- Comprehensive documentation and examples
+* [**Testing Status**](testing_status.md) - Current test coverage and validation status
 
-## 🔗 Quick Links
+## Why Choose HPFRACC?
 
-- **GitHub Repository**: [fractional_calculus_library](https://github.com/dave2k77/fractional_calculus_library)
-- **PyPI Package**: [hpfracc](https://pypi.org/project/hpfracc/)
-- **Issue Tracker**: [GitHub Issues](https://github.com/dave2k77/fractional_calculus_library/issues)
-- **Academic Contact**: [d.r.chin@pgr.reading.ac.uk](mailto:d.r.chin@pgr.reading.ac.uk)
+### Academic Excellence
 
-## 📖 Citation
+* Developed at the University of Reading, Department of Biomedical Engineering
+* Peer-reviewed algorithms and implementations
+* Comprehensive mathematical validation
+
+### Production Ready
+
+* Extensive test coverage (>95%)
+* Performance benchmarking and optimization
+* Multi-platform compatibility
+
+### Active Development
+
+* Regular updates and improvements
+* Community-driven feature development
+* Comprehensive documentation and examples
+
+## Quick Links
+
+* **GitHub Repository**: [fractional_calculus_library](https://github.com/dave2k77/fractional_calculus_library)
+* **PyPI Package**: [hpfracc](https://pypi.org/project/hpfracc/)
+* **Issue Tracker**: [GitHub Issues](https://github.com/dave2k77/fractional_calculus_library/issues)
+* **Academic Contact**: [d.r.chin@pgr.reading.ac.uk](mailto:d.r.chin@pgr.reading.ac.uk)
+
+## Citation
 
 If you use HPFRACC in your research, please cite:
 
 ```bibtex
-@software{hpfracc2024,
+@software{hpfracc2025,
   title={HPFRACC: High-Performance Fractional Calculus Library with Machine Learning Integration},
   author={Chin, Davian R.},
-  year={2024},
+  year={2025},
   url={https://github.com/dave2k77/fractional_calculus_library},
   note={Department of Biomedical Engineering, University of Reading}
 }
 ```
 
-## 🚀 Getting Help
+## Getting Help
 
-- **Documentation**: Browse the sections above for detailed guides
-- **Examples**: Check the examples gallery for practical implementations
-- **Issues**: Report bugs or request features on GitHub
-- **Contact**: Reach out to the development team for academic collaborations
+* **Documentation**: Browse the sections above for detailed guides
+* **Examples**: Check the examples gallery for practical implementations
+* **Issues**: Report bugs or request features on GitHub
+* **Contact**: Reach out to the development team for academic collaborations
 
 ---
 
-**HPFRACC v1.1.2** - *Empowering Research with High-Performance Fractional Calculus*
+**HPFRACC v1.2.0** - *Empowering Research with High-Performance Fractional Calculus* | © 2025 Davian R. Chin

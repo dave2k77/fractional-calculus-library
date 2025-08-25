@@ -19,7 +19,7 @@ import logging
 from scipy.special import gamma, factorial
 import math
 
-from .definitions import FractionalOrder, FractionalType
+from .definitions import FractionalOrder, DefinitionType
 
 
 # Mathematical utilities
