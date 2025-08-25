@@ -9,13 +9,10 @@ build:
   tools:
     python: "3.9"
 
-# Build documentation using pip
+# Install only the documentation requirements
 python:
   install:
-    - method: pip
-      path: .
-      extra_requirements:
-        - docs
+    - requirements: docs/requirements.txt
 
 # Build documentation from the docs/ directory
 sphinx:
