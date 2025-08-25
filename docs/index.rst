@@ -141,7 +141,7 @@ Getting Help
 
 ----
 
-**HPFRACC v1.1.2** - *Empowering Research with High-Performance Fractional Calculus* | © 2025 Davian R. Chin
+**HPFRACC v1.2.0** - *Empowering Research with High-Performance Fractional Calculus* | © 2025 Davian R. Chin
 
 .. toctree::
    :maxdepth: 2
