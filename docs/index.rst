@@ -146,9 +146,8 @@ Getting Help
    :maxdepth: 2
    :caption: Contents:
 
-   model_theory
    user_guide
    api_reference
    examples
-   ml_integration_guide
+   model_theory
    testing_status
