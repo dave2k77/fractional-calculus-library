@@ -16,7 +16,6 @@ python:
       path: .
       extra_requirements:
         - docs
-  pip_install: true
 
 # Build documentation from the docs/ directory
 sphinx:
