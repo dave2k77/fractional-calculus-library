@@ -37,7 +37,7 @@ autodoc_mock_imports = [
 # -- Project information -----------------------------------------------------
 
 project = 'HPFRACC'
-copyright = '2024, Davian R. Chin'
+copyright = '2025, Davian R. Chin'
 author = 'Davian R. Chin'
 
 # The full version, including alpha/beta/rc tags

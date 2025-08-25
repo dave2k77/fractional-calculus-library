@@ -122,10 +122,10 @@ If you use HPFRACC in your research, please cite:
 
 .. code-block:: bibtex
 
-   @software{hpfracc2024,
+   @software{hpfracc2025,
      title={HPFRACC: High-Performance Fractional Calculus Library with Machine Learning Integration},
      author={Chin, Davian R.},
-     year={2024},
+     year={2025},
      url={https://github.com/dave2k77/fractional_calculus_library},
      note={Department of Biomedical Engineering, University of Reading}
    }
@@ -140,7 +140,7 @@ Getting Help
 
 ----
 
-**HPFRACC v1.1.2** - *Empowering Research with High-Performance Fractional Calculus*
+**HPFRACC v1.1.2** - *Empowering Research with High-Performance Fractional Calculus* | © 2025 Davian R. Chin
 
 .. toctree::
    :maxdepth: 2
