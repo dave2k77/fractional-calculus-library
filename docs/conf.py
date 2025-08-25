@@ -20,7 +20,6 @@ sys.path.insert(0, os.path.abspath('../..'))
 project = 'HPFRACC'
 copyright = '2024, Davian R. Chin, Department of Biomedical Engineering, University of Reading'
 author = 'Davian R. Chin'
-email = 'd.r.chin@pgr.reading.ac.uk'
 
 # The full version, including alpha/beta/rc tags
 release = '1.1.2'
@@ -87,7 +86,6 @@ html_theme_options = {
     'includehidden': True,
     'titles_only': False,
     'logo_only': False,
-    'display_version': True,
     'prev_next_buttons_location': 'bottom',
     'style_external_links': True,
     'style_nav_header_background': '#2980B9',
@@ -108,65 +106,6 @@ html_sidebars = {
         'searchbox.html',
     ]
 }
-
-# The name of an image file (relative to this directory) to place at the top
-# of the sidebar.
-html_logo = '_static/logo.png'
-
-# The name of an image file (relative to this directory) to use as a favicon of
-# the docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
-# pixels large.
-html_favicon = '_static/favicon.ico'
-
-# -- Options for HTMLHelp output ------------------------------------------
-
-# Output file base name for HTML help builder.
-htmlhelp_basename = 'HPFRACCdoc'
-
-# -- Options for LaTeX output ---------------------------------------------
-
-latex_elements = {
-    # The paper size ('letterpaper' or 'a4paper').
-    'papersize': 'a4paper',
-
-    # The font size ('10pt', '11pt' or '12pt').
-    'pointsize': '11pt',
-
-    # Additional stuff for the LaTeX preamble.
-    'preamble': r'''
-        \usepackage{amsmath}
-        \usepackage{amssymb}
-        \usepackage{mathtools}
-    ''',
-}
-
-# Grouping the document tree into LaTeX files. List of tuples
-# (source start file, target name, title,
-#  author, documentclass [howto, manual, or own class]).
-latex_documents = [
-    (master_doc, 'HPFRACC.tex', 'HPFRACC Documentation',
-     'Davian R. Chin', 'manual'),
-]
-
-# -- Options for manual page output ---------------------------------------
-
-# One entry per manual page. List of tuples
-# (source start file, name, description, authors, manual section).
-man_pages = [
-    (master_doc, 'hpfracc', 'HPFRACC Documentation',
-     [author], 1)
-]
-
-# -- Options for Texinfo output -------------------------------------------
-
-# Grouping the document tree into Texinfo files. List of tuples
-# (source start file, target name, title, author,
-#  dir menu entry, description, category)
-texinfo_documents = [
-    (master_doc, 'HPFRACC', 'HPFRACC Documentation',
-     author, 'HPFRACC', 'High-Performance Fractional Calculus Library with Machine Learning Integration and Graph Neural Networks',
-     'Miscellaneous'),
-]
 
 # -- Extension configuration -------------------------------------------------
 
