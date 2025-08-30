@@ -8,11 +8,11 @@ This library provides optimized implementations of:
 - Core fractional derivatives: Caputo, Riemann-Liouville, Grünwald-Letnikov
 - Advanced methods: Weyl, Marchaud, Hadamard, Reiz-Feller derivatives
 - Special methods: Fractional Laplacian, Fractional Fourier Transform, Fractional Z-Transform, Fractional Mellin Transform
-- GPU acceleration via JAX
+- GPU acceleration via JAX, PyTorch, and CuPy
 - Parallel computing via NUMBA
 """
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 __author__ = "Davian R. Chin"
 __email__ = "d.r.chin@pgr.reading.ac.uk"
 __affiliation__ = "Department of Biomedical Engineering, University of Reading"
