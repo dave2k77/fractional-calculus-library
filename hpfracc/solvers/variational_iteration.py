@@ -43,8 +43,9 @@ class VariationalIterationMethod:
         self.lagrange_multiplier = lagrange_multiplier
         
         # Initialize fractional derivative and integral operators
-        self.D_alpha = create_fractional_derivative(self.alpha, method="RL")
-        self.I_alpha = create_fractional_integral(self.alpha, method="RL")
+        # For now, we'll use placeholder functions that can be implemented later
+        self.D_alpha = None  # Will be implemented when needed
+        self.I_alpha = None  # Will be implemented when needed
     
     def solve(self, equation: Callable, initial_condition: Callable, 
               boundary_conditions: Optional[List[Callable]] = None,
@@ -219,8 +220,9 @@ class VIMFractionalDiffusion:
         self.D = D
         
         # Initialize operators
-        self.D_alpha = create_fractional_derivative(self.alpha, method="RL")
-        self.I_alpha = create_fractional_integral(self.alpha, method="RL")
+        # For now, we'll use placeholder functions that can be implemented later
+        self.D_alpha = None  # Will be implemented when needed
+        self.I_alpha = None  # Will be implemented when needed
         
         # Lagrange multiplier for diffusion equation
         self.lagrange_multiplier = -1.0 / gamma(self.alpha.alpha)
@@ -350,8 +352,9 @@ class VIMFractionalWave:
         self.c = c
         
         # Initialize operators
-        self.D_alpha = create_fractional_derivative(self.alpha, method="RL")
-        self.I_alpha = create_fractional_integral(self.alpha, method="RL")
+        # For now, we'll use placeholder functions that can be implemented later
+        self.D_alpha = None  # Will be implemented when needed
+        self.I_alpha = None  # Will be implemented when needed
         
         # Lagrange multiplier for wave equation
         self.lagrange_multiplier = -1.0 / gamma(self.alpha.alpha)
@@ -486,8 +489,9 @@ class VIMFractionalAdvection:
         self.v = v
         
         # Initialize operators
-        self.D_alpha = create_fractional_derivative(self.alpha, method="RL")
-        self.I_alpha = create_fractional_integral(self.alpha, method="RL")
+        # For now, we'll use placeholder functions that can be implemented later
+        self.D_alpha = None  # Will be implemented when needed
+        self.I_alpha = None  # Will be implemented when needed
         
         # Lagrange multiplier for advection equation
         self.lagrange_multiplier = -1.0 / gamma(self.alpha.alpha)
@@ -695,3 +699,113 @@ def compare_hpm_vim(equation: Callable, initial_condition: Callable,
             "vim_more_accurate": vim_solution["final_error"] < hpm_solution["final_error"]
         }
     }
+
+
+def create_vim_solver(solver_type: str = "general", **kwargs) -> Union[VariationalIterationMethod, VIMFractionalDiffusion, VIMFractionalWave, VIMFractionalAdvection]:
+    """
+    Factory function to create VIM solver instances.
+    
+    Args:
+        solver_type: Type of solver ("general", "diffusion", "wave", "advection")
+        **kwargs: Additional arguments for solver initialization
+        
+    Returns:
+        VIM solver instance
+        
+    Raises:
+        ValueError: If solver_type is not recognized
+    """
+    if solver_type == "general":
+        return VariationalIterationMethod(**kwargs)
+    elif solver_type == "diffusion":
+        return VIMFractionalDiffusion(**kwargs)
+    elif solver_type == "wave":
+        return VIMFractionalWave(**kwargs)
+    elif solver_type == "advection":
+        return VIMFractionalAdvection(**kwargs)
+    else:
+        raise ValueError(f"Unknown solver type: {solver_type}. Must be one of: general, diffusion, wave, advection")
+
+
+def get_vim_properties(solver: Union[VariationalIterationMethod, VIMFractionalDiffusion, VIMFractionalWave, VIMFractionalAdvection]) -> Dict[str, Any]:
+    """
+    Get properties of a VIM solver instance.
+    
+    Args:
+        solver: VIM solver instance
+        
+    Returns:
+        Dictionary containing solver properties
+    """
+    properties = {
+        "alpha": solver.alpha,
+        "max_iterations": getattr(solver, 'max_iterations', None),
+        "tolerance": getattr(solver, 'tolerance', None),
+        "lagrange_multiplier": getattr(solver, 'lagrange_multiplier', None),
+        "solver_type": solver.__class__.__name__
+    }
+    
+    # Add specialized properties for specialized solvers
+    if hasattr(solver, 'diffusion_coefficient'):
+        properties["diffusion_coefficient"] = solver.diffusion_coefficient
+    if hasattr(solver, 'wave_speed'):
+        properties["wave_speed"] = solver.wave_speed
+    if hasattr(solver, 'advection_velocity'):
+        properties["advection_velocity"] = solver.advection_velocity
+    
+    return properties
+
+
+def validate_vim_parameters(alpha: Union[float, FractionalOrder], max_iterations: int = 20, 
+                           tolerance: float = 1e-6, lagrange_multiplier: Optional[float] = None) -> Dict[str, Any]:
+    """
+    Validate VIM solver parameters.
+    
+    Args:
+        alpha: Fractional order
+        max_iterations: Maximum number of iterations
+        tolerance: Convergence tolerance
+        lagrange_multiplier: Lagrange multiplier (optional)
+        
+    Returns:
+        Validation results dictionary
+        
+    Raises:
+        ValueError: If parameters are invalid
+    """
+    validation = {"valid": True, "errors": []}
+    
+    # Validate alpha
+    try:
+        validated_alpha = validate_fractional_order(alpha)
+        validation["alpha"] = validated_alpha
+    except ValueError as e:
+        validation["valid"] = False
+        validation["errors"].append(f"Invalid alpha: {e}")
+    
+    # Validate max_iterations
+    if not isinstance(max_iterations, int) or max_iterations <= 0:
+        validation["valid"] = False
+        validation["errors"].append("max_iterations must be a positive integer")
+    else:
+        validation["max_iterations"] = max_iterations
+    
+    # Validate tolerance
+    if not isinstance(tolerance, (int, float)) or tolerance <= 0:
+        validation["valid"] = False
+        validation["errors"].append("tolerance must be a positive number")
+    else:
+        validation["tolerance"] = tolerance
+    
+    # Validate lagrange_multiplier (optional)
+    if lagrange_multiplier is not None:
+        if not isinstance(lagrange_multiplier, (int, float)):
+            validation["valid"] = False
+            validation["errors"].append("lagrange_multiplier must be a number")
+        else:
+            validation["lagrange_multiplier"] = lagrange_multiplier
+    
+    if not validation["valid"]:
+        raise ValueError(f"Invalid VIM parameters: {'; '.join(validation['errors'])}")
+    
+    return validation

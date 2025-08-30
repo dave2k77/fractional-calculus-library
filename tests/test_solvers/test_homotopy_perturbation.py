@@ -24,32 +24,32 @@ class TestHomotopyPerturbationMethod:
     
     def test_hpm_creation(self):
         """Test creating HomotopyPerturbationMethod instances."""
-        hpm = HomotopyPerturbationMethod(order=0.5, max_terms=10)
-        assert hpm.order == 0.5
+        hpm = HomotopyPerturbationMethod(alpha=0.5, max_terms=10)
+        assert hpm.alpha == 0.5
         assert hpm.max_terms == 10
         assert hpm.tolerance == 1e-6
     
     def test_hpm_validation(self):
         """Test HomotopyPerturbationMethod validation."""
         # Test valid parameters
-        hpm = HomotopyPerturbationMethod(order=0.5, max_terms=10)
-        assert hpm.order == 0.5
+        hpm = HomotopyPerturbationMethod(alpha=0.5, max_terms=10)
+        assert hpm.alpha == 0.5
         
-        # Test invalid order
+        # Test invalid alpha
         with pytest.raises(ValueError):
-            HomotopyPerturbationMethod(order=-1.0, max_terms=10)
+            HomotopyPerturbationMethod(alpha=-1.0, max_terms=10)
         
         # Test invalid max_terms
         with pytest.raises(ValueError):
-            HomotopyPerturbationMethod(order=0.5, max_terms=0)
+            HomotopyPerturbationMethod(alpha=0.5, max_terms=0)
         
         # Test invalid tolerance
         with pytest.raises(ValueError):
-            HomotopyPerturbationMethod(order=0.5, max_terms=10, tolerance=-1e-6)
+            HomotopyPerturbationMethod(alpha=0.5, max_terms=10, tolerance=-1e-6)
     
     def test_hpm_repr(self):
         """Test HomotopyPerturbationMethod string representation."""
-        hpm = HomotopyPerturbationMethod(order=0.5, max_terms=10, tolerance=1e-8)
+        hpm = HomotopyPerturbationMethod(alpha=0.5, max_terms=10, tolerance=1e-8)
         repr_str = repr(hpm)
         assert "HomotopyPerturbationMethod" in repr_str
         assert "0.5" in repr_str
@@ -57,7 +57,7 @@ class TestHomotopyPerturbationMethod:
     
     def test_construct_homotopy(self):
         """Test homotopy construction."""
-        hpm = HomotopyPerturbationMethod(order=0.5, max_terms=5)
+        hpm = HomotopyPerturbationMethod(alpha=0.5, max_terms=5)
         
         # Define a simple FDE: D^α u + u = 0
         def differential_operator(u, x):
@@ -77,7 +77,7 @@ class TestHomotopyPerturbationMethod:
     
     def test_compute_series_terms(self):
         """Test series terms computation."""
-        hpm = HomotopyPerturbationMethod(order=0.5, max_terms=3)
+        hpm = HomotopyPerturbationMethod(alpha=0.5, max_terms=3)
         
         # Define a simple FDE: D^α u + u = 0
         def differential_operator(u, x):
@@ -96,7 +96,7 @@ class TestHomotopyPerturbationMethod:
     
     def test_solve(self):
         """Test general HPM solve method."""
-        hpm = HomotopyPerturbationMethod(order=0.5, max_terms=5)
+        hpm = HomotopyPerturbationMethod(alpha=0.5, max_terms=5)
         
         # Define a simple FDE: D^α u + u = 0
         def differential_operator(u, x):

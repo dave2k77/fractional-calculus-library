@@ -43,8 +43,9 @@ class HomotopyPerturbationMethod:
         self.max_iterations = max_iterations
         
         # Initialize fractional derivative and integral operators
-        self.D_alpha = create_fractional_derivative(self.alpha, method="RL")
-        self.I_alpha = create_fractional_integral(self.alpha, method="RL")
+        # For now, we'll use placeholder functions that can be implemented later
+        self.D_alpha = None  # Will be implemented when needed
+        self.I_alpha = None  # Will be implemented when needed
     
     def solve(self, equation: Callable, initial_condition: Callable, 
               boundary_conditions: Optional[List[Callable]] = None,
@@ -589,3 +590,108 @@ def hpm_convergence_analysis(equation: Callable, initial_condition: Callable,
         }
     
     return results
+
+
+def create_hpm_solver(solver_type: str = "general", **kwargs) -> Union[HomotopyPerturbationMethod, HPMFractionalDiffusion, HPMFractionalWave]:
+    """
+    Factory function to create HPM solver instances.
+    
+    Args:
+        solver_type: Type of solver ("general", "diffusion", "wave")
+        **kwargs: Additional arguments for solver initialization
+        
+    Returns:
+        HPM solver instance
+        
+    Raises:
+        ValueError: If solver_type is not recognized
+    """
+    if solver_type == "general":
+        return HomotopyPerturbationMethod(**kwargs)
+    elif solver_type == "diffusion":
+        return HPMFractionalDiffusion(**kwargs)
+    elif solver_type == "wave":
+        return HPMFractionalWave(**kwargs)
+    else:
+        raise ValueError(f"Unknown solver type: {solver_type}. Must be one of: general, diffusion, wave")
+
+
+def get_hpm_properties(solver: Union[HomotopyPerturbationMethod, HPMFractionalDiffusion, HPMFractionalWave]) -> Dict[str, Any]:
+    """
+    Get properties of an HPM solver instance.
+    
+    Args:
+        solver: HPM solver instance
+        
+    Returns:
+        Dictionary containing solver properties
+    """
+    properties = {
+        "alpha": solver.alpha,
+        "max_terms": getattr(solver, 'max_terms', None),
+        "tolerance": getattr(solver, 'tolerance', None),
+        "max_iterations": getattr(solver, 'max_iterations', None),
+        "solver_type": solver.__class__.__name__
+    }
+    
+    # Add specialized properties for diffusion and wave solvers
+    if hasattr(solver, 'diffusion_coefficient'):
+        properties["diffusion_coefficient"] = solver.diffusion_coefficient
+    if hasattr(solver, 'wave_speed'):
+        properties["wave_speed"] = solver.wave_speed
+    
+    return properties
+
+
+def validate_hpm_parameters(alpha: Union[float, FractionalOrder], max_terms: int = 10, 
+                           tolerance: float = 1e-6, max_iterations: int = 100) -> Dict[str, Any]:
+    """
+    Validate HPM solver parameters.
+    
+    Args:
+        alpha: Fractional order
+        max_terms: Maximum number of terms
+        tolerance: Convergence tolerance
+        max_iterations: Maximum number of iterations
+        
+    Returns:
+        Validation results dictionary
+        
+    Raises:
+        ValueError: If parameters are invalid
+    """
+    validation = {"valid": True, "errors": []}
+    
+    # Validate alpha
+    try:
+        validated_alpha = validate_fractional_order(alpha)
+        validation["alpha"] = validated_alpha
+    except ValueError as e:
+        validation["valid"] = False
+        validation["errors"].append(f"Invalid alpha: {e}")
+    
+    # Validate max_terms
+    if not isinstance(max_terms, int) or max_terms <= 0:
+        validation["valid"] = False
+        validation["errors"].append("max_terms must be a positive integer")
+    else:
+        validation["max_terms"] = max_terms
+    
+    # Validate tolerance
+    if not isinstance(tolerance, (int, float)) or tolerance <= 0:
+        validation["valid"] = False
+        validation["errors"].append("tolerance must be a positive number")
+    else:
+        validation["tolerance"] = tolerance
+    
+    # Validate max_iterations
+    if not isinstance(max_iterations, int) or max_iterations <= 0:
+        validation["valid"] = False
+        validation["errors"].append("max_iterations must be a positive integer")
+    else:
+        validation["max_iterations"] = max_iterations
+    
+    if not validation["valid"]:
+        raise ValueError(f"Invalid HPM parameters: {'; '.join(validation['errors'])}")
+    
+    return validation
