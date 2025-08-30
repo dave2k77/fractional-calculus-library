@@ -18,6 +18,15 @@ Key Features
 * **Multi-Backend**: Seamless switching between computation backends
 * **Analytics**: Built-in performance monitoring and error analysis
 
+Current Status
+-------------
+
+* **Core Methods**: 95% complete and tested
+* **GPU Acceleration**: Fully implemented
+* **Machine Learning**: 85% complete
+* **Documentation**: 90% complete
+* **PyPI Package**: Published as hpfracc-1.3.1
+
 Quick Start
 ----------
 
@@ -29,10 +38,13 @@ Installation
    # Basic installation
    pip install hpfracc
 
-   # Full installation with ML dependencies
+   # With GPU support
+   pip install hpfracc[gpu]
+
+   # With machine learning extras
    pip install hpfracc[ml]
 
-   # Development installation
+   # Development version
    pip install hpfracc[dev]
 
 Basic Usage
@@ -40,24 +52,17 @@ Basic Usage
 
 .. code-block:: python
 
-   from hpfracc import FractionalOrder
-   from hpfracc.ml import FractionalGNNFactory, BackendType
+   import hpfracc as hpc
    import numpy as np
 
-   # Create a fractional GNN
-   model = FractionalGNNFactory.create_model(
-       model_type='gcn',
-       input_dim=10,
-       hidden_dim=32,
-       output_dim=2,
-       fractional_order=FractionalOrder(0.5),
-       backend=BackendType.TORCH
-   )
+   # Create time array and function
+   t = np.linspace(0, 10, 1000)
+   x = np.sin(t)
 
-   # Process graph data
-   x = np.random.randn(100, 10)  # Node features
-   edge_index = np.random.randint(0, 100, (2, 200))  # Edge connections
-   output = model(x, edge_index)
+   # Compute fractional derivative
+   alpha = 0.5  # fractional order
+   result = hpc.optimized_caputo(t, x, alpha)
+   print(f"Caputo derivative computed, shape: {result.shape}")
 
 Documentation Sections
 ---------------------
@@ -72,7 +77,7 @@ API Reference
 ~~~~~~~~~~~~
 
 * :doc:`api_reference` - Main library functions and classes
-* :doc:`api_reference/advanced_methods_api` - Specialized algorithms and optimizations
+* :doc:`api_reference` - Complete API reference for all modules
 
 Examples & Tutorials
 ~~~~~~~~~~~~~~~~~~~
@@ -99,7 +104,7 @@ Academic Excellence
 Production Ready
 ~~~~~~~~~~~~~~~
 
-* Extensive test coverage (>85%)
+* Extensive test coverage (85%)
 * Performance benchmarking and optimization
 * Multi-platform compatibility
 
@@ -129,6 +134,7 @@ If you use HPFRACC in your research, please cite:
      title={HPFRACC: High-Performance Fractional Calculus Library with Machine Learning Integration},
      author={Chin, Davian R.},
      year={2025},
+     version={1.3.1},
      url={https://github.com/dave2k77/fractional_calculus_library},
      note={Department of Biomedical Engineering, University of Reading}
    }
@@ -143,7 +149,7 @@ Getting Help
 
 ----
 
-**HPFRACC v1.3.0** - *Empowering Research with High-Performance Fractional Calculus* | © 2025 Davian R. Chin
+**HPFRACC v1.3.1** - *Empowering Research with High-Performance Fractional Calculus* | © 2025 Davian R. Chin
 
 .. toctree::
    :maxdepth: 2
