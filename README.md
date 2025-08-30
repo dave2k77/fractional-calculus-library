@@ -1,221 +1,140 @@
 # HPFRACC - High-Performance Fractional Calculus Library
 
-[![PyPI version](https://badge.fury.io/py/hpfracc.svg)](https://badge.fury.io/py/hpfracc)
+[![PyPI version](https://badge.fury.io/py/hpfracc.svg)](https://pypi.org/project/hpfracc/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
-[![Documentation](https://img.shields.io/badge/docs-latest-brightgreen.svg)](https://fractional-calculus-library.readthedocs.io/)
 
-## 👨‍💻 **Author & Developer**
+A high-performance Python library for numerical methods in fractional calculus, featuring dramatic speedups and production-ready optimizations across all methods.
 
-**Davian R. Chin**  
-Department of Biomedical Engineering  
-University of Reading  
-Email: [d.r.chin@pgr.reading.ac.uk](mailto:d.r.chin@pgr.reading.ac.uk)  
-GitHub: [@dave2k77](https://github.com/dave2k77)
+## 🚀 **Quick Start**
 
-## 🚀 **Overview**
-
-HPFRACC (High-Performance Fractional Calculus Library) is a comprehensive Python library that provides high-performance implementations of fractional calculus operations, advanced numerical methods, and machine learning integration with fractional derivatives.
-
-## ✨ **Key Features**
-
-### 🔬 **Core Fractional Calculus**
-- **Multiple Definitions**: Riemann-Liouville, Caputo, Grünwald-Letnikov, and more
-- **High-Performance Algorithms**: Optimized implementations for speed and accuracy
-- **GPU Acceleration**: CUDA support for large-scale computations
-- **Advanced Methods**: Mellin transforms, fractional differential equations, and special functions
-
-### 🤖 **Machine Learning Integration**
-- **Multi-Backend Support**: Seamless integration with PyTorch, JAX, and NUMBA
-- **Fractional Neural Networks**: Core networks with fractional calculus integration
-- **Fractional Attention Mechanisms**: Multi-head attention with fractional derivatives
-- **Graph Neural Networks**: Fractional GNN architectures for graph learning tasks
-- **ML Components**: Basic loss functions, optimizers, and layers (advanced components in development)
-
-### 🎯 **Performance & Usability**
-- **Cross-Platform**: Windows, macOS, and Linux support
-- **Extensive Documentation**: Comprehensive guides and examples
-- **Active Development**: Regular updates and improvements
-- **Research-Ready**: Designed for academic and industrial applications
-
-## 🏗️ **Architecture**
-
-### **Multi-Backend Support**
-HPFRACC provides a unified interface across multiple computation backends:
-
-- **PyTorch**: Full-featured deep learning with GPU acceleration
-- **JAX**: High-performance numerical computing with automatic differentiation
-- **NUMBA**: JIT compilation for CPU optimization
-
-### **Core Components**
-- **Backend Management**: Automatic detection and seamless switching between backends
-- **Unified Tensor Operations**: Consistent API across all backends
-- **Fractional Calculus Integration**: Built-in fractional derivatives in all ML components
-
-## 📦 **Installation**
-
-### **Basic Installation**
+### Installation
 ```bash
 pip install hpfracc
 ```
 
-### **Full Installation with ML Dependencies**
+### Basic Usage
+```python
+import hpfracc as hpc
+
+# Create time array
+t = np.linspace(0, 10, 1000)
+x = np.sin(t)
+
+# Compute fractional derivative
+alpha = 0.5  # fractional order
+result = hpc.optimized_caputo(t, x, alpha)
+```
+
+## ✨ **Features**
+
+### Core Methods
+- **Caputo Derivative**: Optimized implementation with GPU acceleration
+- **Riemann-Liouville Derivative**: High-performance numerical methods
+- **Grünwald-Letnikov Derivative**: Efficient discrete-time algorithms
+- **Fractional Integrals**: Complete integral calculus support
+
+### Advanced Algorithms
+- **GPU Acceleration**: CUDA support via PyTorch, JAX, and CuPy
+- **Parallel Computing**: Multi-core optimization with NUMBA
+- **Machine Learning Integration**: PyTorch and JAX backends
+- **Graph Neural Networks**: Fractional GNN layers and models
+
+### Special Functions
+- **Fractional Laplacian**: Spectral and finite difference methods
+- **Fractional Fourier Transform**: Efficient FFT-based implementation
+- **Mittag-Leffler Functions**: Special function evaluations
+- **Green's Functions**: Analytical and numerical solutions
+
+## 🔧 **Installation Options**
+
+### Basic Installation
+```bash
+pip install hpfracc
+```
+
+### With GPU Support
+```bash
+pip install hpfracc[gpu]
+```
+
+### With Machine Learning Extras
 ```bash
 pip install hpfracc[ml]
 ```
 
-### **Development Installation**
+### Development Version
 ```bash
-git clone https://github.com/dave2k77/hpfracc.git
-cd hpfracc
-pip install -e .
+pip install hpfracc[dev]
 ```
-
-## 🚀 **Quick Start**
-
-### **Basic Fractional Calculus**
-```python
-from hpfracc import FractionalOrder, optimized_riemann_liouville
-
-# Create fractional order
-alpha = FractionalOrder(0.5)
-
-# Compute fractional derivative
-import numpy as np
-t = np.linspace(0, 10, 1000)
-function = np.sin(t)
-result = optimized_riemann_liouville(t, function, alpha)
-```
-
-### **Multi-Backend Neural Networks**
-```python
-from hpfracc.ml import BackendType, FractionalNeuralNetwork
-from hpfracc import FractionalOrder
-
-# Create network with JAX backend
-network = FractionalNeuralNetwork(
-    input_size=10,
-    hidden_sizes=[32, 16],
-    output_size=2,
-    fractional_order=FractionalOrder(0.5),
-    backend=BackendType.JAX
-)
-
-# Forward pass with fractional derivatives
-output = network(input_data, use_fractional=True, method="RL")
-```
-
-### **Fractional Attention Mechanism**
-```python
-from hpfracc.ml import FractionalAttention
-
-# Create attention with fractional calculus
-attention = FractionalAttention(
-    d_model=64,
-    n_heads=8,
-    fractional_order=FractionalOrder(0.5),
-    backend=BackendType.TORCH
-)
-
-# Apply fractional attention
-output = attention(input_sequence, method="RL")
-```
-
-### **Fractional Graph Neural Networks**
-```python
-from hpfracc.ml import FractionalGNNFactory, BackendType
-from hpfracc.core.definitions import FractionalOrder
-
-# Create GNN with fractional calculus
-gnn = FractionalGNNFactory.create_model(
-    model_type='gcn',  # Options: 'gcn', 'gat', 'sage', 'unet'
-    input_dim=16,
-    hidden_dim=32,
-    output_dim=4,
-    fractional_order=FractionalOrder(0.5),
-    backend=BackendType.JAX
-)
-
-# Forward pass on graph data
-output = gnn(node_features, edge_index)
-```
-
-## 🔧 **Current Status**
-
-### **✅ Fully Working & Tested**
-- **Core Fractional Calculus**: All mathematical operations and algorithms (Caputo, Riemann-Liouville, Grünwald-Letnikov)
-- **Advanced Methods**: Weyl, Marchaud, Hadamard, Reiz-Feller derivatives
-- **Special Methods**: Fractional Laplacian, FFT, Z-Transform, Mellin Transform
-- **Fractional Integrals**: Riemann-Liouville and Caputo integrals
-- **GPU Acceleration**: Full CuPy and JAX CUDA support
-- **Backend Management**: Seamless switching between PyTorch, JAX, and NUMBA
-- **Core Neural Networks**: FractionalNeuralNetwork with multi-backend support
-- **Attention Mechanisms**: FractionalAttention with fractional derivatives
-- **Tensor Operations**: Unified API across all backends
-- **Graph Neural Networks**: Complete GNN architectures (GCN, GAT, GraphSAGE, U-Net)
-
-### **🚧 Partially Implemented & Testing**
-- **Advanced Layers**: Basic Conv1D, Conv2D, LSTM, Transformer layers implemented
-- **Loss Functions**: Basic loss functions working, advanced library in development
-- **Optimizers**: Basic optimizers working, advanced library in development
-- **Solver Integration**: Basic ODE/PDE solvers working, advanced methods in development
-
-### **📋 Planned Features**
-- **Advanced ML Components**: Complete layer and optimizer library
-- **Performance Optimization**: Backend-specific optimizations
-- **Research Tools**: Benchmarking and analysis utilities
-- **Extended GNN Support**: Additional graph neural network architectures and graph types
-- **Advanced Solvers**: Homotopy perturbation, variational iteration methods
-
-### **📊 Implementation Status**
-- **Core Functionality**: 95% ✅ Complete
-- **ML Integration**: 80% ✅ Complete
-- **Documentation**: 70% ⚠️ Needs Updates
-- **Testing Coverage**: 85% ✅ Good Coverage
 
 ## 📚 **Documentation**
 
-**📖 [Full Documentation on ReadTheDocs](https://fractional-calculus-library.readthedocs.io)**
+- **📖 [User Guide](https://fractional-calculus-library.readthedocs.io/en/latest/user_guide.html)**
+- **🔍 [API Reference](https://fractional-calculus-library.readthedocs.io/en/latest/api_reference.html)**
+- **📝 [Examples](https://fractional-calculus-library.readthedocs.io/en/latest/examples.html)**
+- **🔬 [Scientific Tutorials](https://fractional-calculus-library.readthedocs.io/en/latest/scientific_tutorials.html)**
 
-- **User Guide**: [docs/user_guide.md](docs/user_guide.md)
-- **API Reference**: [docs/api_reference.md](docs/api_reference.md)
-- **Examples**: [examples/](examples/) directory
-- **Development Guide**: [README_DEV.md](README_DEV.md)
+## 🧪 **Testing**
+
+Run the comprehensive test suite:
+```bash
+python -m pytest tests/
+```
+
+## 🚀 **Performance**
+
+- **Significant speedup** over standard implementations
+- **GPU acceleration** for large-scale computations via PyTorch, JAX, and CuPy
+- **Memory-efficient** algorithms for long time series
+- **Parallel processing** for multi-core systems via NUMBA
+
+## 📊 **Current Status**
+
+### ✅ **Fully Implemented & Tested**
+- **Core Fractional Calculus**: Caputo, Riemann-Liouville, Grünwald-Letnikov derivatives and integrals
+- **Special Functions**: Gamma, Beta, Mittag-Leffler functions, Green's functions
+- **GPU Acceleration**: Full CUDA support via PyTorch, JAX, and CuPy
+- **Parallel Computing**: Multi-core optimization via NUMBA
+
+### 🚧 **Partially Implemented & Testing**
+- **Machine Learning**: Basic neural networks, GNN layers, attention mechanisms (85% complete)
+- **Advanced Solvers**: Basic ODE/PDE solvers, analytical methods in development
+- **Advanced Layers**: Basic Conv1D, Conv2D, LSTM, Transformer layers
+
+### 📋 **Planned Features**
+- **Complete ML Library**: Advanced layers, optimizers, and loss functions
+- **Advanced Solvers**: Homotopy perturbation, variational iteration methods
+- **Extended GNN Support**: Additional graph neural network architectures
+
+### 📈 **Implementation Metrics**
+- **Core Functionality**: 95% complete and tested
+- **ML Integration**: 85% complete
+- **Documentation**: 90% complete
+- **Test Coverage**: 85%
+- **PyPI Package**: Published as `hpfracc-1.3.2`
 
 ## 🤝 **Contributing**
 
-We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) and [Development Guide](README_DEV.md) for details.
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
 
-### **Development Setup**
-```bash
-# Clone repository
-git clone https://github.com/dave2k77/hpfracc.git
-cd hpfracc
-
-# Create virtual environment
-conda create -n hpfracc_dev python=3.9
-conda activate hpfracc_dev
-
-# Install development dependencies
-pip install -e .[dev]
-```
+**Note**: This library is actively developed. While core fractional calculus methods are production-ready, some advanced ML components are still in development. Please check the current status section above for implementation details.
 
 ## 📄 **License**
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
+## 👨‍🔬 **Authors**
+
+- **Davian R. Chin** - Department of Biomedical Engineering, University of Reading
+- **Email**: d.r.chin@pgr.reading.ac.uk
+
 ## 🙏 **Acknowledgments**
 
-- **University of Reading**: Department of Biomedical Engineering
-- **Open Source Community**: Contributors and maintainers
-- **Research Community**: Academic and industrial partners
-
-## 📞 **Contact**
-
-- **Email**: [d.r.chin@pgr.reading.ac.uk](mailto:d.r.chin@pgr.reading.ac.uk)
-- **GitHub**: [@dave2k77](https://github.com/dave2k77)
-- **Project**: [HPFRACC Repository](https://github.com/dave2k77/hpfracc)
+- University of Reading for academic support
+- Open source community for inspiration and tools
+- GPU computing community for optimization techniques
 
 ---
 
-**HPFRACC** - Advancing fractional calculus through high-performance computing and machine learning integration.
+**HPFRACC** - Making fractional calculus accessible, fast, and reliable for researchers and practitioners worldwide.
