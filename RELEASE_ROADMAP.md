@@ -14,37 +14,37 @@ This document outlines the development roadmap for HPFRACC (High-Performance Fra
 **Focus**: Neural fODE framework, SDE solvers, API cleanup
 
 ### ✅ **API Cleanup & Compatibility**
-- [ ] Fix HPM solver API compatibility
-  - [ ] Add `create_hpm_solver()` factory function
-  - [ ] Add `get_hpm_properties()` utility
-  - [ ] Add `validate_hpm_parameters()` validation
-  - [ ] Update tests to use actual API
-- [ ] Fix VIM solver API compatibility
-  - [ ] Add `create_vim_solver()` factory function
-  - [ ] Add `get_vim_properties()` utility
-  - [ ] Add `validate_vim_parameters()` validation
-  - [ ] Update tests to use actual API
+- [x] Fix HPM solver API compatibility
+  - [x] Add `create_hpm_solver()` factory function
+  - [x] Add `get_hpm_properties()` utility
+  - [x] Add `validate_hpm_parameters()` validation
+  - [x] Update tests to use actual API
+- [x] Fix VIM solver API compatibility
+  - [x] Add `create_vim_solver()` factory function
+  - [x] Add `get_vim_properties()` utility
+  - [x] Add `validate_vim_parameters()` validation
+  - [x] Update tests to use actual API
 
-### 🧠 **Neural fODE Framework**
-- [ ] Core neural ODE implementation
-  - [ ] `NeuralODE` base class
-  - [ ] `NeuralFODE` (fractional neural ODE)
-  - [ ] Adjoint method for memory-efficient gradients
-  - [ ] Adaptive stepping algorithms
-- [ ] Training infrastructure
-  - [ ] Loss functions for neural ODEs
-  - [ ] Optimizers with fractional gradients
-  - [ ] Learning rate scheduling
+### ✅ **Neural fODE Framework**
+- [x] Core neural ODE implementation
+  - [x] `NeuralODE` base class
+  - [x] `NeuralFODE` (fractional neural ODE)
+  - [x] Adjoint method for memory-efficient gradients
+  - [x] Adaptive stepping algorithms
+- [x] Training infrastructure
+  - [x] Loss functions for neural ODEs
+  - [x] Optimizers with fractional gradients
+  - [x] Learning rate scheduling
 
-### 📊 **SDE Solvers Foundation**
-- [ ] Basic SDE integration methods
-  - [ ] `EulerMaruyama` solver
-  - [ ] `Milstein` solver (convergence order 1.0)
-  - [ ] `Heun` predictor-corrector solver
-- [ ] SDE utilities
-  - [ ] Noise generation (Wiener processes)
-  - [ ] Error estimation
-  - [ ] Stability analysis
+### ✅ **SDE Solvers Foundation**
+- [x] Basic SDE integration methods
+  - [x] `EulerMaruyama` solver
+  - [x] `Milstein` solver (convergence order 1.0)
+  - [x] `Heun` predictor-corrector solver
+- [x] SDE utilities
+  - [x] Noise generation (Wiener processes)
+  - [x] Error estimation
+  - [x] Stability analysis
 
 ### 🔧 **Infrastructure Improvements**
 - [ ] Enhanced testing framework
