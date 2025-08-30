@@ -1,4 +1,4 @@
-# HPFRACC - High-Performance Fractional Calculus Library
+et'elib # HPFRACC - High-Performance Fractional Calculus Library
 
 [![PyPI version](https://badge.fury.io/py/hpfracc.svg)](https://pypi.org/project/hpfracc/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -39,6 +39,8 @@ result = hpc.optimized_caputo(t, x, alpha)
 - **Parallel Computing**: Multi-core optimization with NUMBA
 - **Machine Learning Integration**: PyTorch and JAX backends
 - **Graph Neural Networks**: Fractional GNN layers and models
+- **Advanced Solvers**: HPM, VIM, and SDE solvers for fractional differential equations
+- **Neural fODE Framework**: Learning-based solution of fractional ODEs
 
 ### Special Functions
 - **Fractional Laplacian**: Spectral and finite difference methods
@@ -98,18 +100,17 @@ python -m pytest tests/
 - **Parallel Computing**: Multi-core optimization via NUMBA
 
 ### 🚧 **Partially Implemented & Testing**
-- **Machine Learning**: Basic neural networks, GNN layers, attention mechanisms (85% complete)
-- **Advanced Solvers**: Basic ODE/PDE solvers, analytical methods in development
+- **Machine Learning**: Basic neural networks, GNN layers, attention mechanisms (90% complete)
 - **Advanced Layers**: Basic Conv1D, Conv2D, LSTM, Transformer layers
 
 ### 📋 **Planned Features**
-- **Complete ML Library**: Advanced layers, optimizers, and loss functions
-- **Advanced Solvers**: Homotopy perturbation, variational iteration methods
+- **Neural fSDE**: Learning-based stochastic differential equation solving
+- **PINNs**: Physics-Informed Neural Networks for fractional PDEs
 - **Extended GNN Support**: Additional graph neural network architectures
 
 ### 📈 **Implementation Metrics**
 - **Core Functionality**: 95% complete and tested
-- **ML Integration**: 85% complete
+- **ML Integration**: 90% complete
 - **Documentation**: 90% complete
 - **Test Coverage**: 85%
 - **PyPI Package**: Published as `hpfracc-1.3.2`

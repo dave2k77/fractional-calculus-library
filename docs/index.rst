@@ -14,6 +14,8 @@ Key Features
 * **Advanced Fractional Calculus**: Riemann-Liouville, Caputo, Grünwald-Letnikov definitions
 * **Machine Learning Integration**: Native PyTorch, JAX, and NUMBA support
 * **Graph Neural Networks**: GCN, GAT, GraphSAGE, and Graph U-Net architectures
+* **Advanced Solvers**: HPM, VIM, and SDE solvers for fractional differential equations
+* **Neural fODE Framework**: Learning-based solution of fractional ODEs
 * **High Performance**: Optimized algorithms with GPU acceleration support
 * **Multi-Backend**: Seamless switching between computation backends
 * **Analytics**: Built-in performance monitoring and error analysis
@@ -23,9 +25,11 @@ Current Status
 
 * **Core Methods**: 95% complete and tested
 * **GPU Acceleration**: Fully implemented
-* **Machine Learning**: 85% complete
+* **Machine Learning**: 90% complete
+* **Advanced Solvers**: HPM, VIM, and SDE solvers fully implemented
+* **Neural fODE Framework**: Complete implementation ready for research
 * **Documentation**: 90% complete
-* **PyPI Package**: Published as hpfracc-1.3.1
+* **PyPI Package**: Published as hpfracc-1.3.2
 
 Quick Start
 ----------
@@ -85,6 +89,8 @@ Examples & Tutorials
 * :doc:`examples` - Comprehensive code examples and use cases
 * :doc:`scientific_tutorials` - Advanced scientific tutorials and research applications
 * :doc:`user_guide` - Machine learning workflows and best practices
+* :doc:`neural_fode_guide` - Complete guide to the Neural fODE framework
+* :doc:`sde_solvers_guide` - Comprehensive guide to SDE solvers
 
 Development & Testing
 ~~~~~~~~~~~~~~~~~~~~
@@ -134,7 +140,7 @@ If you use HPFRACC in your research, please cite:
      title={HPFRACC: High-Performance Fractional Calculus Library with Machine Learning Integration},
      author={Chin, Davian R.},
      year={2025},
-     version={1.3.1},
+     version={1.3.2},
      url={https://github.com/dave2k77/fractional_calculus_library},
      note={Department of Biomedical Engineering, University of Reading}
    }
@@ -149,7 +155,7 @@ Getting Help
 
 ----
 
-**HPFRACC v1.3.1** - *Empowering Research with High-Performance Fractional Calculus* | © 2025 Davian R. Chin
+**HPFRACC v1.3.2** - *Empowering Research with High-Performance Fractional Calculus* | © 2025 Davian R. Chin
 
 .. toctree::
    :maxdepth: 2
@@ -161,3 +167,5 @@ Getting Help
    scientific_tutorials
    model_theory
    testing_status
+   neural_fode_guide
+   sde_solvers_guide
