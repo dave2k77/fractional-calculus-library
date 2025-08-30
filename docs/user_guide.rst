@@ -48,8 +48,7 @@ Fractional Derivatives
 
 .. code-block:: python
 
-   from hpfracc.core.definitions import FractionalOrder
-   from hpfracc.core.derivatives import create_fractional_derivative
+   from hpfracc import FractionalOrder, optimized_riemann_liouville
    import numpy as np
 
    # Define fractional order
@@ -59,12 +58,9 @@ Fractional Derivatives
    def f(x):
        return np.sin(x)
 
-   # Create fractional derivative
-   fractional_deriv = create_fractional_derivative(alpha, method="RL")
-
    # Compute fractional derivative
    x = np.linspace(0, 2*np.pi, 100)
-   result = fractional_deriv(f, x)
+   result = optimized_riemann_liouville(x, f(x), alpha)
 
    print(f"Fractional derivative of sin(x) with order {alpha}:")
    print(result[:5])  # Show first 5 values
@@ -74,8 +70,7 @@ Fractional Integrals
 
 .. code-block:: python
 
-   from hpfracc.core.definitions import FractionalOrder
-   from hpfracc.core.integrals import create_fractional_integral
+   from hpfracc import FractionalOrder, riemann_liouville_integral
    import numpy as np
 
    # Define fractional order
@@ -85,12 +80,9 @@ Fractional Integrals
    def f(x):
        return x**2
 
-   # Create fractional integral
-   fractional_integral = create_fractional_integral(alpha, method="RL")
-
    # Compute fractional integral
    x = np.linspace(0, 5, 100)
-   result = fractional_integral(f, x)
+   result = riemann_liouville_integral(x, f(x), alpha)
 
    print(f"Fractional integral of x² with order {alpha}:")
    print(result[:5])  # Show first 5 values
@@ -158,35 +150,35 @@ HPFRACC provides multiple definitions of fractional derivatives:
 
 .. code-block:: python
 
-   from hpfracc.core.derivatives import create_fractional_derivative
-   from hpfracc.core.definitions import FractionalOrder
+   from hpfracc import FractionalOrder, optimized_riemann_liouville
 
    # Create Riemann-Liouville fractional derivative
    alpha = FractionalOrder(0.5)
-   rl_deriv = create_fractional_derivative(alpha, method="RL")
 
    # Apply to function
    def f(x):
        return np.sin(x)
    
    x = np.linspace(0, 2*np.pi, 100)
-   result = rl_deriv(f, x)
+   result = optimized_riemann_liouville(x, f(x), alpha)
 
 **Caputo Definition:**
 
 .. code-block:: python
 
+   from hpfracc import optimized_caputo
+
    # Create Caputo fractional derivative
-   caputo_deriv = create_fractional_derivative(alpha, method="Caputo")
-   result = caputo_deriv(f, x)
+   result = optimized_caputo(x, f(x), alpha)
 
 **Grünwald-Letnikov Definition:**
 
 .. code-block:: python
 
+   from hpfracc import optimized_grunwald_letnikov
+
    # Create Grünwald-Letnikov fractional derivative
-   gl_deriv = create_fractional_derivative(alpha, method="GL")
-   result = gl_deriv(f, x)
+   result = optimized_grunwald_letnikov(x, f(x), alpha)
 
 Fractional Integrals
 ~~~~~~~~~~~~~~~~~~~
@@ -197,43 +189,28 @@ HPFRACC supports various types of fractional integrals:
 
 .. code-block:: python
 
-   from hpfracc.core.integrals import create_fractional_integral
+   from hpfracc import riemann_liouville_integral
 
    # Create Riemann-Liouville fractional integral
    alpha = FractionalOrder(0.5)
-   rl_integral = create_fractional_integral(alpha, method="RL")
 
    # Apply to function
    def f(x):
        return x**2
    
    x = np.linspace(0, 5, 100)
-   result = rl_integral(f, x)
+   result = riemann_liouville_integral(x, f(x), alpha)
 
 **Caputo Integral:**
 
 .. code-block:: python
 
+   from hpfracc import caputo_integral
+
    # Create Caputo fractional integral
-   caputo_integral = create_fractional_integral(alpha, method="Caputo")
-   result = caputo_integral(f, x)
+   result = caputo_integral(x, f(x), alpha)
 
-**Weyl Integral:**
-
-.. code-block:: python
-
-   # Create Weyl fractional integral
-   weyl_integral = create_fractional_integral(alpha, method="Weyl")
-   result = weyl_integral(f, x)
-
-**Hadamard Integral:**
-
-.. code-block:: python
-
-   # Create Hadamard fractional integral (requires x > 1)
-   hadamard_integral = create_fractional_integral(alpha, method="Hadamard")
-   x_hadamard = np.linspace(1.1, 5, 100)  # Must be > 1
-   result = hadamard_integral(f, x_hadamard)
+**Note**: Weyl and Hadamard integrals are available but require specific implementations. For now, use Riemann-Liouville and Caputo integrals which are fully implemented.
 
 Special Functions
 ~~~~~~~~~~~~~~~~

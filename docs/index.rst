@@ -16,7 +16,7 @@ Key Features
 * **Graph Neural Networks**: GCN, GAT, GraphSAGE, and Graph U-Net architectures
 * **High Performance**: Optimized algorithms with GPU acceleration support
 * **Multi-Backend**: Seamless switching between computation backends
-* **Comprehensive Analytics**: Built-in performance monitoring and error analysis
+* **Analytics**: Built-in performance monitoring and error analysis
 
 Quick Start
 ----------
@@ -40,22 +40,24 @@ Basic Usage
 
 .. code-block:: python
 
-   from hpfracc.core.definitions import FractionalOrder
-   from hpfracc.ml import FractionalGCN
+   from hpfracc import FractionalOrder
+   from hpfracc.ml import FractionalGNNFactory, BackendType
    import numpy as np
 
    # Create a fractional GNN
-   model = FractionalGCN(
+   model = FractionalGNNFactory.create_model(
+       model_type='gcn',
        input_dim=10,
        hidden_dim=32,
        output_dim=2,
-       fractional_order=FractionalOrder(0.5)
+       fractional_order=FractionalOrder(0.5),
+       backend=BackendType.TORCH
    )
 
    # Process graph data
    x = np.random.randn(100, 10)  # Node features
    edge_index = np.random.randint(0, 100, (2, 200))  # Edge connections
-   output = model.forward(x, edge_index)
+   output = model(x, edge_index)
 
 Documentation Sections
 ---------------------
@@ -97,7 +99,7 @@ Academic Excellence
 Production Ready
 ~~~~~~~~~~~~~~~
 
-* Extensive test coverage (>95%)
+* Extensive test coverage (>85%)
 * Performance benchmarking and optimization
 * Multi-platform compatibility
 
@@ -141,7 +143,7 @@ Getting Help
 
 ----
 
-**HPFRACC v1.2.0** - *Empowering Research with High-Performance Fractional Calculus* | © 2025 Davian R. Chin
+**HPFRACC v1.3.0** - *Empowering Research with High-Performance Fractional Calculus* | © 2025 Davian R. Chin
 
 .. toctree::
    :maxdepth: 2

@@ -9,15 +9,25 @@ Core Module
 Fractional Order Definitions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. automodule:: hpfracc.core.definitions
+.. automodule:: hpfracc
    :members:
    :undoc-members:
    :show-inheritance:
 
-Fractional Derivatives
-~~~~~~~~~~~~~~~~~~~~~
+Core Algorithms
+~~~~~~~~~~~~~~
 
-.. automodule:: hpfracc.core.derivatives
+.. automodule:: hpfracc.algorithms.optimized_methods
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. automodule:: hpfracc.algorithms.advanced_methods
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. automodule:: hpfracc.algorithms.special_methods
    :members:
    :undoc-members:
    :show-inheritance:
@@ -41,10 +51,18 @@ Tensor Operations
    :undoc-members:
    :show-inheritance:
 
-Neural Networks
-~~~~~~~~~~~~~~
+Core ML Components
+~~~~~~~~~~~~~~~~~
 
-.. automodule:: hpfracc.ml.neural_networks
+.. automodule:: hpfracc.ml.core
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Neural Network Layers
+~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: hpfracc.ml.layers
    :members:
    :undoc-members:
    :show-inheritance:
@@ -62,10 +80,18 @@ Graph Neural Networks
    :undoc-members:
    :show-inheritance:
 
-Attention Mechanisms
-~~~~~~~~~~~~~~~~~~~
+Loss Functions
+~~~~~~~~~~~~~
 
-.. automodule:: hpfracc.ml.attention
+.. automodule:: hpfracc.ml.losses
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Optimizers
+~~~~~~~~~
+
+.. automodule:: hpfracc.ml.optimizers
    :members:
    :undoc-members:
    :show-inheritance:
@@ -79,20 +105,40 @@ Core Definitions
 FractionalOrder
 ^^^^^^^^^^^^^^
 
-.. autoclass:: hpfracc.core.definitions.FractionalOrder
+.. autoclass:: hpfracc.FractionalOrder
    :members:
    :undoc-members:
    :special-members: __init__, __str__, __repr__
 
    .. automethod:: __init__
 
-Fractional Derivative Methods
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Core Fractional Calculus Methods
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-BaseFractionalDerivative
-^^^^^^^^^^^^^^^^^^^^^^^^
+OptimizedRiemannLiouville
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. autoclass:: hpfracc.core.derivatives.BaseFractionalDerivative
+.. autoclass:: hpfracc.OptimizedRiemannLiouville
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+   .. automethod:: __init__
+
+OptimizedCaputo
+^^^^^^^^^^^^^^
+
+.. autoclass:: hpfracc.OptimizedCaputo
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+   .. automethod:: __init__
+
+OptimizedGrunwaldLetnikov
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autoclass:: hpfracc.OptimizedGrunwaldLetnikov
    :members:
    :undoc-members:
    :show-inheritance:

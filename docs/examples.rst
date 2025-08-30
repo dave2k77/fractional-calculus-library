@@ -16,8 +16,7 @@ Compute fractional derivatives using different methods:
 
    import numpy as np
    import matplotlib.pyplot as plt
-   from hpfracc.core.definitions import FractionalOrder
-   from hpfracc.core.derivatives import create_fractional_derivative
+   from hpfracc import FractionalOrder, optimized_riemann_liouville, optimized_caputo, optimized_grunwald_letnikov
 
    # Define test function
    def test_function(x):
@@ -28,16 +27,13 @@ Compute fractional derivatives using different methods:
    x = np.linspace(0, 2*np.pi, 100)
 
    # Riemann-Liouville
-   rl_deriv = create_fractional_derivative(alpha, method="RL")
-   result_rl = rl_deriv(test_function, x)
+   result_rl = optimized_riemann_liouville(x, test_function(x), alpha)
 
    # Caputo
-   caputo_deriv = create_fractional_derivative(alpha, method="Caputo")
-   result_caputo = caputo_deriv(test_function, x)
+   result_caputo = optimized_caputo(x, test_function(x), alpha)
 
    # Grünwald-Letnikov
-   gl_deriv = create_fractional_derivative(alpha, method="GL")
-   result_gl = gl_deriv(test_function, x)
+   result_gl = optimized_grunwald_letnikov(x, test_function(x), alpha)
 
    # Plot results
    plt.figure(figsize=(12, 8))
@@ -61,8 +57,7 @@ Compute fractional integrals using different methods:
 
    import numpy as np
    import matplotlib.pyplot as plt
-   from hpfracc.core.definitions import FractionalOrder
-   from hpfracc.core.integrals import create_fractional_integral
+   from hpfracc import FractionalOrder, riemann_liouville_integral, caputo_integral
 
    # Define test function
    def test_function(x):
@@ -73,21 +68,12 @@ Compute fractional integrals using different methods:
    x = np.linspace(0, 5, 100)
 
    # Riemann-Liouville
-   rl_integral = create_fractional_integral(alpha, method="RL")
-   result_rl = rl_integral(test_function, x)
+   result_rl = riemann_liouville_integral(x, test_function(x), alpha)
 
    # Caputo
-   caputo_integral = create_fractional_integral(alpha, method="Caputo")
-   result_caputo = caputo_integral(test_function, x)
+   result_caputo = caputo_integral(x, test_function(x), alpha)
 
-   # Weyl
-   weyl_integral = create_fractional_integral(alpha, method="Weyl")
-   result_weyl = weyl_integral(test_function, x)
-
-   # Hadamard (requires x > 1)
-   hadamard_integral = create_fractional_integral(alpha, method="Hadamard")
-   x_hadamard = np.linspace(1.1, 5, 100)
-   result_hadamard = hadamard_integral(test_function, x_hadamard)
+   # Note: Weyl and Hadamard integrals are available but require specific implementations
 
    # Plot results
    plt.figure(figsize=(15, 10))
