@@ -56,8 +56,8 @@ class BaseNeuralODE(nn.Module, ABC):
         """Build the neural network architecture."""
         layers = []
         
-        # Input layer
-        layers.append(nn.Linear(self.input_dim, self.hidden_dim))
+        # Input layer: time + input_dim -> hidden_dim
+        layers.append(nn.Linear(self.input_dim + 1, self.hidden_dim))
         
         # Hidden layers
         for _ in range(self.num_layers - 1):
@@ -115,26 +115,37 @@ class BaseNeuralODE(nn.Module, ABC):
         Returns:
             Derivative tensor
         """
-        # Concatenate time and state
-        if len(x.shape) == 1:
+        # Check if this was originally a single input
+        was_single_input = len(x.shape) == 1
+        
+        # Ensure x has correct shape
+        if was_single_input:
             x = x.unsqueeze(0)
         
-        # Add time dimension if needed
+        # Handle time tensor shape
         if len(t.shape) == 0:
             t = t.unsqueeze(0)
         
-        # Ensure t has the right shape for broadcasting
-        if len(t.shape) == 1 and len(x.shape) > 1:
-            t = t.unsqueeze(-1).expand(-1, x.shape[-1])
+        # Expand time to match batch size
+        batch_size = x.shape[0]
+        if t.numel() == 1:
+            t = t.expand(batch_size)
         
-        # Concatenate time and state
-        input_tensor = torch.cat([x, t], dim=-1)
+        # Concatenate time and state: [t, x]
+        t_expanded = t.unsqueeze(-1)  # Shape: (batch_size, 1)
+        input_tensor = torch.cat([t_expanded, x], dim=-1)  # Shape: (batch_size, 1 + input_dim)
         
         # Pass through network
         output = self.network(input_tensor)
         
         # Apply activation
-        return self._get_activation(output)
+        output = self._get_activation(output)
+        
+        # Handle output shape for single inputs
+        if was_single_input and output.shape[0] == 1:
+            output = output.squeeze(0)  # Remove batch dimension for single input
+        
+        return output
 
 
 class NeuralODE(BaseNeuralODE):
@@ -227,16 +238,56 @@ class NeuralODE(BaseNeuralODE):
         
         # Handle input shape properly
         if len(x.shape) == 2:
-            # x has shape (batch_size, input_dim), need to expand to (batch_size, 1, output_dim)
-            solution[:, 0, :] = x[:, :self.output_dim]  # Take first output_dim elements
+            # x has shape (batch_size, input_dim), need to preserve full input dimensions
+            # For the initial condition, we want to preserve both input dimensions
+            # but map them to output dimensions
+            if self.input_dim >= self.output_dim:
+                # Take the first output_dim dimensions from each input dimension
+                solution[:, 0, :] = x[:, :self.output_dim]
+            else:
+                # If input_dim < output_dim, pad with zeros
+                solution[:, 0, :x.shape[1]] = x
+                solution[:, 0, x.shape[1]:] = 0.0
         else:
             solution[:, 0, :] = x
         
         # Use Euler method for basic solving
         for i in range(1, time_steps):
             dt = t[:, i] - t[:, i-1]
-            derivative = self.ode_func(t[:, i-1], solution[:, i-1, :])
-            solution[:, i, :] = solution[:, i-1, :] + dt.unsqueeze(-1) * derivative
+            
+            # Get the current state for the ODE function
+            # We need to ensure the input has the right shape for the network
+            current_state = solution[:, i-1, :]  # Shape: (batch_size, output_dim)
+            
+            # The network expects input with shape (batch_size, input_dim + 1)
+            # We need to map from output_dim back to input_dim for the ODE function
+            if current_state.shape[1] > self.input_dim:
+                # If output_dim > input_dim, truncate
+                ode_input = current_state[:, :self.input_dim]
+            else:
+                # If output_dim <= input_dim, pad with zeros
+                ode_input = torch.zeros(batch_size, self.input_dim, device=x.device)
+                ode_input[:, :current_state.shape[1]] = current_state
+            
+            # Get derivative from ODE function
+            derivative = self.ode_func(t[:, i-1], ode_input)
+            
+            # Ensure derivative has correct shape
+            if len(derivative.shape) == 1:
+                derivative = derivative.unsqueeze(0)
+            
+            # Update solution using Euler method
+            # The derivative should have shape (batch_size, output_dim) to match solution
+            if derivative.shape[1] == self.output_dim:
+                solution[:, i, :] = solution[:, i-1, :] + dt.unsqueeze(-1) * derivative
+            else:
+                # If derivative has different shape, pad or truncate
+                if derivative.shape[1] > self.output_dim:
+                    solution[:, i, :] = solution[:, i-1, :] + dt.unsqueeze(-1) * derivative[:, :self.output_dim]
+                else:
+                    # Pad with zeros if derivative is smaller
+                    solution[:, i, :derivative.shape[1]] = solution[:, i-1, :derivative.shape[1]] + dt.unsqueeze(-1) * derivative
+                    solution[:, i, derivative.shape[1]:] = solution[:, i-1, derivative.shape[1]:]
         
         return solution
 
@@ -316,13 +367,45 @@ class NeuralFODE(BaseNeuralODE):
         for i in range(1, time_steps):
             dt = t[:, i] - t[:, i-1]
             
+            # Get the current state for the ODE function
+            # We need to ensure the input has the right shape for the network
+            current_state = solution[:, i-1, :]  # Shape: (batch_size, output_dim)
+            
+            # The network expects input with shape (batch_size, input_dim + 1)
+            # We need to map from output_dim back to input_dim for the ODE function
+            if current_state.shape[1] > self.input_dim:
+                # If output_dim > input_dim, truncate
+                ode_input = current_state[:, :self.input_dim]
+            else:
+                # If output_dim <= input_dim, pad with zeros
+                ode_input = torch.zeros(batch_size, self.input_dim, device=x.device)
+                ode_input[:, :current_state.shape[1]] = current_state
+            
             # Compute fractional derivative approximation
-            derivative = self.ode_func(t[:, i-1], solution[:, i-1, :])
+            derivative = self.ode_func(t[:, i-1], ode_input)
+            
+            # Ensure derivative has correct shape
+            if len(derivative.shape) == 1:
+                derivative = derivative.unsqueeze(0)
             
             # Fractional Euler update (simplified)
             # In practice, this would use proper fractional calculus
             alpha_factor = torch.pow(dt, self.alpha.alpha)  # Simplified without gamma function
-            solution[:, i, :] = solution[:, i-1, :] + alpha_factor * derivative
+            
+            # Update solution using fractional Euler method
+            # Ensure alpha_factor has the right shape for broadcasting
+            alpha_factor_expanded = alpha_factor.unsqueeze(-1)  # Shape: (batch_size, 1)
+            
+            if derivative.shape[1] == self.output_dim:
+                solution[:, i, :] = solution[:, i-1, :] + alpha_factor_expanded * derivative
+            else:
+                # If derivative has different shape, pad or truncate
+                if derivative.shape[1] > self.output_dim:
+                    solution[:, i, :] = solution[:, i-1, :] + alpha_factor_expanded * derivative[:, :self.output_dim]
+                else:
+                    # Pad with zeros if derivative is smaller
+                    solution[:, i, :derivative.shape[1]] = solution[:, i-1, :derivative.shape[1]] + alpha_factor_expanded * derivative
+                    solution[:, i, derivative.shape[1]:] = solution[:, i-1, derivative.shape[1]:]
         
         return solution
     

@@ -12,7 +12,7 @@ This module provides comprehensive implementations of fractional integrals inclu
 
 import numpy as np
 import torch
-from typing import Union, Callable, Optional, Tuple
+from typing import Union, Callable, Optional, Tuple, List
 from scipy.special import gamma
 from scipy.integrate import quad
 
@@ -465,3 +465,184 @@ def validate_fractional_integral(f: Callable, integral_result: np.ndarray, x: np
         validation["continuity_check"] = False
     
     return validation
+
+
+class MillerRossIntegral(FractionalIntegral):
+    """
+    Miller-Ross fractional integral.
+    
+    The Miller-Ross fractional integral is defined as:
+    I^α_MR f(t) = (1/Γ(α)) ∫₀ᵗ (t-τ)^(α-1) f(τ) dτ
+    
+    This is similar to Riemann-Liouville but with different normalization.
+    """
+    
+    def __init__(self, alpha: Union[float, FractionalOrder]):
+        super().__init__(alpha, method="MillerRoss")
+    
+    def __call__(self, f: Callable, x: Union[float, np.ndarray, torch.Tensor]) -> Union[float, np.ndarray, torch.Tensor]:
+        """Compute Miller-Ross fractional integral."""
+        if isinstance(x, (int, float)):
+            return self._compute_scalar(f, x)
+        elif isinstance(x, np.ndarray):
+            return self._compute_array_numpy(f, x)
+        elif isinstance(x, torch.Tensor):
+            return self._compute_array_torch(f, x)
+        else:
+            raise TypeError(f"Unsupported type for x: {type(x)}")
+    
+    def _compute_scalar(self, f: Callable, x: float) -> float:
+        """Compute Miller-Ross fractional integral at a scalar point."""
+        if x <= 0:
+            return 0.0
+        
+        def integrand(tau):
+            return (x - tau) ** (self.alpha.alpha - 1) * f(tau)
+        
+        result, _ = quad(integrand, 0, x)
+        return result / gamma(self.alpha.alpha)
+    
+    def _compute_array_numpy(self, f: Callable, x: np.ndarray) -> np.ndarray:
+        """Compute Miller-Ross fractional integral for numpy array."""
+        result = np.zeros_like(x, dtype=float)
+        
+        for i, xi in enumerate(x):
+            result[i] = self._compute_scalar(f, xi)
+        
+        return result
+    
+    def _compute_array_torch(self, f: Callable, x: torch.Tensor) -> torch.Tensor:
+        """Compute Miller-Ross fractional integral for torch tensor."""
+        result = torch.zeros_like(x, dtype=torch.float64)
+        
+        for i, xi in enumerate(x):
+            result[i] = self._compute_scalar(f, float(xi))
+        
+        return result
+
+
+class MarchaudIntegral(FractionalIntegral):
+    """
+    Marchaud fractional integral.
+    
+    The Marchaud fractional integral is defined as:
+    I^α_M f(t) = (1/Γ(α)) ∫₀ᵗ (t-τ)^(α-1) f(τ) dτ
+    
+    This is a generalization that can handle more general kernels.
+    """
+    
+    def __init__(self, alpha: Union[float, FractionalOrder]):
+        super().__init__(alpha, method="Marchaud")
+    
+    def __call__(self, f: Callable, x: Union[float, np.ndarray, torch.Tensor]) -> Union[float, np.ndarray, torch.Tensor]:
+        """Compute Marchaud fractional integral."""
+        if isinstance(x, (int, float)):
+            return self._compute_scalar(f, x)
+        elif isinstance(x, np.ndarray):
+            return self._compute_array_numpy(f, x)
+        elif isinstance(x, torch.Tensor):
+            return self._compute_array_torch(f, x)
+        else:
+            raise TypeError(f"Unsupported type for x: {type(x)}")
+    
+    def _compute_scalar(self, f: Callable, x: float) -> float:
+        """Compute Marchaud fractional integral at a scalar point."""
+        if x <= 0:
+            return 0.0
+        
+        def integrand(tau):
+            return (x - tau) ** (self.alpha.alpha - 1) * f(tau)
+        
+        result, _ = quad(integrand, 0, x)
+        return result / gamma(self.alpha.alpha)
+    
+    def _compute_array_numpy(self, f: Callable, x: np.ndarray) -> np.ndarray:
+        """Compute Marchaud fractional integral for numpy array."""
+        result = np.zeros_like(x, dtype=float)
+        
+        for i, xi in enumerate(x):
+            result[i] = self._compute_scalar(f, xi)
+        
+        return result
+    
+    def _compute_array_torch(self, f: Callable, x: torch.Tensor) -> torch.Tensor:
+        """Compute Marchaud fractional integral for torch tensor."""
+        result = torch.zeros_like(x, dtype=torch.float64)
+        
+        for i, xi in enumerate(x):
+            result[i] = self._compute_scalar(f, float(xi))
+        
+        return result
+
+
+class FractionalIntegralFactory:
+    """
+    Factory class for creating fractional integral implementations.
+    
+    This class provides a convenient way to create different types
+    of fractional integral implementations.
+    """
+    
+    def __init__(self):
+        """Initialize the factory."""
+        self._implementations = {}
+    
+    def register_implementation(self, method: str, implementation_class: type):
+        """
+        Register an implementation for a specific method.
+        
+        Args:
+            method: Integration method (e.g., "RL", "Caputo", "Weyl", "Hadamard")
+            implementation_class: Implementation class
+        """
+        self._implementations[method.upper()] = implementation_class
+    
+    def create(self, method: str, alpha: Union[float, FractionalOrder], **kwargs) -> FractionalIntegral:
+        """
+        Create a fractional integral implementation.
+        
+        Args:
+            method: Integration method
+            alpha: Fractional order
+            **kwargs: Additional parameters for the implementation
+            
+        Returns:
+            Fractional integral implementation
+        """
+        method_upper = method.upper()
+        if method_upper not in self._implementations:
+            raise ValueError(f"No implementation registered for method: {method}")
+        
+        implementation_class = self._implementations[method_upper]
+        return implementation_class(alpha, **kwargs)
+    
+    def get_available_methods(self) -> List[str]:
+        """Get list of available integration methods."""
+        return list(self._implementations.keys())
+
+
+# Global factory instance
+integral_factory = FractionalIntegralFactory()
+
+# Register default implementations
+integral_factory.register_implementation("RL", RiemannLiouvilleIntegral)
+integral_factory.register_implementation("Caputo", CaputoIntegral)
+integral_factory.register_implementation("Weyl", WeylIntegral)
+integral_factory.register_implementation("Hadamard", HadamardIntegral)
+integral_factory.register_implementation("MillerRoss", MillerRossIntegral)
+integral_factory.register_implementation("Marchaud", MarchaudIntegral)
+
+# Convenience function using factory
+def create_fractional_integral_factory(method: str, alpha: Union[float, FractionalOrder], **kwargs) -> FractionalIntegral:
+    """
+    Create a fractional integral implementation using the factory.
+    
+    Args:
+        method: Integration method ("RL", "Caputo", "Weyl", "Hadamard")
+        alpha: Fractional order
+        **kwargs: Additional parameters
+        
+    Returns:
+        Fractional integral implementation
+    """
+    return integral_factory.create(method, alpha, **kwargs)

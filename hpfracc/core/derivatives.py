@@ -259,8 +259,20 @@ class FractionalDerivativeFactory:
         Returns:
             Fractional derivative implementation
         """
+        # Handle string keys directly if they exist in the implementations
         if isinstance(definition_type, str):
-            definition_type = DefinitionType(definition_type.lower())
+            # First try to find the string key directly
+            if definition_type in self._implementations:
+                # Keep the string key as is - don't convert to enum
+                pass
+            else:
+                # Try to convert to DefinitionType enum
+                try:
+                    definition_type = DefinitionType(definition_type.lower())
+                except ValueError:
+                    # If conversion fails, check if the string key exists
+                    if definition_type not in self._implementations:
+                        raise ValueError(f"No implementation registered for {definition_type}")
 
         if definition_type not in self._implementations:
             raise ValueError(f"No implementation registered for {definition_type}")
@@ -272,7 +284,13 @@ class FractionalDerivativeFactory:
 
     def get_available_implementations(self) -> List[str]:
         """Get list of available implementation types."""
-        return [impl.value for impl in self._implementations.keys()]
+        result = []
+        for impl in self._implementations.keys():
+            if hasattr(impl, 'value'):
+                result.append(impl.value)
+            else:
+                result.append(str(impl))
+        return result
 
 
 class FractionalDerivativeChain:
@@ -434,6 +452,34 @@ class FractionalDerivativeProperties:
 
 # Global factory instance
 derivative_factory = FractionalDerivativeFactory()
+
+# Register implementations
+try:
+    from hpfracc.core.fractional_implementations import (
+        RiemannLiouvilleDerivative,
+        CaputoDerivative,
+        GrunwaldLetnikovDerivative
+    )
+    
+    # Register derivative implementations
+    derivative_factory.register_implementation(
+        DefinitionType.RIEMANN_LIOUVILLE, 
+        RiemannLiouvilleDerivative
+    )
+    derivative_factory.register_implementation(
+        DefinitionType.CAPUTO, 
+        CaputoDerivative
+    )
+    derivative_factory.register_implementation(
+        DefinitionType.GRUNWALD_LETNIKOV, 
+        GrunwaldLetnikovDerivative
+    )
+    
+    print("Fractional derivative implementations registered successfully!")
+except ImportError as e:
+    # If the implementations module isn't available yet, skip registration
+    print(f"Could not register implementations: {e}")
+    pass
 
 
 # Convenience functions

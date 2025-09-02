@@ -1,0 +1,430 @@
+\section{Framework Architecture}
+
+\subsection{Overall Design Philosophy}
+
+The \hpfracc framework is built on several core design principles that ensure flexibility, extensibility, and ease of use while maintaining high performance and numerical accuracy.
+
+\subsubsection{Modularity and Extensibility}
+
+The framework follows a modular architecture where each component is designed to be independent yet easily integrable. This design enables researchers to use specific components without the overhead of the entire framework, while also allowing for easy extension with new methods and algorithms.
+
+\subsubsection{Unified API Design}
+
+A consistent API design across all mathematical domains (fractional calculus, neural ODEs, SDEs) enables seamless integration and reduces the learning curve for users. The factory pattern implementation provides intuitive object creation while maintaining flexibility in configuration.
+
+\subsubsection{Multi-Backend Support}
+
+Support for multiple computation backends (PyTorch, JAX, NUMBA) allows users to choose the most appropriate platform for their specific use case, whether it's GPU acceleration, automatic differentiation, or high-performance numerical computing.
+
+\subsubsection{Comprehensive Testing and Validation}
+
+The framework implements a rigorous testing strategy with 85\%+ test coverage, ensuring reliability and correctness across all components. This includes unit tests, integration tests, and validation against analytical solutions.
+
+\subsection{Core Architecture Components}
+
+\subsubsection{Base Classes and Interfaces}
+
+The framework is built around several key base classes that define the interface for all implementations:
+
+\begin{itemize}
+    \item \textbf{BaseNeuralODE}: Abstract base class for all neural ODE implementations
+    \item \textbf{BaseSDESolver}: Abstract base class for stochastic differential equation solvers
+    \item \textbf{FractionalOperator}: Interface for fractional derivative and integral operators
+    \item \textbf{NeuralTrainer}: Base class for training infrastructure
+\end{itemize}
+
+These base classes provide common functionality while enforcing consistent interfaces across different implementations.
+
+\subsubsection{Module Organization}
+
+The framework is organized into logical modules that group related functionality:
+
+\begin{itemize}
+    \item \textbf{core}: Fundamental mathematical definitions and utilities
+    \item \textbf{algorithms}: Implementation of fractional calculus algorithms
+    \item \textbf{ml}: Machine learning components including neural ODEs
+    \item \textbf{solvers}: Differential equation solvers (HPM, VIM, SDE)
+    \item \textbf{special}: Special functions and advanced mathematical operations
+    \item \textbf{utils}: Utility functions and helper classes
+    \item \textbf{validation}: Testing, validation, and benchmarking tools
+\end{itemize}
+
+\subsubsection{Configuration Management}
+
+A centralized configuration system manages framework-wide settings including:
+
+\begin{itemize}
+    \item \textbf{Precision}: Numerical precision settings for different backends
+    \item \textbf{Method Selection}: Default algorithms for different operations
+    \item \textbf{Performance}: Optimization flags and parallel processing settings
+    \item \textbf{Logging}: Comprehensive logging and debugging capabilities
+\end{itemize}
+
+\subsection{Neural fODE Framework Architecture}
+
+\subsubsection{BaseNeuralODE Implementation}
+
+The \texttt{BaseNeuralODE} class provides the foundation for all neural ODE implementations:
+
+\begin{lstlisting}[language=Python, caption=BaseNeuralODE Base Class]
+class BaseNeuralODE(nn.Module, ABC):
+    def __init__(self, input_dim, hidden_dim, output_dim, 
+                 num_layers=3, activation="tanh", use_adjoint=True):
+        super().__init__()
+        self.input_dim = input_dim
+        self.hidden_dim = hidden_dim
+        self.output_dim = output_dim
+        self.num_layers = num_layers
+        self.activation = activation
+        self.use_adjoint = use_adjoint
+        self._build_network()
+    
+    @abstractmethod
+    def forward(self, x, t):
+        pass
+    
+    def ode_func(self, t, x):
+        # Common ODE function implementation
+        pass
+\end{lstlisting}
+
+This base class provides:
+\begin{itemize}
+    \item \textbf{Network Architecture}: Configurable neural network with multiple layers
+    \item \textbf{Activation Functions}: Support for tanh, relu, and sigmoid activations
+    \item \textbf{Weight Initialization}: Xavier initialization for optimal training
+    \item \textbf{Abstract Interface}: Defines the contract for all neural ODE implementations
+\end{itemize}
+
+\subsubsection{NeuralODE Implementation}
+
+The \texttt{NeuralODE} class extends the base class for standard ordinary differential equations:
+
+\begin{lstlisting}[language=Python, caption=NeuralODE Implementation]
+class NeuralODE(BaseNeuralODE):
+    def __init__(self, input_dim, hidden_dim, output_dim,
+                 num_layers=3, activation="tanh", use_adjoint=True,
+                 solver="dopri5", rtol=1e-5, atol=1e-5):
+        super().__init__(input_dim, hidden_dim, output_dim, 
+                        num_layers, activation, use_adjoint)
+        self.solver = solver
+        self.rtol = rtol
+        self.atol = atol
+        self._setup_solver()
+    
+    def forward(self, x, t):
+        if self.has_torchdiffeq and self.solver == "dopri5":
+            return self._solve_torchdiffeq(x, t)
+        else:
+            return self._solve_basic(x, t)
+\end{lstlisting}
+
+Key features include:
+\begin{itemize}
+    \item \textbf{Multiple Solvers}: Support for dopri5 (with torchdiffeq) and basic Euler
+    \item \textbf{Adjoint Method}: Memory-efficient gradient computation
+    \item \textbf{Adaptive Stepping}: Configurable tolerance and step size
+    \item \textbf{Fallback Methods}: Basic Euler solver when advanced solvers unavailable
+\end{itemize}
+
+\subsubsection{NeuralFODE Implementation}
+
+The \texttt{NeuralFODE} class extends neural ODEs to fractional calculus:
+
+\begin{lstlisting}[language=Python, caption=NeuralFODE Implementation]
+class NeuralFODE(BaseNeuralODE):
+    def __init__(self, input_dim, hidden_dim, output_dim,
+                 fractional_order=0.5, num_layers=3, activation="tanh",
+                 use_adjoint=True, solver="fractional_euler"):
+        super().__init__(input_dim, hidden_dim, output_dim, 
+                        num_layers, activation, use_adjoint)
+        self.alpha = validate_fractional_order(fractional_order)
+        self.solver = solver
+        self._setup_fractional_solver()
+    
+    def forward(self, x, t):
+        return self._solve_fractional_ode(x, t)
+    
+    def get_fractional_order(self):
+        return self.alpha.alpha
+\end{lstlisting}
+
+This implementation provides:
+\begin{itemize}
+    \item \textbf{Fractional Order Support}: Configurable fractional order $\alpha \in (0,1)$
+    \item \textbf{Fractional Dynamics}: Learning of $D^{\alpha} x = f(x, t)$
+    \item \textbf{Order Validation}: Ensures fractional order is in valid range
+    \item \textbf{Specialized Solvers}: Fractional Euler method for fractional ODEs
+\end{itemize}
+
+\subsubsection{NeuralODETrainer Implementation}
+
+The training infrastructure provides comprehensive training capabilities:
+
+\begin{lstlisting}[language=Python, caption=NeuralODETrainer Implementation]
+class NeuralODETrainer:
+    def __init__(self, model, optimizer="adam", 
+                 learning_rate=1e-3, loss_function="mse"):
+        self.model = model
+        self.learning_rate = learning_rate
+        self.loss_function = loss_function
+        self.optimizer = self._setup_optimizer(optimizer)
+        self.criterion = self._setup_loss_function(loss_function)
+    
+    def train(self, train_loader, val_loader=None, 
+              num_epochs=100, verbose=True):
+        # Complete training loop implementation
+        pass
+\end{lstlisting}
+
+Training features include:
+\begin{itemize}
+    \item \textbf{Multiple Optimizers}: Adam, SGD, RMSprop with configurable learning rates
+    \item \textbf{Multiple Loss Functions}: MSE, MAE, Huber loss functions
+    \item \textbf{Training Loops}: Complete training and validation workflows
+    \item \textbf{History Tracking}: Monitor training progress and performance
+\end{itemize}
+
+\subsection{SDE Solvers Architecture}
+
+\subsubsection{BaseSDESolver Implementation}
+
+The \texttt{BaseSDESolver} class provides common functionality for all SDE solvers:
+
+\begin{lstlisting}[language=Python, caption=BaseSDESolver Base Class]
+class BaseSDESolver(ABC):
+    def __init__(self, drift_func, diffusion_func, initial_condition,
+                 time_span, num_steps, seed=None):
+        self.drift_func = drift_func
+        self.diffusion_func = diffusion_func
+        self.initial_condition = initial_condition
+        self.time_span = time_span
+        self.num_steps = num_steps
+        self.seed = seed
+        self._setup_random_generator()
+    
+    @abstractmethod
+    def solve(self):
+        pass
+    
+    def _generate_wiener_process(self):
+        # Common Wiener process generation
+        pass
+    
+    def _estimate_error(self):
+        # Common error estimation
+        pass
+\end{lstlisting}
+
+Common functionality includes:
+\begin{itemize}
+    \item \textbf{Wiener Process Generation}: Efficient Brownian motion simulation
+    \item \textbf{Error Estimation}: Built-in error analysis and validation
+    \item \textbf{Stability Analysis}: Numerical stability checks
+    \item \textbf{Utility Methods}: Common operations for all SDE solvers
+\end{itemize}
+
+\subsubsection{Concrete SDE Solver Implementations}
+
+\paragraph{Euler-Maruyama Solver}
+\begin{lstlisting}[language=Python, caption=EulerMaruyama Implementation]
+class EulerMaruyama(BaseSDESolver):
+    def solve(self):
+        # Implementation of Euler-Maruyama method
+        # Convergence order: 0.5 (strong convergence)
+        pass
+\end{lstlisting}
+
+\paragraph{Milstein Solver}
+\begin{lstlisting}[language=Python, caption=Milstein Implementation]
+class Milstein(BaseSDESolver):
+    def solve(self):
+        # Implementation of Milstein method
+        # Convergence order: 1.0 (strong convergence)
+        pass
+\end{lstlisting}
+
+\paragraph{Heun Solver}
+\begin{lstlisting}[language=Python, caption=Heun Implementation]
+class Heun(BaseSDESolver):
+    def solve(self):
+        # Implementation of Heun predictor-corrector method
+        # Convergence order: 1.0 (strong convergence)
+        pass
+\end{lstlisting}
+
+\subsection{Factory Pattern Implementation}
+
+\subsubsection{Model Creation Factories}
+
+The framework uses factory functions to simplify object creation:
+
+\begin{lstlisting}[language=Python, caption=Neural ODE Factory Functions]
+def create_neural_ode(model_type="standard", **kwargs):
+    if model_type == "standard":
+        return NeuralODE(**kwargs)
+    elif model_type == "fractional":
+        return NeuralFODE(**kwargs)
+    else:
+        raise ValueError(f"Unknown model type: {model_type}")
+
+def create_neural_ode_trainer(model, **kwargs):
+    return NeuralODETrainer(model, **kwargs)
+\end{lstlisting}
+
+\subsubsection{SDE Solver Factories}
+
+Similar factory functions exist for SDE solvers:
+
+\begin{lstlisting}[language=Python, caption=SDE Solver Factory Functions]
+def create_sde_solver(solver_type="euler", **kwargs):
+    if solver_type == "euler":
+        return EulerMaruyama(**kwargs)
+    elif solver_type == "milstein":
+        return Milstein(**kwargs)
+    elif solver_type == "heun":
+        return Heun(**kwargs)
+    else:
+        raise ValueError(f"Unknown solver type: {solver_type}")
+\end{lstlisting}
+
+\subsection{Backend Management System}
+
+\subsubsection{Backend Abstraction}
+
+The framework abstracts backend-specific operations through a unified interface:
+
+\begin{lstlisting}[language=Python, caption=Backend Abstraction]
+class BackendManager:
+    def __init__(self, backend="pytorch"):
+        self.backend = backend
+        self._setup_backend()
+    
+    def create_tensor(self, data):
+        if self.backend == "pytorch":
+            return torch.tensor(data)
+        elif self.backend == "jax":
+            return jnp.array(data)
+        elif self.backend == "numba":
+            return np.array(data)
+    
+    def compute_gradient(self, loss, parameters):
+        # Backend-specific gradient computation
+        pass
+\end{lstlisting}
+
+\subsubsection{Backend-Specific Optimizations}
+
+Each backend provides specialized optimizations:
+
+\begin{itemize}
+    \item \textbf{PyTorch}: GPU acceleration, automatic differentiation, dynamic computation graphs
+    \item \textbf{JAX}: Just-in-time compilation, vectorization, GPU/TPU support
+    \item \textbf{NUMBA}: Just-in-time compilation, parallel processing, low-level optimization
+\end{itemize}
+
+\subsection{Error Handling and Validation}
+
+\subsubsection{Parameter Validation}
+
+Comprehensive parameter validation ensures robust operation:
+
+\begin{lstlisting}[language=Python, caption=Parameter Validation Example]
+def validate_neural_ode_parameters(input_dim, hidden_dim, output_dim, 
+                                 num_layers, activation):
+    if not isinstance(input_dim, int) or input_dim <= 0:
+        raise ValueError("input_dim must be a positive integer")
+    if not isinstance(hidden_dim, int) or hidden_dim <= 0:
+        raise ValueError("hidden_dim must be a positive integer")
+    if not isinstance(output_dim, int) or output_dim <= 0:
+        raise ValueError("output_dim must be a positive integer")
+    if not isinstance(num_layers, int) or num_layers <= 0:
+        raise ValueError("num_layers must be a positive integer")
+    if activation not in ["tanh", "relu", "sigmoid"]:
+        raise ValueError("activation must be one of: tanh, relu, sigmoid")
+\end{lstlisting}
+
+\subsubsection{Error Recovery and Graceful Degradation}
+
+The framework implements error recovery strategies:
+
+\begin{itemize}
+    \item \textbf{Fallback Methods}: Automatic fallback to simpler algorithms when advanced methods fail
+    \item \textbf{Error Reporting}: Comprehensive error messages with debugging information
+    \item \textbf{Recovery Mechanisms}: Automatic recovery from numerical instabilities
+    \item \textbf{Logging}: Detailed logging for debugging and performance analysis
+\end{itemize}
+
+\subsection{Performance Optimization}
+
+\subsubsection{Memory Management}
+
+Efficient memory management is crucial for large-scale computations:
+
+\begin{itemize}
+    \item \textbf{Gradient Checkpointing}: Memory-efficient gradient computation for large models
+    \item \textbf{Memory Pooling}: Reuse of memory buffers to reduce allocation overhead
+    \item \textbf{Garbage Collection}: Automatic cleanup of temporary objects
+    \item \textbf{Memory Profiling}: Tools for monitoring memory usage and identifying bottlenecks
+\end{itemize}
+
+\subsubsection{Parallel Processing}
+
+The framework supports parallel processing through multiple strategies:
+
+\begin{itemize}
+    \item \textbf{Multi-threading}: Parallel execution of independent operations
+    \item \textbf{Multi-processing}: Distribution of work across multiple processes
+    \item \textbf{GPU Acceleration}: Parallel execution on graphics processing units
+    \item \textbf{Vectorization}: SIMD operations for improved performance
+\end{itemize}
+
+\subsection{Testing and Validation Framework}
+
+\subsubsection{Test Organization}
+
+The testing framework is organized into logical categories:
+
+\begin{itemize}
+    \item \textbf{Unit Tests}: Individual component testing with 85\%+ coverage
+    \item \textbf{Integration Tests}: End-to-end workflow testing
+    \item \textbf{Performance Tests}: Benchmarking and performance regression testing
+    \item \textbf{Validation Tests}: Comparison with analytical solutions
+\end{itemize}
+
+\subsubsection{Continuous Integration}
+
+Automated testing ensures code quality:
+
+\begin{itemize}
+    \item \textbf{Automated Testing}: Tests run on every commit and pull request
+    \textbf{Multi-platform Testing}: Testing across different operating systems and Python versions
+    \item \textbf{Performance Monitoring}: Continuous performance benchmarking
+    \item \textbf{Documentation Building}: Automated documentation generation and validation
+\end{itemize}
+
+\subsection{Documentation and Examples}
+
+\subsubsection{Comprehensive Documentation}
+
+The framework provides extensive documentation:
+
+\begin{itemize}
+    \item \textbf{API Reference}: Auto-generated from docstrings with comprehensive coverage
+    \item \textbf{User Guides}: Step-by-step tutorials for common use cases
+    \item \textbf{Examples}: Working code examples for all major features
+    \item \textbf{Performance Guides}: Optimization strategies and best practices
+\end{itemize}
+
+\subsubsection{Interactive Examples}
+
+Interactive examples demonstrate framework capabilities:
+
+\begin{itemize}
+    \item \textbf{Jupyter Notebooks}: Interactive tutorials with real-time execution
+    \item \textbf{Benchmark Scripts}: Performance comparison and validation scripts
+    \item \textbf{Application Examples}: Real-world problem solving demonstrations
+    \item \textbf{Visualization Tools}: Built-in plotting and analysis capabilities
+\end{itemize}
+
+This architecture design ensures that \hpfracc is not only powerful and flexible but also maintainable, extensible, and accessible to researchers across different domains. The modular structure allows for easy integration of new methods while maintaining consistency and reliability across all components.

@@ -8,6 +8,14 @@ Overview
 
 The HPFRACC library offers a powerful framework for applying fractional calculus to real scientific problems. These tutorials showcase advanced mathematical methods, performance optimization techniques, and practical applications across multiple scientific domains.
 
+The library now includes comprehensive mathematical theory documentation covering:
+
+* **Classical Definitions**: Riemann-Liouville, Caputo, and Grunwald-Letnikov derivatives
+* **Novel Methods**: Caputo-Fabrizio and Atangana-Baleanu derivatives with enhanced stability
+* **Advanced Operators**: Weyl, Marchaud, and Hadamard derivatives with optimized implementations
+* **Special Operators**: Fractional Laplacian, Fractional Fourier Transform, and Riesz-Fisher operator
+* **Mathematical Foundations**: Complete theoretical background with proofs and properties
+
 Each tutorial includes:
 
 * **Comprehensive Analysis**: Detailed mathematical analysis and results

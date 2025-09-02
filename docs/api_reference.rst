@@ -32,6 +32,30 @@ Core Algorithms
    :undoc-members:
    :show-inheritance:
 
+Fractional Implementations
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: hpfracc.core.fractional_implementations
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Core Derivatives
+~~~~~~~~~~~~~~~
+
+.. automodule:: hpfracc.core.derivatives
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Core Integrals
+~~~~~~~~~~~~~
+
+.. automodule:: hpfracc.core.integrals
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Machine Learning Module
 ----------------------
 

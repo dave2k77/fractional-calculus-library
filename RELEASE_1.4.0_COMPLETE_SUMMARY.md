@@ -83,11 +83,7 @@
   - Research applications (PINNs, time series)
   - Performance optimization tips
   - Testing and validation procedures
-- **docs/sde_solvers_guide.md**: Comprehensive SDE solvers guide
-  - Solver architecture and methods
-  - Financial and biological applications
-  - Performance optimization and error analysis
-  - Testing and validation procedures
+
 
 ### 📖 **Documentation Features**
 - **LaTeX Math Rendering**: All mathematical expressions properly rendered
@@ -106,10 +102,9 @@
 - **Test Categories**:
   - Core Functionality: 100% pass rate
   - Special Functions: 98% pass rate
-  - Analytical Methods: 98% pass rate (HPM, VIM, SDE solvers)
+  - Analytical Methods: 98% pass rate
   - Machine Learning: 95% pass rate
   - Neural fODE Framework: 98% pass rate
-  - SDE Solvers: 98% pass rate
   - Utilities: 100% pass rate
 
 ### ✅ **Test Categories Complete**
@@ -123,14 +118,14 @@
 
 ### **Computational Performance**
 - **Neural ODE Forward Pass**: ~10ms for 1000 time steps
-- **SDE Solvers**: ~50ms for 1000 steps (Milstein method)
+
 - **Memory Efficiency**: Optimized for large-scale computations
 - **GPU Acceleration**: Full CUDA support via PyTorch and JAX
 
 ### **Research Applications Ready**
 - **Physics-Informed Neural Networks (PINNs)**: Complete framework
 - **Time Series Prediction**: Neural ODE-based forecasting
-- **Financial Modeling**: SDE solvers for option pricing
+
 - **Biological Systems**: Stochastic modeling with noise
 - **Fractional Calculus**: Neural fODE for complex dynamics
 
@@ -158,7 +153,7 @@
 ### **Overall Progress**
 - **Core Functionality**: 95% complete and tested
 - **Machine Learning**: 90% complete
-- **Advanced Solvers**: 100% complete (HPM, VIM, SDE)
+- **Advanced Solvers**: 100% complete
 - **Neural fODE Framework**: 100% complete
 - **Documentation**: 90% complete
 - **Test Coverage**: 85%

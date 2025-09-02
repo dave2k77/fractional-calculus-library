@@ -859,3 +859,48 @@ def solve_fractional_reaction_diffusion(
         nt,
         **kwargs,
     )
+
+
+def solve_fractional_pde(
+    x_span: Tuple[float, float],
+    t_span: Tuple[float, float],
+    initial_condition: Callable,
+    boundary_conditions: Tuple[Callable, Callable],
+    alpha: Union[float, FractionalOrder],
+    beta: Union[float, FractionalOrder],
+    equation_type: str = "diffusion",
+    **kwargs,
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """
+    Generic solver for fractional PDEs.
+    
+    Args:
+        x_span: Spatial interval (x0, xf)
+        t_span: Time interval (t0, tf)
+        initial_condition: Initial condition u(x, 0)
+        boundary_conditions: Boundary conditions (left_bc, right_bc)
+        alpha: Temporal fractional order
+        beta: Spatial fractional order
+        equation_type: Type of PDE ("diffusion", "advection", "reaction_diffusion")
+        **kwargs: Additional solver parameters
+        
+    Returns:
+        Tuple of (t_values, x_values, solution)
+    """
+    if equation_type == "diffusion":
+        return solve_fractional_diffusion(
+            x_span, t_span, initial_condition, boundary_conditions, 
+            alpha, beta, **kwargs
+        )
+    elif equation_type == "advection":
+        return solve_fractional_advection(
+            x_span, t_span, initial_condition, boundary_conditions, 
+            alpha, beta, **kwargs
+        )
+    elif equation_type == "reaction_diffusion":
+        return solve_fractional_reaction_diffusion(
+            x_span, t_span, initial_condition, boundary_conditions, 
+            alpha, beta, **kwargs
+        )
+    else:
+        raise ValueError(f"Unknown equation type: {equation_type}")

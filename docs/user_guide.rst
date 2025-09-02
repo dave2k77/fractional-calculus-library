@@ -87,6 +87,40 @@ Fractional Integrals
    print(f"Fractional integral of x² with order {alpha}:")
    print(result[:5])  # Show first 5 values
 
+Advanced Fractional Operators
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+HPFRACC provides a comprehensive collection of fractional operators beyond the classical definitions:
+
+.. code-block:: python
+
+   from hpfracc.core.derivatives import create_fractional_derivative
+   from hpfracc.core.fractional_implementations import create_riesz_fisher_operator
+   import numpy as np
+
+   # Novel derivatives
+   cf_derivative = create_fractional_derivative('caputo_fabrizio', 0.5)
+   ab_derivative = create_fractional_derivative('atangana_baleanu', 0.5)
+
+   # Advanced methods
+   weyl_derivative = create_fractional_derivative('weyl', 0.5)
+   marchaud_derivative = create_fractional_derivative('marchaud', 0.5)
+
+   # Special operators
+   rf_operator = create_riesz_fisher_operator(0.5)  # Derivative behavior
+   rf_integral = create_riesz_fisher_operator(-0.5)  # Integral behavior
+
+   # Test function
+   def f(x): return np.exp(-x**2)
+   x = np.linspace(-2, 2, 100)
+
+   # Compute results
+   cf_result = cf_derivative.compute(f, x)
+   rf_result = rf_operator.compute(f, x)
+
+   print(f"Caputo-Fabrizio result shape: {cf_result.shape}")
+   print(f"Riesz-Fisher result shape: {rf_result.shape}")
+
 Special Functions
 ^^^^^^^^^^^^^^^^
 
@@ -254,133 +288,17 @@ Special Functions
    z = np.linspace(-5, 5, 100)
    ml_vals = [mittag_leffler_function(alpha, zi) for zi in z]
 
-Fractional Green's Functions
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Green's functions have been removed from this release
+# They will be re-implemented in future releases with improved stability
 
-HPFRACC provides Green's functions for fractional differential equations:
 
-**Diffusion Green's Function:**
 
-.. code-block:: python
 
-   from hpfracc.special.greens_function import FractionalDiffusionGreensFunction
 
-   # Create diffusion Green's function
-   alpha = 0.5
-   D = 1.0  # Diffusion coefficient
-   diffusion_gf = FractionalDiffusionGreensFunction(alpha, D)
 
-   # Compute Green's function
-   x = np.linspace(-5, 5, 100)
-   t = np.linspace(0.1, 2, 50)
-   X, T = np.meshgrid(x, t)
-   
-   green_function = np.array([[diffusion_gf.compute(xi, ti) for xi in x] for ti in t])
 
-**Wave Green's Function:**
-
-.. code-block:: python
-
-   from hpfracc.special.greens_function import FractionalWaveGreensFunction
-
-   # Create wave Green's function
-   alpha = 0.5
-   c = 1.0  # Wave speed
-   wave_gf = FractionalWaveGreensFunction(alpha, c)
-
-   # Compute Green's function
-   green_function = np.array([[wave_gf.compute(xi, ti) for xi in x] for ti in t])
-
-**Advection Green's Function:**
-
-.. code-block:: python
-
-   from hpfracc.special.greens_function import FractionalAdvectionGreensFunction
-
-   # Create advection Green's function
-   alpha = 0.5
-   v = 1.0  # Advection velocity
-   advection_gf = FractionalAdvectionGreensFunction(alpha, v)
-
-   # Compute Green's function
-   green_function = np.array([[advection_gf.compute(xi, ti) for xi in x] for ti in t])
-
-Analytical Methods
-~~~~~~~~~~~~~~~~~
-
-**Homotopy Perturbation Method (HPM):**
-
-.. code-block:: python
-
-   from hpfracc.solvers.homotopy_perturbation import HomotopyPerturbationMethod
-
-   # Define the fractional differential equation
-   # D^α u + u = f(t), where f(t) = t^2
-   def source_function(t):
-       return t**2
-
-   def initial_condition(t):
-       return 0.0
-
-   # Create HPM solver
-   alpha = 0.5
-   hpm_solver = HomotopyPerturbationMethod(alpha)
-
-   # Solve the equation
-   t = np.linspace(0, 2, 100)
-   solution = hpm_solver.solve(
-       source_function=source_function,
-       initial_condition=initial_condition,
-       t_span=t,
-       max_iterations=5
-   )
-
-   # Analyze convergence
-   convergence = hpm_solver.analyze_convergence(
-       source_function=source_function,
-       initial_condition=initial_condition,
-       t_span=t,
-       max_iterations=10
-   )
-
-**Variational Iteration Method (VIM):**
-
-.. code-block:: python
-
-   from hpfracc.solvers.variational_iteration import VariationalIterationMethod
-
-   # Define the fractional differential equation
-   # D^α u + u^2 = f(t), where f(t) = 1
-   def source_function(t):
-       return np.ones_like(t)
-
-   def initial_condition(t):
-       return 0.0
-
-   def nonlinear_term(u):
-       return u**2
-
-   # Create VIM solver
-   alpha = 0.5
-   vim_solver = VariationalIterationMethod(alpha)
-
-   # Solve the equation
-   t = np.linspace(0, 2, 100)
-   solution = vim_solver.solve(
-       source_function=source_function,
-       initial_condition=initial_condition,
-       nonlinear_term=nonlinear_term,
-       t_span=t,
-       max_iterations=5
-   )
-
-   # Analyze convergence
-   convergence = vim_solver.analyze_convergence(
-       source_function=source_function,
-       initial_condition=initial_condition,
-       t_span=t,
-       max_iterations=10
-   )
+# HPM and VIM solvers have been removed from this release
+# They will be re-implemented in future releases with improved stability
 
 Mathematical Utilities
 ~~~~~~~~~~~~~~~~~~~~~

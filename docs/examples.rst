@@ -183,189 +183,28 @@ Working with special functions in fractional calculus:
    plt.tight_layout()
    plt.show()
 
-Fractional Green's Functions
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Using fractional Green's functions for solving differential equations:
+# Green's functions have been removed from this release
+# They will be re-implemented in future releases with improved stability
 
 .. code-block:: python
 
-   import numpy as np
-   import matplotlib.pyplot as plt
-   from hpfracc.special.greens_function import (
-       FractionalDiffusionGreensFunction,
-       FractionalWaveGreensFunction,
-       FractionalAdvectionGreensFunction
-   )
 
-   # Parameters
-   alpha = 0.5
-   D = 1.0  # Diffusion coefficient
-   c = 1.0  # Wave speed
-   v = 1.0  # Advection velocity
 
-   # Create Green's functions
-   diffusion_gf = FractionalDiffusionGreensFunction(alpha, D)
-   wave_gf = FractionalWaveGreensFunction(alpha, c)
-   advection_gf = FractionalAdvectionGreensFunction(alpha, v)
 
-   # Spatial and temporal grids
-   x = np.linspace(-5, 5, 200)
-   t = np.linspace(0.1, 2, 100)
-   X, T = np.meshgrid(x, t)
 
-   # Compute Green's functions
-   diffusion_result = np.array([[diffusion_gf.compute(xi, ti) for xi in x] for ti in t])
-   wave_result = np.array([[wave_gf.compute(xi, ti) for xi in x] for ti in t])
-   advection_result = np.array([[advection_gf.compute(xi, ti) for xi in x] for ti in t])
 
-   # Plot results
-   plt.figure(figsize=(15, 5))
-   
-   plt.subplot(1, 3, 1)
-   plt.contourf(X, T, diffusion_result, levels=20)
-   plt.colorbar(label='G(x, t)')
-   plt.xlabel('x')
-   plt.ylabel('t')
-   plt.title(f'Fractional Diffusion Green\'s Function (α={alpha})')
-   
-   plt.subplot(1, 3, 2)
-   plt.contourf(X, T, wave_result, levels=20)
-   plt.colorbar(label='G(x, t)')
-   plt.xlabel('x')
-   plt.ylabel('t')
-   plt.title(f'Fractional Wave Green\'s Function (α={alpha})')
-   
-   plt.subplot(1, 3, 3)
-   plt.contourf(X, T, advection_result, levels=20)
-   plt.colorbar(label='G(x, t)')
-   plt.xlabel('x')
-   plt.ylabel('t')
-   plt.title(f'Fractional Advection Green\'s Function (α={alpha})')
-   
-   plt.tight_layout()
-   plt.show()
 
-Analytical Methods: Homotopy Perturbation Method
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Solving fractional differential equations using HPM:
 
-.. code-block:: python
 
-   import numpy as np
-   import matplotlib.pyplot as plt
-   from hpfracc.solvers.homotopy_perturbation import HomotopyPerturbationMethod
 
-   # Define the fractional differential equation
-   # D^α u + u = f(t), where f(t) = t^2
-   def source_function(t):
-       return t**2
 
-   def initial_condition(t):
-       return 0.0
 
-   # Create HPM solver
-   alpha = 0.5
-   hpm_solver = HomotopyPerturbationMethod(alpha)
 
-   # Solve the equation
-   t = np.linspace(0, 2, 100)
-   solution = hpm_solver.solve(
-       source_function=source_function,
-       initial_condition=initial_condition,
-       t_span=t,
-       max_iterations=5
-   )
+# HPM and VIM solvers have been removed from this release
+# They will be re-implemented in future releases with improved stability
 
-   # Plot solution
-   plt.figure(figsize=(10, 6))
-   plt.plot(t, solution, 'b-', linewidth=2, label=f'HPM Solution (α={alpha})')
-   plt.plot(t, source_function(t), 'r--', linewidth=2, label='Source Function f(t) = t²')
-   plt.xlabel('t')
-   plt.ylabel('u(t)')
-   plt.title('Solution of Fractional Differential Equation using HPM')
-   plt.legend()
-   plt.grid(True)
-   plt.show()
-
-   # Analyze convergence
-   convergence = hpm_solver.analyze_convergence(
-       source_function=source_function,
-       initial_condition=initial_condition,
-       t_span=t,
-       max_iterations=10
-   )
-   
-   print("Convergence Analysis:")
-   print(f"Final residual: {convergence['final_residual']:.6f}")
-   print(f"Convergence rate: {convergence['convergence_rate']:.6f}")
-
-Analytical Methods: Variational Iteration Method
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Solving fractional differential equations using VIM:
-
-.. code-block:: python
-
-   import numpy as np
-   import matplotlib.pyplot as plt
-   from hpfracc.solvers.variational_iteration import VariationalIterationMethod
-
-   # Define the fractional differential equation
-   # D^α u + u^2 = f(t), where f(t) = 1
-   def source_function(t):
-       return np.ones_like(t)
-
-   def initial_condition(t):
-       return 0.0
-
-   def nonlinear_term(u):
-       return u**2
-
-   # Create VIM solver
-   alpha = 0.5
-   vim_solver = VariationalIterationMethod(alpha)
-
-   # Solve the equation
-   t = np.linspace(0, 2, 100)
-   solution = vim_solver.solve(
-       source_function=source_function,
-       initial_condition=initial_condition,
-       nonlinear_term=nonlinear_term,
-       t_span=t,
-       max_iterations=5
-   )
-
-   # Plot solution
-   plt.figure(figsize=(10, 6))
-   plt.plot(t, solution, 'g-', linewidth=2, label=f'VIM Solution (α={alpha})')
-   plt.plot(t, source_function(t), 'r--', linewidth=2, label='Source Function f(t) = 1')
-   plt.xlabel('t')
-   plt.ylabel('u(t)')
-   plt.title('Solution of Nonlinear Fractional Differential Equation using VIM')
-   plt.legend()
-   plt.grid(True)
-   plt.show()
-
-   # Compare HPM and VIM
-   hpm_solver = HomotopyPerturbationMethod(alpha)
-   hpm_solution = hpm_solver.solve(
-       source_function=source_function,
-       initial_condition=initial_condition,
-       t_span=t,
-       max_iterations=5
-   )
-
-   plt.figure(figsize=(10, 6))
-   plt.plot(t, hpm_solution, 'b-', linewidth=2, label='HPM Solution')
-   plt.plot(t, solution, 'g-', linewidth=2, label='VIM Solution')
-   plt.xlabel('t')
-   plt.ylabel('u(t)')
-   plt.title('Comparison of HPM and VIM Solutions')
-   plt.legend()
-   plt.grid(True)
-   plt.show()
+   # HPM and VIM comparison removed - solvers have been removed from this release
 
 Mathematical Utilities
 ~~~~~~~~~~~~~~~~~~~~~
@@ -1143,6 +982,89 @@ Analyze convergence of iterative methods:
    
    plt.tight_layout()
    plt.show()
+
+Advanced Fractional Operators
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Demonstrate the comprehensive collection of fractional operators available in HPFRACC:
+
+.. code-block:: python
+
+   from hpfracc.core.derivatives import create_fractional_derivative
+   from hpfracc.core.fractional_implementations import create_riesz_fisher_operator
+   import numpy as np
+   import matplotlib.pyplot as plt
+
+   # Test function
+   def f(x): return np.exp(-x**2)
+   x = np.linspace(-3, 3, 200)
+   alpha = 0.5
+
+   # Create different operators
+   operators = {
+       'Riemann-Liouville': create_fractional_derivative('riemann_liouville', alpha),
+       'Caputo': create_fractional_derivative('caputo', alpha),
+       'Caputo-Fabrizio': create_fractional_derivative('caputo_fabrizio', alpha),
+       'Atangana-Baleanu': create_fractional_derivative('atangana_baleanu', alpha),
+       'Riesz-Fisher': create_riesz_fisher_operator(alpha)
+   }
+
+   # Compute results
+   results = {}
+   for name, operator in operators.items():
+       try:
+           results[name] = operator.compute(f, x)
+       except Exception as e:
+           print(f"{name}: {e}")
+
+   # Plot comparison
+   plt.figure(figsize=(15, 10))
+   
+   plt.subplot(2, 2, 1)
+   plt.plot(x, f(x), 'k-', linewidth=3, label='Original: exp(-x²)')
+   plt.xlabel('x')
+   plt.ylabel('f(x)')
+   plt.title('Original Function')
+   plt.legend()
+   plt.grid(True, alpha=0.3)
+   
+   plt.subplot(2, 2, 2)
+   for name, result in results.items():
+       if name in ['Riemann-Liouville', 'Caputo']:
+           plt.plot(x, result, '--', linewidth=2, label=f'{name} D^{alpha}')
+   plt.xlabel('x')
+   plt.ylabel('D^α f(x)')
+   plt.title('Classical Methods Comparison')
+   plt.legend()
+   plt.grid(True, alpha=0.3)
+   
+   plt.subplot(2, 2, 3)
+   for name, result in results.items():
+       if name in ['Caputo-Fabrizio', 'Atangana-Baleanu']:
+           plt.plot(x, result, '--', linewidth=2, label=f'{name} D^{alpha}')
+   plt.xlabel('x')
+   plt.ylabel('D^α f(x)')
+   plt.title('Novel Methods Comparison')
+   plt.legend()
+   plt.grid(True, alpha=0.3)
+   
+   plt.subplot(2, 2, 4)
+   if 'Riesz-Fisher' in results:
+       plt.plot(x, results['Riesz-Fisher'], '--', linewidth=2, label=f'Riesz-Fisher D^{alpha}')
+   plt.xlabel('x')
+   plt.ylabel('D^α f(x)')
+   plt.title('Special Operators')
+   plt.legend()
+   plt.grid(True, alpha=0.3)
+   
+   plt.tight_layout()
+   plt.show()
+
+   # Performance comparison
+   print("\\nPerformance Comparison:")
+   for name, result in results.items():
+       if name in results:
+           print(f"{name}: Result shape {result.shape}")
 
 These examples demonstrate the comprehensive capabilities of the HPFRACC library, from basic fractional calculus operations to advanced applications in machine learning, signal processing, and numerical analysis. Each example includes visualization and analysis tools to help users understand the behavior and performance of fractional calculus methods.
 """

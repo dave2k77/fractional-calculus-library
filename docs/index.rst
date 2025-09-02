@@ -76,6 +76,8 @@ Core Concepts
 
 * :doc:`model_theory` - Mathematical foundations and theoretical background
 * :doc:`user_guide` - Getting started and basic usage patterns
+* :doc:`fractional_operators_guide` - Comprehensive guide to all fractional operators
+* :doc:`mathematical_theory` - Deep mathematical theory and foundations
 
 API Reference
 ~~~~~~~~~~~~
@@ -90,7 +92,7 @@ Examples & Tutorials
 * :doc:`scientific_tutorials` - Advanced scientific tutorials and research applications
 * :doc:`user_guide` - Machine learning workflows and best practices
 * :doc:`neural_fode_guide` - Complete guide to the Neural fODE framework
-* :doc:`sde_solvers_guide` - Comprehensive guide to SDE solvers
+
 
 Development & Testing
 ~~~~~~~~~~~~~~~~~~~~
@@ -165,7 +167,9 @@ Getting Help
    api_reference
    examples
    scientific_tutorials
+   fractional_operators_guide
+   mathematical_theory
    model_theory
    testing_status
    neural_fode_guide
-   sde_solvers_guide
+

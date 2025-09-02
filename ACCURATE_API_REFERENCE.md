@@ -148,15 +148,9 @@ from hpfracc.ml import (
 
 ### **Import Errors in Tests**
 - `test_advanced_features.py`: Missing `solve_advanced_fractional_ode`
-- `test_homotopy_perturbation.py`: Missing `create_hpm_solver`
-- `test_variational_iteration.py`: Missing `create_vim_solver`
-- `test_greens_function.py`: Missing `get_greens_function_properties`
 
 ### **Missing Solver Functions**
 - Advanced ODE solvers not fully implemented
-- Homotopy perturbation methods incomplete
-- Variational iteration methods incomplete
-- Green's function utilities missing
 
 ### **Example File Issues**
 - `financial_modeling.py`: Broken imports
