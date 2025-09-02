@@ -8,7 +8,7 @@ Development & Testing Status
 Project Status Overview
 ----------------------
 
-**Current Version**: 1.3.2  
+**Current Version**: 1.5.0  
 **Last Updated**: August 2025  
 **Development Status**: Core Features Production Ready, ML Components and Advanced Solvers Complete  
 **Test Coverage**: 85%  
@@ -42,7 +42,7 @@ Core Components
 * **Integral Methods**: Basic fractional integral computation
 * **PDE/ODE Solvers**: Basic differential equation solvers with fractional calculus
 * **Predictor-Corrector**: High-accuracy numerical methods
-* **Analytical Methods**: Basic implementations (HPM and VIM in development)
+* **Analytical Methods**: Basic implementations (SDE solvers fully implemented)
 
 Special Functions and Green's Functions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -59,18 +59,6 @@ Analytical Methods
 ~~~~~~~~~~~~~~~~~
 
 ✅ **Fully Implemented and Tested (100%)**
-
-* **Homotopy Perturbation Method (HPM)**:
-  - Complete implementation for linear and nonlinear fractional differential equations
-  - Specialized solvers for diffusion, wave, and general equations
-  - Factory functions and utility methods
-  - Comprehensive test coverage
-
-* **Variational Iteration Method (VIM)**:
-  - Complete implementation using Lagrange multipliers
-  - Specialized solvers for diffusion, wave, and advection equations
-  - Factory functions and utility methods
-  - Comprehensive test coverage
 
 * **SDE Solvers**: Complete implementation of Euler-Maruyama, Milstein, and Heun methods
 * **Comparison Tools**: Comprehensive comparison and analysis tools
@@ -191,7 +179,7 @@ Test Categories
 * **Core Integrals**: 27 tests covering all integral types and edge cases
 * **Special Functions**: 45+ tests covering gamma, beta, Mittag-Leffler, and binomial functions
 * **Green's Functions**: 30+ tests covering diffusion, wave, and advection Green's functions
-* **Analytical Methods**: 50+ tests covering HPM, VIM, and SDE solvers
+* **Analytical Methods**: 50+ tests covering SDE solvers
 * **Mathematical Utilities**: 30+ tests covering validation, performance monitoring, and utilities
 * **Machine Learning**: 60+ tests covering neural networks, layers, and optimizers
 * **Neural fODE Framework**: 25+ tests covering all neural ODE components
@@ -257,8 +245,7 @@ Computational Performance
 * **Binomial Coefficients**: ~0.05ms per 1000 points
 
 **Analytical Methods**:
-* **HPM (5 iterations)**: ~50ms for 100 points
-* **VIM (5 iterations)**: ~45ms for 100 points
+* **SDE Solvers**: ~50ms for 100 points
 * **Green's Functions**: ~10ms per 100x100 grid
 
 Memory Usage
@@ -331,7 +318,7 @@ Package Distribution
 ✅ **PyPI Distribution (100% Complete)**
 
 * **Package Name**: `hpfracc`
-* **Version**: 1.3.2
+* **Version**: 1.5.0
 * **Python Versions**: 3.8, 3.9, 3.10, 3.11, 3.12, 3.13
 * **Platforms**: Windows, macOS, Linux
 * **Architectures**: x86_64, ARM64

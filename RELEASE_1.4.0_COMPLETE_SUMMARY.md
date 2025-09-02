@@ -157,7 +157,7 @@
 - **Neural fODE Framework**: 100% complete
 - **Documentation**: 90% complete
 - **Test Coverage**: 85%
-- **PyPI Package**: Published as `hpfracc-1.3.2`
+- **PyPI Package**: Published as `hpfracc-1.5.0`
 
 ### **Lines of Code**
 - **Total Lines**: ~36,000 lines
@@ -215,4 +215,4 @@
 
 ---
 
-**Release 1.4.0 - Complete** | **HPFRACC v1.3.2** | **August 2025**
+**Release 1.4.0 - Complete** | **HPFRACC v1.5.0** | **August 2025**

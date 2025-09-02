@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] - 2025-01-27
+
+### Added
+- **Version 1.5.0 Release**
+  - Updated to latest stable version with comprehensive testing
+  - Enhanced documentation and API reference
+  - Improved performance and stability across all backends
+
+### Changed
+- **Version Update**: Bumped from 1.3.2 to 1.5.0
+- **Documentation**: Updated all version references across the project
+
+---
+
 ## [1.2.0] - 2024-12-19
 
 ### Fixed

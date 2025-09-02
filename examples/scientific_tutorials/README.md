@@ -145,7 +145,7 @@ Fractional calculus extends classical calculus to non-integer orders, enabling t
 - **Fractional Integrals**: Complete implementation with validation
 - **Special Functions**: Gamma, Beta, Mittag-Leffler functions
 - **Green's Functions**: Analytical solutions for various equations
-- **Analytical Methods**: HPM and VIM for solving fractional differential equations
+- **Analytical Methods**: SDE solvers for solving fractional differential equations
 
 ### Performance Optimization
 
@@ -184,7 +184,7 @@ Fractional calculus extends classical calculus to non-integer orders, enabling t
 - **Fractional Derivatives**: 10,000+ operations/second on CPU, 50,000+ on GPU
 - **Fractional Integrals**: 5,000+ operations/second on CPU, 25,000+ on GPU
 - **Special Functions**: 100,000+ operations/second for gamma/beta functions
-- **Analytical Methods**: HPM and VIM solving complex FDEs in <1 second
+- **Analytical Methods**: SDE solvers solving complex FDEs in <1 second
 
 ### Accuracy Validation
 

@@ -297,7 +297,7 @@ Special Functions
 
 
 
-# HPM and VIM solvers have been removed from this release
+# Focus on implemented methods
 # They will be re-implemented in future releases with improved stability
 
 Mathematical Utilities
@@ -492,28 +492,10 @@ Error Analysis and Validation
 
 .. code-block:: python
 
-   from hpfracc.solvers.homotopy_perturbation import HomotopyPerturbationMethod
+   # HPM solver removed - focusing on implemented methods
 
-   # Analyze convergence of HPM
-   def source_function(t):
-       return t**2
-
-   def initial_condition(t):
-       return 0.0
-
-   alpha = 0.5
-   hpm_solver = HomotopyPerturbationMethod(alpha)
-   t = np.linspace(0, 2, 100)
-
-   convergence = hpm_solver.analyze_convergence(
-       source_function=source_function,
-       initial_condition=initial_condition,
-       t_span=t,
-       max_iterations=10
-   )
-
-   print(f"Final residual: {convergence['final_residual']:.6f}")
-   print(f"Convergence rate: {convergence['convergence_rate']:.6f}")
+   # Focus on implemented methods: SDE solvers, fractional operators, and ML integration
+   print("HPM solver removed - focusing on implemented methods")
 
 Performance Optimization
 ~~~~~~~~~~~~~~~~~~~~~~~

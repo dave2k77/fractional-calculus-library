@@ -39,7 +39,7 @@ result = hpc.optimized_caputo(t, x, alpha)
 - **Parallel Computing**: Multi-core optimization with NUMBA
 - **Machine Learning Integration**: PyTorch and JAX backends
 - **Graph Neural Networks**: Fractional GNN layers and models
-- **Advanced Solvers**: HPM, VIM, and SDE solvers for fractional differential equations
+- **Advanced Solvers**: SDE solvers for fractional differential equations
 - **Neural fODE Framework**: Learning-based solution of fractional ODEs
 
 ### Special Functions
@@ -113,7 +113,7 @@ python -m pytest tests/
 - **ML Integration**: 95% complete with autograd fractional derivatives
 - **Documentation**: 95% complete with ML autograd coverage
 - **Test Coverage**: 95%
-- **PyPI Package**: Published as `hpfracc-1.3.2`
+- **PyPI Package**: Published as `hpfracc-1.5.0`
 
 ## 🤝 **Contributing**
 

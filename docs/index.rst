@@ -14,7 +14,7 @@ Key Features
 * **Advanced Fractional Calculus**: Riemann-Liouville, Caputo, Grünwald-Letnikov definitions
 * **Machine Learning Integration**: Native PyTorch, JAX, and NUMBA support with autograd-friendly fractional derivatives
 * **Graph Neural Networks**: GCN, GAT, GraphSAGE, and Graph U-Net architectures
-* **Advanced Solvers**: HPM, VIM, and SDE solvers for fractional differential equations
+* **Advanced Solvers**: SDE solvers for fractional differential equations
 * **Neural fODE Framework**: Learning-based solution of fractional ODEs
 * **High Performance**: Optimized algorithms with GPU acceleration support
 * **Multi-Backend**: Seamless switching between computation backends
@@ -26,7 +26,7 @@ Current Status
 * **Core Methods**: 95% complete and tested
 * **GPU Acceleration**: Fully implemented
 * **Machine Learning**: 95% complete with autograd fractional derivatives
-* **Advanced Solvers**: HPM, VIM, and SDE solvers fully implemented
+* **Advanced Solvers**: SDE solvers fully implemented
 * **Neural fODE Framework**: Complete implementation ready for research
 * **Documentation**: 95% complete with ML autograd coverage
 * **PyPI Package**: Published as hpfracc-1.3.2
@@ -71,13 +71,12 @@ Basic Usage
 Documentation Sections
 ---------------------
 
-Core Concepts
-~~~~~~~~~~~~
+Core Concepts & Theory
+~~~~~~~~~~~~~~~~~~~~~~
 
 * :doc:`model_theory` - Mathematical foundations and theoretical background
-* :doc:`user_guide` - Getting started and basic usage patterns
+* :doc:`mathematical_theory` - Deep mathematical theory and foundations including ML models, Neural fODEs, GNNs, and autograd kernels
 * :doc:`fractional_operators_guide` - Comprehensive guide to all fractional operators including ML autograd
-* :doc:`mathematical_theory` - Deep mathematical theory and foundations including autograd kernels
 
 API Reference
 ~~~~~~~~~~~~
@@ -142,7 +141,7 @@ If you use HPFRACC in your research, please cite:
      title={HPFRACC: High-Performance Fractional Calculus Library with Machine Learning Integration},
      author={Chin, Davian R.},
      year={2025},
-     version={1.3.2},
+     version={1.5.0},
      url={https://github.com/dave2k77/fractional_calculus_library},
      note={Department of Biomedical Engineering, University of Reading}
    }

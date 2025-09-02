@@ -492,4 +492,4 @@ For questions and support:
 
 ---
 
-**Neural fODE Framework v1.4.0** - *Empowering Research with Learning-Based Fractional Differential Equation Solving*
+**Neural fODE Framework v1.5.0** - *Empowering Research with Learning-Based Fractional Differential Equation Solving*

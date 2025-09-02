@@ -201,10 +201,7 @@ Working with special functions in fractional calculus:
 
 
 
-# HPM and VIM solvers have been removed from this release
-# They will be re-implemented in future releases with improved stability
-
-   # HPM and VIM comparison removed - solvers have been removed from this release
+# Analytical methods section - focusing on implemented solvers
 
 Mathematical Utilities
 ~~~~~~~~~~~~~~~~~~~~~
@@ -905,83 +902,25 @@ Analyze convergence of iterative methods:
 
    import numpy as np
    import matplotlib.pyplot as plt
-   from hpfracc.solvers.homotopy_perturbation import HomotopyPerturbationMethod
-   from hpfracc.solvers.variational_iteration import VariationalIterationMethod
+   # HPM and VIM solvers removed - focusing on implemented methods
 
-   def convergence_analysis():
-       """Analyze convergence of HPM and VIM methods."""
-       # Define test problem
-       def source_function(t):
-           return t**2
-       
-       def initial_condition(t):
-           return 0.0
-       
-       t = np.linspace(0, 2, 100)
-       alpha = 0.5
-       
-       # HPM convergence
-       hpm_solver = HomotopyPerturbationMethod(alpha)
-       hpm_convergence = hpm_solver.analyze_convergence(
-           source_function=source_function,
-           initial_condition=initial_condition,
-           t_span=t,
-           max_iterations=10
-       )
-       
-       # VIM convergence
-       vim_solver = VariationalIterationMethod(alpha)
-       vim_convergence = vim_solver.analyze_convergence(
-           source_function=source_function,
-           initial_condition=initial_condition,
-           t_span=t,
-           max_iterations=10
-       )
-       
-       return hpm_convergence, vim_convergence
+   # HPM and VIM solvers removed - focusing on implemented methods
 
-   # Run convergence analysis
-   hpm_conv, vim_conv = convergence_analysis()
+   # HPM and VIM solvers removed - focusing on implemented methods
 
-   # Plot convergence
-   plt.figure(figsize=(12, 8))
+   # HPM and VIM plotting removed - focusing on implemented methods
    
-   plt.subplot(2, 2, 1)
-   plt.semilogy(hpm_conv['residuals'], 'b-o', linewidth=2, label='HPM')
-   plt.xlabel('Iteration')
-   plt.ylabel('Residual')
-   plt.title('HPM Convergence')
-   plt.legend()
-   plt.grid(True)
+   # VIM plotting removed
    
-   plt.subplot(2, 2, 2)
-   plt.semilogy(vim_conv['residuals'], 'r-s', linewidth=2, label='VIM')
-   plt.xlabel('Iteration')
-   plt.ylabel('Residual')
-   plt.title('VIM Convergence')
-   plt.legend()
-   plt.grid(True)
-   
-   plt.subplot(2, 2, 3)
-   plt.plot(hpm_conv['solutions'][-1], 'b-', linewidth=2, label='HPM Final Solution')
-   plt.plot(vim_conv['solutions'][-1], 'r--', linewidth=2, label='VIM Final Solution')
-   plt.xlabel('t')
-   plt.ylabel('u(t)')
-   plt.title('Final Solutions Comparison')
-   plt.legend()
-   plt.grid(True)
+   # Solutions comparison removed
    
    plt.subplot(2, 2, 4)
-   plt.plot(hpm_conv['convergence_rates'], 'b-o', linewidth=2, label='HPM')
-   plt.plot(vim_conv['convergence_rates'], 'r-s', linewidth=2, label='VIM')
-   plt.xlabel('Iteration')
-   plt.ylabel('Convergence Rate')
-   plt.title('Convergence Rates')
-   plt.legend()
-   plt.grid(True)
+   # HPM convergence rates removed
+   # VIM convergence rates removed
+   # All HPM/VIM plotting removed
    
-   plt.tight_layout()
-   plt.show()
+   # Focus on implemented methods: SDE solvers, fractional operators, and ML integration
+   print("HPM and VIM solvers have been removed - focusing on implemented methods")
 
 Advanced Fractional Operators
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
