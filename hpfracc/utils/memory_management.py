@@ -12,9 +12,8 @@ import numpy as np
 import gc
 import psutil
 import time
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, Optional
 from functools import wraps
-import weakref
 
 
 class MemoryManager:
@@ -102,7 +101,11 @@ class MemoryManager:
 
         after = self.get_memory_usage()
 
-        return {"before": before, "after": after, "freed": before["rss"] - after["rss"]}
+        return {
+            "before": before,
+            "after": after,
+            "freed": before["rss"] -
+            after["rss"]}
 
     def get_memory_summary(self) -> Dict[str, Any]:
         """
@@ -116,9 +119,13 @@ class MemoryManager:
         return {
             "current": current,
             "peak": self.peak_memory,
-            "history_length": len(self.memory_history),
+            "history_length": len(
+                self.memory_history),
             "within_limit": self.check_memory_limit(),
-            "available_percent": (current["available"] / current["total"]) * 100,
+            "available_percent": (
+                current["available"] /
+                current["total"]) *
+            100,
         }
 
 
@@ -209,10 +216,8 @@ class CacheManager:
         size_bytes = self._estimate_size(value)
 
         # Check if adding this item would exceed limits
-        if (
-            len(self.cache) >= self.max_size
-            or self._get_cache_size_gb() + size_bytes / (1024**3) > self.max_memory_gb
-        ):
+        if (len(self.cache) >= self.max_size or self._get_cache_size_gb() +
+                size_bytes / (1024**3) > self.max_memory_gb):
             self._evict_least_used()
 
         # Add to cache

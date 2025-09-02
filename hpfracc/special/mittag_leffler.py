@@ -9,10 +9,9 @@ naturally in solutions of fractional differential equations.
 import numpy as np
 import jax
 import jax.numpy as jnp
-from numba import jit, vectorize
-from typing import Union, Optional, Tuple, Callable
-import scipy.special as scipy_special
-from .gamma_beta import gamma, log_gamma
+from numba import jit
+from typing import Union
+from .gamma_beta import gamma
 
 
 class MittagLefflerFunction:
@@ -29,8 +28,10 @@ class MittagLefflerFunction:
     """
 
     def __init__(
-        self, use_jax: bool = False, use_numba: bool = True, max_terms: int = 100
-    ):
+            self,
+            use_jax: bool = False,
+            use_numba: bool = True,
+            max_terms: int = 100):
         """
         Initialize Mittag-Leffler function calculator.
 
@@ -75,7 +76,8 @@ class MittagLefflerFunction:
         z: Union[float, np.ndarray], alpha: float, beta: float
     ) -> Union[float, np.ndarray]:
         """SciPy implementation for reference and fallback."""
-        # SciPy doesn't have mittag_leffler in all versions, so we use our own implementation
+        # SciPy doesn't have mittag_leffler in all versions, so we use our own
+        # implementation
         if alpha == 1.0 and beta == 1.0:
             return np.exp(z)
         elif alpha == 2.0 and beta == 1.0:
@@ -134,7 +136,8 @@ class MittagLefflerFunction:
         def ml_general(z):
             # Series expansion for general case
             k = jnp.arange(100)
-            terms = z[..., None] ** k / jax.scipy.special.gamma(alpha * k + beta)
+            terms = z[..., None] ** k / \
+                jax.scipy.special.gamma(alpha * k + beta)
             return jnp.sum(terms, axis=-1)
 
         # Use jax.lax.cond for conditional computation
@@ -238,7 +241,7 @@ class MittagLefflerMatrix:
         self, A: np.ndarray, alpha: float, beta: float, max_terms: int
     ) -> np.ndarray:
         """NumPy implementation of matrix Mittag-Leffler function."""
-        n = A.shape[0]
+        A.shape[0]
         result = np.zeros_like(A)
 
         for k in range(max_terms):
@@ -353,7 +356,12 @@ def exponential(
     use_numba: bool = True,
 ) -> Union[float, np.ndarray, jnp.ndarray]:
     """E_1,1(z) = e^z"""
-    return mittag_leffler(z, alpha=1.0, beta=1.0, use_jax=use_jax, use_numba=use_numba)
+    return mittag_leffler(
+        z,
+        alpha=1.0,
+        beta=1.0,
+        use_jax=use_jax,
+        use_numba=use_numba)
 
 
 def cosine_fractional(

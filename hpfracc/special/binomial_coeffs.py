@@ -8,10 +8,10 @@ which are fundamental in the Grünwald-Letnikov definition of fractional derivat
 import numpy as np
 import jax
 import jax.numpy as jnp
-from numba import jit, vectorize
-from typing import Union, Optional, Tuple, List
+from numba import jit
+from typing import Union
 import scipy.special as scipy_special
-from .gamma_beta import gamma, log_gamma
+from .gamma_beta import gamma
 
 
 class BinomialCoefficients:
@@ -27,8 +27,10 @@ class BinomialCoefficients:
     """
 
     def __init__(
-        self, use_jax: bool = False, use_numba: bool = True, cache_size: int = 1000
-    ):
+            self,
+            use_jax: bool = False,
+            use_numba: bool = True,
+            cache_size: int = 1000):
         """
         Initialize binomial coefficients calculator.
 
@@ -167,7 +169,9 @@ class BinomialCoefficients:
         return gamma(alpha + 1) / (gamma(k + 1) * gamma(alpha - k + 1))
 
     @staticmethod
-    def _binomial_fractional_jax(alpha: jnp.ndarray, k: jnp.ndarray) -> jnp.ndarray:
+    def _binomial_fractional_jax(
+            alpha: jnp.ndarray,
+            k: jnp.ndarray) -> jnp.ndarray:
         """
         JAX implementation of fractional binomial coefficient.
 
@@ -193,7 +197,8 @@ class BinomialCoefficients:
             k = np.arange(max_k + 1)
             return scipy_special.binom(alpha, k)
 
-    def compute_alternating_sequence(self, alpha: float, max_k: int) -> np.ndarray:
+    def compute_alternating_sequence(
+            self, alpha: float, max_k: int) -> np.ndarray:
         """
         Compute the alternating sequence of binomial coefficients (-1)^k * C(α,k).
 
@@ -227,7 +232,8 @@ class GrunwaldLetnikovCoefficients:
         """
         self.use_jax = use_jax
         self.use_numba = use_numba
-        self.binomial = BinomialCoefficients(use_jax=use_jax, use_numba=use_numba)
+        self.binomial = BinomialCoefficients(
+            use_jax=use_jax, use_numba=use_numba)
 
     def compute_coefficients(self, alpha: float, max_k: int) -> np.ndarray:
         """
@@ -329,13 +335,17 @@ def grunwald_letnikov_coefficients(
     Returns:
         Array of Grünwald-Letnikov coefficients
     """
-    gl_coeffs = GrunwaldLetnikovCoefficients(use_jax=use_jax, use_numba=use_numba)
+    gl_coeffs = GrunwaldLetnikovCoefficients(
+        use_jax=use_jax, use_numba=use_numba)
     return gl_coeffs.compute_coefficients(alpha, max_k)
 
 
 def grunwald_letnikov_weighted_coefficients(
-    alpha: float, max_k: int, h: float, use_jax: bool = False, use_numba: bool = True
-) -> np.ndarray:
+        alpha: float,
+        max_k: int,
+        h: float,
+        use_jax: bool = False,
+        use_numba: bool = True) -> np.ndarray:
     """
     Convenience function to compute weighted Grünwald-Letnikov coefficients.
 
@@ -349,7 +359,8 @@ def grunwald_letnikov_weighted_coefficients(
     Returns:
         Array of weighted Grünwald-Letnikov coefficients
     """
-    gl_coeffs = GrunwaldLetnikovCoefficients(use_jax=use_jax, use_numba=use_numba)
+    gl_coeffs = GrunwaldLetnikovCoefficients(
+        use_jax=use_jax, use_numba=use_numba)
     return gl_coeffs.compute_weighted_coefficients(alpha, max_k, h)
 
 
@@ -401,7 +412,8 @@ def fractional_pascal_triangle(
         triangle = jnp.zeros((n + 1, n + 1))
         for i in range(n + 1):
             for j in range(i + 1):
-                triangle = triangle.at[i, j].set(jax.scipy.special.binom(alpha + i, j))
+                triangle = triangle.at[i, j].set(
+                    jax.scipy.special.binom(alpha + i, j))
         return triangle
     else:
         triangle = np.zeros((n + 1, n + 1))

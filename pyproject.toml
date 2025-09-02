@@ -198,3 +198,21 @@ exclude_lines = [
     "class .*\\bProtocol\\):",
     "@(abc\\.)?abstractmethod",
 ]
+
+[tool.flake8]
+max-line-length = 120
+ignore = [
+  "E501",  # line length handled above
+  "W503",  # line break before binary operator
+  "W504",  # line break after binary operator (style-only)
+]
+exclude = [
+  ".git",
+  "__pycache__",
+  "build",
+  "dist",
+  "examples",
+  "benchmarks",
+  "docs",
+  "hpfracc/core/fractional_implementations_backup.py"
+]

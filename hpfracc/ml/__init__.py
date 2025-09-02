@@ -37,8 +37,6 @@ from .core import (
     FractionalNeuralNetwork,
     FractionalAttention,
     FractionalLossFunction,
-    FractionalMSELoss,
-    FractionalCrossEntropyLoss,
     FractionalAutoML
 )
 
@@ -55,8 +53,8 @@ from .layers import (
 
 # Loss Functions
 from .losses import (
-    FractionalMSELoss as FractionalMSELoss,
-    FractionalCrossEntropyLoss as FractionalCrossEntropyLoss,
+    FractionalMSELoss,
+    FractionalCrossEntropyLoss,
     FractionalHuberLoss,
     FractionalSmoothL1Loss,
     FractionalKLDivLoss,
@@ -106,21 +104,19 @@ __all__ = [
     'set_backend_manager',
     'get_active_backend',
     'switch_backend',
-    
+
     # Tensor Operations
     'TensorOps',
     'get_tensor_ops',
     'create_tensor',
-    
+
     # Core ML Components
     'MLConfig',
     'FractionalNeuralNetwork',
     'FractionalAttention',
     'FractionalLossFunction',
-    'FractionalMSELoss',
-    'FractionalCrossEntropyLoss',
     'FractionalAutoML',
-    
+
     # Neural Network Layers
     'LayerConfig',
     'FractionalConv1D',
@@ -129,7 +125,7 @@ __all__ = [
     'FractionalTransformer',
     'FractionalPooling',
     'FractionalBatchNorm1d',
-    
+
     # Loss Functions
     'FractionalMSELoss',
     'FractionalCrossEntropyLoss',
@@ -146,13 +142,13 @@ __all__ = [
     'FractionalCTCLoss',
     'FractionalCustomLoss',
     'FractionalCombinedLoss',
-    
+
     # Optimizers
     'FractionalOptimizer',
     'FractionalAdam',
     'FractionalSGD',
     'FractionalRMSprop',
-    
+
     # Fractional GNN Components
     'BaseFractionalGNNLayer',
     'FractionalGraphConv',

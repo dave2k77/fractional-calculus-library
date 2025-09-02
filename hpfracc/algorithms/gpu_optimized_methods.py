@@ -17,14 +17,12 @@ import time
 import warnings
 from typing import Union, Optional, Tuple, Callable, Dict, Any, List
 from concurrent.futures import ThreadPoolExecutor
-import threading
 
 # GPU imports with fallbacks
 try:
     import jax
     import jax.numpy as jnp
-    from jax import jit, vmap, pmap, device_put, device_get, grad, jacfwd, hessian
-    from jax.lib import xla_bridge
+    from jax import jit, vmap, grad, jacfwd, hessian
     from jax.scipy import special
 
     JAX_AVAILABLE = True
@@ -122,10 +120,15 @@ class GPUOptimizedRiemannLiouville:
         """Compile JAX kernels for GPU acceleration."""
         from jax import jit
         import jax.numpy as jnp
-        from jax.lax import dynamic_slice, dynamic_update_slice
 
         @jit
-        def jax_fft_convolution(f_jax, t_jax, h_jax, n_jax, alpha_jax, gamma_val_jax):
+        def jax_fft_convolution(
+                f_jax,
+                t_jax,
+                h_jax,
+                n_jax,
+                alpha_jax,
+                gamma_val_jax):
             # Static sizes from shape (avoid len(.))
             N = f_jax.shape[0]
 
@@ -156,7 +159,8 @@ class GPUOptimizedRiemannLiouville:
             iomegaN = (1j * freqs) ** n_jax
 
             FG = jnp.fft.fft(Gpad)
-            dGpad = jnp.fft.ifft(FG * iomegaN)  # complex small imag residuals possible
+            # complex small imag residuals possible
+            dGpad = jnp.fft.ifft(FG * iomegaN)
             dGpad_r = jnp.real(dGpad)
 
             # Crop back to original length
@@ -184,7 +188,7 @@ class GPUOptimizedRiemannLiouville:
         ) {
             int idx = blockIdx.x * blockDim.x + threadIdx.x;
             if (idx >= N) return;
-            
+
             // FFT convolution computation
             if (idx >= n) {
                 if (idx < N - 1) {
@@ -236,7 +240,8 @@ class GPUOptimizedRiemannLiouville:
             self.gpu_config.performance_stats["gpu_time"] += gpu_time
 
             if self.gpu_config.monitor_performance:
-                print(f"✅ GPU RL FFT: {gpu_time:.4f}s for {len(f_array)} points")
+                print(
+                    f"✅ GPU RL FFT: {gpu_time:.4f}s for {len(f_array)} points")
 
             return result
 
@@ -259,7 +264,8 @@ class GPUOptimizedRiemannLiouville:
         gamma_val = gamma(self.n - self.alpha_val)
 
         # Execute GPU kernel
-        result = self._jax_kernel(f_jax, t_jax, h, self.n, self.alpha_val, gamma_val)
+        result = self._jax_kernel(
+            f_jax, t_jax, h, self.n, self.alpha_val, gamma_val)
 
         # Move result back to CPU
         return np.array(result)
@@ -277,7 +283,8 @@ class GPUOptimizedRiemannLiouville:
         # RL kernel in time domain (vectorized)
         gamma_val = gamma(self.n - self.alpha_val)
         kernel_gpu = cp.where(
-            t_gpu > 0.0, (t_gpu ** (self.n - self.alpha_val - 1.0)) / gamma_val, 0.0
+            t_gpu > 0.0, (t_gpu ** (self.n - self.alpha_val - 1.0)
+                          ) / gamma_val, 0.0
         )
 
         # Zero-padding to mitigate circular wrap (>= 2N & power of two)
@@ -300,7 +307,8 @@ class GPUOptimizedRiemannLiouville:
         iomegaN = (1j * freqs) ** self.n
 
         FG = cp.fft.fft(Gpad)
-        dGpad = cp.fft.ifft(FG * iomegaN)  # complex small imag residuals possible
+        # complex small imag residuals possible
+        dGpad = cp.fft.ifft(FG * iomegaN)
         dGpad_r = cp.real(dGpad)
 
         # Crop back to original length
@@ -440,7 +448,8 @@ class GPUOptimizedCaputo:
                 n_indices = jnp.arange(N_jax)[:, None]  # Shape: (N, 1)
                 coeff_indices = jnp.arange(N_jax)[None, :]  # Shape: (1, N)
 
-                # Create coefficient matrix where coeffs[i, j] = coeffs[j] if j <= i, else 0
+                # Create coefficient matrix where coeffs[i, j] = coeffs[j] if j
+                # <= i, else 0
                 coeff_matrix = jnp.where(
                     coeff_indices <= n_indices, coeffs[coeff_indices], 0.0
                 )
@@ -488,7 +497,8 @@ class GPUOptimizedCaputo:
                 if self.gpu_config.backend == "jax" and JAX_AVAILABLE:
                     result = self._compute_jax_l1(f_array, h_val)
                 else:
-                    raise RuntimeError("GPU backend not available for L1 scheme")
+                    raise RuntimeError(
+                        "GPU backend not available for L1 scheme")
             else:
                 raise ValueError("Only L1 scheme is currently GPU-optimized")
 
@@ -497,7 +507,8 @@ class GPUOptimizedCaputo:
             self.gpu_config.performance_stats["gpu_time"] += gpu_time
 
             if self.gpu_config.monitor_performance:
-                print(f"✅ GPU Caputo L1: {gpu_time:.4f}s for {len(f_array)} points")
+                print(
+                    f"✅ GPU Caputo L1: {gpu_time:.4f}s for {len(f_array)} points")
 
             return result
 
@@ -573,11 +584,14 @@ class GPUOptimizedGrunwaldLetnikov:
                 n_indices = jnp.arange(N_jax)[:, None]  # Shape: (N, 1)
                 j_indices = jnp.arange(N_jax)[None, :]  # Shape: (1, N)
 
-                # Create valid indices matrix where valid[i, j] = True if j <= i, else False
+                # Create valid indices matrix where valid[i, j] = True if j <=
+                # i, else False
                 valid_indices = j_indices <= n_indices
 
-                # Create coefficient matrix where coeffs[i, j] = coeffs_signed[j] if j <= i, else 0
-                coeff_matrix = jnp.where(valid_indices, coeffs_signed[j_indices], 0.0)
+                # Create coefficient matrix where coeffs[i, j] =
+                # coeffs_signed[j] if j <= i, else 0
+                coeff_matrix = jnp.where(
+                    valid_indices, coeffs_signed[j_indices], 0.0)
 
                 # Create function value matrix using a more JAX-friendly approach
                 # Use gather operation to create the matrix
@@ -641,7 +655,8 @@ class GPUOptimizedGrunwaldLetnikov:
             self.gpu_config.performance_stats["gpu_time"] += gpu_time
 
             if self.gpu_config.monitor_performance:
-                print(f"✅ GPU GL Direct: {gpu_time:.4f}s for {len(f_array)} points")
+                print(
+                    f"✅ GPU GL Direct: {gpu_time:.4f}s for {len(f_array)} points")
 
             return result
 
@@ -655,7 +670,8 @@ class GPUOptimizedGrunwaldLetnikov:
     def _compute_jax(self, f_array: np.ndarray, h: float) -> np.ndarray:
         """Compute GL derivative using JAX GPU acceleration."""
         # Precompute binomial coefficients
-        coeffs = self._fast_binomial_coefficients_jax(self.alpha_val, len(f_array) - 1)
+        coeffs = self._fast_binomial_coefficients_jax(
+            self.alpha_val, len(f_array) - 1)
 
         f_jax = jnp.array(f_array)
         coeffs_jax = jnp.array(coeffs)
@@ -663,7 +679,8 @@ class GPUOptimizedGrunwaldLetnikov:
         result = self._jax_kernel(f_jax, coeffs_jax, h, self.alpha_val)
         return np.array(result)
 
-    def _fast_binomial_coefficients_jax(self, alpha: float, max_k: int) -> np.ndarray:
+    def _fast_binomial_coefficients_jax(
+            self, alpha: float, max_k: int) -> np.ndarray:
         """Fast binomial coefficient generation using JAX."""
         # Check cache first
         cache_key = (alpha, max_k)
@@ -681,7 +698,10 @@ class GPUOptimizedGrunwaldLetnikov:
         self._coefficient_cache[cache_key] = coeffs
         return coeffs
 
-    def _compute_cpu_fallback(self, f_array: np.ndarray, h: float) -> np.ndarray:
+    def _compute_cpu_fallback(
+            self,
+            f_array: np.ndarray,
+            h: float) -> np.ndarray:
         """Fallback to CPU computation."""
         from .optimized_methods import OptimizedGrunwaldLetnikov
 
@@ -720,14 +740,14 @@ class MultiGPUManager:
                         if device.platform == "gpu"
                     ]
                 )
-            except:
+            except Exception:
                 pass
 
         if CUPY_AVAILABLE:
             try:
                 cupy_devices = cp.cuda.runtime.getDeviceCount()
                 gpus.extend([f"cupy:{i}" for i in range(cupy_devices)])
-            except:
+            except Exception:
                 pass
 
         return gpus
@@ -739,9 +759,10 @@ class MultiGPUManager:
 
         return min(self.gpu_loads.keys(), key=lambda gpu: self.gpu_loads[gpu])
 
-    def distribute_computation(
-        self, computation_func: Callable, data_chunks: List[np.ndarray], **kwargs
-    ) -> List[np.ndarray]:
+    def distribute_computation(self,
+                               computation_func: Callable,
+                               data_chunks: List[np.ndarray],
+                               **kwargs) -> List[np.ndarray]:
         """Distribute computation across multiple GPUs."""
         if not self.available_gpus or len(data_chunks) == 1:
             # Single GPU or CPU computation
@@ -755,8 +776,7 @@ class MultiGPUManager:
             for i, chunk in enumerate(data_chunks):
                 gpu = self.available_gpus[i % len(self.available_gpus)]
                 future = executor.submit(
-                    self._compute_on_gpu, computation_func, chunk, gpu, **kwargs
-                )
+                    self._compute_on_gpu, computation_func, chunk, gpu, **kwargs)
                 futures.append(future)
 
             for future in futures:

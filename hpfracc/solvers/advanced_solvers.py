@@ -6,19 +6,11 @@ and high-order numerical schemes for fractional differential equations.
 """
 
 import numpy as np
-from typing import Union, Optional, Tuple, Callable, Dict, Any, List
-from scipy import integrate, interpolate
-from scipy.linalg import solve_banded
+from typing import Union, Optional, Tuple, Callable, Dict, Any
 import warnings
 from enum import Enum
 
 from ..core.definitions import FractionalOrder
-from ..algorithms.optimized_methods import (
-    optimized_caputo,
-    optimized_riemann_liouville,
-    optimized_grunwald_letnikov,
-)
-from ..special import gamma
 from ..utils.error_analysis import ErrorAnalyzer
 from ..utils.memory_management import MemoryManager
 
@@ -108,9 +100,11 @@ class AdvancedFractionalODESolver:
 
     def _validate_parameters(self):
         """Validate solver parameters."""
-        valid_derivatives = ["caputo", "riemann_liouville", "grunwald_letnikov"]
+        valid_derivatives = [
+            "caputo", "riemann_liouville", "grunwald_letnikov"]
         if self.derivative_type not in valid_derivatives:
-            raise ValueError(f"Derivative type must be one of {valid_derivatives}")
+            raise ValueError(
+                f"Derivative type must be one of {valid_derivatives}")
 
         if self.tol <= 0 or self.rtol <= 0 or self.atol <= 0:
             raise ValueError("Tolerances must be positive")
@@ -169,7 +163,8 @@ class AdvancedFractionalODESolver:
             remaining_time = tf - current_t
             if current_h < remaining_time * 1e-6:
                 current_h = min(remaining_time * 0.1, self.max_step)
-                warnings.warn(f"Step size too small, increasing to {current_h}")
+                warnings.warn(
+                    f"Step size too small, increasing to {current_h}")
             # Compute next step
             result = self._compute_step(
                 f, current_t, current_y, alpha, current_h, current_order
@@ -330,11 +325,12 @@ class AdvancedFractionalODESolver:
             try:
                 sol = self._runge_kutta_step(f, t, y, alpha, h, ord)
                 solutions.append((ord, sol))
-            except:
+            except BaseException:
                 continue
 
         if len(solutions) < 2:
-            raise ValueError("Could not compute solutions for error estimation")
+            raise ValueError(
+                "Could not compute solutions for error estimation")
 
         # Select best order based on error estimates
         best_order, best_solution = solutions[0]
@@ -596,7 +592,7 @@ class HighOrderFractionalSolver:
         t_cheb = 0.5 * (tf - t0) * (t_cheb + 1) + t0
 
         # Spectral differentiation matrix
-        D = self._chebyshev_differentiation_matrix(n)
+        self._chebyshev_differentiation_matrix(n)
 
         # Solve the system
         y0_array = np.array(y0)
@@ -637,10 +633,12 @@ class HighOrderFractionalSolver:
         for i in range(1, len(t_values)):
             if i < self.order:
                 # Use lower order method for startup
-                y_values[i] = y_values[i - 1] + h * f(t_values[i - 1], y_values[i - 1])
+                y_values[i] = y_values[i - 1] + h * \
+                    f(t_values[i - 1], y_values[i - 1])
             else:
                 # Use multi-step method
-                y_values[i] = self._multistep_step(f, t_values, y_values, i, h, alpha)
+                y_values[i] = self._multistep_step(
+                    f, t_values, y_values, i, h, alpha)
 
         return {
             "t": t_values,
@@ -689,7 +687,8 @@ class HighOrderFractionalSolver:
             for j in range(n):
                 if i != j:
                     D[i, j] = (-1) ** (i + j) / (
-                        np.cos(i * np.pi / (n - 1)) - np.cos(j * np.pi / (n - 1))
+                        np.cos(i * np.pi / (n - 1)) -
+                        np.cos(j * np.pi / (n - 1))
                     )
                 else:
                     D[i, i] = 0

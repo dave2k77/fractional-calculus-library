@@ -8,8 +8,8 @@ which are fundamental special functions used throughout fractional calculus.
 import numpy as np
 import jax
 import jax.numpy as jnp
-from numba import jit, vectorize
-from typing import Union, Optional, Tuple
+from numba import jit
+from typing import Union
 import scipy.special as scipy_special
 
 

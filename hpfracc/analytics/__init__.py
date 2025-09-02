@@ -16,7 +16,7 @@ from .analytics_manager import AnalyticsManager
 
 __all__ = [
     'UsageTracker',
-    'PerformanceMonitor', 
+    'PerformanceMonitor',
     'ErrorAnalyzer',
     'WorkflowInsights',
     'AnalyticsManager'

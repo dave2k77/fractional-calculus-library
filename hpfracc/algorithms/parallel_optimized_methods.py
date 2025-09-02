@@ -15,15 +15,9 @@ Features:
 
 import numpy as np
 import time
-import warnings
-from typing import Union, Optional, Tuple, Callable, Dict, Any, List
-from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor, as_completed
-import multiprocessing as mp
-from multiprocessing import Pool, Manager, Queue, Process
-import threading
+from typing import Union, Optional, Callable, Dict, Any, List
+from concurrent.futures import ProcessPoolExecutor, as_completed
 import psutil
-import os
-import gc
 from functools import partial
 
 # Optional imports for advanced parallel computing
@@ -36,7 +30,6 @@ except ImportError:
 
 try:
     import dask.array as da
-    import dask.distributed as dd
     from dask.distributed import Client, LocalCluster
 
     DASK_AVAILABLE = True
@@ -51,7 +44,6 @@ except ImportError:
     RAY_AVAILABLE = False
 
 from ..core.definitions import FractionalOrder
-from ..special import gamma
 
 
 class ParallelConfig:
@@ -134,11 +126,12 @@ class ParallelLoadBalancer:
             chunk_size = self.config.chunk_size
 
         # Adaptive chunking based on data size and available workers
-        optimal_chunk_size = max(chunk_size, len(data) // (self.config.n_jobs * 2))
+        optimal_chunk_size = max(chunk_size, len(
+            data) // (self.config.n_jobs * 2))
 
         chunks = []
         for i in range(0, len(data), optimal_chunk_size):
-            chunks.append(data[i : i + optimal_chunk_size])
+            chunks.append(data[i: i + optimal_chunk_size])
 
         self.chunk_history.append(
             {
@@ -239,7 +232,8 @@ class ParallelOptimizedRiemannLiouville:
         self.parallel_config.performance_stats["total_time"] += total_time
 
         if self.parallel_config.monitor_performance:
-            print(f"✅ Parallel RL FFT: {total_time:.4f}s for {len(f_array)} points")
+            print(
+                f"✅ Parallel RL FFT: {total_time:.4f}s for {len(f_array)} points")
 
         return result
 
@@ -325,7 +319,8 @@ class ParallelOptimizedRiemannLiouville:
             return self._worker_rl_fft(chunk, t_array, h)
 
         # Process chunks in parallel
-        futures = [ray_worker_rl_fft.remote(chunk, t_array, h) for chunk in chunks]
+        futures = [ray_worker_rl_fft.remote(
+            chunk, t_array, h) for chunk in chunks]
         results = ray.get(futures)
 
         return np.concatenate(results)
@@ -342,7 +337,8 @@ class ParallelOptimizedRiemannLiouville:
         # Compute for this chunk
         # Note: This is a simplified version - in practice, you'd need to handle
         # the convolution properly for chunks
-        return cpu_calc._fft_convolution_rl_numpy(f_chunk, t_array[: len(f_chunk)], h)
+        return cpu_calc._fft_convolution_rl_numpy(
+            f_chunk, t_array[: len(f_chunk)], h)
 
 
 class ParallelOptimizedCaputo:
@@ -418,11 +414,16 @@ class ParallelOptimizedCaputo:
         self.parallel_config.performance_stats["total_time"] += total_time
 
         if self.parallel_config.monitor_performance:
-            print(f"✅ Parallel Caputo L1: {total_time:.4f}s for {len(f_array)} points")
+            print(
+                f"✅ Parallel Caputo L1: {total_time:.4f}s for {len(f_array)} points")
 
         return result
 
-    def _compute_serial(self, f_array: np.ndarray, h: float, method: str) -> np.ndarray:
+    def _compute_serial(
+            self,
+            f_array: np.ndarray,
+            h: float,
+            method: str) -> np.ndarray:
         """Serial computation fallback."""
         from .optimized_methods import OptimizedCaputo
 
@@ -454,7 +455,11 @@ class ParallelOptimizedCaputo:
 
         return np.concatenate(results)
 
-    def _compute_joblib(self, f_array: np.ndarray, h: float, method: str) -> np.ndarray:
+    def _compute_joblib(
+            self,
+            f_array: np.ndarray,
+            h: float,
+            method: str) -> np.ndarray:
         """Parallel computation using joblib."""
         chunks = self.load_balancer.create_chunks(f_array)
         worker_func = partial(self._worker_caputo_l1, h=h, method=method)
@@ -546,7 +551,8 @@ class ParallelOptimizedGrunwaldLetnikov:
         self.parallel_config.performance_stats["total_time"] += total_time
 
         if self.parallel_config.monitor_performance:
-            print(f"✅ Parallel GL Direct: {total_time:.4f}s for {len(f_array)} points")
+            print(
+                f"✅ Parallel GL Direct: {total_time:.4f}s for {len(f_array)} points")
 
         return result
 
@@ -566,7 +572,10 @@ class ParallelOptimizedGrunwaldLetnikov:
         else:
             return self._compute_serial(f_array, h)
 
-    def _compute_multiprocessing(self, f_array: np.ndarray, h: float) -> np.ndarray:
+    def _compute_multiprocessing(
+            self,
+            f_array: np.ndarray,
+            h: float) -> np.ndarray:
         """Parallel computation using multiprocessing."""
         chunks = self.load_balancer.create_chunks(f_array)
         worker_func = partial(self._worker_grunwald_letnikov, h=h)
@@ -588,7 +597,10 @@ class ParallelOptimizedGrunwaldLetnikov:
 
         return np.concatenate(results)
 
-    def _worker_grunwald_letnikov(self, f_chunk: np.ndarray, h: float) -> np.ndarray:
+    def _worker_grunwald_letnikov(
+            self,
+            f_chunk: np.ndarray,
+            h: float) -> np.ndarray:
         """Worker function for GL computation."""
         from .optimized_methods import OptimizedGrunwaldLetnikov
 
@@ -610,8 +622,12 @@ class ParallelPerformanceMonitor:
         analysis = {
             "data_size": data_size,
             "execution_time": execution_time,
-            "throughput": data_size / execution_time,
-            "efficiency": self._calculate_efficiency(config, data_size, execution_time),
+            "throughput": data_size /
+            execution_time,
+            "efficiency": self._calculate_efficiency(
+                config,
+                data_size,
+                execution_time),
             "suggestions": [],
         }
 
@@ -623,7 +639,8 @@ class ParallelPerformanceMonitor:
                 )
 
             if config.chunk_size and config.chunk_size < 1000:
-                analysis["suggestions"].append("Increase chunk_size to reduce overhead")
+                analysis["suggestions"].append(
+                    "Increase chunk_size to reduce overhead")
 
         # Memory analysis
         memory_usage = psutil.virtual_memory().percent
@@ -647,7 +664,8 @@ class ParallelPerformanceMonitor:
         """Calculate parallel efficiency."""
         # Estimate serial time based on data size
         estimated_serial_time = data_size * 1e-6  # Rough estimate
-        parallel_efficiency = estimated_serial_time / (execution_time * config.n_jobs)
+        parallel_efficiency = estimated_serial_time / \
+            (execution_time * config.n_jobs)
         return min(1.0, max(0.0, parallel_efficiency))
 
     def get_optimization_suggestions(self) -> List[str]:
@@ -658,7 +676,8 @@ class ParallelPerformanceMonitor:
         suggestions = []
 
         # Analyze trends
-        avg_efficiency = np.mean([h["efficiency"] for h in self.performance_history])
+        avg_efficiency = np.mean([h["efficiency"]
+                                 for h in self.performance_history])
         if avg_efficiency < 0.5:
             suggestions.append(
                 "Low parallel efficiency detected. Consider reducing n_jobs or increasing chunk_size."
@@ -666,8 +685,8 @@ class ParallelPerformanceMonitor:
 
         # Memory usage analysis
         memory_issues = [
-            h for h in self.performance_history if "memory" in str(h["suggestions"])
-        ]
+            h for h in self.performance_history if "memory" in str(
+                h["suggestions"])]
         if len(memory_issues) > len(self.performance_history) * 0.5:
             suggestions.append(
                 "Frequent memory issues detected. Consider reducing chunk_size or using streaming processing."
@@ -740,7 +759,8 @@ def benchmark_parallel_vs_serial(
 
     # Verify accuracy
     accuracy = np.allclose(serial_result, parallel_result, rtol=1e-6)
-    speedup = serial_time / parallel_time if parallel_time > 0 else float("inf")
+    speedup = serial_time / \
+        parallel_time if parallel_time > 0 else float("inf")
 
     return {
         "serial_time": serial_time,
@@ -850,7 +870,10 @@ class NumbaOptimizer:
 
         return optimized_kernel
 
-    def create_parallel_kernel(self, kernel_func: Callable, **kwargs) -> Callable:
+    def create_parallel_kernel(
+            self,
+            kernel_func: Callable,
+            **kwargs) -> Callable:
         """
         Create a parallel kernel for CPU execution.
 

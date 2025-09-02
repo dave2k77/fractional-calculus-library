@@ -11,44 +11,34 @@ This script demonstrates the new advanced fractional calculus methods:
 Includes performance comparisons and visualizations.
 """
 
-import sys
-import os
-
-sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
-
-import numpy as np
-import matplotlib.pyplot as plt
-import time
-from typing import Callable
-
-# Import the new advanced methods
-from hpfracc.algorithms.advanced_methods import (
-    WeylDerivative,
-    MarchaudDerivative,
-    HadamardDerivative,
-    ReizFellerDerivative,
-    AdomianDecomposition,
-    weyl_derivative,
-    marchaud_derivative,
-    hadamard_derivative,
-    reiz_feller_derivative,
-)
-
+from hpfracc.algorithms.parallel_optimized_methods import ParallelConfig
 from hpfracc.algorithms.advanced_optimized_methods import (
     OptimizedWeylDerivative,
     OptimizedMarchaudDerivative,
     OptimizedHadamardDerivative,
     OptimizedReizFellerDerivative,
     OptimizedAdomianDecomposition,
-    optimized_weyl_derivative,
-    optimized_marchaud_derivative,
-    optimized_hadamard_derivative,
-    optimized_reiz_feller_derivative,
-    optimized_adomian_decomposition,
 )
+from hpfracc.algorithms.advanced_methods import (
+    WeylDerivative,
+    MarchaudDerivative,
+    HadamardDerivative,
+    ReizFellerDerivative,
+    AdomianDecomposition,
+)
+import time
+import matplotlib.pyplot as plt
+import numpy as np
+import sys
+import os
+
+sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
+
+
+# Import the new advanced methods
+
 
 # Updated import for consolidated structure
-from hpfracc.algorithms.parallel_optimized_methods import ParallelConfig
 
 
 def create_test_functions():
@@ -100,7 +90,8 @@ def demo_weyl_derivative():
         # Standard implementation
         start_time = time.time()
         weyl_calc = WeylDerivative(alpha)
-        result_standard = weyl_calc.compute(func, x, h=0.01, use_parallel=False)
+        result_standard = weyl_calc.compute(
+            func, x, h=0.01, use_parallel=False)
         standard_time = time.time() - start_time
 
         # Optimized implementation
@@ -182,12 +173,14 @@ def demo_marchaud_derivative():
         # Standard implementation
         start_time = time.time()
         marchaud_calc = MarchaudDerivative(alpha)
-        result_standard = marchaud_calc.compute(func, x, h=0.01, memory_optimized=False)
+        result_standard = marchaud_calc.compute(
+            func, x, h=0.01, memory_optimized=False)
         standard_time = time.time() - start_time
 
         # Memory optimized implementation
         start_time = time.time()
-        result_optimized = marchaud_calc.compute(func, x, h=0.01, memory_optimized=True)
+        result_optimized = marchaud_calc.compute(
+            func, x, h=0.01, memory_optimized=True)
         optimized_time = time.time() - start_time
 
         # Numba optimized implementation
@@ -324,7 +317,8 @@ def demo_reiz_feller_derivative():
         # Standard implementation
         start_time = time.time()
         reiz_calc = ReizFellerDerivative(alpha)
-        result_standard = reiz_calc.compute(func, x, h=0.01, use_parallel=False)
+        result_standard = reiz_calc.compute(
+            func, x, h=0.01, use_parallel=False)
         standard_time = time.time() - start_time
 
         # Optimized implementation
@@ -337,7 +331,8 @@ def demo_reiz_feller_derivative():
         parallel_config = ParallelConfig(n_jobs=4, enabled=True)
         start_time = time.time()
         reiz_parallel = ReizFellerDerivative(alpha, parallel_config)
-        result_parallel = reiz_parallel.compute(func, x, h=0.01, use_parallel=True)
+        result_parallel = reiz_parallel.compute(
+            func, x, h=0.01, use_parallel=True)
         parallel_time = time.time() - start_time
 
         print(f"  Standard time: {standard_time:.4f}s")
@@ -525,10 +520,12 @@ def performance_benchmark():
         standard_calc = StandardClass(alpha)
         if name == "Hadamard":
             x_hadamard = np.linspace(1, 10, 2000)
-            result_standard = standard_calc.compute(test_function, x_hadamard, h=0.005)
+            result_standard = standard_calc.compute(
+                test_function, x_hadamard, h=0.005)
         elif name == "Reiz-Feller":
             x_reiz = np.linspace(-5, 5, 2000)
-            result_standard = standard_calc.compute(test_function, x_reiz, h=0.005)
+            result_standard = standard_calc.compute(
+                test_function, x_reiz, h=0.005)
         else:
             result_standard = standard_calc.compute(test_function, x, h=0.005)
         standard_time = time.time() - start_time
@@ -541,9 +538,11 @@ def performance_benchmark():
                 test_function, x_hadamard, h=0.005
             )
         elif name == "Reiz-Feller":
-            result_optimized = optimized_calc.compute(test_function, x_reiz, h=0.005)
+            result_optimized = optimized_calc.compute(
+                test_function, x_reiz, h=0.005)
         else:
-            result_optimized = optimized_calc.compute(test_function, x, h=0.005)
+            result_optimized = optimized_calc.compute(
+                test_function, x, h=0.005)
         optimized_time = time.time() - start_time
 
         speedup = standard_time / optimized_time
@@ -569,7 +568,8 @@ def performance_benchmark():
     plt.figure(figsize=(12, 5))
 
     plt.subplot(1, 2, 1)
-    bars = plt.bar(methods_list, speedups, color=["blue", "green", "red", "orange"])
+    bars = plt.bar(methods_list, speedups, color=[
+                   "blue", "green", "red", "orange"])
     plt.title("Performance Speedup Comparison")
     plt.ylabel("Speedup Factor")
     plt.ylim(0, max(speedups) * 1.1)
@@ -583,7 +583,8 @@ def performance_benchmark():
         )
 
     plt.subplot(1, 2, 2)
-    bars = plt.bar(methods_list, accuracies, color=["blue", "green", "red", "orange"])
+    bars = plt.bar(methods_list, accuracies, color=[
+                   "blue", "green", "red", "orange"])
     plt.title("Accuracy Comparison")
     plt.ylabel("Mean Absolute Error")
     plt.yscale("log")
@@ -597,7 +598,8 @@ def performance_benchmark():
         )
 
     plt.tight_layout()
-    plt.savefig("examples/performance_benchmark.png", dpi=300, bbox_inches="tight")
+    plt.savefig("examples/performance_benchmark.png",
+                dpi=300, bbox_inches="tight")
     plt.show()
 
     return results

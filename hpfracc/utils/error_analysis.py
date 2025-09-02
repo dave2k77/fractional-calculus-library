@@ -9,7 +9,7 @@ This module provides tools for:
 """
 
 import numpy as np
-from typing import Callable, Dict, List, Optional, Tuple, Union
+from typing import Callable, Dict, List, Optional
 import warnings
 
 
@@ -86,7 +86,10 @@ class ErrorAnalyzer:
         """
         return np.sqrt(np.mean((numerical - analytical) ** 2))
 
-    def linf_error(self, numerical: np.ndarray, analytical: np.ndarray) -> float:
+    def linf_error(
+            self,
+            numerical: np.ndarray,
+            analytical: np.ndarray) -> float:
         """
         Compute L-infinity error norm.
 
@@ -113,12 +116,14 @@ class ErrorAnalyzer:
             Dictionary containing all error metrics
         """
         return {
-            "l1": self.l1_error(numerical, analytical),
-            "l2": self.l2_error(numerical, analytical),
-            "linf": self.linf_error(numerical, analytical),
-            "mean_absolute": np.mean(self.absolute_error(numerical, analytical)),
-            "mean_relative": np.mean(self.relative_error(numerical, analytical)),
-        }
+            "l1": self.l1_error(
+                numerical, analytical), "l2": self.l2_error(
+                numerical, analytical), "linf": self.linf_error(
+                numerical, analytical), "mean_absolute": np.mean(
+                    self.absolute_error(
+                        numerical, analytical)), "mean_relative": np.mean(
+                            self.relative_error(
+                                numerical, analytical)), }
 
 
 class ConvergenceAnalyzer:
@@ -126,7 +131,6 @@ class ConvergenceAnalyzer:
 
     def __init__(self):
         """Initialize the convergence analyzer."""
-        pass
 
     def compute_convergence_rate(
         self, grid_sizes: List[int], errors: List[float]
@@ -142,7 +146,8 @@ class ConvergenceAnalyzer:
             Convergence rate (order of accuracy)
         """
         if len(grid_sizes) < 2 or len(errors) < 2:
-            raise ValueError("Need at least 2 points to compute convergence rate")
+            raise ValueError(
+                "Need at least 2 points to compute convergence rate")
 
         # Convert to log space
         log_n = np.log(np.array(grid_sizes))
@@ -151,7 +156,8 @@ class ConvergenceAnalyzer:
         # Linear regression: log(error) = -p * log(N) + C
         # where p is the convergence rate
         coeffs = np.polyfit(log_n, log_error, 1)
-        convergence_rate = -coeffs[0]  # Negative because error decreases with N
+        # Negative because error decreases with N
+        convergence_rate = -coeffs[0]
 
         return convergence_rate
 
@@ -176,7 +182,8 @@ class ConvergenceAnalyzer:
                     grid_sizes, error_list
                 )
             except (ValueError, np.linalg.LinAlgError) as e:
-                warnings.warn(f"Could not compute convergence rate for {metric}: {e}")
+                warnings.warn(
+                    f"Could not compute convergence rate for {metric}: {e}")
                 convergence_rates[metric] = np.nan
 
         return convergence_rates
@@ -196,7 +203,8 @@ class ConvergenceAnalyzer:
             Estimated optimal grid size
         """
         if len(grid_sizes) < 2:
-            raise ValueError("Need at least 2 points to estimate optimal grid size")
+            raise ValueError(
+                "Need at least 2 points to estimate optimal grid size")
 
         convergence_rate = self.compute_convergence_rate(grid_sizes, errors)
 
@@ -205,7 +213,8 @@ class ConvergenceAnalyzer:
         error_ref = errors[-1]
 
         # Estimate: N_opt = N_ref * (error_ref / target_error)^(1/p)
-        N_opt = int(N_ref * (error_ref / target_error) ** (1 / convergence_rate))
+        N_opt = int(N_ref * (error_ref / target_error)
+                    ** (1 / convergence_rate))
 
         return max(N_opt, 1)  # Ensure positive grid size
 
@@ -245,7 +254,8 @@ class ValidationFramework:
         if grid_sizes is None:
             grid_sizes = [50, 100, 200, 400]
 
-        results = {"test_cases": [], "convergence_study": {}, "overall_summary": {}}
+        results = {"test_cases": [],
+                   "convergence_study": {}, "overall_summary": {}}
 
         # Test individual cases
         for i, test_case in enumerate(test_cases):
@@ -262,7 +272,8 @@ class ValidationFramework:
             results["convergence_study"] = convergence_result
 
         # Overall summary
-        results["overall_summary"] = self._compute_summary(results["test_cases"])
+        results["overall_summary"] = self._compute_summary(
+            results["test_cases"])
 
         return results
 
@@ -278,7 +289,8 @@ class ValidationFramework:
             analytical = analytical_func(**test_case["params"])
 
             # Compute errors
-            errors = self.error_analyzer.compute_all_errors(numerical, analytical)
+            errors = self.error_analyzer.compute_all_errors(
+                numerical, analytical)
 
             return {
                 "case_name": test_case.get("name", f"Case_{len(test_case)}"),
@@ -315,11 +327,12 @@ class ValidationFramework:
                 numerical = method_func(**params)
                 analytical = analytical_func(**params)
 
-                errors = self.error_analyzer.compute_all_errors(numerical, analytical)
+                errors = self.error_analyzer.compute_all_errors(
+                    numerical, analytical)
                 errors_by_metric["l2"].append(errors["l2"])
                 errors_by_metric["linf"].append(errors["linf"])
 
-            except Exception as e:
+            except Exception:
                 errors_by_metric["l2"].append(np.nan)
                 errors_by_metric["linf"].append(np.nan)
 

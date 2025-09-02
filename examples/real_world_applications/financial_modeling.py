@@ -11,17 +11,15 @@ including:
 
 import numpy as np
 import matplotlib.pyplot as plt
-from typing import Dict, Any, Tuple, Optional
+from typing import Dict, Any
 import warnings
 
 # Import fractional calculus components
 from hpfracc.algorithms.optimized_methods import (
     optimized_caputo,
-    optimized_riemann_liouville,
 )
-from hpfracc.solvers import solve_advanced_fractional_ode, solve_high_order_fractional_ode
+from hpfracc.solvers import solve_advanced_fractional_ode
 from hpfracc.utils.plotting import PlotManager
-from hpfracc.validation import get_analytical_solution, validate_against_analytical
 
 
 class FractionalBlackScholesModel:
@@ -89,7 +87,7 @@ class FractionalBlackScholesModel:
             Dictionary containing pricing results
         """
         # Time grid
-        t = np.linspace(0, T, t_points)
+        np.linspace(0, T, t_points)
 
         # Fractional Black-Scholes PDE
         def fractional_pde(t, S):
@@ -163,7 +161,8 @@ class FractionalBlackScholesModel:
         # Apply at each time point for the option price
         t = call_result["t"]
         put_price = (
-            call_result["option_price"] - call_result["S_t"] + K * np.exp(-self.r * t)
+            call_result["option_price"] -
+            call_result["S_t"] + K * np.exp(-self.r * t)
         )
 
         # Ensure put prices are non-negative (due to numerical errors)
@@ -206,7 +205,8 @@ class FractionalBlackScholesModel:
                 time_factor = np.sqrt(T)
 
                 # Simplified implied volatility calculation (avoiding complex option pricing)
-                implied_vol = self.sigma * (1 + 0.1 * (moneyness - 1) * time_factor)
+                implied_vol = self.sigma * \
+                    (1 + 0.1 * (moneyness - 1) * time_factor)
                 implied_volatilities[i, j] = implied_vol
 
                 # Simplified option price calculation using Black-Scholes approximation
@@ -220,7 +220,8 @@ class FractionalBlackScholesModel:
                 call_price = S0 * 0.5 * (1 + np.tanh(d1 / 2)) - K * np.exp(
                     -self.r * T
                 ) * 0.5 * (1 + np.tanh(d2 / 2))
-                volatility_surface[i, j] = max(call_price, 0)  # Ensure non-negative
+                volatility_surface[i, j] = max(
+                    call_price, 0)  # Ensure non-negative
 
         return {
             "volatility_surface": volatility_surface,
@@ -237,7 +238,8 @@ class FractionalBlackScholesModel:
         fig, axes = plt.subplots(2, 2, figsize=(15, 10))
 
         # Stock price evolution
-        axes[0, 0].plot(call_result["t"], call_result["S_t"], "b-", linewidth=2)
+        axes[0, 0].plot(call_result["t"], call_result["S_t"],
+                        "b-", linewidth=2)
         axes[0, 0].set_title("Stock Price Evolution")
         axes[0, 0].set_xlabel("Time")
         axes[0, 0].set_ylabel("Stock Price")
@@ -347,7 +349,8 @@ class FractionalVolatilityModel:
             noise = np.random.normal(0, 1) * np.sqrt(dt)
 
             # Euler step
-            volatility[i] = volatility[i - 1] + mean_reversion * dt + 0.1 * noise
+            volatility[i] = volatility[i - 1] + \
+                mean_reversion * dt + 0.1 * noise
 
             # Ensure volatility stays positive
             volatility[i] = max(volatility[i], 0.01)
@@ -540,7 +543,7 @@ class FractionalRiskManager:
         for _ in range(n_iterations):
             # Calculate current portfolio return and risk
             portfolio_return = np.dot(weights, mean_returns)
-            portfolio_risk = np.sqrt(np.dot(weights.T, np.dot(cov_matrix, weights)))
+            np.sqrt(np.dot(weights.T, np.dot(cov_matrix, weights)))
 
             # Simple gradient update
             if portfolio_return < target_return:
@@ -565,7 +568,8 @@ def demonstrate_financial_applications():
     print("-" * 40)
 
     # Initialize model
-    fbs_model = FractionalBlackScholesModel(alpha=0.7, r=0.05, sigma=0.2, use_gpu=False)
+    fbs_model = FractionalBlackScholesModel(
+        alpha=0.7, r=0.05, sigma=0.2, use_gpu=False)
 
     # Price options
     S0, K, T = 100, 100, 1.0  # At-the-money option
@@ -636,7 +640,8 @@ def demonstrate_financial_applications():
     K_range = np.linspace(80, 120, 10)
     T_range = np.linspace(0.1, 1.0, 10)
 
-    vol_surface_result = fbs_model.analyze_volatility_surface(S0, K_range, T_range)
+    vol_surface_result = fbs_model.analyze_volatility_surface(
+        S0, K_range, T_range)
 
     # Plot volatility surface
     fig, ax = plt.subplots(figsize=(10, 8))

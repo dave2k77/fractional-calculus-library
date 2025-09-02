@@ -8,7 +8,7 @@ comparing different numerical methods in terms of accuracy and performance.
 import numpy as np
 import time
 import psutil
-from typing import Callable, Dict, List, Optional, Tuple, Union
+from typing import Callable, Dict, List, Optional
 import warnings
 from dataclasses import dataclass
 from enum import Enum
@@ -80,7 +80,7 @@ class PerformanceBenchmark:
         for _ in range(n_runs):
             start_time = time.perf_counter()
             try:
-                result = method_func(**test_params)
+                method_func(**test_params)
                 end_time = time.perf_counter()
                 execution_times.append(end_time - start_time)
             except Exception as e:
@@ -146,8 +146,10 @@ class AccuracyBenchmark:
         self.tolerance = tolerance
 
     def benchmark_method(
-        self, method_func: Callable, analytical_func: Callable, test_params: Dict
-    ) -> BenchmarkResult:
+            self,
+            method_func: Callable,
+            analytical_func: Callable,
+            test_params: Dict) -> BenchmarkResult:
         """
         Benchmark accuracy of a method against analytical solution.
 
@@ -171,7 +173,8 @@ class AccuracyBenchmark:
             analytical = analytical_func(**test_params)
 
             # Compute accuracy metrics
-            accuracy_metrics = error_analyzer.compute_all_errors(numerical, analytical)
+            accuracy_metrics = error_analyzer.compute_all_errors(
+                numerical, analytical)
 
             return BenchmarkResult(
                 method_name=method_func.__name__,
@@ -212,7 +215,8 @@ class AccuracyBenchmark:
         results = []
 
         for method_name, method_func in methods.items():
-            result = self.benchmark_method(method_func, analytical_func, test_params)
+            result = self.benchmark_method(
+                method_func, analytical_func, test_params)
             result.method_name = method_name
             results.append(result)
 
@@ -264,8 +268,7 @@ class BenchmarkSuite:
         # Run accuracy benchmarks
         for i, test_case in enumerate(test_cases):
             accuracy_results = self.accuracy_benchmark.benchmark_multiple_methods(
-                methods, analytical_func, test_case
-            )
+                methods, analytical_func, test_case)
 
             for result in accuracy_results:
                 result.parameters["test_case_index"] = i
@@ -275,8 +278,7 @@ class BenchmarkSuite:
         # Run performance benchmarks (use first test case for performance)
         if test_cases:
             performance_results = self.performance_benchmark.benchmark_multiple_methods(
-                methods, test_cases[0], n_runs
-            )
+                methods, test_cases[0], n_runs)
             results["performance_results"] = performance_results
 
         # Generate summary
@@ -313,11 +315,11 @@ class BenchmarkSuite:
             if successful_results:
                 # Accuracy summary
                 l2_errors = [
-                    r.accuracy_metrics.get("l2", np.inf) for r in successful_results
-                ]
+                    r.accuracy_metrics.get(
+                        "l2", np.inf) for r in successful_results]
                 linf_errors = [
-                    r.accuracy_metrics.get("linf", np.inf) for r in successful_results
-                ]
+                    r.accuracy_metrics.get(
+                        "linf", np.inf) for r in successful_results]
 
                 # Performance summary
                 perf_results = [
@@ -344,7 +346,8 @@ class BenchmarkSuite:
                     },
                     "performance": {
                         "mean_execution_time": (
-                            np.mean(execution_times) if execution_times else np.nan
+                            np.mean(
+                                execution_times) if execution_times else np.nan
                         ),
                         "mean_memory_usage": (
                             np.mean(memory_usage) if memory_usage else np.nan
@@ -406,7 +409,8 @@ def compare_methods(
     """
     suite = BenchmarkSuite()
     test_cases = [test_params]
-    results = suite.run_comprehensive_benchmark(methods, analytical_func, test_cases)
+    results = suite.run_comprehensive_benchmark(
+        methods, analytical_func, test_cases)
 
     # Extract comparison data
     comparison = {
@@ -456,7 +460,8 @@ def generate_benchmark_report(
     # Summary
     summary = benchmark_results.get("summary", {})
     report_lines.append(f"Total Methods: {summary.get('total_methods', 0)}")
-    report_lines.append(f"Total Test Cases: {summary.get('total_test_cases', 0)}")
+    report_lines.append(
+        f"Total Test Cases: {summary.get('total_test_cases', 0)}")
     report_lines.append("")
 
     # Method summaries

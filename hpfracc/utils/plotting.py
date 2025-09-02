@@ -10,9 +10,8 @@ This module provides tools for:
 
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches
 from matplotlib import rcParams
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple
 import os
 import warnings
 
@@ -20,7 +19,8 @@ import warnings
 class PlotManager:
     """Manager for creating and managing plots."""
 
-    def __init__(self, style: str = "default", figsize: Tuple[int, int] = (10, 6)):
+    def __init__(self, style: str = "default",
+                 figsize: Tuple[int, int] = (10, 6)):
         """
         Initialize the plot manager.
 
@@ -177,7 +177,7 @@ class PlotManager:
                 coeffs = np.polyfit(log_n, log_error, 1)
                 convergence_rate = -coeffs[0]
                 convergence_rates[metric] = convergence_rate
-            except:
+            except Exception:
                 convergence_rates[metric] = np.nan
 
         # Plot convergence rates
@@ -250,7 +250,8 @@ class PlotManager:
         ax2.grid(True, alpha=0.3)
 
         # Plot relative error
-        rel_error = np.abs(numerical - analytical) / (np.abs(analytical) + 1e-12)
+        rel_error = np.abs(numerical - analytical) / \
+            (np.abs(analytical) + 1e-12)
         ax3.plot(x, rel_error, "m-", linewidth=2)
         ax3.set_title("Relative Error", fontweight="bold")
         ax3.set_xlabel("x")
@@ -266,7 +267,8 @@ class PlotManager:
         }
 
         # Create text box with statistics
-        stats_text = "\n".join([f"{k}: {v:.2e}" for k, v in error_stats.items()])
+        stats_text = "\n".join(
+            [f"{k}: {v:.2e}" for k, v in error_stats.items()])
         ax4.text(
             0.1,
             0.5,
@@ -288,8 +290,11 @@ class PlotManager:
         return fig
 
     def save_plot(
-        self, fig: plt.Figure, path: str, dpi: int = 300, bbox_inches: str = "tight"
-    ) -> None:
+            self,
+            fig: plt.Figure,
+            path: str,
+            dpi: int = 300,
+            bbox_inches: str = "tight") -> None:
         """
         Save a plot to file.
 
@@ -351,7 +356,8 @@ def plot_error_analysis(
 ) -> plt.Figure:
     """Plot error analysis between numerical and analytical solutions."""
     manager = PlotManager()
-    return manager.plot_error_analysis(x, numerical, analytical, title, save_path)
+    return manager.plot_error_analysis(
+        x, numerical, analytical, title, save_path)
 
 
 def save_plot(

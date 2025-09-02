@@ -6,7 +6,7 @@ of numerical methods for fractional derivatives.
 """
 
 import numpy as np
-from typing import Callable, Dict, List, Optional, Tuple, Union
+from typing import Callable, Dict, List
 import warnings
 from enum import Enum
 
@@ -124,7 +124,8 @@ class ConvergenceTester:
             Convergence rate (order of accuracy)
         """
         if len(grid_sizes) < 2 or len(errors) < 2:
-            raise ValueError("Need at least 2 points to compute convergence rate")
+            raise ValueError(
+                "Need at least 2 points to compute convergence rate")
 
         # Convert to log space
         log_n = np.log(np.array(grid_sizes))
@@ -133,7 +134,8 @@ class ConvergenceTester:
         # Linear regression: log(error) = -p * log(N) + C
         # where p is the convergence rate
         coeffs = np.polyfit(log_n, log_error, 1)
-        convergence_rate = -coeffs[0]  # Negative because error decreases with N
+        # Negative because error decreases with N
+        convergence_rate = -coeffs[0]
 
         return convergence_rate
 
@@ -165,7 +167,8 @@ class ConvergenceTester:
                     method_func, analytical_func, grid_sizes, test_params, norm
                 )
             except Exception as e:
-                warnings.warn(f"Failed to test convergence for norm {norm}: {e}")
+                warnings.warn(
+                    f"Failed to test convergence for norm {norm}: {e}")
                 results[norm] = None
 
         return results
@@ -390,7 +393,9 @@ def run_method_convergence_test(
     )
 
 
-def estimate_convergence_rate(grid_sizes: List[int], errors: List[float]) -> float:
+def estimate_convergence_rate(
+        grid_sizes: List[int],
+        errors: List[float]) -> float:
     """
     Estimate convergence rate from grid sizes and errors.
 

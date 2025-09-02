@@ -10,13 +10,7 @@ This module implements the most efficient computational methods for fractional c
 """
 
 import numpy as np
-import jax
-import jax.numpy as jnp
-from jax import jit, vmap
-from jax.scipy import special
-from numba import jit as numba_jit, prange
-from typing import Union, Optional, Tuple, Callable, Dict, Any
-import warnings
+from typing import Union, Optional, Tuple, Callable
 
 # Import from relative paths for package structure
 try:
@@ -77,7 +71,8 @@ class OptimizedRiemannLiouville:
 
         # Input validation
         if len(f_array) != len(t_array):
-            raise ValueError("Function array and time array must have the same length")
+            raise ValueError(
+                "Function array and time array must have the same length")
 
         if h is not None and h <= 0:
             raise ValueError("Step size must be positive")
@@ -136,14 +131,15 @@ class OptimizedRiemannLiouville:
 
         if n == 1:
             # First derivative - vectorized
-            result[n:-1] = (conv[n + 1 :] - conv[n - 1 : -2]) / (2 * h)
+            result[n:-1] = (conv[n + 1:] - conv[n - 1: -2]) / (2 * h)
             if N > n:
                 result[-1] = (conv[-1] - conv[-2]) / h
         else:
             # Higher derivatives - optimized loop
             for i in range(n, N):
                 if i < N - 1:
-                    result[i] = (conv[i + 1] - 2 * conv[i] + conv[i - 1]) / (h**2)
+                    result[i] = (conv[i + 1] - 2 * conv[i] +
+                                 conv[i - 1]) / (h**2)
                 else:
                     result[i] = (conv[i] - conv[i - 1]) / h
 
@@ -193,7 +189,8 @@ class OptimizedCaputo:
 
         # Input validation
         if len(f_array) != len(t_array):
-            raise ValueError("Function array and time array must have the same length")
+            raise ValueError(
+                "Function array and time array must have the same length")
 
         if h is not None and h <= 0:
             raise ValueError("Step size must be positive")
@@ -220,7 +217,8 @@ class OptimizedCaputo:
 
         # Compute derivative using correct L1 scheme
         # For Caputo derivative: D^α f(t) = (1/Γ(2-α)) * ∫₀ᵗ (t-τ)^(-α) * f'(τ) dτ
-        # L1 approximation: D^α f(t_n) ≈ (1/Γ(2-α)) * h^(-α) * Σ_{j=0}^{n-1} w_j * (f_{n-j} - f_{n-j-1})
+        # L1 approximation: D^α f(t_n) ≈ (1/Γ(2-α)) * h^(-α) * Σ_{j=0}^{n-1}
+        # w_j * (f_{n-j} - f_{n-j-1})
         for n in range(1, N):
             sum_val = 0.0
             for j in range(n):
@@ -229,10 +227,13 @@ class OptimizedCaputo:
 
         return result
 
-    def _diethelm_ford_freed_numpy(self, f: np.ndarray, h: float) -> np.ndarray:
+    def _diethelm_ford_freed_numpy(
+            self,
+            f: np.ndarray,
+            h: float) -> np.ndarray:
         """Diethelm-Ford-Freed predictor-corrector using numpy."""
         N = len(f)
-        alpha = self.alpha_val
+        self.alpha_val
         result = np.zeros(N)
 
         # Initial values using L1 scheme
@@ -244,7 +245,7 @@ class OptimizedCaputo:
         # Predictor-corrector for remaining points
         for n in range(4, N):
             # Predictor step (Adams-Bashforth)
-            pred = np.sum(weights * result[n - 4 : n])
+            pred = np.sum(weights * result[n - 4: n])
 
             # Corrector step (simplified Adams-Moulton)
             result[n] = 0.5 * (pred + result[n - 1])
@@ -296,7 +297,8 @@ class OptimizedGrunwaldLetnikov:
 
         # Input validation
         if len(f_array) != len(t_array):
-            raise ValueError("Function array and time array must have the same length")
+            raise ValueError(
+                "Function array and time array must have the same length")
 
         if h is not None and h <= 0:
             raise ValueError("Step size must be positive")
@@ -318,7 +320,8 @@ class OptimizedGrunwaldLetnikov:
         coeffs_signed = signs * coeffs
 
         # Compute derivative using correct GL formula
-        # For GL derivative: D^α f(t) = lim_{h→0} h^(-α) * Σ_{j=0}^n (-1)^j * C(α,j) * f(t - jh)
+        # For GL derivative: D^α f(t) = lim_{h→0} h^(-α) * Σ_{j=0}^n (-1)^j *
+        # C(α,j) * f(t - jh)
         for n in range(1, N):
             sum_val = 0.0
             for j in range(n + 1):
@@ -333,7 +336,8 @@ class OptimizedGrunwaldLetnikov:
 
         return result
 
-    def _fast_binomial_coefficients_jax(self, alpha: float, max_k: int) -> np.ndarray:
+    def _fast_binomial_coefficients_jax(
+            self, alpha: float, max_k: int) -> np.ndarray:
         """Fast binomial coefficient generation using robust recursive formula."""
         # Check cache first
         cache_key = (alpha, max_k)
@@ -354,7 +358,10 @@ class OptimizedGrunwaldLetnikov:
 
         return coeffs
 
-    def _fast_binomial_coefficients(self, alpha: float, max_k: int) -> np.ndarray:
+    def _fast_binomial_coefficients(
+            self,
+            alpha: float,
+            max_k: int) -> np.ndarray:
         """Legacy method - kept for backward compatibility."""
         return self._fast_binomial_coefficients_jax(alpha, max_k)
 
@@ -461,7 +468,8 @@ class AdvancedFFTMethods:
         """Compute fractional derivative using advanced FFT method."""
         # Input validation
         if len(f) != len(t):
-            raise ValueError("Function array and time array must have the same length")
+            raise ValueError(
+                "Function array and time array must have the same length")
 
         # Alpha validation
         if isinstance(alpha, FractionalOrder):
@@ -531,7 +539,8 @@ class AdvancedFFTMethods:
 
         return np.real(result)
 
-    def _fractional_fourier_transform(self, f: np.ndarray, phi: float) -> np.ndarray:
+    def _fractional_fourier_transform(
+            self, f: np.ndarray, phi: float) -> np.ndarray:
         """Compute fractional Fourier transform."""
         N = len(f)
 
@@ -581,7 +590,8 @@ class AdvancedFFTMethods:
         freqs = np.fft.fftfreq(N)
 
         # Wavelet-like spectral operator
-        wavelet_op = (1j * 2 * np.pi * freqs) ** alpha_val * np.exp(-(freqs**2))
+        wavelet_op = (1j * 2 * np.pi * freqs) ** alpha_val * \
+            np.exp(-(freqs**2))
 
         result_fft = f_fft * wavelet_op
         result = np.real(np.fft.ifft(result_fft))
@@ -637,7 +647,8 @@ class L1L2Schemes:
                 diffusion_coeff,
             )
         else:
-            raise NotImplementedError(f"Scheme {self.scheme} not yet implemented")
+            raise NotImplementedError(
+                f"Scheme {self.scheme} not yet implemented")
 
     def _solve_l1_scheme(
         self,

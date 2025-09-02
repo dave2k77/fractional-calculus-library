@@ -34,9 +34,6 @@ from hpfracc.algorithms.advanced_methods import (
 # Import optimized methods
 from hpfracc.algorithms.advanced_optimized_methods import (
     optimized_weyl_derivative,
-    optimized_marchaud_derivative,
-    optimized_hadamard_derivative,
-    optimized_reiz_feller_derivative,
 )
 
 
@@ -252,7 +249,8 @@ def application_3_financial_modeling():
     # Black-Scholes-like model with fractional volatility
     def option_price(S, T, r, sigma_frac, K):
         """Simplified option pricing with fractional volatility"""
-        d1 = (np.log(S / K) + (r + 0.5 * sigma_frac**2) * T) / (sigma_frac * np.sqrt(T))
+        d1 = (np.log(S / K) + (r + 0.5 * sigma_frac**2) * T) / \
+            (sigma_frac * np.sqrt(T))
         d2 = d1 - sigma_frac * np.sqrt(T)
 
         # Call option price
@@ -460,7 +458,7 @@ def application_5_control_systems():
             return system_dynamics(t_val, y_val, u[i], alpha_val)
 
         # Solve for one step
-        dt = t[1] - t[0]
+        t[1] - t[0]
         y_step = adomian.solve(
             rhs, np.array([t[i - 1], t[i]]), initial_condition=y[i - 1], terms=5
         )
@@ -701,7 +699,8 @@ def application_7_signal_processing():
 
     # Calculate SNR improvement
     snr_before = 10 * np.log10(np.var(signal) / np.var(noisy_signal - signal))
-    snr_after = 10 * np.log10(np.var(signal) / np.var(filtered_signal - signal))
+    snr_after = 10 * np.log10(np.var(signal) /
+                              np.var(filtered_signal - signal))
 
     print("Signal processing analysis completed!")
     print(f"SNR before filtering: {snr_before:.2f} dB")
@@ -769,8 +768,8 @@ def application_8_climate_modeling():
     freqs = np.fft.fftfreq(len(t), h)
 
     # Remove DC component
-    psd = np.abs(fft_climate[1 : len(freqs) // 2]) ** 2
-    freqs_plot = freqs[1 : len(freqs) // 2]
+    psd = np.abs(fft_climate[1: len(freqs) // 2]) ** 2
+    freqs_plot = freqs[1: len(freqs) // 2]
 
     plt.loglog(freqs_plot, psd, "b-", linewidth=1.5)
     plt.title("Power Spectral Density")
@@ -792,7 +791,7 @@ def application_8_climate_modeling():
             m = n // i
             rs = []
             for j in range(m):
-                segment = data[j * i : (j + 1) * i]
+                segment = data[j * i: (j + 1) * i]
                 mean_seg = np.mean(segment)
                 dev = segment - mean_seg
                 cumdev = np.cumsum(dev)
@@ -830,7 +829,7 @@ def performance_comparison():
     # Test parameters
     alpha = 0.5
     grid_sizes = [1000, 5000, 10000]
-    test_function = lambda x: np.sin(x) * np.exp(-x / 3)
+    def test_function(x): return np.sin(x) * np.exp(-x / 3)
 
     print("Grid Size | Standard (s) | Optimized (s) | Speedup")
     print("-" * 50)
@@ -842,12 +841,12 @@ def performance_comparison():
         # Standard methods
         start_time = time.time()
         weyl_std = WeylDerivative(alpha)
-        result_std = weyl_std.compute(test_function, x, h)
+        weyl_std.compute(test_function, x, h)
         time_std = time.time() - start_time
 
         # Optimized methods
         start_time = time.time()
-        result_opt = optimized_weyl_derivative(test_function, x, alpha, h)
+        optimized_weyl_derivative(test_function, x, alpha, h)
         time_opt = time.time() - start_time
 
         speedup = time_std / time_opt

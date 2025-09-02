@@ -28,17 +28,19 @@ from .mittag_leffler import (
 __all__ = [
     # Gamma and Beta functions
     'gamma_function',
-    'beta_function', 
+    'beta_function',
+    'gamma',
+    'beta',
     'incomplete_gamma',
     'incomplete_beta',
     'log_gamma',
-    
+
     # Binomial coefficients
     'binomial_coefficient',
     'generalized_binomial',
     'multinomial_coefficient',
     'stirling_numbers',
-    
+
     # Mittag-Leffler functions
     'mittag_leffler_function',
     'mittag_leffler_derivative',

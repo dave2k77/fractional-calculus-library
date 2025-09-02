@@ -6,9 +6,7 @@ Adams-Bashforth-Moulton schemes, variable step size control, and error estimatio
 """
 
 import numpy as np
-from typing import Union, Optional, Tuple, Callable, Dict, Any, List
-from scipy import linalg
-import warnings
+from typing import Union, Optional, Tuple, Callable
 
 from ..core.definitions import FractionalOrder
 from ..special import gamma
@@ -53,9 +51,11 @@ class PredictorCorrectorSolver:
         self.max_h = max_h
 
         # Validate derivative type
-        valid_derivatives = ["caputo", "riemann_liouville", "grunwald_letnikov"]
+        valid_derivatives = [
+            "caputo", "riemann_liouville", "grunwald_letnikov"]
         if self.derivative_type not in valid_derivatives:
-            raise ValueError(f"Derivative type must be one of {valid_derivatives}")
+            raise ValueError(
+                f"Derivative type must be one of {valid_derivatives}")
 
     def solve(
         self,
@@ -132,10 +132,11 @@ class PredictorCorrectorSolver:
 
         # Main iteration loop
         for n in range(1, N):
-            t_n = t_values[n]
+            t_values[n]
 
             # Predictor step
-            y_pred = self._predictor_step(f, t_values, y_values, n, alpha, coeffs, h0)
+            y_pred = self._predictor_step(
+                f, t_values, y_values, n, alpha, coeffs, h0)
 
             # Corrector step with iteration
             y_corr = self._corrector_step(
@@ -225,12 +226,15 @@ class PredictorCorrectorSolver:
                 y_current = y_corr
 
                 # Adjust step size for next step
-                h_current = min(self.max_h, h_current * (self.tol / error) ** 0.5)
+                h_current = min(self.max_h, h_current *
+                                (self.tol / error) ** 0.5)
             else:
                 # Reject step and reduce step size
-                h_current = max(self.min_h, h_current * (self.tol / error) ** 0.25)
+                h_current = max(self.min_h, h_current *
+                                (self.tol / error) ** 0.25)
 
-                # Safety check: if step size is at minimum and still not converging, force progress
+                # Safety check: if step size is at minimum and still not
+                # converging, force progress
                 if h_current <= self.min_h and error > self.tol:
                     # Force acceptance with warning
                     import warnings
@@ -364,7 +368,8 @@ class PredictorCorrectorSolver:
         # Corrector formula
         t_n = t_values[n]
         y_corr = y_values[n - 1] + (h**alpha_val / gamma(alpha_val + 1)) * (
-            0.5 * (f(t_n, y_pred) + f(t_values[n - 1], y_values[n - 1])) - frac_term
+            0.5 * (f(t_n, y_pred) +
+                   f(t_values[n - 1], y_values[n - 1])) - frac_term
         )
 
         return y_corr
@@ -523,13 +528,14 @@ class AdamsBashforthMoultonSolver(PredictorCorrectorSolver):
         weights = self._compute_adams_bashforth_weights(n, alpha_val)
 
         # Predictor formula
-        t_n = t_values[n]
+        t_values[n]
         y_pred = y_values[n - 1]
 
         for j in range(n):
             t_j = t_values[j]
             y_pred += (
-                h**alpha_val / gamma(alpha_val + 1) * weights[j] * f(t_j, y_values[j])
+                h**alpha_val / gamma(alpha_val + 1) *
+                weights[j] * f(t_j, y_values[j])
             )
 
         return y_pred
@@ -570,14 +576,15 @@ class AdamsBashforthMoultonSolver(PredictorCorrectorSolver):
         weights = self._compute_adams_moulton_weights(n, alpha_val)
 
         # Corrector formula
-        t_n = t_values[n]
+        t_values[n]
         y_corr = y_values[n - 1]
 
         for j in range(n):
             t_j = t_values[j]
             if j == n - 1:
                 y_corr += (
-                    h**alpha_val / gamma(alpha_val + 1) * weights[j] * f(t_j, y_pred)
+                    h**alpha_val / gamma(alpha_val + 1) *
+                    weights[j] * f(t_j, y_pred)
                 )
             else:
                 y_corr += (
@@ -589,7 +596,8 @@ class AdamsBashforthMoultonSolver(PredictorCorrectorSolver):
 
         return y_corr
 
-    def _compute_adams_bashforth_weights(self, n: int, alpha: float) -> np.ndarray:
+    def _compute_adams_bashforth_weights(
+            self, n: int, alpha: float) -> np.ndarray:
         """
         Compute Adams-Bashforth weights.
 
@@ -608,7 +616,8 @@ class AdamsBashforthMoultonSolver(PredictorCorrectorSolver):
 
         return weights
 
-    def _compute_adams_moulton_weights(self, n: int, alpha: float) -> np.ndarray:
+    def _compute_adams_moulton_weights(
+            self, n: int, alpha: float) -> np.ndarray:
         """
         Compute Adams-Moulton weights.
 
@@ -676,7 +685,8 @@ class VariableStepPredictorCorrector(PredictorCorrectorSolver):
             Estimated error
         """
         # Use relative error for better control
-        error = np.linalg.norm(y_corr - y_pred) / (np.linalg.norm(y_corr) + 1e-12)
+        error = np.linalg.norm(y_corr - y_pred) / \
+            (np.linalg.norm(y_corr) + 1e-12)
         return error
 
     def _adaptive_step_size_control(
@@ -697,13 +707,15 @@ class VariableStepPredictorCorrector(PredictorCorrectorSolver):
         if error <= self.tol:
             # Accept step and increase step size
             factor = min(
-                2.0, self.safety_factor * (self.tol / error) ** (1.0 / (order + 1))
+                2.0, self.safety_factor *
+                (self.tol / error) ** (1.0 / (order + 1))
             )
             h_new = min(self.max_h, h_current * factor)
         else:
             # Reject step and decrease step size
             factor = max(
-                0.1, self.safety_factor * (self.tol / error) ** (1.0 / (order + 1))
+                0.1, self.safety_factor *
+                (self.tol / error) ** (1.0 / (order + 1))
             )
             h_new = max(self.min_h, h_current * factor)
 
@@ -742,7 +754,8 @@ def solve_predictor_corrector(
     if method == "standard":
         solver = PredictorCorrectorSolver(derivative_type, adaptive=adaptive)
     elif method == "adams_bashforth_moulton":
-        solver = AdamsBashforthMoultonSolver(derivative_type, adaptive=adaptive)
+        solver = AdamsBashforthMoultonSolver(
+            derivative_type, adaptive=adaptive)
     elif method == "variable_step":
         solver = VariableStepPredictorCorrector(derivative_type)
     else:

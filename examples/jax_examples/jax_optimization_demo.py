@@ -6,6 +6,14 @@ This example demonstrates the use of JAX for GPU acceleration, automatic
 differentiation, and vectorization in fractional calculus computations.
 """
 
+from hpfracc.algorithms.gpu_optimized_methods import (
+    JAXAutomaticDifferentiation,
+    gpu_optimized_caputo,
+    gpu_optimized_riemann_liouville,
+    gpu_optimized_grunwald_letnikov,
+    optimize_fractional_derivative_jax,
+    vectorize_fractional_derivatives,
+)
 import numpy as np
 import jax.numpy as jnp
 import matplotlib.pyplot as plt
@@ -16,18 +24,6 @@ import os
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
 
 # Updated imports for consolidated structure
-from hpfracc.algorithms.gpu_optimized_methods import (
-    GPUOptimizedCaputo,
-    GPUOptimizedRiemannLiouville,
-    GPUOptimizedGrunwaldLetnikov,
-    JAXAutomaticDifferentiation,
-    JAXOptimizer,
-    gpu_optimized_caputo,
-    gpu_optimized_riemann_liouville,
-    gpu_optimized_grunwald_letnikov,
-    optimize_fractional_derivative_jax,
-    vectorize_fractional_derivatives,
-)
 
 
 def gpu_acceleration_demo():
@@ -88,7 +84,8 @@ def gpu_acceleration_demo():
 
     # Original function
     plt.subplot(2, 2, 1)
-    plt.plot(t, f, "k-", linewidth=2, label="Original: f(t) = sin(t) * exp(-t/2)")
+    plt.plot(t, f, "k-", linewidth=2,
+             label="Original: f(t) = sin(t) * exp(-t/2)")
     plt.xlabel("Time t")
     plt.ylabel("Function Value")
     plt.title("Original Function")
@@ -105,7 +102,8 @@ def gpu_acceleration_demo():
         )
         plt.xlabel("Time t")
         plt.ylabel("Derivative Value")
-        plt.title(f"{method_name} Derivative\nTime: {timings[method_name]:.4f}s")
+        plt.title(
+            f"{method_name} Derivative\nTime: {timings[method_name]:.4f}s")
         plt.legend()
         plt.grid(True, alpha=0.3)
 
@@ -186,7 +184,8 @@ def vectorization_demo():
             gpu_optimized_caputo, f, t, alphas, h
         )
 
-        print(f"✅ Vectorized computation completed: shape {vectorized_results.shape}")
+        print(
+            f"✅ Vectorized computation completed: shape {vectorized_results.shape}")
 
         # Plot results
         plt.figure(figsize=(12, 8))
@@ -266,7 +265,7 @@ def performance_benchmark():
 
                 # Time the computation
                 start_time = time.time()
-                result = method_func(f_np, t_np, alpha, h_np)
+                method_func(f_np, t_np, alpha, h_np)
                 end_time = time.time()
 
                 timings[method_name] = end_time - start_time
@@ -355,7 +354,8 @@ def fft_methods_demo():
         # Spectral method
         plt.subplot(1, 3, 2)
         plt.plot(t, f, "k-", linewidth=1, alpha=0.3, label="Original")
-        plt.plot(t, results["spectral"], "r-", linewidth=2, label="Spectral FFT")
+        plt.plot(t, results["spectral"], "r-",
+                 linewidth=2, label="Spectral FFT")
         plt.xlabel("Time t")
         plt.ylabel("Derivative Value")
         plt.title("Spectral FFT Method")
@@ -365,7 +365,8 @@ def fft_methods_demo():
         # Convolution method
         plt.subplot(1, 3, 3)
         plt.plot(t, f, "k-", linewidth=1, alpha=0.3, label="Original")
-        plt.plot(t, results["convolution"], "b-", linewidth=2, label="Convolution FFT")
+        plt.plot(t, results["convolution"], "b-",
+                 linewidth=2, label="Convolution FFT")
         plt.xlabel("Time t")
         plt.ylabel("Derivative Value")
         plt.title("Convolution FFT Method")

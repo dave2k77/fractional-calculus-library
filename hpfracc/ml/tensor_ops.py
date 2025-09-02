@@ -5,7 +5,7 @@ This module provides consistent tensor operations across PyTorch, JAX, and NUMBA
 enabling seamless switching between frameworks while maintaining the same API.
 """
 
-from typing import Optional, Union, Any, List, Tuple, Callable
+from typing import Optional, Union, Any, List, Tuple
 import warnings
 
 from .backends import get_backend_manager, BackendType
@@ -14,20 +14,21 @@ from .backends import get_backend_manager, BackendType
 class TensorOps:
     """
     Unified tensor operations across different backends
-    
+
     This class provides a consistent interface for common tensor operations
     regardless of the underlying backend (PyTorch, JAX, or NUMBA).
     """
-    
+
     def __init__(self, backend: Optional[BackendType] = None):
         self.backend_manager = get_backend_manager()
-        # Normalize AUTO to currently active backend to avoid Unknown backend errors
+        # Normalize AUTO to currently active backend to avoid Unknown backend
+        # errors
         resolved_backend = backend or self.backend_manager.active_backend
         if resolved_backend == BackendType.AUTO:
             resolved_backend = self.backend_manager.active_backend
         self.backend = resolved_backend
         self.tensor_lib = self.backend_manager.get_tensor_lib()
-    
+
     def create_tensor(self, data: Any, **kwargs) -> Any:
         """Create a tensor in the current backend"""
         # Filter out backend-specific arguments
@@ -36,15 +37,17 @@ class TensorOps:
             return self.backend_manager.create_tensor(data, **kwargs)
         elif self.backend == BackendType.JAX:
             # JAX doesn't support requires_grad, filter it out
-            jax_kwargs = {k: v for k, v in kwargs.items() if k != 'requires_grad'}
+            jax_kwargs = {k: v for k, v in kwargs.items() if k !=
+                          'requires_grad'}
             return self.backend_manager.create_tensor(data, **jax_kwargs)
         elif self.backend == BackendType.NUMBA:
             # NUMBA doesn't support requires_grad, filter it out
-            numba_kwargs = {k: v for k, v in kwargs.items() if k != 'requires_grad'}
+            numba_kwargs = {k: v for k,
+                            v in kwargs.items() if k != 'requires_grad'}
             return self.backend_manager.create_tensor(data, **numba_kwargs)
         else:
             raise RuntimeError(f"Unknown backend: {self.backend}")
-    
+
     def zeros(self, shape: Tuple[int, ...], **kwargs) -> Any:
         """Create a tensor of zeros"""
         if self.backend == BackendType.TORCH:
@@ -56,7 +59,7 @@ class TensorOps:
             return np.zeros(shape, **kwargs)
         else:
             raise RuntimeError(f"Unknown backend: {self.backend}")
-    
+
     def ones(self, shape: Tuple[int, ...], **kwargs) -> Any:
         """Create a tensor of ones"""
         if self.backend == BackendType.TORCH:
@@ -68,7 +71,7 @@ class TensorOps:
             return np.ones(shape, **kwargs)
         else:
             raise RuntimeError(f"Unknown backend: {self.backend}")
-    
+
     def eye(self, n: int, **kwargs) -> Any:
         """Create an identity matrix"""
         if self.backend == BackendType.TORCH:
@@ -80,7 +83,7 @@ class TensorOps:
             return np.eye(n, **kwargs)
         else:
             raise RuntimeError(f"Unknown backend: {self.backend}")
-    
+
     def arange(self, start: int, end: int, step: int = 1, **kwargs) -> Any:
         """Create a range of values"""
         if self.backend == BackendType.TORCH:
@@ -92,7 +95,7 @@ class TensorOps:
             return np.arange(start, end, step, **kwargs)
         else:
             raise RuntimeError(f"Unknown backend: {self.backend}")
-    
+
     def linspace(self, start: float, end: float, num: int, **kwargs) -> Any:
         """Create linearly spaced values"""
         if self.backend == BackendType.TORCH:
@@ -104,7 +107,7 @@ class TensorOps:
             return np.linspace(start, end, num, **kwargs)
         else:
             raise RuntimeError(f"Unknown backend: {self.backend}")
-    
+
     def zeros_like(self, tensor: Any, **kwargs) -> Any:
         """Create a tensor of zeros with the same shape as the input tensor"""
         if self.backend == BackendType.TORCH:
@@ -120,7 +123,7 @@ class TensorOps:
                 return np.zeros(1, **kwargs)
         else:
             raise RuntimeError(f"Unknown backend: {self.backend}")
-    
+
     def sqrt(self, tensor: Any) -> Any:
         """Compute the square root of a tensor"""
         if self.backend == BackendType.TORCH:
@@ -132,7 +135,7 @@ class TensorOps:
             return np.sqrt(tensor)
         else:
             raise RuntimeError(f"Unknown backend: {self.backend}")
-    
+
     def stack(self, tensors: List[Any], dim: int = 0) -> Any:
         """Stack tensors along a dimension"""
         if self.backend == BackendType.TORCH:
@@ -144,7 +147,7 @@ class TensorOps:
             return np.stack(tensors, axis=dim)
         else:
             raise RuntimeError(f"Unknown backend: {self.backend}")
-    
+
     def cat(self, tensors: List[Any], dim: int = 0) -> Any:
         """Concatenate tensors along a dimension"""
         if self.backend == BackendType.TORCH:
@@ -156,7 +159,7 @@ class TensorOps:
             return np.concatenate(tensors, axis=dim)
         else:
             raise RuntimeError(f"Unknown backend: {self.backend}")
-    
+
     def reshape(self, tensor: Any, shape: Tuple[int, ...]) -> Any:
         """Reshape a tensor"""
         if self.backend == BackendType.TORCH:
@@ -167,8 +170,9 @@ class TensorOps:
             return tensor.reshape(shape)
         else:
             raise RuntimeError(f"Unknown backend: {self.backend}")
-    
-    def repeat(self, tensor: Any, repeats: Union[int, Tuple[int, ...]], dim: int = 0) -> Any:
+
+    def repeat(self, tensor: Any,
+               repeats: Union[int, Tuple[int, ...]], dim: int = 0) -> Any:
         """Repeat a tensor along specified dimensions"""
         if self.backend == BackendType.TORCH:
             return tensor.repeat(repeats, dim=dim)
@@ -179,7 +183,7 @@ class TensorOps:
             return np.repeat(tensor, repeats, axis=dim)
         else:
             raise RuntimeError(f"Unknown backend: {self.backend}")
-    
+
     def clip(self, tensor: Any, min_val: float, max_val: float) -> Any:
         """Clip tensor values to a specified range"""
         if self.backend == BackendType.TORCH:
@@ -191,7 +195,7 @@ class TensorOps:
             return np.clip(tensor, min_val, max_val)
         else:
             raise RuntimeError(f"Unknown backend: {self.backend}")
-    
+
     def unsqueeze(self, tensor: Any, dim: int) -> Any:
         """Add a dimension to a tensor at the specified position"""
         if self.backend == BackendType.TORCH:
@@ -203,7 +207,7 @@ class TensorOps:
             return np.expand_dims(tensor, dim)
         else:
             raise RuntimeError(f"Unknown backend: {self.backend}")
-    
+
     def expand(self, tensor: Any, *sizes: int) -> Any:
         """Expand a tensor to new dimensions"""
         if self.backend == BackendType.TORCH:
@@ -217,7 +221,7 @@ class TensorOps:
             return np.broadcast_to(tensor, sizes)
         else:
             raise RuntimeError(f"Unknown backend: {self.backend}")
-    
+
     def gather(self, tensor: Any, dim: int, index: Any) -> Any:
         """Gather values from a tensor using indices"""
         if self.backend == BackendType.TORCH:
@@ -226,12 +230,12 @@ class TensorOps:
             # JAX doesn't have gather, use advanced indexing instead
             return tensor[index]
         elif self.backend == BackendType.NUMBA:
-            import numpy as np
+            pass
             # NUMBA doesn't have gather, use advanced indexing instead
             return tensor[index]
         else:
             raise RuntimeError(f"Unknown backend: {self.backend}")
-    
+
     def squeeze(self, tensor: Any, dim: Optional[int] = None) -> Any:
         """Remove dimensions of size 1 from a tensor"""
         if self.backend == BackendType.TORCH:
@@ -243,7 +247,7 @@ class TensorOps:
             return np.squeeze(tensor, axis=dim)
         else:
             raise RuntimeError(f"Unknown backend: {self.backend}")
-    
+
     def transpose(self, tensor: Any, dims: Tuple[int, ...]) -> Any:
         """Transpose a tensor"""
         if self.backend == BackendType.TORCH:
@@ -254,7 +258,7 @@ class TensorOps:
             return tensor.transpose(dims)
         else:
             raise RuntimeError(f"Unknown backend: {self.backend}")
-    
+
     def matmul(self, a: Any, b: Any) -> Any:
         """Matrix multiplication"""
         if self.backend == BackendType.TORCH:
@@ -266,7 +270,7 @@ class TensorOps:
             return np.matmul(a, b)
         else:
             raise RuntimeError(f"Unknown backend: {self.backend}")
-    
+
     def einsum(self, equation: str, *operands) -> Any:
         """Einstein summation"""
         if self.backend == BackendType.TORCH:
@@ -275,11 +279,12 @@ class TensorOps:
             return self.tensor_lib.einsum(equation, *operands)
         elif self.backend == BackendType.NUMBA:
             # NUMBA doesn't have einsum, fall back to basic operations
-            warnings.warn("NUMBA backend doesn't support einsum, using basic operations")
+            warnings.warn(
+                "NUMBA backend doesn't support einsum, using basic operations")
             return self._numba_einsum_fallback(equation, *operands)
         else:
             raise RuntimeError(f"Unknown backend: {self.backend}")
-    
+
     def _numba_einsum_fallback(self, equation: str, *operands) -> Any:
         """Fallback einsum implementation for NUMBA"""
         # This is a simplified fallback - in practice, you might want to
@@ -290,9 +295,14 @@ class TensorOps:
         elif equation == "i,i->":
             return np.sum(operands[0] * operands[1])
         else:
-            raise NotImplementedError(f"NUMBA backend doesn't support einsum pattern: {equation}")
-    
-    def sum(self, tensor: Any, dim: Optional[int] = None, keepdims: bool = False) -> Any:
+            raise NotImplementedError(
+                f"NUMBA backend doesn't support einsum pattern: {equation}")
+
+    def sum(
+            self,
+            tensor: Any,
+            dim: Optional[int] = None,
+            keepdims: bool = False) -> Any:
         """Sum tensor elements"""
         if self.backend == BackendType.TORCH:
             return tensor.sum(dim=dim, keepdim=keepdims)
@@ -303,8 +313,12 @@ class TensorOps:
             return np.sum(tensor, axis=dim, keepdims=keepdims)
         else:
             raise RuntimeError(f"Unknown backend: {self.backend}")
-    
-    def mean(self, tensor: Any, dim: Optional[int] = None, keepdims: bool = False) -> Any:
+
+    def mean(
+            self,
+            tensor: Any,
+            dim: Optional[int] = None,
+            keepdims: bool = False) -> Any:
         """Mean of tensor elements"""
         if self.backend == BackendType.TORCH:
             return tensor.mean(dim=dim, keepdim=keepdims)
@@ -315,8 +329,12 @@ class TensorOps:
             return np.mean(tensor, axis=dim, keepdims=keepdims)
         else:
             raise RuntimeError(f"Unknown backend: {self.backend}")
-    
-    def max(self, tensor: Any, dim: Optional[int] = None, keepdims: bool = False) -> Any:
+
+    def max(
+            self,
+            tensor: Any,
+            dim: Optional[int] = None,
+            keepdims: bool = False) -> Any:
         """Maximum of tensor elements"""
         if self.backend == BackendType.TORCH:
             return tensor.max(dim=dim, keepdim=keepdims)
@@ -327,8 +345,12 @@ class TensorOps:
             return np.max(tensor, axis=dim, keepdims=keepdims)
         else:
             raise RuntimeError(f"Unknown backend: {self.backend}")
-    
-    def min(self, tensor: Any, dim: Optional[int] = None, keepdims: bool = False) -> Any:
+
+    def min(
+            self,
+            tensor: Any,
+            dim: Optional[int] = None,
+            keepdims: bool = False) -> Any:
         """Minimum of tensor elements"""
         if self.backend == BackendType.TORCH:
             return tensor.min(dim=dim, keepdim=keepdims)
@@ -339,8 +361,9 @@ class TensorOps:
             return np.min(tensor, axis=dim, keepdims=keepdims)
         else:
             raise RuntimeError(f"Unknown backend: {self.backend}")
-    
-    def norm(self, tensor: Any, p: float = 2, dim: Optional[int] = None) -> Any:
+
+    def norm(self, tensor: Any, p: float = 2,
+             dim: Optional[int] = None) -> Any:
         """Compute norm of tensor"""
         if self.backend == BackendType.TORCH:
             return tensor.norm(p=p, dim=dim)
@@ -351,7 +374,7 @@ class TensorOps:
             return np.linalg.norm(tensor, ord=p, axis=dim)
         else:
             raise RuntimeError(f"Unknown backend: {self.backend}")
-    
+
     def softmax(self, tensor: Any, dim: int = -1) -> Any:
         """Apply softmax activation"""
         if self.backend == BackendType.TORCH:
@@ -361,10 +384,11 @@ class TensorOps:
             return jax.nn.softmax(tensor, axis=dim)
         elif self.backend == BackendType.NUMBA:
             import numpy as np
-            return np.exp(tensor) / np.sum(np.exp(tensor), axis=dim, keepdims=True)
+            return np.exp(tensor) / np.sum(np.exp(tensor),
+                                           axis=dim, keepdims=True)
         else:
             raise RuntimeError(f"Unknown backend: {self.backend}")
-    
+
     def relu(self, tensor: Any) -> Any:
         """Apply ReLU activation"""
         if self.backend == BackendType.TORCH:
@@ -376,7 +400,7 @@ class TensorOps:
             return np.maximum(tensor, 0)
         else:
             raise RuntimeError(f"Unknown backend: {self.backend}")
-    
+
     def sigmoid(self, tensor: Any) -> Any:
         """Apply sigmoid activation"""
         if self.backend == BackendType.TORCH:
@@ -388,7 +412,7 @@ class TensorOps:
             return 1 / (1 + np.exp(-tensor))
         else:
             raise RuntimeError(f"Unknown backend: {self.backend}")
-    
+
     def tanh(self, tensor: Any) -> Any:
         """Apply tanh activation"""
         if self.backend == BackendType.TORCH:
@@ -400,19 +424,7 @@ class TensorOps:
             return np.tanh(tensor)
         else:
             raise RuntimeError(f"Unknown backend: {self.backend}")
-    
-    def sqrt(self, tensor: Any) -> Any:
-        """Compute square root"""
-        if self.backend == BackendType.TORCH:
-            return self.tensor_lib.sqrt(tensor)
-        elif self.backend == BackendType.JAX:
-            return self.tensor_lib.sqrt(tensor)
-        elif self.backend == BackendType.NUMBA:
-            import numpy as np
-            return np.sqrt(tensor)
-        else:
-            raise RuntimeError(f"Unknown backend: {self.backend}")
-    
+
     def log(self, tensor: Any) -> Any:
         """Compute natural logarithm"""
         if self.backend == BackendType.TORCH:
@@ -424,12 +436,16 @@ class TensorOps:
             return np.log(tensor)
         else:
             raise RuntimeError(f"Unknown backend: {self.backend}")
-    
-    def dropout(self, tensor: Any, p: float = 0.5, training: bool = True) -> Any:
+
+    def dropout(
+            self,
+            tensor: Any,
+            p: float = 0.5,
+            training: bool = True) -> Any:
         """Apply dropout"""
         if not training or p == 0:
             return tensor
-        
+
         if self.backend == BackendType.TORCH:
             return self.tensor_lib.dropout(tensor, p=p, train=training)
         elif self.backend == BackendType.JAX:
@@ -454,7 +470,8 @@ _tensor_ops: Optional[TensorOps] = None
 def get_tensor_ops(backend: Optional[BackendType] = None) -> TensorOps:
     """Get the global tensor operations instance"""
     global _tensor_ops
-    if _tensor_ops is None or (backend is not None and _tensor_ops.backend != backend):
+    if _tensor_ops is None or (
+            backend is not None and _tensor_ops.backend != backend):
         _tensor_ops = TensorOps(backend)
     return _tensor_ops
 

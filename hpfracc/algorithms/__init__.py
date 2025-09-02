@@ -8,7 +8,8 @@ including standard, optimized, GPU-accelerated, and parallel processing versions
 # Core algorithms (consolidated into optimized_methods.py)
 # from .caputo import CaputoDerivative  # REMOVED - use OptimizedCaputo instead
 # from .riemann_liouville import RiemannLiouvilleDerivative  # REMOVED - use OptimizedRiemannLiouville instead
-# from .grunwald_letnikov import GrunwaldLetnikovDerivative  # REMOVED - use OptimizedGrunwaldLetnikov instead
+# from .grunwald_letnikov import GrunwaldLetnikovDerivative  # REMOVED -
+# use OptimizedGrunwaldLetnikov instead
 
 # Optimized algorithms (consolidated - PRIMARY implementations)
 from .optimized_methods import (
@@ -84,10 +85,12 @@ from .advanced_optimized_methods import (
 )
 
 # FFT methods (consolidated into optimized_methods.py)
-# from .fft_methods import FFTFractionalMethods  # REMOVED - use AdvancedFFTMethods instead
+# from .fft_methods import FFTFractionalMethods  # REMOVED - use
+# AdvancedFFTMethods instead
 
 # L1/L2 schemes (consolidated into optimized_methods.py)
-# from .L1_L2_schemes import L1L2Schemes  # REMOVED - now imported from optimized_methods
+# from .L1_L2_schemes import L1L2Schemes  # REMOVED - now imported from
+# optimized_methods
 
 # Define what gets imported with "from algorithms import *"
 __all__ = [

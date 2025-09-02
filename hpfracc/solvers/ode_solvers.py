@@ -6,10 +6,7 @@ various numerical methods, adaptive step size control, and error estimation.
 """
 
 import numpy as np
-from typing import Union, Optional, Tuple, Callable, Dict, Any, List
-from scipy import integrate, interpolate
-from scipy.linalg import solve_banded
-import warnings
+from typing import Union, Optional, Tuple, Callable
 
 from ..core.definitions import FractionalOrder
 
@@ -53,9 +50,11 @@ class FractionalODESolver:
         self.max_iter = max_iter
 
         # Validate derivative type
-        valid_derivatives = ["caputo", "riemann_liouville", "grunwald_letnikov"]
+        valid_derivatives = [
+            "caputo", "riemann_liouville", "grunwald_letnikov"]
         if self.derivative_type not in valid_derivatives:
-            raise ValueError(f"Derivative type must be one of {valid_derivatives}")
+            raise ValueError(
+                f"Derivative type must be one of {valid_derivatives}")
 
         # Validate method
         valid_methods = [
@@ -96,9 +95,11 @@ class FractionalODESolver:
             h = (tf - t0) / 100  # Default step size
 
         if self.method == "predictor_corrector":
-            return self._solve_predictor_corrector(f, t0, tf, y0, alpha, h, **kwargs)
+            return self._solve_predictor_corrector(
+                f, t0, tf, y0, alpha, h, **kwargs)
         elif self.method == "adams_bashforth":
-            return self._solve_adams_bashforth(f, t0, tf, y0, alpha, h, **kwargs)
+            return self._solve_adams_bashforth(
+                f, t0, tf, y0, alpha, h, **kwargs)
         elif self.method == "runge_kutta":
             return self._solve_runge_kutta(f, t0, tf, y0, alpha, h, **kwargs)
         elif self.method == "euler":
@@ -148,10 +149,11 @@ class FractionalODESolver:
 
         # Main iteration loop
         for n in range(1, N):
-            t_n = t_values[n]
+            t_values[n]
 
             # Predictor step (Adams-Bashforth type)
-            y_pred = self._predictor_step(f, t_values, y_values, n, alpha, coeffs, h)
+            y_pred = self._predictor_step(
+                f, t_values, y_values, n, alpha, coeffs, h)
 
             # Corrector step (Adams-Moulton type)
             y_corr = self._corrector_step(
@@ -214,7 +216,7 @@ class FractionalODESolver:
 
         # Main iteration loop
         for n in range(1, N):
-            t_n = t_values[n]
+            t_values[n]
 
             # Adams-Bashforth step
             y_values[n] = self._adams_bashforth_step(
@@ -262,10 +264,11 @@ class FractionalODESolver:
 
         # Main iteration loop
         for n in range(1, N):
-            t_n = t_values[n]
+            t_values[n]
 
             # Fractional Runge-Kutta step
-            y_values[n] = self._runge_kutta_step(f, t_values, y_values, n, alpha, h)
+            y_values[n] = self._runge_kutta_step(
+                f, t_values, y_values, n, alpha, h)
 
         return t_values, y_values
 
@@ -311,10 +314,11 @@ class FractionalODESolver:
 
         # Main iteration loop
         for n in range(1, N):
-            t_n = t_values[n]
+            t_values[n]
 
             # Fractional Euler step
-            y_values[n] = self._euler_step(f, t_values, y_values, n, alpha, coeffs, h)
+            y_values[n] = self._euler_step(
+                f, t_values, y_values, n, alpha, coeffs, h)
 
         return t_values, y_values
 
@@ -436,7 +440,8 @@ class FractionalODESolver:
         # Corrector formula
         t_n = t_values[n]
         y_corr = y_values[n - 1] + (h**alpha_val / gamma(alpha_val + 1)) * (
-            0.5 * (f(t_n, y_pred) + f(t_values[n - 1], y_values[n - 1])) - frac_term
+            0.5 * (f(t_n, y_pred) +
+                   f(t_values[n - 1], y_values[n - 1])) - frac_term
         )
 
         return y_corr
@@ -524,7 +529,8 @@ class FractionalODESolver:
         # Runge-Kutta formula
         y_next = (
             y_n
-            + (h**alpha_val / gamma(alpha_val + 1)) * (k1 + 2 * k2 + 2 * k3 + k4) / 6
+            + (h**alpha_val / gamma(alpha_val + 1)) *
+            (k1 + 2 * k2 + 2 * k3 + k4) / 6
         )
 
         return y_next
@@ -666,10 +672,12 @@ class AdaptiveFractionalODESolver(FractionalODESolver):
                 y_current = y_next
 
                 # Adjust step size for next step
-                h_current = min(self.max_h, h_current * (self.tol / error) ** 0.5)
+                h_current = min(self.max_h, h_current *
+                                (self.tol / error) ** 0.5)
             else:
                 # Reject step and reduce step size
-                h_current = max(self.min_h, h_current * (self.tol / error) ** 0.25)
+                h_current = max(self.min_h, h_current *
+                                (self.tol / error) ** 0.25)
 
         return np.array(t_values), np.array(y_values)
 
@@ -701,7 +709,8 @@ class AdaptiveFractionalODESolver(FractionalODESolver):
                 f, t_current, t_next, y_current, alpha, h
             )
         elif self.method == "runge_kutta":
-            return self._adaptive_runge_kutta(f, t_current, t_next, y_current, alpha, h)
+            return self._adaptive_runge_kutta(
+                f, t_current, t_next, y_current, alpha, h)
         else:
             # Fall back to non-adaptive method
             return self._euler_step(
@@ -738,7 +747,8 @@ class AdaptiveFractionalODESolver(FractionalODESolver):
             Solution at next time
         """
         # Predictor step
-        y_pred = y_current + (h**alpha / gamma(alpha + 1)) * f(t_current, y_current)
+        y_pred = y_current + (h**alpha / gamma(alpha + 1)
+                              ) * f(t_current, y_current)
 
         # Corrector step with iteration
         y_corr = y_pred
@@ -784,7 +794,8 @@ class AdaptiveFractionalODESolver(FractionalODESolver):
 
         # Runge-Kutta formula
         y_next = (
-            y_current + (h**alpha / gamma(alpha + 1)) * (k1 + 2 * k2 + 2 * k3 + k4) / 6
+            y_current + (h**alpha / gamma(alpha + 1)) *
+            (k1 + 2 * k2 + 2 * k3 + k4) / 6
         )
 
         return y_next
@@ -815,7 +826,8 @@ class AdaptiveFractionalODESolver(FractionalODESolver):
             Estimated error
         """
         # Use difference between predictor and corrector as error estimate
-        y_pred = y_current + (h**alpha / gamma(alpha + 1)) * f(t_current, y_current)
+        y_pred = y_current + (h**alpha / gamma(alpha + 1)
+                              ) * f(t_current, y_current)
         error = np.linalg.norm(y_next - y_pred)
 
         return error
@@ -884,4 +896,11 @@ def solve_fractional_system(
     """
     # For now, use the same solver for systems
     # In practice, you might want specialized system solvers
-    return solve_fractional_ode(f, t_span, y0, alpha, derivative_type, method, **kwargs)
+    return solve_fractional_ode(
+        f,
+        t_span,
+        y0,
+        alpha,
+        derivative_type,
+        method,
+        **kwargs)

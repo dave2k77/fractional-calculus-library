@@ -8,8 +8,7 @@ numerical methods.
 
 import numpy as np
 from scipy.special import gamma
-from typing import Callable, Dict, List, Optional, Tuple, Union
-import warnings
+from typing import Callable, Dict, List, Tuple
 
 
 class AnalyticalSolutions:
@@ -17,7 +16,6 @@ class AnalyticalSolutions:
 
     def __init__(self):
         """Initialize the analytical solutions."""
-        pass
 
     def power_function_derivative(
         self, x: np.ndarray, alpha: float, order: float
@@ -167,7 +165,11 @@ class PowerFunctionSolutions:
         """Initialize power function solutions."""
         self.base_solutions = AnalyticalSolutions()
 
-    def get_solution(self, x: np.ndarray, alpha: float, order: float) -> np.ndarray:
+    def get_solution(
+            self,
+            x: np.ndarray,
+            alpha: float,
+            order: float) -> np.ndarray:
         """Get analytical solution for x^alpha."""
         return self.base_solutions.power_function_derivative(x, alpha, order)
 
@@ -189,7 +191,11 @@ class ExponentialSolutions:
         """Initialize exponential solutions."""
         self.base_solutions = AnalyticalSolutions()
 
-    def get_solution(self, x: np.ndarray, a: float, order: float) -> np.ndarray:
+    def get_solution(
+            self,
+            x: np.ndarray,
+            a: float,
+            order: float) -> np.ndarray:
         """Get analytical solution for exp(ax)."""
         return self.base_solutions.exponential_derivative(x, a, order)
 
@@ -214,7 +220,8 @@ class TrigonometricSolutions:
         self, x: np.ndarray, func_type: str, omega: float, order: float
     ) -> np.ndarray:
         """Get analytical solution for trigonometric functions."""
-        return self.base_solutions.trigonometric_derivative(x, func_type, omega, order)
+        return self.base_solutions.trigonometric_derivative(
+            x, func_type, omega, order)
 
     def get_test_cases(self) -> List[Dict]:
         """Get standard test cases for trigonometric functions."""
@@ -252,7 +259,10 @@ class TrigonometricSolutions:
         ]
 
 
-def get_analytical_solution(func_type: str, x: np.ndarray, **params) -> np.ndarray:
+def get_analytical_solution(
+        func_type: str,
+        x: np.ndarray,
+        **params) -> np.ndarray:
     """
     Get analytical solution for a given function type.
 

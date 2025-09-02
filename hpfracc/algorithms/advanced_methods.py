@@ -12,19 +12,11 @@ All methods include parallel processing and memory optimizations.
 """
 
 import numpy as np
-import jax
-import jax.numpy as jnp
-from jax import jit, vmap, pmap
-from jax.scipy import special
-from numba import jit as numba_jit, prange
-from typing import Union, Optional, Tuple, Callable, Dict, Any, List
-import warnings
-from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
-import multiprocessing as mp
-from functools import partial
+from typing import Union, Optional, Tuple, Callable, Dict, List
+from concurrent.futures import ThreadPoolExecutor
 
 from ..core.definitions import FractionalOrder
-from ..special import gamma, beta
+from ..special import gamma
 from .parallel_optimized_methods import ParallelConfig
 
 
@@ -87,7 +79,11 @@ class WeylDerivative:
         else:
             return self._compute_serial(f_array, x_array, h or 1.0)
 
-    def _compute_serial(self, f: np.ndarray, x: np.ndarray, h: float) -> np.ndarray:
+    def _compute_serial(
+            self,
+            f: np.ndarray,
+            x: np.ndarray,
+            h: float) -> np.ndarray:
         """Serial computation using optimized FFT convolution."""
         N = len(f)
         n = self.n
@@ -121,23 +117,28 @@ class WeylDerivative:
                     result[i] = (conv[i] - conv[i - 1]) / h
             else:
                 if i < N - 1:
-                    result[i] = (conv[i + 1] - 2 * conv[i] + conv[i - 1]) / (h**2)
+                    result[i] = (conv[i + 1] - 2 * conv[i] +
+                                 conv[i - 1]) / (h**2)
                 else:
                     result[i] = (conv[i] - conv[i - 1]) / h
 
         return result * h
 
-    def _compute_parallel(self, f: np.ndarray, x: np.ndarray, h: float) -> np.ndarray:
+    def _compute_parallel(
+            self,
+            f: np.ndarray,
+            x: np.ndarray,
+            h: float) -> np.ndarray:
         """Parallel computation using chunked processing."""
         N = len(f)
-        
+
         # Handle empty arrays
         if N == 0:
             return np.array([])
-            
+
         chunk_size = max(1, N // self.parallel_config.n_jobs)
         chunks = [
-            (f[i : i + chunk_size], x[i : i + chunk_size], h)
+            (f[i: i + chunk_size], x[i: i + chunk_size], h)
             for i in range(0, N, chunk_size)
         ]
 
@@ -217,32 +218,33 @@ class MarchaudDerivative:
                 f_array, x_array, h or 1.0, use_parallel
             )
         else:
-            return self._compute_standard(f_array, x_array, h or 1.0, use_parallel)
+            return self._compute_standard(
+                f_array, x_array, h or 1.0, use_parallel)
 
     def _compute_memory_optimized(
         self, f: np.ndarray, x: np.ndarray, h: float, use_parallel: bool
     ) -> np.ndarray:
         """Memory-optimized computation using streaming approach."""
         N = len(f)
-        
+
         # Handle empty arrays
         if N == 0:
             return np.array([])
-            
+
         result = np.zeros(N)
 
         # Use smaller chunks to reduce memory usage
         chunk_size = max(1, min(1000, N // 4))
 
         if use_parallel and self.parallel_config.enabled:
-            chunks = [
-                (f, x, h, i, min(i + chunk_size, N)) for i in range(0, N, chunk_size)
-            ]
+            chunks = [(f, x, h, i, min(i + chunk_size, N))
+                      for i in range(0, N, chunk_size)]
 
             with ThreadPoolExecutor(
                 max_workers=self.parallel_config.n_jobs
             ) as executor:
-                chunk_results = list(executor.map(self._process_marchaud_chunk, chunks))
+                chunk_results = list(executor.map(
+                    self._process_marchaud_chunk, chunks))
 
             for i, chunk_result in enumerate(chunk_results):
                 start_idx = i * chunk_size
@@ -251,7 +253,8 @@ class MarchaudDerivative:
         else:
             for i in range(0, N, chunk_size):
                 end_idx = min(i + chunk_size, N)
-                result[i:end_idx] = self._compute_marchaud_segment(f, x, h, i, end_idx)
+                result[i:end_idx] = self._compute_marchaud_segment(
+                    f, x, h, i, end_idx)
 
         return result
 
@@ -263,8 +266,12 @@ class MarchaudDerivative:
         return self._compute_marchaud_segment(f, x, h, start_idx, end_idx)
 
     def _compute_marchaud_segment(
-        self, f: np.ndarray, x: np.ndarray, h: float, start_idx: int, end_idx: int
-    ) -> np.ndarray:
+            self,
+            f: np.ndarray,
+            x: np.ndarray,
+            h: float,
+            start_idx: int,
+            end_idx: int) -> np.ndarray:
         """Compute Marchaud derivative for a segment."""
         result = np.zeros(end_idx - start_idx)
 
@@ -344,7 +351,8 @@ class HadamardDerivative:
                 x_max = x
                 if h is None:
                     h = x_max / 1000
-                x_array = np.arange(1, x_max + h, h)  # Start from 1 for Hadamard
+                # Start from 1 for Hadamard
+                x_array = np.arange(1, x_max + h, h)
             f_array = np.array([f(xi) for xi in x_array])
         else:
             f_array = f
@@ -360,7 +368,11 @@ class HadamardDerivative:
 
         return self._compute_hadamard(f_array, x_array, h or 1.0)
 
-    def _compute_hadamard(self, f: np.ndarray, x: np.ndarray, h: float) -> np.ndarray:
+    def _compute_hadamard(
+            self,
+            f: np.ndarray,
+            x: np.ndarray,
+            h: float) -> np.ndarray:
         """Compute Hadamard derivative using logarithmic transformation."""
         N = len(f)
         result = np.zeros(N)
@@ -573,16 +585,19 @@ class AdomianDecomposition:
         with ThreadPoolExecutor(max_workers=self.parallel_config.n_jobs) as executor:
             futures = []
             for n in term_indices:
-                future = executor.submit(self._compute_single_term, equation, t, h, n)
+                future = executor.submit(
+                    self._compute_single_term, equation, t, h, n)
                 futures.append(future)
 
             terms = [future.result() for future in futures]
 
         return terms
 
-    def _compute_adomian_polynomial(
-        self, equation: Callable, previous_terms: List[np.ndarray], n: int, t: np.ndarray
-    ) -> np.ndarray:
+    def _compute_adomian_polynomial(self,
+                                    equation: Callable,
+                                    previous_terms: List[np.ndarray],
+                                    n: int,
+                                    t: np.ndarray) -> np.ndarray:
         """Compute the nth Adomian polynomial."""
         N = len(t)
         adomian = np.zeros(N)
@@ -605,7 +620,8 @@ class AdomianDecomposition:
             for j in range(i + 1):
                 # Avoid division by zero and negative powers
                 if t[i] > t[j] and self.alpha_val > 0:
-                    kernel = ((t[i] - t[j]) ** (self.alpha_val - 1)) / gamma(self.alpha_val)
+                    kernel = ((t[i] - t[j]) ** (self.alpha_val - 1)
+                              ) / gamma(self.alpha_val)
                     integral += adomian[j] * kernel
 
             result[i] = integral * h
@@ -617,7 +633,8 @@ class AdomianDecomposition:
     ) -> np.ndarray:
         """Compute a single decomposition term."""
         # This is a simplified implementation
-        # In practice, you would need the previous terms to compute the Adomian polynomial
+        # In practice, you would need the previous terms to compute the Adomian
+        # polynomial
         adomian = np.zeros_like(t)
 
         # For demonstration, use a simple approximation

@@ -6,17 +6,11 @@ finite difference methods, spectral methods, and adaptive mesh refinement.
 """
 
 import numpy as np
-from typing import Union, Optional, Tuple, Callable, Dict, Any, List
-from scipy import linalg, sparse
+from typing import Union, Optional, Tuple, Callable
+from scipy import sparse
 from scipy.sparse.linalg import spsolve
-import warnings
 
 from ..core.definitions import FractionalOrder
-from ..algorithms.optimized_methods import (
-    optimized_caputo,
-    optimized_riemann_liouville,
-    optimized_grunwald_letnikov,
-)
 
 
 class FractionalPDESolver:
@@ -52,7 +46,8 @@ class FractionalPDESolver:
         self.adaptive = adaptive
 
         # Validate PDE type
-        valid_pde_types = ["diffusion", "advection", "reaction_diffusion", "wave"]
+        valid_pde_types = ["diffusion", "advection",
+                           "reaction_diffusion", "wave"]
         if self.pde_type not in valid_pde_types:
             raise ValueError(f"PDE type must be one of {valid_pde_types}")
 
@@ -200,7 +195,7 @@ class FractionalDiffusionSolver(FractionalPDESolver):
         Returns:
             Solution at interior points
         """
-        nx = len(x_values)
+        len(x_values)
 
         if self.method == "finite_difference":
             return self._finite_difference_step(
@@ -269,10 +264,12 @@ class FractionalDiffusionSolver(FractionalPDESolver):
         nx = len(x_values)
 
         # Compute temporal fractional derivative
-        temporal_deriv = self._compute_temporal_derivative(solution, n, alpha, dt)
+        temporal_deriv = self._compute_temporal_derivative(
+            solution, n, alpha, dt)
 
         # Compute spatial fractional derivative
-        spatial_deriv = self._compute_spatial_derivative(solution[n - 1, :], beta, dx)
+        self._compute_spatial_derivative(
+            solution[n - 1, :], beta, dx)
 
         # Source term
         source = np.zeros(nx)
@@ -281,7 +278,8 @@ class FractionalDiffusionSolver(FractionalPDESolver):
                 source[i] = source_term(x, t_n, solution[n - 1, i])
 
         # Implicit scheme: solve linear system
-        A = self._build_spatial_matrix(nx, beta, diffusion_coeff, dx, dt, alpha)
+        A = self._build_spatial_matrix(
+            nx, beta, diffusion_coeff, dx, dt, alpha)
         b = temporal_deriv[1:-1] + source[1:-1]  # Interior points only
 
         # Solve linear system
@@ -334,7 +332,7 @@ class FractionalDiffusionSolver(FractionalPDESolver):
         spatial_deriv_hat = (1j * k) ** beta * u_hat
 
         # Temporal fractional derivative
-        temporal_deriv = self._compute_temporal_derivative(solution, n, alpha, dt)
+        self._compute_temporal_derivative(solution, n, alpha, dt)
 
         # Source term
         source = np.zeros(nx)
@@ -399,7 +397,8 @@ class FractionalDiffusionSolver(FractionalPDESolver):
         # Compute temporal derivative
         temporal_deriv = np.zeros_like(solution[n, :])
         for j in range(n + 1):
-            temporal_deriv += coeffs[j] * (solution[n - j, :] - solution[n - j - 1, :])
+            temporal_deriv += coeffs[j] * \
+                (solution[n - j, :] - solution[n - j - 1, :])
 
         return temporal_deriv / (dt**alpha_val)
 
@@ -469,9 +468,9 @@ class FractionalDiffusionSolver(FractionalPDESolver):
             alpha_val = alpha
 
         if isinstance(beta, FractionalOrder):
-            beta_val = beta.alpha
+            beta.alpha
         else:
-            beta_val = beta
+            pass
 
         # Build tridiagonal matrix for spatial discretization
         n_interior = nx - 2
@@ -595,20 +594,18 @@ class FractionalAdvectionSolver(FractionalPDESolver):
 
         # Main time-stepping loop (simplified)
         for n in range(1, nt):
-            t_n = t_values[n]
+            t_values[n]
 
             # Simple upwind scheme for advection
             for i in range(1, nx - 1):
                 if velocity > 0:
                     # Upwind
-                    solution[n, i] = solution[n - 1, i] - velocity * dt / dx * (
-                        solution[n - 1, i] - solution[n - 1, i - 1]
-                    )
+                    solution[n, i] = solution[n - 1, i] - velocity * dt / \
+                        dx * (solution[n - 1, i] - solution[n - 1, i - 1])
                 else:
                     # Downwind
-                    solution[n, i] = solution[n - 1, i] - velocity * dt / dx * (
-                        solution[n - 1, i + 1] - solution[n - 1, i]
-                    )
+                    solution[n, i] = solution[n - 1, i] - velocity * dt / \
+                        dx * (solution[n - 1, i + 1] - solution[n - 1, i])
 
         return t_values, x_values, solution
 
@@ -689,8 +686,7 @@ class FractionalReactionDiffusionSolver(FractionalPDESolver):
 
         # Use diffusion solver with combined source term
         diffusion_solver = FractionalDiffusionSolver(
-            self.method, self.spatial_order, self.temporal_order, self.derivative_type
-        )
+            self.method, self.spatial_order, self.temporal_order, self.derivative_type)
 
         return diffusion_solver.solve(
             x_span,
@@ -873,7 +869,7 @@ def solve_fractional_pde(
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Generic solver for fractional PDEs.
-    
+
     Args:
         x_span: Spatial interval (x0, xf)
         t_span: Time interval (t0, tf)
@@ -883,23 +879,23 @@ def solve_fractional_pde(
         beta: Spatial fractional order
         equation_type: Type of PDE ("diffusion", "advection", "reaction_diffusion")
         **kwargs: Additional solver parameters
-        
+
     Returns:
         Tuple of (t_values, x_values, solution)
     """
     if equation_type == "diffusion":
         return solve_fractional_diffusion(
-            x_span, t_span, initial_condition, boundary_conditions, 
+            x_span, t_span, initial_condition, boundary_conditions,
             alpha, beta, **kwargs
         )
     elif equation_type == "advection":
         return solve_fractional_advection(
-            x_span, t_span, initial_condition, boundary_conditions, 
+            x_span, t_span, initial_condition, boundary_conditions,
             alpha, beta, **kwargs
         )
     elif equation_type == "reaction_diffusion":
         return solve_fractional_reaction_diffusion(
-            x_span, t_span, initial_condition, boundary_conditions, 
+            x_span, t_span, initial_condition, boundary_conditions,
             alpha, beta, **kwargs
         )
     else:

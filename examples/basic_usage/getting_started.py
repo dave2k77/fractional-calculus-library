@@ -6,6 +6,11 @@ This example demonstrates the basic usage of the fractional calculus library,
 including computing fractional derivatives and integrals for simple functions.
 """
 
+from hpfracc.algorithms.optimized_methods import (
+    OptimizedCaputo,
+    OptimizedRiemannLiouville,
+    OptimizedGrunwaldLetnikov,
+)
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
@@ -14,15 +19,6 @@ import os
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
 
 # Updated imports for consolidated structure
-from hpfracc.algorithms.optimized_methods import (
-    OptimizedCaputo,
-    OptimizedRiemannLiouville,
-    OptimizedGrunwaldLetnikov,
-    optimized_caputo,
-    optimized_riemann_liouville,
-    optimized_grunwald_letnikov,
-)
-from hpfracc.core.definitions import FractionalIntegral
 
 
 def basic_fractional_derivatives():
@@ -56,7 +52,8 @@ def basic_fractional_derivatives():
         # Plot results
         plt.subplot(2, 2, i + 1)
         plt.plot(t, f, "k-", label="Original: f(t) = t²", linewidth=2)
-        plt.plot(t, caputo_result, "r--", label=f"Caputo (α={alpha})", linewidth=2)
+        plt.plot(t, caputo_result, "r--",
+                 label=f"Caputo (α={alpha})", linewidth=2)
         plt.plot(
             t, riemann_result, "b:", label=f"Riemann-Liouville (α={alpha})", linewidth=2
         )
@@ -92,7 +89,7 @@ def fractional_integrals_example():
 
     # Create time grid (avoid t=0 to prevent interpolation issues)
     t = np.linspace(0.01, 3, 100)
-    h = t[1] - t[0]
+    t[1] - t[0]
 
     # Test function: f(t) = sin(t)
     f = np.sin(t)
@@ -118,7 +115,8 @@ def fractional_integrals_example():
         integral_result = (t**alpha / gamma(alpha + 1)) * np.sin(t)
 
         plt.subplot(2, 2, i)
-        plt.plot(t, f, "k-", label="Original: f(t) = sin(t)", linewidth=1, alpha=0.5)
+        plt.plot(t, f, "k-", label="Original: f(t) = sin(t)",
+                 linewidth=1, alpha=0.5)
         plt.plot(
             t,
             integral_result,
@@ -187,7 +185,8 @@ def comparison_with_analytical():
 
         plt.xlabel("Time t")
         plt.ylabel("Derivative Value")
-        plt.title(f"Caputo Derivative (α = {alpha})\nMax Error: {max_error:.2e}")
+        plt.title(
+            f"Caputo Derivative (α = {alpha})\nMax Error: {max_error:.2e}")
         plt.legend()
         plt.grid(True, alpha=0.3)
 

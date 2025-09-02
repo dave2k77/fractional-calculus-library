@@ -12,7 +12,6 @@ This module implements highly optimized versions of advanced fractional calculus
 import numpy as np
 from numba import jit as numba_jit, prange
 from typing import Union, Optional, Callable
-import warnings
 
 from ..core.definitions import FractionalOrder
 
@@ -200,7 +199,8 @@ class OptimizedHadamardDerivative:
                 x_max = x
                 if h is None:
                     h = x_max / 1000
-                x_array = np.arange(1, x_max + h, h)  # Start from 1 for Hadamard
+                # Start from 1 for Hadamard
+                x_array = np.arange(1, x_max + h, h)
             f_array = np.array([f(xi) for xi in x_array])
         else:
             f_array = f

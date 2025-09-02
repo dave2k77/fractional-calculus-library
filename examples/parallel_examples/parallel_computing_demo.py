@@ -6,6 +6,11 @@ This example demonstrates the use of parallel computing backends (Joblib, Dask, 
 for accelerating fractional calculus computations.
 """
 
+from hpfracc.algorithms.optimized_methods import OptimizedCaputo
+from hpfracc.algorithms.parallel_optimized_methods import (
+    ParallelConfig,
+    parallel_optimized_caputo,
+)
 import numpy as np
 import matplotlib.pyplot as plt
 import time
@@ -15,17 +20,6 @@ import os
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
 
 # Updated imports for consolidated structure
-from hpfracc.algorithms.parallel_optimized_methods import (
-    ParallelConfig,
-    ParallelOptimizedCaputo,
-    ParallelOptimizedRiemannLiouville,
-    ParallelOptimizedGrunwaldLetnikov,
-    NumbaParallelManager,
-    parallel_optimized_caputo,
-    parallel_optimized_riemann_liouville,
-    parallel_optimized_grunwald_letnikov,
-)
-from hpfracc.algorithms.optimized_methods import OptimizedCaputo
 
 
 def compute_derivative(data):
@@ -47,7 +41,7 @@ def parallel_backend_comparison():
 
     # Check joblib availability
     try:
-        import joblib
+        pass
 
         available["joblib"] = True
         print("  ✅ joblib")
@@ -57,7 +51,7 @@ def parallel_backend_comparison():
 
     # Check multiprocessing availability
     try:
-        import multiprocessing
+        pass
 
         available["multiprocessing"] = True
         print("  ✅ multiprocessing")
@@ -67,7 +61,7 @@ def parallel_backend_comparison():
 
     # Check threading availability
     try:
-        import threading
+        pass
 
         available["threading"] = True
         print("  ✅ threading")
@@ -214,7 +208,8 @@ def joblib_optimization_demo():
 
     # Ideal scaling (linear speedup)
     ideal_times = [times[0] / w for w in workers]
-    plt.plot(workers, ideal_times, "r--", linewidth=2, label="Ideal Scaling", alpha=0.7)
+    plt.plot(workers, ideal_times, "r--", linewidth=2,
+             label="Ideal Scaling", alpha=0.7)
 
     plt.xlabel("Number of Workers")
     plt.ylabel("Execution Time (s)")
@@ -244,7 +239,8 @@ def vectorized_parallel_demo():
     # Test different alpha values
     alphas = np.array([0.1, 0.3, 0.5, 0.7, 0.9])
 
-    print(f"Computing vectorized fractional derivatives for {len(alphas)} α values")
+    print(
+        f"Computing vectorized fractional derivatives for {len(alphas)} α values")
 
     # Create parallel configuration
     parallel_config = ParallelConfig(backend="joblib")
@@ -276,7 +272,8 @@ def vectorized_parallel_demo():
 
     plt.subplot(2, 1, 2)
     for i, alpha in enumerate(alphas):
-        plt.plot(t, results[i], linewidth=2, label=f"Caputo Derivative (α={alpha:.1f})")
+        plt.plot(t, results[i], linewidth=2,
+                 label=f"Caputo Derivative (α={alpha:.1f})")
 
     plt.xlabel("Time t")
     plt.ylabel("Derivative Value")
@@ -338,7 +335,8 @@ def load_balancing_demo():
             chunks = load_balancer.balance_work(work_items)
         else:  # adaptive
             estimated_time = 0.01  # Rough estimate
-            chunk_size = load_balancer.adaptive_chunk_size(work_items, estimated_time)
+            chunk_size = load_balancer.adaptive_chunk_size(
+                work_items, estimated_time)
             chunks = load_balancer.create_work_chunks(work_items, chunk_size)
 
         # Simulate work distribution
@@ -402,7 +400,7 @@ def memory_optimization_demo():
 
         # Time memory-efficient computation
         start_time = time.time()
-        result = memory_optimizer.memory_efficient_caputo(f, alpha, h)
+        memory_optimizer.memory_efficient_caputo(f, alpha, h)
         end_time = time.time()
 
         results[N] = end_time - start_time
@@ -446,7 +444,8 @@ def system_info_demo():
     print(f"  🖥️  CPU Count: {system_info['cpu_count']}")
     print(f"  ⚡ CPU Frequency: {system_info['cpu_freq']}")
     print(f"  💾 Total Memory: {system_info['memory_total'] / 1024**3:.2f} GB")
-    print(f"  📊 Available Memory: {system_info['memory_available'] / 1024**3:.2f} GB")
+    print(
+        f"  📊 Available Memory: {system_info['memory_available'] / 1024**3:.2f} GB")
     print(f"  🖥️  Platform: {system_info['platform']}")
     print(f"  🐍 Python Version: {system_info['python_version']}")
 

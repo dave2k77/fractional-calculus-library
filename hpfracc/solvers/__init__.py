@@ -42,20 +42,20 @@ __all__ = [
     'FractionalODESolver',
     'AdaptiveFractionalODESolver',
     'solve_fractional_ode',
-    
+
     # PDE Solvers
     'FractionalPDESolver',
     'FractionalDiffusionSolver',
     'FractionalAdvectionSolver',
     'FractionalReactionDiffusionSolver',
     'solve_fractional_pde',
-    
+
     # Advanced Solvers
     'AdvancedFractionalODESolver',
     'HighOrderFractionalSolver',
     'solve_advanced_fractional_ode',
     'solve_high_order_fractional_ode',
-    
+
     # Predictor-Corrector Methods
     'PredictorCorrectorSolver',
     'AdamsBashforthMoultonSolver',

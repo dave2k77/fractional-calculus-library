@@ -8,7 +8,7 @@ for implementing different fractional derivative definitions.
 import numpy as np
 import jax.numpy as jnp
 from abc import ABC, abstractmethod
-from typing import Union, Optional, Tuple, Callable, Dict, Any, List
+from typing import Union, Optional, Callable, Dict, Any, List
 from .definitions import FractionalOrder, DefinitionType, FractionalDefinition
 
 
@@ -37,7 +37,8 @@ class BaseFractionalDerivative(ABC):
             use_numba: Whether to use NUMBA optimizations
         """
         self.alpha = (
-            FractionalOrder(alpha) if isinstance(alpha, (int, float)) else alpha
+            FractionalOrder(alpha) if isinstance(
+                alpha, (int, float)) else alpha
         )
         self.definition = definition
         self.use_jax = use_jax
@@ -54,7 +55,8 @@ class BaseFractionalDerivative(ABC):
         if self.definition is not None and not isinstance(
             self.definition, FractionalDefinition
         ):
-            raise TypeError("Definition must be a FractionalDefinition instance")
+            raise TypeError(
+                "Definition must be a FractionalDefinition instance")
 
     @abstractmethod
     def compute(
@@ -71,7 +73,6 @@ class BaseFractionalDerivative(ABC):
         Returns:
             Fractional derivative value(s)
         """
-        pass
 
     @abstractmethod
     def compute_numerical(
@@ -91,7 +92,6 @@ class BaseFractionalDerivative(ABC):
         Returns:
             Fractional derivative values
         """
-        pass
 
     def get_definition_info(self) -> Dict[str, Any]:
         """Get information about the mathematical definition."""
@@ -106,8 +106,7 @@ class BaseFractionalDerivative(ABC):
 
     def __repr__(self) -> str:
         definition_type = (
-            self.definition.definition_type.value if self.definition else "unknown"
-        )
+            self.definition.definition_type.value if self.definition else "unknown")
         return f"{definition_type.title()}Derivative(α={self.alpha})"
 
     def __str__(self) -> str:
@@ -139,7 +138,8 @@ class FractionalDerivativeOperator:
             use_numba: Whether to use NUMBA optimizations
         """
         self.alpha = (
-            FractionalOrder(alpha) if isinstance(alpha, (int, float)) else alpha
+            FractionalOrder(alpha) if isinstance(
+                alpha, (int, float)) else alpha
         )
         self.definition_type = definition_type
         self.use_jax = use_jax
@@ -192,7 +192,8 @@ class FractionalDerivativeOperator:
         if self._implementation is None:
             raise NotImplementedError("No implementation available")
 
-        return self._implementation.compute_numerical(f_values, x_values, **kwargs)
+        return self._implementation.compute_numerical(
+            f_values, x_values, **kwargs)
 
     def set_implementation(self, implementation: BaseFractionalDerivative):
         """Set the implementation for this operator."""
@@ -272,10 +273,12 @@ class FractionalDerivativeFactory:
                 except ValueError:
                     # If conversion fails, check if the string key exists
                     if definition_type not in self._implementations:
-                        raise ValueError(f"No implementation registered for {definition_type}")
+                        raise ValueError(
+                            f"No implementation registered for {definition_type}")
 
         if definition_type not in self._implementations:
-            raise ValueError(f"No implementation registered for {definition_type}")
+            raise ValueError(
+                f"No implementation registered for {definition_type}")
 
         implementation_class = self._implementations[definition_type]
         return implementation_class(
@@ -353,7 +356,8 @@ class FractionalDerivativeChain:
 
     def get_chain_info(self) -> List[Dict[str, Any]]:
         """Get information about each derivative in the chain."""
-        return [derivative.get_definition_info() for derivative in self.derivatives]
+        return [derivative.get_definition_info()
+                for derivative in self.derivatives]
 
 
 class FractionalDerivativeProperties:
@@ -392,7 +396,8 @@ class FractionalDerivativeProperties:
         left_side = derivative.compute(combined_function, x)
 
         # Compute a * D^α f + b * D^α g
-        right_side = a * derivative.compute(f, x) + b * derivative.compute(g, x)
+        right_side = a * \
+            derivative.compute(f, x) + b * derivative.compute(g, x)
 
         return np.allclose(left_side, right_side, atol=tolerance)
 
@@ -460,26 +465,25 @@ try:
         CaputoDerivative,
         GrunwaldLetnikovDerivative
     )
-    
+
     # Register derivative implementations
     derivative_factory.register_implementation(
-        DefinitionType.RIEMANN_LIOUVILLE, 
+        DefinitionType.RIEMANN_LIOUVILLE,
         RiemannLiouvilleDerivative
     )
     derivative_factory.register_implementation(
-        DefinitionType.CAPUTO, 
+        DefinitionType.CAPUTO,
         CaputoDerivative
     )
     derivative_factory.register_implementation(
-        DefinitionType.GRUNWALD_LETNIKOV, 
+        DefinitionType.GRUNWALD_LETNIKOV,
         GrunwaldLetnikovDerivative
     )
-    
+
     print("Fractional derivative implementations registered successfully!")
 except ImportError as e:
     # If the implementations module isn't available yet, skip registration
     print(f"Could not register implementations: {e}")
-    pass
 
 
 # Convenience functions
@@ -526,4 +530,5 @@ def create_derivative_operator(
     Returns:
         Fractional derivative operator
     """
-    return FractionalDerivativeOperator(alpha, definition_type, use_jax, use_numba)
+    return FractionalDerivativeOperator(
+        alpha, definition_type, use_jax, use_numba)

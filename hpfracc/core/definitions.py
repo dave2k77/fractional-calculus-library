@@ -7,9 +7,8 @@ for the numerical implementations.
 """
 
 import numpy as np
-from typing import Union, Optional, Tuple, Callable, Dict, Any
+from typing import Union, Dict, Any
 from enum import Enum
-import jax.numpy as jnp
 
 
 class FractionalOrder:
@@ -20,7 +19,10 @@ class FractionalOrder:
     we consider 0 < α < 2 for most applications.
     """
 
-    def __init__(self, alpha: Union[float, "FractionalOrder"], validate: bool = True):
+    def __init__(self,
+                 alpha: Union[float,
+                              "FractionalOrder"],
+                 validate: bool = True):
         """
         Initialize fractional order.
 
@@ -93,9 +95,8 @@ class FractionalDefinition:
     definitions of fractional derivatives and integrals.
     """
 
-    def __init__(
-        self, definition_type: DefinitionType, alpha: Union[float, FractionalOrder]
-    ):
+    def __init__(self, definition_type: DefinitionType,
+                 alpha: Union[float, FractionalOrder]):
         """
         Initialize fractional definition.
 
@@ -105,7 +106,8 @@ class FractionalDefinition:
         """
         self.definition_type = definition_type
         self.alpha = (
-            FractionalOrder(alpha) if isinstance(alpha, (int, float)) else alpha
+            FractionalOrder(alpha) if isinstance(
+                alpha, (int, float)) else alpha
         )
 
     def get_definition_formula(self) -> str:

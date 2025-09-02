@@ -6,18 +6,16 @@ This example demonstrates solving fractional partial differential equations
 using the library's advanced solver capabilities.
 """
 
+from hpfracc.special.gamma_beta import gamma
+from hpfracc.solvers.predictor_corrector import PredictorCorrectorSolver
+from hpfracc.algorithms.L1_L2_schemes import L1L2Schemes
+from hpfracc.solvers.pde_solvers import FractionalDiffusionSolver
 import numpy as np
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 import sys
 import os
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
-
-from hpfracc.solvers.pde_solvers import FractionalDiffusionSolver
-from hpfracc.algorithms.L1_L2_schemes import L1L2Schemes
-from hpfracc.solvers.predictor_corrector import PredictorCorrectorSolver
-from hpfracc.special.gamma_beta import gamma
 
 
 def ensure_output_dir():
@@ -65,7 +63,8 @@ def fractional_diffusion_equation():
         x_span=(0, L),
         t_span=(0, T),
         initial_condition=initial_condition,
-        boundary_conditions=(boundary_condition_left, boundary_condition_right),
+        boundary_conditions=(boundary_condition_left,
+                             boundary_condition_right),
         alpha=alpha,
         beta=2.0,  # Standard second-order spatial derivative
         nx=Nx,
@@ -167,7 +166,8 @@ def fractional_wave_equation():
         x_span=(0, L),
         t_span=(0, T),
         initial_condition=initial_condition,
-        boundary_conditions=(boundary_condition_left, boundary_condition_right),
+        boundary_conditions=(boundary_condition_left,
+                             boundary_condition_right),
         alpha=alpha,
         beta=2.0,  # Standard second-order spatial derivative
         nx=Nx,
@@ -273,7 +273,8 @@ def L1_L2_schemes_comparison():
     print("\n🧪 Solving with L1 scheme...")
     t_l1, x_l1, u_l1 = l1_scheme.solve_time_fractional_pde(
         initial_condition=u0,
-        boundary_conditions=(boundary_condition_left, boundary_condition_right),
+        boundary_conditions=(boundary_condition_left,
+                             boundary_condition_right),
         alpha=alpha,
         t_final=T,
         dt=dt,
@@ -284,7 +285,8 @@ def L1_L2_schemes_comparison():
     print("🧪 Solving with L2 scheme...")
     t_l2, x_l2, u_l2 = l2_scheme.solve_time_fractional_pde(
         initial_condition=u0,
-        boundary_conditions=(boundary_condition_left, boundary_condition_right),
+        boundary_conditions=(boundary_condition_left,
+                             boundary_condition_right),
         alpha=alpha,
         t_final=T,
         dt=dt,
@@ -439,7 +441,8 @@ def predictor_corrector_demo():
         return -y  # Simple decay equation
 
     # Solve with predictor-corrector
-    t_pc, y_pc = pc_solver.solve(f=f, t_span=(0, T), y0=1.0, alpha=alpha, h0=0.01)
+    t_pc, y_pc = pc_solver.solve(f=f, t_span=(
+        0, T), y0=1.0, alpha=alpha, h0=0.01)
 
     # Compare with standard diffusion solver
     solver = FractionalDiffusionSolver()
@@ -447,7 +450,8 @@ def predictor_corrector_demo():
         x_span=(0, L),
         t_span=(0, T),
         initial_condition=initial_condition,
-        boundary_conditions=(boundary_condition_left, boundary_condition_right),
+        boundary_conditions=(boundary_condition_left,
+                             boundary_condition_right),
         alpha=alpha,
         beta=2.0,  # Standard second-order spatial derivative
         nx=Nx,
@@ -614,7 +618,8 @@ def anomalous_transport_demo():
             x_span=(0, L),
             t_span=(0, T),
             initial_condition=initial_condition,
-            boundary_conditions=(boundary_condition_left, boundary_condition_right),
+            boundary_conditions=(boundary_condition_left,
+                                 boundary_condition_right),
             alpha=alpha,
             beta=2.0,
             nx=Nx,
@@ -750,7 +755,8 @@ def memory_effects_demo():
         x_span=(0, L),
         t_span=(0, T),
         initial_condition=initial_condition,
-        boundary_conditions=(boundary_condition_left, boundary_condition_right),
+        boundary_conditions=(boundary_condition_left,
+                             boundary_condition_right),
         alpha=alpha,
         beta=2.0,
         nx=Nx,
@@ -762,7 +768,8 @@ def memory_effects_demo():
         x_span=(0, L),
         t_span=(0, T),
         initial_condition=initial_condition,
-        boundary_conditions=(boundary_condition_left, boundary_condition_right),
+        boundary_conditions=(boundary_condition_left,
+                             boundary_condition_right),
         alpha=1.0,  # Normal diffusion
         beta=2.0,
         nx=Nx,
@@ -775,7 +782,8 @@ def memory_effects_demo():
     # 3D comparison
     ax1 = plt.subplot(2, 4, 1, projection="3d")
     X, T_mesh = np.meshgrid(x, t)
-    surf1 = ax1.plot_surface(X, T_mesh, u_fractional.T, cmap="viridis", alpha=0.8)
+    surf1 = ax1.plot_surface(X, T_mesh, u_fractional.T,
+                             cmap="viridis", alpha=0.8)
     ax1.set_xlabel("Position x")
     ax1.set_ylabel("Time t")
     ax1.set_zlabel("u(x,t)")
@@ -795,8 +803,10 @@ def memory_effects_demo():
     ax3 = plt.subplot(2, 4, 3)
     for pos in positions:
         idx = np.argmin(np.abs(x - pos))
-        ax3.plot(t, u_fractional[idx, :], linewidth=2, label=f"Fractional x={pos}")
-        ax3.plot(t, u_normal[idx, :], "--", linewidth=2, label=f"Normal x={pos}")
+        ax3.plot(t, u_fractional[idx, :], linewidth=2,
+                 label=f"Fractional x={pos}")
+        ax3.plot(t, u_normal[idx, :], "--",
+                 linewidth=2, label=f"Normal x={pos}")
     ax3.set_xlabel("Time t")
     ax3.set_ylabel("u(x,t)")
     ax3.set_title("Time Evolution Comparison")
@@ -808,8 +818,10 @@ def memory_effects_demo():
     ax4 = plt.subplot(2, 4, 4)
     for time_val in times:
         idx = np.argmin(np.abs(t - time_val))
-        ax4.plot(x, u_fractional[:, idx], linewidth=2, label=f"Fractional t={time_val}")
-        ax4.plot(x, u_normal[:, idx], "--", linewidth=2, label=f"Normal t={time_val}")
+        ax4.plot(x, u_fractional[:, idx], linewidth=2,
+                 label=f"Fractional t={time_val}")
+        ax4.plot(x, u_normal[:, idx], "--", linewidth=2,
+                 label=f"Normal t={time_val}")
     ax4.set_xlabel("Position x")
     ax4.set_ylabel("u(x,t)")
     ax4.set_title("Spatial Profiles Comparison")
@@ -818,12 +830,15 @@ def memory_effects_demo():
 
     # Memory kernel visualization
     ax5 = plt.subplot(2, 4, 5)
-    t_kernel = np.linspace(0.01, 2, 100)  # Avoid t=0 to prevent division by zero
+    # Avoid t=0 to prevent division by zero
+    t_kernel = np.linspace(0.01, 2, 100)
     # Fractional memory kernel: t^(α-1)
     memory_kernel = t_kernel ** (alpha - 1) / gamma(alpha)
-    ax5.plot(t_kernel, memory_kernel, "b-", linewidth=2, label=f"Fractional α={alpha}")
+    ax5.plot(t_kernel, memory_kernel, "b-",
+             linewidth=2, label=f"Fractional α={alpha}")
     # Normal memory kernel (delta function)
-    ax5.axhline(y=0, color="r", linestyle="--", linewidth=2, label="Normal (no memory)")
+    ax5.axhline(y=0, color="r", linestyle="--",
+                linewidth=2, label="Normal (no memory)")
     ax5.set_xlabel("Time t")
     ax5.set_ylabel("Memory Kernel")
     ax5.set_title("Memory Kernel Comparison")
@@ -832,7 +847,8 @@ def memory_effects_demo():
 
     # Contour comparison
     ax6 = plt.subplot(2, 4, 6)
-    contour1 = ax6.contourf(X, T_mesh, u_fractional.T, levels=20, cmap="viridis")
+    contour1 = ax6.contourf(X, T_mesh, u_fractional.T,
+                            levels=20, cmap="viridis")
     ax6.set_xlabel("Position x")
     ax6.set_ylabel("Time t")
     ax6.set_title("Fractional: Contour")
@@ -904,7 +920,8 @@ def levy_flights_demo():
             x_span=(0, L),
             t_span=(0, T),
             initial_condition=initial_condition,
-            boundary_conditions=(boundary_condition_left, boundary_condition_right),
+            boundary_conditions=(boundary_condition_left,
+                                 boundary_condition_right),
             alpha=1.0,  # Normal time evolution
             beta=beta,  # Spatial fractional order
             nx=Nx,
@@ -943,7 +960,8 @@ def levy_flights_demo():
         profile = u[:, -1]
         # Remove zeros for log plot
         mask = profile > 1e-10
-        ax_final.semilogy(x[mask], profile[mask], linewidth=2, label=f"β = {beta}")
+        ax_final.semilogy(x[mask], profile[mask],
+                          linewidth=2, label=f"β = {beta}")
     ax_final.set_xlabel("Position x")
     ax_final.set_ylabel("u(x,T) (log scale)")
     ax_final.set_title("Final Profiles (Log Scale)")
@@ -1062,7 +1080,8 @@ def heavy_tailed_demo():
             x_span=(0, L),
             t_span=(0, T),
             initial_condition=initial_condition,
-            boundary_conditions=(boundary_condition_left, boundary_condition_right),
+            boundary_conditions=(boundary_condition_left,
+                                 boundary_condition_right),
             alpha=alpha,
             beta=beta,
             nx=Nx,
@@ -1138,11 +1157,13 @@ def heavy_tailed_demo():
             # Power law: P(x) ~ x^(-β-1)
             try:
                 jump_dist = x_jump ** (-beta - 1) / gamma(1 - beta)
-                ax_jump.loglog(x_jump, jump_dist, linewidth=2, label=f"β = {beta}")
+                ax_jump.loglog(x_jump, jump_dist, linewidth=2,
+                               label=f"β = {beta}")
             except:
                 # Fallback for problematic values
                 jump_dist = x_jump ** (-beta - 1)
-                ax_jump.loglog(x_jump, jump_dist, linewidth=2, label=f"β = {beta}")
+                ax_jump.loglog(x_jump, jump_dist, linewidth=2,
+                               label=f"β = {beta}")
     ax_jump.set_xlabel("Jump Length x")
     ax_jump.set_ylabel("P(x)")
     ax_jump.set_title("Jump Length Distribution")
