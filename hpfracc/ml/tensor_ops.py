@@ -48,6 +48,25 @@ class TensorOps:
         else:
             raise RuntimeError(f"Unknown backend: {self.backend}")
 
+    def tensor(self, data: Any, **kwargs) -> Any:
+        """Create a tensor from data (alias for create_tensor)"""
+        return self.create_tensor(data, **kwargs)
+
+    def no_grad(self):
+        """Context manager for disabling gradient computation"""
+        if self.backend == BackendType.TORCH:
+            import torch
+            return torch.no_grad()
+        elif self.backend == BackendType.JAX:
+            import jax
+            return jax.disable_jit()
+        elif self.backend == BackendType.NUMBA:
+            # NUMBA doesn't have a no_grad equivalent, return a dummy context
+            from contextlib import nullcontext
+            return nullcontext()
+        else:
+            raise RuntimeError(f"Unknown backend: {self.backend}")
+
     def zeros(self, shape: Tuple[int, ...], **kwargs) -> Any:
         """Create a tensor of zeros"""
         if self.backend == BackendType.TORCH:
@@ -330,6 +349,69 @@ class TensorOps:
         else:
             raise RuntimeError(f"Unknown backend: {self.backend}")
 
+    def std(
+            self,
+            tensor: Any,
+            dim: Optional[int] = None,
+            keepdims: bool = False) -> Any:
+        """Standard deviation of tensor elements"""
+        if self.backend == BackendType.TORCH:
+            return tensor.std(dim=dim, keepdim=keepdims)
+        elif self.backend == BackendType.JAX:
+            return self.tensor_lib.std(tensor, axis=dim, keepdims=keepdims)
+        elif self.backend == BackendType.NUMBA:
+            import numpy as np
+            return np.std(tensor, axis=dim, keepdims=keepdims)
+        else:
+            raise RuntimeError(f"Unknown backend: {self.backend}")
+
+    def median(
+            self,
+            tensor: Any,
+            dim: Optional[int] = None,
+            keepdims: bool = False) -> Any:
+        """Median of tensor elements"""
+        if self.backend == BackendType.TORCH:
+            return tensor.median(dim=dim, keepdim=keepdims)[0]
+        elif self.backend == BackendType.JAX:
+            return self.tensor_lib.median(tensor, axis=dim, keepdims=keepdims)
+        elif self.backend == BackendType.NUMBA:
+            import numpy as np
+            return np.median(tensor, axis=dim, keepdims=keepdims)
+        else:
+            raise RuntimeError(f"Unknown backend: {self.backend}")
+
+    def quantile(
+            self,
+            tensor: Any,
+            q: Union[float, List[float]],
+            dim: Optional[int] = None,
+            keepdims: bool = False) -> Any:
+        """Quantile of tensor elements"""
+        if self.backend == BackendType.TORCH:
+            return tensor.quantile(torch.tensor(q), dim=dim, keepdim=keepdims)
+        elif self.backend == BackendType.JAX:
+            return self.tensor_lib.quantile(tensor, q, axis=dim, keepdims=keepdims)
+        elif self.backend == BackendType.NUMBA:
+            import numpy as np
+            return np.quantile(tensor, q, axis=dim, keepdims=keepdims)
+        else:
+            raise RuntimeError(f"Unknown backend: {self.backend}")
+
+    def randn_like(self, tensor: Any, **kwargs) -> Any:
+        """Create random normal tensor with same shape as input"""
+        if self.backend == BackendType.TORCH:
+            return self.tensor_lib.randn_like(tensor, **kwargs)
+        elif self.backend == BackendType.JAX:
+            import jax.random as random
+            key = random.PRNGKey(0)  # Default key
+            return random.normal(key, tensor.shape, **kwargs)
+        elif self.backend == BackendType.NUMBA:
+            import numpy as np
+            return np.random.randn(*tensor.shape).astype(tensor.dtype)
+        else:
+            raise RuntimeError(f"Unknown backend: {self.backend}")
+
     def max(
             self,
             tensor: Any,
@@ -337,12 +419,21 @@ class TensorOps:
             keepdims: bool = False) -> Any:
         """Maximum of tensor elements"""
         if self.backend == BackendType.TORCH:
-            return tensor.max(dim=dim, keepdim=keepdims)
+            if dim is None:
+                return tensor.max()
+            else:
+                return tensor.max(dim=dim, keepdim=keepdims)
         elif self.backend == BackendType.JAX:
-            return self.tensor_lib.max(tensor, axis=dim, keepdims=keepdims)
+            if dim is None:
+                return self.tensor_lib.max(tensor)
+            else:
+                return self.tensor_lib.max(tensor, axis=dim, keepdims=keepdims)
         elif self.backend == BackendType.NUMBA:
             import numpy as np
-            return np.max(tensor, axis=dim, keepdims=keepdims)
+            if dim is None:
+                return np.max(tensor)
+            else:
+                return np.max(tensor, axis=dim, keepdims=keepdims)
         else:
             raise RuntimeError(f"Unknown backend: {self.backend}")
 
@@ -353,12 +444,21 @@ class TensorOps:
             keepdims: bool = False) -> Any:
         """Minimum of tensor elements"""
         if self.backend == BackendType.TORCH:
-            return tensor.min(dim=dim, keepdim=keepdims)
+            if dim is None:
+                return tensor.min()
+            else:
+                return tensor.min(dim=dim, keepdim=keepdims)
         elif self.backend == BackendType.JAX:
-            return self.tensor_lib.min(tensor, axis=dim, keepdims=keepdims)
+            if dim is None:
+                return self.tensor_lib.min(tensor)
+            else:
+                return self.tensor_lib.min(tensor, axis=dim, keepdims=keepdims)
         elif self.backend == BackendType.NUMBA:
             import numpy as np
-            return np.min(tensor, axis=dim, keepdims=keepdims)
+            if dim is None:
+                return np.min(tensor)
+            else:
+                return np.min(tensor, axis=dim, keepdims=keepdims)
         else:
             raise RuntimeError(f"Unknown backend: {self.backend}")
 

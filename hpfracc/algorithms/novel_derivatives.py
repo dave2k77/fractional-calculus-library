@@ -145,26 +145,35 @@ class CaputoFabrizioDerivative:
         # Compute first derivative of f using finite differences
         f_prime = np.gradient(f, h)
 
-        # Create exponential kernel: exp(-α(t-τ)/(1-α))
+        # Create exponential kernel for convolution
+        # The kernel should represent the weight function for the integral
         kernel = np.zeros(n)
         for i in range(n):
             if i == 0:
-                kernel[i] = 0
+                kernel[i] = 0  # No contribution at t=0
             else:
+                # Weight: exp(-α(t-τ)/(1-α)) where t-τ = i*h
                 kernel[i] = np.exp(-self.alpha_factor * i * h)
 
-        # Normalize by (1-α) factor
+        # Normalize kernel properly
         kernel = kernel / (1 - self.alpha)
 
-        # Use FFT for convolution
-        f_prime_fft = np.fft.fft(f_prime)
-        kernel_fft = np.fft.fft(kernel)
+        # Use FFT for convolution with proper zero-padding
+        # Pad arrays to avoid circular convolution effects
+        padded_size = 2 * n
+        f_prime_padded = np.pad(f_prime, (0, padded_size - n), mode='constant')
+        kernel_padded = np.pad(kernel, (0, padded_size - n), mode='constant')
+
+        # FFT convolution
+        f_prime_fft = np.fft.fft(f_prime_padded)
+        kernel_fft = np.fft.fft(kernel_padded)
 
         # Convolve in frequency domain
         result_fft = f_prime_fft * kernel_fft
 
-        # Transform back to time domain
-        result = np.fft.ifft(result_fft).real
+        # Transform back to time domain and take only the valid part
+        result_padded = np.fft.ifft(result_fft).real
+        result = result_padded[:n]
 
         # Scale by step size and normalization
         result = result * h * self.normalization

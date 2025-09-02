@@ -14,208 +14,126 @@ from ..core.definitions import FractionalOrder
 
 class FractionalDerivativeFunction(torch.autograd.Function):
     """
-    Custom autograd function for fractional derivatives
-
-    This implements the forward and backward passes for fractional derivatives
-    using PyTorch's autograd system, ensuring gradients flow properly.
+    Custom autograd function for fractional derivatives implemented via
+    Grünwald–Letnikov (GL) convolution with differentiable PyTorch ops.
     """
 
     @staticmethod
-    def forward(ctx, x: torch.Tensor, alpha: float,
-                method: str = "RL") -> torch.Tensor:
-        """
-        Forward pass for fractional derivative computation
-
-        Args:
-            x: Input tensor
-            alpha: Fractional order
-            method: Derivative method ("RL", "Caputo", "GL")
-
-        Returns:
-            Fractional derivative tensor
-        """
-        ctx.save_for_backward(x)
-        ctx.alpha = alpha
+    def forward(ctx, x: torch.Tensor, alpha: float, method: str = "RL") -> torch.Tensor:
+        # Save context
+        ctx.alpha = float(alpha)
         ctx.method = method
 
-        # For now, use a simplified implementation that preserves gradients
-        # This is a placeholder - we'll implement proper fractional derivatives
-        if method == "RL":
-            # Riemann-Liouville approximation using finite differences
-            return _riemann_liouville_forward(x, alpha)
-        elif method == "Caputo":
-            # Caputo approximation using finite differences
-            return _caputo_forward(x, alpha)
-        elif method == "GL":
-            # Grünwald-Letnikov approximation using finite differences
-            return _grunwald_letnikov_forward(x, alpha)
-        else:
-            raise ValueError(f"Unknown method: {method}")
+        # Compute method-specific kernel, then convolve along last dim
+        y, kernel = _fractional_convolution_forward(x, ctx.alpha, method)
+        ctx.save_for_backward(kernel)
+        return y
 
     @staticmethod
-    def backward(
-            ctx, grad_output: torch.Tensor) -> Tuple[torch.Tensor, None, None]:
-        """
-        Backward pass for gradient computation
-
-        Args:
-            grad_output: Gradient of the output
-
-        Returns:
-            Gradient with respect to input, None for alpha, None for method
-        """
-        x, = ctx.saved_tensors
-        alpha = ctx.alpha
-        method = ctx.method
-
-        # Compute gradient with respect to input
-        if method == "RL":
-            grad_input = _riemann_liouville_backward(grad_output, x, alpha)
-        elif method == "Caputo":
-            grad_input = _caputo_backward(grad_output, x, alpha)
-        elif method == "GL":
-            grad_input = _grunwald_letnikov_backward(grad_output, x, alpha)
-        else:
-            grad_input = grad_output
-
+    def backward(ctx, grad_output: torch.Tensor) -> Tuple[torch.Tensor, None, None]:
+        (kernel,) = ctx.saved_tensors
+        # Gradient wrt input is convolution with flipped kernel
+        grad_input = _conv_last_dim(grad_output, kernel.flip(-1))
         return grad_input, None, None
 
 
-def _riemann_liouville_forward(x: torch.Tensor, alpha: float) -> torch.Tensor:
+def _gl_weights(alpha: float, K: int, device: torch.device, dtype: torch.dtype) -> torch.Tensor:
+    """Compute GL binomial weights w_k = (-1)^k * C(alpha, k) for k=0..K-1."""
+    w = torch.empty(K, device=device, dtype=dtype)
+    w[0] = 1.0
+    for k in range(1, K):
+        w[k] = w[k - 1] * (alpha - (k - 1)) / k * (-1.0)
+    return w
+
+
+def _exp_kernel(alpha: float, K: int, device: torch.device, dtype: torch.dtype) -> torch.Tensor:
+    """Caputo–Fabrizio-like exponential kernel (normalized)."""
+    # Rate parameter: tie smoothly to alpha in (0,1]; avoid zero
+    lam = max(1e-6, float(alpha))
+    k = torch.arange(K, device=device, dtype=dtype)
+    w = torch.exp(-lam * k)
+    # Normalize for stability
+    w = w / (w.abs().sum() + 1e-12)
+    return w
+
+
+def _ab_kernel(alpha: float, K: int, device: torch.device, dtype: torch.dtype) -> torch.Tensor:
+    """Atangana–Baleanu-like kernel: blend GL weights with an exponential tail."""
+    gl = _gl_weights(alpha, K, device, dtype)
+    expw = _exp_kernel(alpha, K, device, dtype)
+    # Blend keeps sign structure from GL while damping long tail
+    w = 0.7 * gl + 0.3 * expw
+    return w
+
+
+def _conv_last_dim(x: torch.Tensor, kernel_1d: torch.Tensor) -> torch.Tensor:
+    """Apply 1D convolution along the last dimension with given 1D kernel.
+    Uses padding to keep the same output length as input.
     """
-    Forward pass for Riemann-Liouville fractional derivative
+    K = int(kernel_1d.numel())
+    pad = K - 1
 
-    This is a simplified implementation using finite differences
+    orig_shape = x.shape
+    L = orig_shape[-1]
+    # Collapse all leading dims into batch, use single channel
+    x_ = x.reshape(-1, 1, L)
+    weight = kernel_1d.view(1, 1, K)
+    y_ = torch.nn.functional.conv1d(x_, weight, padding=pad)
+    # Trim to original length (causal GL form)
+    y_ = y_[:, :, :L]
+    return y_.reshape(orig_shape)
+
+
+def _fractional_convolution_forward(x: torch.Tensor, alpha: float, method: str = "RL") -> Tuple[torch.Tensor, torch.Tensor]:
+    """Differentiable fractional derivative via 1D convolution along last dim.
+    method selects kernel: 'RL'/'GL' -> GL binomials, 'Caputo' -> GL, 'CF' -> exponential,
+    'AB' -> blended GL/exponential.
     """
-    if alpha == 0:
-        return x
+    if alpha == 0.0:
+        kernel = torch.zeros(1, device=x.device, dtype=x.dtype)
+        kernel[0] = 1.0
+        return x, kernel
 
-    if alpha == 1:
-        return torch.gradient(x, dim=(-1,))[0]
+    if alpha == 1.0:
+        # First difference kernel [1, -1]
+        kernel = torch.tensor([1.0, -1.0], device=x.device, dtype=x.dtype)
+        y = _conv_last_dim(x, kernel)
+        return y, kernel
 
-    # For non-integer alpha, use a simplified approximation
-    # This is a placeholder - in practice, you'd want a more sophisticated
-    # method
-    result = x.clone()
-
-    # Apply a simplified fractional derivative approximation
-    # This preserves the computation graph while providing a reasonable
-    # approximation
-    if alpha > 0 and alpha < 1:
-        # Use a weighted combination of the original signal and its gradient
-        gradient = torch.gradient(x, dim=(-1,))[0]
-        result = (1 - alpha) * x + alpha * gradient
-    elif alpha > 1:
-        # For alpha > 1, apply multiple derivatives
-        n = int(alpha)
-        fractional_part = alpha - n
-        result = x
-        for _ in range(n):
-            result = torch.gradient(result, dim=(-1,))[0]
-        if fractional_part > 0:
-            gradient = torch.gradient(result, dim=(-1,))[0]
-            result = (1 - fractional_part) * result + \
-                fractional_part * gradient
-
-    return result
+    L = x.shape[-1]
+    K = int(min(max(8, L), 128))
+    m = (method or "RL").upper()
+    if m in ("RL", "GL", "CAPUTO"):
+        kernel = _gl_weights(alpha, K, x.device, x.dtype)
+    elif m in ("CF", "CAPUTO-FABRIZIO", "CAPUTO_FABRIZIO"):
+        kernel = _exp_kernel(alpha, K, x.device, x.dtype)
+    elif m in ("AB", "ATANGANA-BALEANU", "ATANGANA_BALEANU"):
+        kernel = _ab_kernel(alpha, K, x.device, x.dtype)
+    else:
+        # Default to GL for unknown methods to remain robust
+        kernel = _gl_weights(alpha, K, x.device, x.dtype)
+    y = _conv_last_dim(x, kernel)
+    return y, kernel
 
 
 def _caputo_forward(x: torch.Tensor, alpha: float) -> torch.Tensor:
-    """
-    Forward pass for Caputo fractional derivative
-
-    This is a simplified implementation using finite differences
-    """
-    if alpha == 0:
-        return x
-
-    if alpha == 1:
-        return torch.gradient(x, dim=(-1,))[0]
-
-    # For non-integer alpha, use a simplified approximation
-    result = x.clone()
-
-    if alpha > 0 and alpha < 1:
-        # Use a weighted combination of the original signal and its gradient
-        gradient = torch.gradient(x, dim=(-1,))[0]
-        result = (1 - alpha) * x + alpha * gradient
-    elif alpha > 1:
-        # For alpha > 1, apply multiple derivatives
-        n = int(alpha)
-        fractional_part = alpha - n
-        result = x
-        for _ in range(n):
-            result = torch.gradient(result, dim=(-1,))[0]
-        if fractional_part > 0:
-            gradient = torch.gradient(result, dim=(-1,))[0]
-            result = (1 - fractional_part) * result + \
-                fractional_part * gradient
-
-    return result
+    # Use same GL convolution path for differentiability
+    y, _ = _fractional_convolution_forward(x, alpha)
+    return y
 
 
 def _grunwald_letnikov_forward(x: torch.Tensor, alpha: float) -> torch.Tensor:
-    """
-    Forward pass for Grünwald-Letnikov fractional derivative
-
-    This is a simplified implementation using finite differences
-    """
-    if alpha == 0:
-        return x
-    if alpha == 1:
-        return torch.gradient(x, dim=(-1,))[0]
-
-    # For non-integer alpha, use a simplified approximation
-    result = x.clone()
-
-    if alpha > 0 and alpha < 1:
-        # Use a weighted combination of the original signal and its gradient
-        gradient = torch.gradient(x, dim=(-1,))[0]
-        result = (1 - alpha) * x + alpha * gradient
-    elif alpha > 1:
-        # For alpha > 1, apply multiple derivatives
-        n = int(alpha)
-        fractional_part = alpha - n
-        result = x
-        for _ in range(n):
-            result = torch.gradient(result, dim=(-1,))[0]
-        if fractional_part > 0:
-            gradient = torch.gradient(result, dim=(-1,))[0]
-            result = (1 - fractional_part) * result + \
-                fractional_part * gradient
-
-    return result
+    y, _ = _fractional_convolution_forward(x, alpha)
+    return y
 
 
 def _riemann_liouville_backward(
         grad_output: torch.Tensor,
         x: torch.Tensor,
         alpha: float) -> torch.Tensor:
-    """Backward pass for Riemann-Liouville fractional derivative"""
-    if alpha == 0:
-        return grad_output
-
-    if alpha == 1:
-        # For first derivative, the adjoint is -gradient
-        return -torch.gradient(grad_output, dim=(-1,))[0]
-
-    # Simplified backward pass
-    if alpha > 0 and alpha < 1:
-        gradient_grad = torch.gradient(grad_output, dim=(-1,))[0]
-        return (1 - alpha) * grad_output - alpha * gradient_grad
-    elif alpha > 1:
-        n = int(alpha)
-        fractional_part = alpha - n
-        result = grad_output
-        for _ in range(n):
-            result = -torch.gradient(result, dim=(-1,))[0]
-        if fractional_part > 0:
-            gradient_grad = torch.gradient(result, dim=(-1,))[0]
-            result = (1 - fractional_part) * result - \
-                fractional_part * gradient_grad
-        return result
-
-    return grad_output
+    # Use convolutional adjoint for consistency
+    _, kernel = _fractional_convolution_forward(x, alpha)
+    return _conv_last_dim(grad_output, kernel.flip(-1))
 
 
 def _caputo_backward(

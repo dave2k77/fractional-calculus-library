@@ -6,7 +6,7 @@ fractional derivatives, designed to work seamlessly across PyTorch, JAX, and NUM
 """
 
 from abc import ABC, abstractmethod
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, Any, List, Callable
 import warnings
 
 from ..core.definitions import FractionalOrder

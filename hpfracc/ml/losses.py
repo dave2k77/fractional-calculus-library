@@ -300,7 +300,15 @@ class FractionalBCELoss(FractionalLossFunction):
 
     def compute_loss(self, predictions: Any, targets: Any) -> Any:
         if self.backend == BackendType.TORCH:
+            import torch
             import torch.nn.functional as F
+            if not isinstance(predictions, torch.Tensor):
+                predictions = torch.tensor(predictions, dtype=torch.float32)
+            if not isinstance(targets, torch.Tensor):
+                targets = torch.tensor(targets, dtype=torch.float32)
+            # Ensure predictions are within (0,1)
+            if predictions.min() < 0 or predictions.max() > 1:
+                predictions = torch.sigmoid(predictions)
             return F.binary_cross_entropy(
                 predictions, targets, reduction=self.reduction)
         else:

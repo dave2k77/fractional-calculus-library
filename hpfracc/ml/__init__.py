@@ -14,10 +14,10 @@ with neural networks, including:
 - **Unified Tensor Operations**: Cross-backend tensor manipulations
 """
 
-# Backend Management System
+# Backend Management
 from .backends import (
-    BackendManager,
     BackendType,
+    BackendManager,
     get_backend_manager,
     set_backend_manager,
     get_active_backend,
@@ -98,8 +98,8 @@ from .gnn_models import (
 # Export all components
 __all__ = [
     # Backend Management
-    'BackendManager',
     'BackendType',
+    'BackendManager',
     'get_backend_manager',
     'set_backend_manager',
     'get_active_backend',
@@ -161,8 +161,8 @@ __all__ = [
     'FractionalGraphUNet',
     'FractionalGNNFactory'
 ]
-
 __version__ = "0.1.0"
 __author__ = "Davian R. Chin"
 __email__ = "d.r.chin@pgr.reading.ac.uk"
 __institution__ = "Department of Biomedical Engineering, University of Reading"
+

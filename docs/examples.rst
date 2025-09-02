@@ -1066,5 +1066,99 @@ Demonstrate the comprehensive collection of fractional operators available in HP
        if name in results:
            print(f"{name}: Result shape {result.shape}")
 
+Autograd Fractional Derivatives (ML)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Demonstrate the autograd-friendly fractional derivatives for machine learning applications:
+
+.. code-block:: python
+
+   import torch
+   import torch.nn as nn
+   from hpfracc.ml.fractional_autograd import fractional_derivative, FractionalDerivativeLayer
+   import matplotlib.pyplot as plt
+
+   # Create test data
+   batch_size, channels, time_steps = 4, 16, 128
+   x = torch.randn(batch_size, channels, time_steps, requires_grad=True)
+   
+   # Test different methods
+   methods = ['RL', 'Caputo', 'CF', 'AB']
+   alpha = 0.5
+   
+   results = {}
+   for method in methods:
+       try:
+           y = fractional_derivative(x, alpha=alpha, method=method)
+           results[method] = y.detach().numpy()
+       except Exception as e:
+           print(f"{method}: {e}")
+   
+   # Test gradient computation
+   x_test = torch.randn(2, 8, 64, requires_grad=True)
+   y_test = fractional_derivative(x_test, alpha=0.3, method="RL")
+   loss = y_test.mean()
+   loss.backward()
+   
+   print(f"Gradient shape: {x_test.grad.shape}")
+   print(f"Gradient norm: {x_test.grad.norm().item():.6f}")
+   
+   # Test layer wrapper
+   layer = FractionalDerivativeLayer(alpha=0.5, method="RL")
+   y_layer = layer(x_test)
+   print(f"Layer output shape: {y_layer.shape}")
+   
+   # Visualize results
+   if results:
+       plt.figure(figsize=(15, 10))
+       
+       # Original signal
+       plt.subplot(2, 2, 1)
+       plt.plot(x[0, 0, :].detach().numpy(), 'k-', linewidth=2, label='Original')
+       plt.xlabel('Time')
+       plt.ylabel('Amplitude')
+       plt.title('Original Signal')
+       plt.legend()
+       plt.grid(True, alpha=0.3)
+       
+       # Method comparisons
+       for i, (method, result) in enumerate(results.items()):
+           plt.subplot(2, 2, i+2)
+           plt.plot(result[0, 0, :], '--', linewidth=2, label=f'{method} D^{alpha}')
+           plt.xlabel('Time')
+           plt.ylabel('D^α f(t)')
+           plt.title(f'{method} Method')
+           plt.legend()
+           plt.grid(True, alpha=0.3)
+       
+       plt.tight_layout()
+       plt.show()
+   
+   # Training example
+   class FractionalNet(nn.Module):
+       def __init__(self, alpha=0.5, method="RL"):
+           super().__init__()
+           self.fractional_layer = FractionalDerivativeLayer(alpha, method)
+           self.linear = nn.Linear(64, 1)
+       
+       def forward(self, x):
+           x = self.fractional_layer(x)
+           x = x.mean(dim=1)  # Global average pooling
+           return self.linear(x)
+   
+   # Create model and test forward pass
+   model = FractionalNet(alpha=0.5, method="RL")
+   output = model(x_test)
+   print(f"Model output shape: {output.shape}")
+   
+   # Test training step
+   optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+   target = torch.randn(2, 1)
+   loss = nn.MSELoss()(output, target)
+   loss.backward()
+   optimizer.step()
+   
+   print(f"Training loss: {loss.item():.6f}")
+
 These examples demonstrate the comprehensive capabilities of the HPFRACC library, from basic fractional calculus operations to advanced applications in machine learning, signal processing, and numerical analysis. Each example includes visualization and analysis tools to help users understand the behavior and performance of fractional calculus methods.
 """

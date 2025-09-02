@@ -1425,3 +1425,145 @@ class FractionalBatchNorm1d:
                 self.weight.reshape(1, -1, 1) + self.bias.reshape(1, -1, 1)
 
         return x_norm
+
+
+class FractionalDropout:
+    """
+    Dropout layer with optional fractional calculus integration.
+
+    During training, randomly zeroes some of the elements of the input tensor
+    with probability p using samples from a Bernoulli distribution. When
+    fractional use is enabled, p is lightly modulated by the fractional order
+    to keep API parity without enforcing a specific theory.
+    """
+
+    def __init__(
+        self,
+        p: float = 0.5,
+        inplace: bool = False,
+        config: LayerConfig = None,
+        backend: Optional[BackendType] = None
+    ):
+        self.config = config or LayerConfig()
+        self.p = float(p)
+        self.inplace = inplace
+
+        # Set backend (normalize AUTO to active)
+        resolved_backend = backend or self.config.backend or get_backend_manager().active_backend
+        if resolved_backend == BackendType.AUTO:
+            resolved_backend = get_backend_manager().active_backend
+        self.backend = resolved_backend
+        self.tensor_ops = get_tensor_ops(self.backend)
+
+    def forward(self, x: Any, training: bool = True) -> Any:
+        if not training or self.p <= 0.0:
+            return x
+
+        # Optional fractional modulation of dropout probability
+        p = self.p
+        if self.config.use_fractional and hasattr(self.config, 'fractional_order'):
+            try:
+                alpha = float(self.config.fractional_order.alpha)
+                p = max(0.0, min(1.0, p * (0.5 + 0.5 * alpha)))
+            except Exception:
+                pass
+
+        if self.backend == BackendType.TORCH:
+            import torch.nn.functional as F
+            return F.dropout(x, p=p, training=True, inplace=self.inplace)
+        elif self.backend == BackendType.JAX:
+            import jax.numpy as jnp
+            import numpy as np
+            rng = np.random.default_rng()
+            mask = (rng.random(size=x.shape) > p).astype(x.dtype)
+            return (x * mask) / (1.0 - p)
+        elif self.backend == BackendType.NUMBA:
+            import numpy as np
+            mask = (np.random.random(size=x.shape) > p).astype(x.dtype)
+            return (x * mask) / (1.0 - p)
+        else:
+            raise RuntimeError(f"Unknown backend: {self.backend}")
+
+    def __call__(self, x: Any, training: bool = True) -> Any:
+        return self.forward(x, training)
+
+
+class FractionalLayerNorm:
+    """
+    Layer Normalization with optional fractional calculus integration.
+
+    Normalizes over the last dimension by default (feature dimension), with
+    optional affine parameters. If fractional use is enabled, the normalized
+    activations are lightly modulated by the fractional order.
+    """
+
+    def __init__(
+        self,
+        normalized_shape: int,
+        eps: float = 1e-5,
+        elementwise_affine: bool = True,
+        config: LayerConfig = None,
+        backend: Optional[BackendType] = None
+    ):
+        self.config = config or LayerConfig()
+        self.normalized_shape = normalized_shape
+        self.eps = eps
+        self.elementwise_affine = elementwise_affine
+
+        resolved_backend = backend or self.config.backend or get_backend_manager().active_backend
+        if resolved_backend == BackendType.AUTO:
+            resolved_backend = get_backend_manager().active_backend
+        self.backend = resolved_backend
+        self.tensor_ops = get_tensor_ops(self.backend)
+
+        # Parameters
+        if self.elementwise_affine:
+            if self.backend == BackendType.TORCH:
+                import torch
+                self.weight = torch.ones(self.normalized_shape, requires_grad=True)
+                self.bias = torch.zeros(self.normalized_shape, requires_grad=True)
+            else:
+                import numpy as np
+                self.weight = self.tensor_ops.create_tensor(
+                    np.ones(self.normalized_shape, dtype=np.float32), requires_grad=True)
+                self.bias = self.tensor_ops.create_tensor(
+                    np.zeros(self.normalized_shape, dtype=np.float32), requires_grad=True)
+        else:
+            self.weight = None
+            self.bias = None
+
+    def forward(self, x: Any) -> Any:
+        # Optionally apply fractional derivative pre-normalization (torch only)
+        if self.config.use_fractional and self.backend == BackendType.TORCH:
+            x = fractional_derivative(
+                x, self.config.fractional_order.alpha, self.config.method)
+
+        if self.backend == BackendType.TORCH:
+            import torch
+            mean = x.mean(dim=-1, keepdim=True)
+            var = x.var(dim=-1, unbiased=False, keepdim=True)
+            x_norm = (x - mean) / torch.sqrt(var + self.eps)
+            if self.elementwise_affine:
+                x_norm = x_norm * self.weight + self.bias
+            return x_norm
+        elif self.backend == BackendType.JAX:
+            import jax.numpy as jnp
+            mean = jnp.mean(x, axis=-1, keepdims=True)
+            var = jnp.var(x, axis=-1, keepdims=True)
+            x_norm = (x - mean) / jnp.sqrt(var + self.eps)
+            if self.elementwise_affine:
+                x_norm = x_norm * self.weight + self.bias
+            return x_norm
+        elif self.backend == BackendType.NUMBA:
+            import numpy as np
+            mean = np.mean(x, axis=-1, keepdims=True)
+            var = np.var(x, axis=-1, keepdims=True)
+            x_norm = (x - mean) / np.sqrt(var + self.eps)
+            if self.elementwise_affine:
+                x_norm = x_norm * self.weight + self.bias
+            return x_norm
+        else:
+            raise RuntimeError(f"Unknown backend: {self.backend}")
+
+    def __call__(self, x: Any) -> Any:
+        return self.forward(x)

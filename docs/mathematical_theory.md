@@ -323,6 +323,14 @@ I^α_H f(t) = (1/Γ(α)) ∫₁ᵗ (ln(t/τ))^(α-1) f(τ) dτ/τ
    - High accuracy for smooth functions
    - Parallel processing capability
 
+4. **Autograd-Friendly Convolutional Kernels (ML)**
+   - Implement fractional derivatives as 1D convolutions along the last dimension
+   - Method-specific kernels:
+     - RL/GL/Caputo: GL binomial weights w_k = (-1)^k C(α,k)
+     - CF: normalized exponential kernel exp(-λk), λ≈α
+     - AB: blended kernel 0.7·GL + 0.3·exp tail
+   - Preserves computation graph and enables gradient-based learning
+
 ### Error Analysis
 
 **Truncation Error**: O(h^p) where p depends on method

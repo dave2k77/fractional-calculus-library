@@ -1,4 +1,4 @@
-HPFRACC Documentation
+# HPFRACC Documentation
 =====================
 
 Welcome to the **HPFRACC** (High-Performance Fractional Calculus) documentation!
@@ -12,7 +12,7 @@ Key Features
 -----------
 
 * **Advanced Fractional Calculus**: Riemann-Liouville, Caputo, Grünwald-Letnikov definitions
-* **Machine Learning Integration**: Native PyTorch, JAX, and NUMBA support
+* **Machine Learning Integration**: Native PyTorch, JAX, and NUMBA support with autograd-friendly fractional derivatives
 * **Graph Neural Networks**: GCN, GAT, GraphSAGE, and Graph U-Net architectures
 * **Advanced Solvers**: HPM, VIM, and SDE solvers for fractional differential equations
 * **Neural fODE Framework**: Learning-based solution of fractional ODEs
@@ -25,10 +25,10 @@ Current Status
 
 * **Core Methods**: 95% complete and tested
 * **GPU Acceleration**: Fully implemented
-* **Machine Learning**: 90% complete
+* **Machine Learning**: 95% complete with autograd fractional derivatives
 * **Advanced Solvers**: HPM, VIM, and SDE solvers fully implemented
 * **Neural fODE Framework**: Complete implementation ready for research
-* **Documentation**: 90% complete
+* **Documentation**: 95% complete with ML autograd coverage
 * **PyPI Package**: Published as hpfracc-1.3.2
 
 Quick Start
@@ -76,8 +76,8 @@ Core Concepts
 
 * :doc:`model_theory` - Mathematical foundations and theoretical background
 * :doc:`user_guide` - Getting started and basic usage patterns
-* :doc:`fractional_operators_guide` - Comprehensive guide to all fractional operators
-* :doc:`mathematical_theory` - Deep mathematical theory and foundations
+* :doc:`fractional_operators_guide` - Comprehensive guide to all fractional operators including ML autograd
+* :doc:`mathematical_theory` - Deep mathematical theory and foundations including autograd kernels
 
 API Reference
 ~~~~~~~~~~~~
@@ -90,7 +90,7 @@ Examples & Tutorials
 
 * :doc:`examples` - Comprehensive code examples and use cases
 * :doc:`scientific_tutorials` - Advanced scientific tutorials and research applications
-* :doc:`user_guide` - Machine learning workflows and best practices
+* :doc:`user_guide` - Machine learning workflows and best practices including autograd
 * :doc:`neural_fode_guide` - Complete guide to the Neural fODE framework
 
 

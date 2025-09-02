@@ -12,9 +12,10 @@ The HPFRACC library provides a comprehensive collection of fractional calculus o
 4. [Parallel-Optimized Methods](#parallel-optimized-methods)
 5. [Special Operators](#special-operators)
 6. [Fractional Integrals](#fractional-integrals)
-7. [Usage Examples](#usage-examples)
-8. [Performance Considerations](#performance-considerations)
-9. [Mathematical Theory](#mathematical-theory)
+7. [Autograd Fractional Derivatives (ML)](#autograd-fractional-derivatives-ml)
+8. [Usage Examples](#usage-examples)
+9. [Performance Considerations](#performance-considerations)
+10. [Mathematical Theory](#mathematical-theory)
 
 ## Classical Fractional Derivatives
 
@@ -284,6 +285,39 @@ result = rf_identity.compute(f, x)
 - Unified derivative/integral operator
 - Smooth transition between operations
 - Perfect for signal processing and image analysis
+
+## Autograd Fractional Derivatives (ML)
+
+The ML module provides autograd-friendly fractional derivatives that preserve the computation graph, implemented as 1D convolutions along the last dimension with method-specific kernels.
+
+- RL/GL/Caputo: Grünwald–Letnikov (GL) binomial weights.
+- CF (Caputo–Fabrizio): normalized exponential kernel.
+- AB (Atangana–Baleanu): blended kernel (GL + exponential tail).
+
+### Usage
+
+```python
+import torch
+from hpfracc.ml.fractional_autograd import fractional_derivative, FractionalDerivativeLayer
+
+x = torch.randn(2, 64, 128, requires_grad=True)  # (batch, channels, time)
+
+# RL/GL
+y_rl = fractional_derivative(x, alpha=0.5, method="RL")
+
+# Caputo
+y_caputo = fractional_derivative(x, alpha=0.5, method="Caputo")
+
+# Caputo–Fabrizio (exponential kernel)
+y_cf = fractional_derivative(x, alpha=0.5, method="CF")
+
+# Atangana–Baleanu (blended kernel)
+y_ab = fractional_derivative(x, alpha=0.5, method="AB")
+
+# Layer wrapper
+layer = FractionalDerivativeLayer(alpha=0.5, method="RL")
+out = layer(torch.randn(4, 16, 256, requires_grad=True))
+```
 
 ## Fractional Integrals
 
