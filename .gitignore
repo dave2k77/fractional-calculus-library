@@ -224,3 +224,8 @@ logs/
 *.dump
 *.dmp
 .pypirc
+
+# Manuscript and research papers (not relevant for community)
+manuscript/
+*.tex
+*.bib
