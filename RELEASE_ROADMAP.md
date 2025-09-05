@@ -493,3 +493,23 @@ This document outlines the development roadmap for HPFRACC (High-Performance Fra
 ---
 
 *This roadmap is a living document and will be updated based on user feedback, research developments, and implementation progress. Release 1.5.0 represents a major milestone with complete ML integration and production-ready autograd fractional derivatives.*
+
+## 📌 Execution Plan Addendum for 1.6.0: Fractional Autograd and Probabilistic Optimization
+
+- **Goals**: Spectral fractional autograd (Mellin/FFT/Laplacian), stochastic memory sampling, probabilistic fractional orders.
+- **Milestones**:
+  - M1: Spectral autograd core engines and unified Function/Layer API
+  - M2: Stochastic memory sampling (importance sampling, stratified, control variates)
+  - M3: Probabilistic α with reparameterization and score-function estimators
+  - M4: Benchmarks (accuracy, variance, latency, memory) vs deterministic baselines
+  - M5: GPU optimization (chunked FFT, fused ops, AMP) and CI perf gates
+  - M6: Docs/examples (PINNs, fODEs, GNNs) + manuscript updates
+- **Success metrics**:
+  - ≥3x wall-clock speedup vs full-history L1 at same error tolerance
+  - ≤10% variance inflation on D^α estimates at K ≤ 128 samples
+  - ≤1.2x memory overhead vs deterministic spectral method
+  - Stable training on 3 tasks (PINN diffusion, fODE, graph conv) with equal/better final loss
+- **Risks & mitigation**:
+  - High variance for heavy tails → stratification + control variates + capped weights
+  - Backprop through α noisy → reparameterization + baselines; fallback to fixed α
+  - FFT chunking artifacts → overlap-add with windowing; regression tests

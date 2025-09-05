@@ -13,6 +13,7 @@ Key Features
 
 * **Advanced Fractional Calculus**: Riemann-Liouville, Caputo, Grünwald-Letnikov definitions
 * **Machine Learning Integration**: Native PyTorch, JAX, and NUMBA support with autograd-friendly fractional derivatives
+* **Fractional Autograd Framework**: Spectral domain computation, stochastic memory sampling, probabilistic fractional orders
 * **Graph Neural Networks**: GCN, GAT, GraphSAGE, and Graph U-Net architectures
 * **Advanced Solvers**: SDE solvers for fractional differential equations
 * **Neural fODE Framework**: Learning-based solution of fractional ODEs
@@ -90,6 +91,7 @@ Examples & Tutorials
 * :doc:`examples` - Comprehensive code examples and use cases
 * :doc:`scientific_tutorials` - Advanced scientific tutorials and research applications
 * :doc:`user_guide` - Machine learning workflows and best practices including autograd
+* :doc:`fractional_autograd_guide` - Complete guide to the Fractional Autograd Framework
 * :doc:`neural_fode_guide` - Complete guide to the Neural fODE framework
 
 
@@ -163,6 +165,7 @@ Getting Help
    :caption: Contents:
 
    user_guide
+   fractional_autograd_guide
    api_reference
    examples
    scientific_tutorials

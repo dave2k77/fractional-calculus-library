@@ -1,0 +1,8 @@
+Fractional derivative implementations registered successfully!
+Fractional derivative implementations registered successfully!
+step 0 loss 0.323326
+step 2 loss 0.321221
+step 4 loss 0.319125
+step 6 loss 0.317037
+step 8 loss 0.314958
+Training completed.

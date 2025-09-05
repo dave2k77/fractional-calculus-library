@@ -1,0 +1,32 @@
+name: Smoke Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Install package (editable)
+        run: |
+          pip install -e .
+      - name: Run minimal probabilistic fractional training example
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+        run: |
+          python examples/minimal_probabilistic_fractional_training.py | tee smoke_output.txt
+      - name: Check output for success
+        run: |
+          grep -q "Training completed." smoke_output.txt

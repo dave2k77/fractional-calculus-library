@@ -95,6 +95,33 @@ from .gnn_models import (
     FractionalGNNFactory
 )
 
+# Spectral Fractional Autograd
+from .spectral_autograd import (
+    FractionalAutogradFunction,
+    FractionalAutogradLayer,
+    spectral_fractional_derivative,
+    create_spectral_fractional_layer,
+)
+
+# Stochastic Memory Sampling
+from .stochastic_memory_sampling import (
+    StochasticFractionalDerivative,
+    StochasticFractionalLayer,
+    stochastic_fractional_derivative,
+    create_stochastic_fractional_layer,
+)
+
+# Probabilistic Fractional Orders
+from .probabilistic_fractional_orders import (
+    ProbabilisticFractionalOrder,
+    ProbabilisticFractionalLayer,
+    create_probabilistic_fractional_layer,
+    create_normal_alpha_layer,
+    create_uniform_alpha_layer,
+    create_beta_alpha_layer,
+    BayesianFractionalOptimizer,
+)
+
 # Export all components
 __all__ = [
     # Backend Management
@@ -159,7 +186,28 @@ __all__ = [
     'FractionalGAT',
     'FractionalGraphSAGE',
     'FractionalGraphUNet',
-    'FractionalGNNFactory'
+    'FractionalGNNFactory',
+
+    # Spectral
+    'FractionalAutogradFunction',
+    'FractionalAutogradLayer',
+    'spectral_fractional_derivative',
+    'create_spectral_fractional_layer',
+
+    # Stochastic
+    'StochasticFractionalDerivative',
+    'StochasticFractionalLayer',
+    'stochastic_fractional_derivative',
+    'create_stochastic_fractional_layer',
+
+    # Probabilistic
+    'ProbabilisticFractionalOrder',
+    'ProbabilisticFractionalLayer',
+    'create_probabilistic_fractional_layer',
+    'create_normal_alpha_layer',
+    'create_uniform_alpha_layer',
+    'create_beta_alpha_layer',
+    'BayesianFractionalOptimizer',
 ]
 __version__ = "0.1.0"
 __author__ = "Davian R. Chin"

@@ -17,20 +17,20 @@ Fractional calculus extends the classical calculus of integer-order derivatives 
 ## Mathematical Foundations
 
 ### Gamma Function
-The gamma function Γ(z) is the foundation of fractional calculus:
+The gamma function $\Gamma(z)$ is the foundation of fractional calculus:
 
-```
-Γ(z) = ∫₀^∞ t^(z-1) e^(-t) dt
-```
+$$\Gamma(z) = \int {\operatorname{e}^{\infty} t^{z-1} \operatorname{e}^{-t} dt}$$
 
 **Properties**:
-- Γ(n+1) = n! for n ∈ ℕ
-- Γ(z+1) = zΓ(z) for z ∉ ℤ⁻
-- Γ(1/2) = √π
+
+- $Γ(n+1) = n! \text{    } \forall n \in \mathbb{N}$
+- $\Gamma(z+1) = z\Gamma(z) \text{    } \forall z ∉ \mathbb{Z}⁻$
+- $\Gamma\left(\frac{1}{2}\right) = √{\pi}$
 
 ### Fractional Order
+
 The fractional order α can be:
-- **Positive**: α > 0 (derivatives)
+- **Positive**: \alpha > 0$ (derivatives)
 - **Negative**: α < 0 (integrals)
 - **Zero**: α = 0 (identity operator)
 

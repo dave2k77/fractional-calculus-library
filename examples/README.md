@@ -10,6 +10,8 @@ examples/
 ├── jax_examples/         # JAX optimization examples
 ├── parallel_examples/    # Parallel computing examples
 ├── advanced_applications/ # Advanced PDE solver examples
+├── minimal_probabilistic_fractional_training.py  # End-to-end training example
+├── variance_aware_training_example.py            # Variance monitoring example
 └── README.md            # This file
 ```
 
@@ -77,6 +79,46 @@ Features demonstrated:
 - L1/L2 scheme comparisons
 - Predictor-corrector methods
 - 3D visualization of solutions
+
+### Fractional Autograd (Spectral, Stochastic, Probabilistic)
+
+#### End-to-End Training Example
+
+Run a minimal end-to-end training loop that combines spectral autograd, stochastic memory sampling, and probabilistic fractional orders:
+
+```bash
+python examples/minimal_probabilistic_fractional_training.py
+```
+
+Features:
+- Spectral fractional autograd (Mellin/FFT/Laplacian engines)
+- Stochastic memory sampling (importance/stratified/control variate)
+- Probabilistic fractional orders (reparameterization/score function)
+- End-to-end neural network training
+- Performance monitoring and visualization
+
+#### Variance-Aware Training Example
+
+Learn how to monitor and control variance in stochastic fractional derivatives:
+
+```bash
+python examples/variance_aware_training_example.py
+```
+
+Features:
+- Real-time variance monitoring
+- Adaptive sampling parameter adjustment
+- Seed management for reproducibility
+- Comprehensive training visualization
+- Integration with stochastic and probabilistic layers
+
+What it shows:
+- Spectral fractional layer (FFT/Laplacian-based)
+- Stochastic memory sampling with importance sampling
+- Probabilistic fractional orders (Normal) for uncertainty
+- Tiny training loop with decreasing loss and a “Training completed.” success flag
+
+Tip: In CI and local smoke tests we assert the success flag; you can do the same via `scripts/smoke_test.sh`.
 
 ## 📊 Example Outputs
 
