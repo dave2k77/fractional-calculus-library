@@ -59,6 +59,37 @@ Core Integrals
 Machine Learning Module
 ----------------------
 
+Fractional Autograd Framework
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: hpfracc.ml.autograd.spectral_autograd
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. automodule:: hpfracc.ml.autograd.stochastic_sampling
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. automodule:: hpfracc.ml.autograd.probabilistic_orders
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. automodule:: hpfracc.ml.autograd.variance_aware_training
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+GPU Optimization
+~~~~~~~~~~~~~~~~
+
+.. automodule:: hpfracc.ml.gpu_optimization
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Backend Management
 ~~~~~~~~~~~~~~~~~
 
@@ -398,6 +429,96 @@ FractionalAttention
    .. automethod:: forward
    .. automethod:: get_attention_weights
 
+Fractional Autograd Framework
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+SpectralAutogradEngine
+^^^^^^^^^^^^^^^^^^^^^^
+
+.. autoclass:: hpfracc.ml.autograd.spectral_autograd.SpectralAutogradEngine
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+   .. automethod:: __init__
+   .. automethod:: forward
+   .. automethod:: backward
+
+StochasticMemorySampler
+^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autoclass:: hpfracc.ml.autograd.stochastic_sampling.StochasticMemorySampler
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+   .. automethod:: __init__
+   .. automethod:: sample
+   .. automethod:: compute_variance
+
+ProbabilisticFractionalLayer
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autoclass:: hpfracc.ml.autograd.probabilistic_orders.ProbabilisticFractionalLayer
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+   .. automethod:: __init__
+   .. automethod:: forward
+   .. automethod:: sample_alpha
+
+VarianceAwareTrainer
+^^^^^^^^^^^^^^^^^^^^
+
+.. autoclass:: hpfracc.ml.autograd.variance_aware_training.VarianceAwareTrainer
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+   .. automethod:: __init__
+   .. automethod:: train_step
+   .. automethod:: monitor_variance
+
+GPU Optimization
+~~~~~~~~~~~~~~~~
+
+GPUProfiler
+^^^^^^^^^^^
+
+.. autoclass:: hpfracc.ml.gpu_optimization.GPUProfiler
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+   .. automethod:: __init__
+   .. automethod:: start_profiling
+   .. automethod:: stop_profiling
+
+ChunkedFFT
+^^^^^^^^^^
+
+.. autoclass:: hpfracc.ml.gpu_optimization.ChunkedFFT
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+   .. automethod:: __init__
+   .. automethod:: forward
+   .. automethod:: backward
+
+AMPFractionalEngine
+^^^^^^^^^^^^^^^^^^^
+
+.. autoclass:: hpfracc.ml.gpu_optimization.AMPFractionalEngine
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+   .. automethod:: __init__
+   .. automethod:: forward
+   .. automethod:: backward
+
 Utility Functions
 ----------------
 
@@ -609,6 +730,59 @@ Backend Management
    # Get current backend
    current = BackendManager.get_current_backend()
    print(f"Current: {current}")
+
+Fractional Autograd Framework
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: python
+
+   import torch
+   from hpfracc.ml.autograd.spectral_autograd import SpectralAutogradEngine
+   from hpfracc.ml.autograd.stochastic_sampling import StochasticMemorySampler
+   from hpfracc.ml.autograd.probabilistic_orders import ProbabilisticFractionalLayer
+
+   # Create spectral autograd engine
+   spectral_engine = SpectralAutogradEngine(alpha=0.5, method="mellin")
+   
+   # Create stochastic memory sampler
+   sampler = StochasticMemorySampler(k=32, method="importance")
+   
+   # Create probabilistic fractional layer
+   prob_layer = ProbabilisticFractionalLayer(mean=0.5, std=0.1, learnable=True)
+   
+   # Forward pass with autograd
+   x = torch.randn(100, 10, requires_grad=True)
+   result = spectral_engine(x)
+   
+   # Backward pass
+   loss = result.sum()
+   loss.backward()
+   print(f"Gradients computed: {x.grad is not None}")
+
+GPU Optimization
+~~~~~~~~~~~~~~~~
+
+.. code-block:: python
+
+   import torch
+   from hpfracc.ml.gpu_optimization import GPUProfiler, ChunkedFFT, gpu_optimization_context
+
+   # GPU profiling
+   profiler = GPUProfiler()
+   with profiler:
+       # Your GPU operations here
+       x = torch.randn(1000, 1000, device='cuda')
+       result = torch.fft.fft(x)
+
+   # Chunked FFT for large sequences
+   chunked_fft = ChunkedFFT(chunk_size=1024)
+   x = torch.randn(10000, device='cuda')
+   result = chunked_fft.forward(x)
+
+   # GPU optimization context
+   with gpu_optimization_context(use_amp=True, chunk_size=512):
+       # Your fractional calculus operations here
+       pass
 
 Performance Considerations
 -------------------------

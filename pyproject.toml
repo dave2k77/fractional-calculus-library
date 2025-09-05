@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "hpfracc"
-version = "1.5.0"
-description = "High-Performance Fractional Calculus Library with GPU Acceleration, Machine Learning Integration, and Graph Neural Networks"
+version = "2.0.0"
+description = "High-Performance Fractional Calculus Library with Fractional Autograd Framework, GPU Acceleration, Machine Learning Integration, and Graph Neural Networks"
 authors = [
     {name = "Davian R. Chin", email = "d.r.chin@pgr.reading.ac.uk"}
 ]
@@ -15,7 +15,7 @@ maintainers = [
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.8"
-keywords = ["fractional-calculus", "numerical-methods", "machine-learning", "graph-neural-networks", "jax", "pytorch", "numba", "scientific-computing", "mathematics", "deep-learning"]
+keywords = ["fractional-calculus", "numerical-methods", "machine-learning", "graph-neural-networks", "autograd", "spectral-methods", "stochastic-optimization", "jax", "pytorch", "numba", "scientific-computing", "mathematics", "deep-learning"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Science/Research",

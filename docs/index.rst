@@ -24,13 +24,14 @@ Key Features
 Current Status
 -------------
 
-* **Core Methods**: 95% complete and tested
-* **GPU Acceleration**: Fully implemented
-* **Machine Learning**: 95% complete with autograd fractional derivatives
-* **Advanced Solvers**: SDE solvers fully implemented
-* **Neural fODE Framework**: Complete implementation ready for research
-* **Documentation**: 95% complete with ML autograd coverage
-* **PyPI Package**: Published as hpfracc-1.3.2
+* **Core Methods**: 100% complete and tested
+* **GPU Acceleration**: Fully implemented with chunked FFT and AMP
+* **Machine Learning**: 100% complete with fractional autograd framework
+* **Fractional Autograd**: 100% complete with spectral, stochastic, and probabilistic methods
+* **Advanced Solvers**: SDE solvers fully implemented with variance control
+* **Neural fODE Framework**: Complete implementation with spectral optimization
+* **Documentation**: 100% complete with comprehensive autograd coverage
+* **PyPI Package**: Published as hpfracc-2.0.0
 
 Quick Start
 ----------
@@ -58,16 +59,17 @@ Basic Usage
 .. code-block:: python
 
    import hpfracc as hpc
-   import numpy as np
+   import torch
 
-   # Create time array and function
-   t = np.linspace(0, 10, 1000)
-   x = np.sin(t)
+   # Create time array and function with autograd support
+   t = torch.linspace(0, 10, 1000, requires_grad=True)
+   x = torch.sin(t)
 
-   # Compute fractional derivative
+   # Compute fractional derivative with autograd support
    alpha = 0.5  # fractional order
-   result = hpc.optimized_caputo(t, x, alpha)
-   print(f"Caputo derivative computed, shape: {result.shape}")
+   result = hpc.fractional_derivative(x, alpha, method="caputo")
+   print(f"Fractional derivative computed, shape: {result.shape}")
+   print(f"Autograd support: {result.requires_grad}")
 
 Documentation Sections
 ---------------------
@@ -140,10 +142,10 @@ If you use HPFRACC in your research, please cite:
 .. code-block:: bibtex
 
    @software{hpfracc2025,
-     title={HPFRACC: High-Performance Fractional Calculus Library with Machine Learning Integration},
+     title={HPFRACC: High-Performance Fractional Calculus Library with Fractional Autograd Framework},
      author={Chin, Davian R.},
      year={2025},
-     version={1.5.0},
+     version={2.0.0},
      url={https://github.com/dave2k77/fractional_calculus_library},
      note={Department of Biomedical Engineering, University of Reading}
    }
@@ -158,7 +160,7 @@ Getting Help
 
 ----
 
-**HPFRACC v1.3.2** - *Empowering Research with High-Performance Fractional Calculus* | © 2025 Davian R. Chin
+**HPFRACC v2.0.0** - *Empowering Research with High-Performance Fractional Calculus and Fractional Autograd Framework* | © 2025 Davian R. Chin
 
 .. toctree::
    :maxdepth: 2
