@@ -229,3 +229,16 @@ logs/
 manuscript/
 *.tex
 *.bib
+*.md
+RELEASE_*.md
+DOCUMENTATION_*.md
+ML_INTEGRATION_*.md
+PROBABILISTIC_*.md
+FRACTIONAL_*.md
+GNN_FIXES_*.md
+TEST_FIXES_*.md
+COMPREHENSIVE_*.md
+ENVIRONMENT_*.md
+PYPI_*.md
+CHANGELOG.md
+sources.bib
