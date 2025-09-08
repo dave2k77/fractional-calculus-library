@@ -1,0 +1,17 @@
+Simple EEG Classification Results
+Hardware: ASUS TUF A15 (RTX 3050, 30GB RAM, Ubuntu 24.04)
+Dataset: MNE Sample Data (BCI Competition IV when available)
+==================================================
+
+Random Forest:
+  Accuracy: 0.9138
+  Time: 2.59s
+
+SVM:
+  Accuracy: 0.7241
+  Time: 24.40s
+
+Simple CNN:
+  Accuracy: 0.8966
+  Time: 2.00s
+

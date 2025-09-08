@@ -1,0 +1,58 @@
+Simple Fractional Calculus Library Comparison Results
+Hardware: ASUS TUF A15 (RTX 3050, 30GB RAM, Ubuntu 24.04)
+============================================================
+
+FRACTIONAL DERIVATIVE ACCURACY:
+----------------------------------------
+α = 0.5:
+  hpfracc: L2 error = inf, Time = infs
+  differint: L2 error = inf, Time = infs
+  custom: L2 error = 0.759837, Time = 0.0019s
+
+α = 0.7:
+  hpfracc: L2 error = inf, Time = infs
+  differint: L2 error = inf, Time = infs
+  custom: L2 error = 0.912854, Time = 0.0018s
+
+α = 0.9:
+  hpfracc: L2 error = inf, Time = infs
+  differint: L2 error = inf, Time = infs
+  custom: L2 error = 1.079359, Time = 0.0019s
+
+α = 1.0:
+  hpfracc: L2 error = inf, Time = infs
+  differint: L2 error = inf, Time = infs
+  custom: L2 error = 1.166349, Time = 0.0019s
+
+α = 1.3:
+  hpfracc: L2 error = inf, Time = infs
+  differint: L2 error = inf, Time = infs
+  custom: L2 error = 1.433467, Time = 0.0019s
+
+α = 1.5:
+  hpfracc: L2 error = inf, Time = infs
+  differint: L2 error = inf, Time = infs
+  custom: L2 error = 1.608029, Time = 0.0019s
+
+PERFORMANCE SCALING:
+----------------------------------------
+Size = 50:
+  hpfracc: infs
+  differint: infs
+  custom: 0.0005s
+
+Size = 100:
+  hpfracc: infs
+  differint: infs
+  custom: 0.0019s
+
+Size = 200:
+  hpfracc: infs
+  differint: infs
+  custom: 0.0075s
+
+Size = 500:
+  hpfracc: infs
+  differint: infs
+  custom: 0.0474s
+

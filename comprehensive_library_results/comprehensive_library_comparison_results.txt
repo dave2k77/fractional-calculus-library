@@ -1,0 +1,30 @@
+Comprehensive Library Comparison Results for hpfracc
+Hardware: ASUS TUF A15 (RTX 3050, 30GB RAM, Ubuntu 24.04)
+============================================================
+
+WAVE EQUATION COMPREHENSIVE COMPARISON:
+--------------------------------------------------
+α = 0.5:
+  classical: L2=0.014053, L∞=0.031728, Time=0.1039s
+  scipy: L2=0.015950, L∞=0.031182, Time=0.2847s
+  differint: L2=inf, L∞=inf, Time=infs
+  hpfracc: L2=inf, L∞=inf, Time=infs
+
+α = 0.7:
+  classical: L2=0.014053, L∞=0.031728, Time=0.1039s
+  scipy: L2=0.014865, L∞=0.031286, Time=0.1334s
+  differint: L2=inf, L∞=inf, Time=infs
+  hpfracc: L2=inf, L∞=inf, Time=infs
+
+α = 0.9:
+  classical: L2=0.014053, L∞=0.031728, Time=0.1039s
+  scipy: L2=0.013641, L∞=0.031629, Time=0.1202s
+  differint: L2=inf, L∞=inf, Time=infs
+  hpfracc: L2=inf, L∞=inf, Time=infs
+
+α = 1.0:
+  classical: L2=0.014053, L∞=0.031728, Time=0.1039s
+  scipy: L2=0.014053, L∞=0.031728, Time=0.1105s
+  differint: L2=inf, L∞=inf, Time=infs
+  hpfracc: L2=inf, L∞=inf, Time=infs
+

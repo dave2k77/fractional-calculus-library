@@ -1,0 +1,90 @@
+{
+  "name": "EEG Motor Movement/Imagery Dataset",
+  "full_name": "PhysioNet EEG Motor Movement/Imagery Dataset",
+  "abbreviation": "EEGMMIDB",
+  "source": "PhysioNet",
+  "url": "https://physionet.org/content/eegmmidb/1.0.0/",
+  "year": 2001,
+  "authors": [
+    "Schalk, G.",
+    "McFarland, D.J.",
+    "Hinterberger, T.",
+    "Birbaumer, N.",
+    "Wolpaw, J.R."
+  ],
+  "citation": "Schalk, G., McFarland, D.J., Hinterberger, T., Birbaumer, N., & Wolpaw, J.R. (2004). BCI2000: a general-purpose brain-computer interface (BCI) system. IEEE Transactions on biomedical engineering, 51(6), 1034-1043.",
+  "doi": "10.1109/TBME.2004.827072",
+  "license": "PhysioNet Credentialed Health Data License",
+  "purpose": "Motor movement and imagery classification for brain-computer interfaces",
+  "description": "This dataset contains over 1,500 one- and two-minute EEG recordings from 109 volunteers. Subjects performed different motor/imagery tasks while 64-channel EEG was recorded. The dataset includes both actual motor movements and motor imagery tasks.",
+  "experimental_protocol": {
+    "paradigm": "Motor movement and imagery",
+    "tasks": [
+      "Baseline (eyes open)",
+      "Baseline (eyes closed)",
+      "Task 1 (open and close left or right fist)",
+      "Task 2 (imagine opening and closing left or right fist)",
+      "Task 3 (open and close both fists or both feet)",
+      "Task 4 (imagine opening and closing both fists or both feet)"
+    ],
+    "number_of_subjects": 109,
+    "sessions_per_subject": "Variable (1-14 sessions)",
+    "trial_duration": "1-2 minutes per trial",
+    "total_recordings": 1500,
+    "cue_duration": "Not specified",
+    "feedback": "No feedback provided"
+  },
+  "recording_parameters": {
+    "sampling_rate": "160 Hz",
+    "channels": 64,
+    "electrode_positions": "10-10 system",
+    "reference": "Linked ears reference",
+    "filtering": "0.5-100 Hz bandpass",
+    "amplifier": "BCI2000 system",
+    "electrodes": "Ag/AgCl electrodes"
+  },
+  "data_format": {
+    "file_format": "EDF (European Data Format)",
+    "data_structure": "Continuous EEG recordings",
+    "events": "Task markers",
+    "labels": "6-class task labels",
+    "file_size": "~1.5 GB total"
+  },
+  "subject_demographics": {
+    "age_range": "Not specified",
+    "gender": "Not specified",
+    "handedness": "Not specified",
+    "health_status": "Healthy subjects",
+    "bci_experience": "Not specified"
+  },
+  "preprocessing": {
+    "baseline_correction": "Not applied",
+    "artifact_removal": "Manual inspection recommended",
+    "filtering": "0.5-100 Hz bandpass",
+    "epoching": "Variable duration epochs",
+    "downsampling": "Not applied"
+  },
+  "evaluation_metrics": {
+    "cross_validation": "Subject-specific evaluation",
+    "performance_measure": "Classification accuracy",
+    "baseline_methods": "Common spatial patterns (CSP), Linear discriminant analysis (LDA)",
+    "expected_performance": "Variable depending on subject and task"
+  },
+  "usage_notes": {
+    "difficulty": "Medium - requires EEG preprocessing knowledge",
+    "recommended_tools": "EEGLAB, MNE-Python, FieldTrip",
+    "common_applications": "Motor imagery classification, BCI algorithm development",
+    "limitations": "Variable session lengths, no standardized protocol"
+  },
+  "related_datasets": [
+    "BCI Competition IV Dataset 2a",
+    "DEAP Dataset",
+    "OpenNeuro datasets"
+  ],
+  "paper_relevance": {
+    "suitability_for_fractional_methods": "High - motor tasks involve non-local temporal dynamics",
+    "comparison_baseline": "Standard CSP+LDA methods",
+    "expected_improvement": "Fractional methods may capture long-range temporal dependencies",
+    "validation_approach": "Subject-specific cross-validation with statistical significance testing"
+  }
+}

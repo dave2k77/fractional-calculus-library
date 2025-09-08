@@ -1,0 +1,46 @@
+Final Honest Physics Benchmark Results for hpfracc
+Hardware: ASUS TUF A15 (RTX 3050, 30GB RAM, Ubuntu 24.04)
+==================================================
+
+WAVE EQUATION:
+  α = 0.5:
+    Classical: L2=0.000000, L∞=0.000000, Time=0.1074s
+    Fractional: L2=0.278089, L∞=0.395209, Time=0.1061s
+  α = 0.7:
+    Classical: L2=0.000000, L∞=0.000000, Time=0.1074s
+    Fractional: L2=0.091109, L∞=0.129480, Time=0.1069s
+  α = 0.9:
+    Classical: L2=0.000000, L∞=0.000000, Time=0.1074s
+    Fractional: L2=0.009306, L∞=0.013225, Time=0.1042s
+  α = 1.0:
+    Classical: L2=0.000000, L∞=0.000000, Time=0.1074s
+    Fractional: L2=0.000000, L∞=0.000000, Time=0.1076s
+
+HEAT EQUATION:
+  α = 0.5:
+    Classical: L2=0.000037, L∞=0.000052, Time=0.1927s
+    Fractional: L2=0.087876, L∞=0.124886, Time=0.1850s
+  α = 0.7:
+    Classical: L2=0.000037, L∞=0.000052, Time=0.1927s
+    Fractional: L2=0.045844, L∞=0.065152, Time=0.2091s
+  α = 0.9:
+    Classical: L2=0.000037, L∞=0.000052, Time=0.1927s
+    Fractional: L2=0.013589, L∞=0.019312, Time=0.1789s
+  α = 1.0:
+    Classical: L2=0.000037, L∞=0.000052, Time=0.1927s
+    Fractional: L2=0.000037, L∞=0.000052, Time=0.1857s
+
+BURGERS EQUATION:
+  α = 0.5:
+    Classical: L2=0.000000, L∞=0.000000, Time=0.1680s
+    Fractional: L2=0.016606, L∞=0.090863, Time=0.1640s
+  α = 0.7:
+    Classical: L2=0.000000, L∞=0.000000, Time=0.1680s
+    Fractional: L2=0.008988, L∞=0.047085, Time=0.1731s
+  α = 0.9:
+    Classical: L2=0.000000, L∞=0.000000, Time=0.1680s
+    Fractional: L2=0.002757, L∞=0.013889, Time=0.1827s
+  α = 1.0:
+    Classical: L2=0.000000, L∞=0.000000, Time=0.1680s
+    Fractional: L2=0.000000, L∞=0.000000, Time=0.1670s
+

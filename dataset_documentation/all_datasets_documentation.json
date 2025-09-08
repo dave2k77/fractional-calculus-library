@@ -1,0 +1,287 @@
+{
+  "bci_competition_iv_2a": {
+    "name": "BCI Competition IV Dataset 2a",
+    "full_name": "Brain-Computer Interface Competition IV Dataset 2a",
+    "abbreviation": "BCI-IV-2a",
+    "source": "BCI Competition IV",
+    "url": "http://www.bbci.de/competition/iv/",
+    "year": 2008,
+    "authors": [
+      "Tangermann, M.",
+      "M\u00fcller, K.R.",
+      "Aertsen, A.",
+      "Birbaumer, N.",
+      "Braun, C.",
+      "Brunner, C.",
+      "Leeb, R.",
+      "Meinicke, P.",
+      "Miller, K.J.",
+      "M\u00fcller-Putz, G.R.",
+      "Nolte, G.",
+      "Pfurtscheller, G.",
+      "Preissl, H.",
+      "Schalk, G.",
+      "Schl\u00f6gl, A.",
+      "Vidaurre, C.",
+      "Waldert, S.",
+      "Blankertz, B."
+    ],
+    "citation": "Tangermann, M., M\u00fcller, K.R., Aertsen, A., Birbaumer, N., Braun, C., Brunner, C., Leeb, R., Meinicke, P., Miller, K.J., M\u00fcller-Putz, G.R., Nolte, G., Pfurtscheller, G., Preissl, H., Schalk, G., Schl\u00f6gl, A., Vidaurre, C., Waldert, S., & Blankertz, B. (2012). Review of the BCI competition IV. Frontiers in neuroscience, 6, 55.",
+    "doi": "10.3389/fnins.2012.00055",
+    "license": "Research use only",
+    "purpose": "Motor imagery classification for brain-computer interfaces",
+    "description": "The BCI Competition IV Dataset 2a consists of EEG recordings from nine subjects performing four different motor imagery tasks: left hand, right hand, both feet, and tongue. The dataset was designed to evaluate and compare different classification algorithms for motor imagery-based brain-computer interfaces.",
+    "experimental_protocol": {
+      "paradigm": "Motor imagery",
+      "tasks": [
+        "Left hand",
+        "Right hand",
+        "Both feet",
+        "Tongue"
+      ],
+      "number_of_subjects": 9,
+      "sessions_per_subject": 2,
+      "trials_per_class": 72,
+      "total_trials": 288,
+      "trial_duration": "4 seconds",
+      "inter_trial_interval": "2 seconds",
+      "cue_duration": "1.25 seconds",
+      "feedback": "No feedback provided"
+    },
+    "recording_parameters": {
+      "sampling_rate": "250 Hz",
+      "channels": 22,
+      "electrode_positions": "10-20 system",
+      "reference": "Common average reference",
+      "filtering": "0.5-100 Hz bandpass, 50 Hz notch filter",
+      "amplifier": "g.tec g.USBamp",
+      "electrodes": "Ag/AgCl electrodes"
+    },
+    "data_format": {
+      "file_format": "GDF (General Data Format)",
+      "data_structure": "Continuous EEG recordings with event markers",
+      "events": "Cue onset, trial start/end markers",
+      "labels": "4-class motor imagery labels",
+      "file_size": "~420 MB total"
+    },
+    "subject_demographics": {
+      "age_range": "Not specified",
+      "gender": "Not specified",
+      "handedness": "Not specified",
+      "health_status": "Healthy subjects",
+      "bci_experience": "Not specified"
+    },
+    "preprocessing": {
+      "baseline_correction": "Not applied",
+      "artifact_removal": "Manual inspection recommended",
+      "filtering": "0.5-100 Hz bandpass, 50 Hz notch",
+      "epoching": "4-second epochs around cue onset",
+      "downsampling": "Not applied"
+    },
+    "evaluation_metrics": {
+      "cross_validation": "Subject-specific evaluation",
+      "performance_measure": "Classification accuracy",
+      "baseline_methods": "Common spatial patterns (CSP), Linear discriminant analysis (LDA)",
+      "expected_performance": "60-90% accuracy depending on subject and method"
+    },
+    "usage_notes": {
+      "difficulty": "Medium - requires EEG preprocessing knowledge",
+      "recommended_tools": "EEGLAB, MNE-Python, FieldTrip",
+      "common_applications": "Motor imagery classification, BCI algorithm development",
+      "limitations": "Limited to 9 subjects, no feedback, fixed experimental protocol"
+    },
+    "related_datasets": [
+      "BCI Competition IV Dataset 2b",
+      "BCI Competition IV Dataset 2c",
+      "PhysioNet EEG Motor Movement/Imagery Dataset"
+    ],
+    "paper_relevance": {
+      "suitability_for_fractional_methods": "High - motor imagery involves non-local temporal dynamics",
+      "comparison_baseline": "Standard CSP+LDA methods",
+      "expected_improvement": "Fractional methods may capture long-range temporal dependencies",
+      "validation_approach": "Subject-specific cross-validation with statistical significance testing"
+    }
+  },
+  "physionet_eeg": {
+    "name": "EEG Motor Movement/Imagery Dataset",
+    "full_name": "PhysioNet EEG Motor Movement/Imagery Dataset",
+    "abbreviation": "EEGMMIDB",
+    "source": "PhysioNet",
+    "url": "https://physionet.org/content/eegmmidb/1.0.0/",
+    "year": 2001,
+    "authors": [
+      "Schalk, G.",
+      "McFarland, D.J.",
+      "Hinterberger, T.",
+      "Birbaumer, N.",
+      "Wolpaw, J.R."
+    ],
+    "citation": "Schalk, G., McFarland, D.J., Hinterberger, T., Birbaumer, N., & Wolpaw, J.R. (2004). BCI2000: a general-purpose brain-computer interface (BCI) system. IEEE Transactions on biomedical engineering, 51(6), 1034-1043.",
+    "doi": "10.1109/TBME.2004.827072",
+    "license": "PhysioNet Credentialed Health Data License",
+    "purpose": "Motor movement and imagery classification for brain-computer interfaces",
+    "description": "This dataset contains over 1,500 one- and two-minute EEG recordings from 109 volunteers. Subjects performed different motor/imagery tasks while 64-channel EEG was recorded. The dataset includes both actual motor movements and motor imagery tasks.",
+    "experimental_protocol": {
+      "paradigm": "Motor movement and imagery",
+      "tasks": [
+        "Baseline (eyes open)",
+        "Baseline (eyes closed)",
+        "Task 1 (open and close left or right fist)",
+        "Task 2 (imagine opening and closing left or right fist)",
+        "Task 3 (open and close both fists or both feet)",
+        "Task 4 (imagine opening and closing both fists or both feet)"
+      ],
+      "number_of_subjects": 109,
+      "sessions_per_subject": "Variable (1-14 sessions)",
+      "trial_duration": "1-2 minutes per trial",
+      "total_recordings": 1500,
+      "cue_duration": "Not specified",
+      "feedback": "No feedback provided"
+    },
+    "recording_parameters": {
+      "sampling_rate": "160 Hz",
+      "channels": 64,
+      "electrode_positions": "10-10 system",
+      "reference": "Linked ears reference",
+      "filtering": "0.5-100 Hz bandpass",
+      "amplifier": "BCI2000 system",
+      "electrodes": "Ag/AgCl electrodes"
+    },
+    "data_format": {
+      "file_format": "EDF (European Data Format)",
+      "data_structure": "Continuous EEG recordings",
+      "events": "Task markers",
+      "labels": "6-class task labels",
+      "file_size": "~1.5 GB total"
+    },
+    "subject_demographics": {
+      "age_range": "Not specified",
+      "gender": "Not specified",
+      "handedness": "Not specified",
+      "health_status": "Healthy subjects",
+      "bci_experience": "Not specified"
+    },
+    "preprocessing": {
+      "baseline_correction": "Not applied",
+      "artifact_removal": "Manual inspection recommended",
+      "filtering": "0.5-100 Hz bandpass",
+      "epoching": "Variable duration epochs",
+      "downsampling": "Not applied"
+    },
+    "evaluation_metrics": {
+      "cross_validation": "Subject-specific evaluation",
+      "performance_measure": "Classification accuracy",
+      "baseline_methods": "Common spatial patterns (CSP), Linear discriminant analysis (LDA)",
+      "expected_performance": "Variable depending on subject and task"
+    },
+    "usage_notes": {
+      "difficulty": "Medium - requires EEG preprocessing knowledge",
+      "recommended_tools": "EEGLAB, MNE-Python, FieldTrip",
+      "common_applications": "Motor imagery classification, BCI algorithm development",
+      "limitations": "Variable session lengths, no standardized protocol"
+    },
+    "related_datasets": [
+      "BCI Competition IV Dataset 2a",
+      "DEAP Dataset",
+      "OpenNeuro datasets"
+    ],
+    "paper_relevance": {
+      "suitability_for_fractional_methods": "High - motor tasks involve non-local temporal dynamics",
+      "comparison_baseline": "Standard CSP+LDA methods",
+      "expected_improvement": "Fractional methods may capture long-range temporal dependencies",
+      "validation_approach": "Subject-specific cross-validation with statistical significance testing"
+    }
+  },
+  "deap": {
+    "name": "DEAP Dataset",
+    "full_name": "Database for Emotion Analysis using Physiological Signals",
+    "abbreviation": "DEAP",
+    "source": "Queen Mary University of London",
+    "url": "https://www.eecs.qmul.ac.uk/mmv/datasets/deap/",
+    "year": 2012,
+    "authors": [
+      "Koelstra, S.",
+      "M\u00fchl, C.",
+      "Soleymani, M.",
+      "Lee, J.S.",
+      "Yazdani, A.",
+      "Ebrahimi, T.",
+      "Pun, T.",
+      "Nijholt, A.",
+      "Patras, I."
+    ],
+    "citation": "Koelstra, S., M\u00fchl, C., Soleymani, M., Lee, J.S., Yazdani, A., Ebrahimi, T., Pun, T., Nijholt, A., & Patras, I. (2012). Deap: A database for emotion analysis using physiological signals. IEEE transactions on affective computing, 3(1), 18-31.",
+    "doi": "10.1109/T-AFFC.2011.15",
+    "license": "Research use only",
+    "purpose": "Emotion recognition from physiological signals including EEG",
+    "description": "DEAP is a multimodal dataset for the analysis of human affective states. It contains EEG and peripheral physiological signals of 32 participants as they watched 40 one-minute long excerpts of music videos. Participants rated each video in terms of valence, arousal, dominance, and liking.",
+    "experimental_protocol": {
+      "paradigm": "Emotion induction",
+      "stimuli": "40 music video excerpts (1 minute each)",
+      "number_of_subjects": 32,
+      "sessions_per_subject": 1,
+      "trials_per_subject": 40,
+      "trial_duration": "60 seconds",
+      "rating_dimensions": [
+        "Valence",
+        "Arousal",
+        "Dominance",
+        "Liking"
+      ],
+      "rating_scale": "1-9 scale"
+    },
+    "recording_parameters": {
+      "sampling_rate": "128 Hz",
+      "channels": 32,
+      "electrode_positions": "10-20 system",
+      "reference": "Common average reference",
+      "filtering": "4-45 Hz bandpass",
+      "amplifier": "Biosemi ActiveTwo system",
+      "electrodes": "Ag/AgCl electrodes"
+    },
+    "data_format": {
+      "file_format": "MATLAB (.mat)",
+      "data_structure": "Preprocessed EEG epochs",
+      "events": "Video onset/offset markers",
+      "labels": "Continuous emotion ratings",
+      "file_size": "~1.5 GB total"
+    },
+    "subject_demographics": {
+      "age_range": "19-37 years",
+      "gender": "16 male, 16 female",
+      "handedness": "Not specified",
+      "health_status": "Healthy subjects",
+      "bci_experience": "Not specified"
+    },
+    "preprocessing": {
+      "baseline_correction": "Applied",
+      "artifact_removal": "EOG correction applied",
+      "filtering": "4-45 Hz bandpass",
+      "epoching": "60-second epochs",
+      "downsampling": "128 Hz"
+    },
+    "evaluation_metrics": {
+      "cross_validation": "Subject-specific evaluation",
+      "performance_measure": "Classification accuracy, regression metrics",
+      "baseline_methods": "SVM, Random Forest, Neural Networks",
+      "expected_performance": "60-80% accuracy for binary classification"
+    },
+    "usage_notes": {
+      "difficulty": "Medium - requires emotion recognition knowledge",
+      "recommended_tools": "MATLAB, Python, MNE-Python",
+      "common_applications": "Emotion recognition, affective computing",
+      "limitations": "Limited to 32 subjects, music video stimuli only"
+    },
+    "related_datasets": [
+      "MAHNOB-HCI",
+      "AMIGOS",
+      "DREAMER"
+    ],
+    "paper_relevance": {
+      "suitability_for_fractional_methods": "High - emotions involve non-local temporal dynamics",
+      "comparison_baseline": "Standard emotion recognition methods",
+      "expected_improvement": "Fractional methods may capture emotional state transitions",
+      "validation_approach": "Subject-specific cross-validation with statistical significance testing"
+    }
+  }
+}

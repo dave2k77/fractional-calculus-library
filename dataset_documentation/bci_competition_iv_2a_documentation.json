@@ -1,0 +1,103 @@
+{
+  "name": "BCI Competition IV Dataset 2a",
+  "full_name": "Brain-Computer Interface Competition IV Dataset 2a",
+  "abbreviation": "BCI-IV-2a",
+  "source": "BCI Competition IV",
+  "url": "http://www.bbci.de/competition/iv/",
+  "year": 2008,
+  "authors": [
+    "Tangermann, M.",
+    "M\u00fcller, K.R.",
+    "Aertsen, A.",
+    "Birbaumer, N.",
+    "Braun, C.",
+    "Brunner, C.",
+    "Leeb, R.",
+    "Meinicke, P.",
+    "Miller, K.J.",
+    "M\u00fcller-Putz, G.R.",
+    "Nolte, G.",
+    "Pfurtscheller, G.",
+    "Preissl, H.",
+    "Schalk, G.",
+    "Schl\u00f6gl, A.",
+    "Vidaurre, C.",
+    "Waldert, S.",
+    "Blankertz, B."
+  ],
+  "citation": "Tangermann, M., M\u00fcller, K.R., Aertsen, A., Birbaumer, N., Braun, C., Brunner, C., Leeb, R., Meinicke, P., Miller, K.J., M\u00fcller-Putz, G.R., Nolte, G., Pfurtscheller, G., Preissl, H., Schalk, G., Schl\u00f6gl, A., Vidaurre, C., Waldert, S., & Blankertz, B. (2012). Review of the BCI competition IV. Frontiers in neuroscience, 6, 55.",
+  "doi": "10.3389/fnins.2012.00055",
+  "license": "Research use only",
+  "purpose": "Motor imagery classification for brain-computer interfaces",
+  "description": "The BCI Competition IV Dataset 2a consists of EEG recordings from nine subjects performing four different motor imagery tasks: left hand, right hand, both feet, and tongue. The dataset was designed to evaluate and compare different classification algorithms for motor imagery-based brain-computer interfaces.",
+  "experimental_protocol": {
+    "paradigm": "Motor imagery",
+    "tasks": [
+      "Left hand",
+      "Right hand",
+      "Both feet",
+      "Tongue"
+    ],
+    "number_of_subjects": 9,
+    "sessions_per_subject": 2,
+    "trials_per_class": 72,
+    "total_trials": 288,
+    "trial_duration": "4 seconds",
+    "inter_trial_interval": "2 seconds",
+    "cue_duration": "1.25 seconds",
+    "feedback": "No feedback provided"
+  },
+  "recording_parameters": {
+    "sampling_rate": "250 Hz",
+    "channels": 22,
+    "electrode_positions": "10-20 system",
+    "reference": "Common average reference",
+    "filtering": "0.5-100 Hz bandpass, 50 Hz notch filter",
+    "amplifier": "g.tec g.USBamp",
+    "electrodes": "Ag/AgCl electrodes"
+  },
+  "data_format": {
+    "file_format": "GDF (General Data Format)",
+    "data_structure": "Continuous EEG recordings with event markers",
+    "events": "Cue onset, trial start/end markers",
+    "labels": "4-class motor imagery labels",
+    "file_size": "~420 MB total"
+  },
+  "subject_demographics": {
+    "age_range": "Not specified",
+    "gender": "Not specified",
+    "handedness": "Not specified",
+    "health_status": "Healthy subjects",
+    "bci_experience": "Not specified"
+  },
+  "preprocessing": {
+    "baseline_correction": "Not applied",
+    "artifact_removal": "Manual inspection recommended",
+    "filtering": "0.5-100 Hz bandpass, 50 Hz notch",
+    "epoching": "4-second epochs around cue onset",
+    "downsampling": "Not applied"
+  },
+  "evaluation_metrics": {
+    "cross_validation": "Subject-specific evaluation",
+    "performance_measure": "Classification accuracy",
+    "baseline_methods": "Common spatial patterns (CSP), Linear discriminant analysis (LDA)",
+    "expected_performance": "60-90% accuracy depending on subject and method"
+  },
+  "usage_notes": {
+    "difficulty": "Medium - requires EEG preprocessing knowledge",
+    "recommended_tools": "EEGLAB, MNE-Python, FieldTrip",
+    "common_applications": "Motor imagery classification, BCI algorithm development",
+    "limitations": "Limited to 9 subjects, no feedback, fixed experimental protocol"
+  },
+  "related_datasets": [
+    "BCI Competition IV Dataset 2b",
+    "BCI Competition IV Dataset 2c",
+    "PhysioNet EEG Motor Movement/Imagery Dataset"
+  ],
+  "paper_relevance": {
+    "suitability_for_fractional_methods": "High - motor imagery involves non-local temporal dynamics",
+    "comparison_baseline": "Standard CSP+LDA methods",
+    "expected_improvement": "Fractional methods may capture long-range temporal dependencies",
+    "validation_approach": "Subject-specific cross-validation with statistical significance testing"
+  }
+}
