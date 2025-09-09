@@ -28,10 +28,10 @@ Analytical solution: $y(t) = E_{\alpha,1}(-\lambda t^{\alpha})$
 
 Performance metrics:
 \begin{itemize}
-    \item \textbf{Accuracy**: Maximum relative error < $0.04\%$
-    \item \textbf{Convergence**: $L^2$ error < $2.1 \times 10^{-5}$
-    \item \textbf{Performance**: GPU speedup 3-7x over CPU
-    \item \textbf{Memory**: Linear scaling with time horizon
+    \item \textbf{Accuracy}: Maximum relative error < $0.04\%$
+    \item \textbf{Convergence}: $L^2$ error < $2.1 \times 10^{-5}$
+    \item \textbf{Performance}: GPU speedup 3-7x over CPU
+    \item \textbf{Memory}: Linear scaling with time horizon
 \end{itemize}
 
 \paragraph{Fractional Harmonic Oscillator}
@@ -43,10 +43,10 @@ D^{\alpha} x(t) + \omega^2 x(t) = 0, \quad x(0) = 1, \quad \dot{x}(0) = 0
 
 Performance characteristics:
 \begin{itemize}
-    \item \textbf{Training Time**: 1000 epochs in ~45 seconds (GPU)
+    \item \textbf{Training Time}: 1000 epochs in ~45 seconds (GPU)
     \item \textbf{Final Loss**: MSE < $2.3 \times 10^{-6}$
     \item \textbf{Memory Usage**: 3.1 GB with gradient checkpointing
-    \item \textbf{Convergence**: Stable across all fractional orders
+    \item \textbf{Convergence}: Stable across all fractional orders
 \end{itemize}
 
 \paragraph{Fractional Diffusion Equation}
@@ -60,7 +60,7 @@ Performance metrics:
 \begin{itemize}
     \item \textbf{Spatial Resolution**: 100 spatial points
     \item \textbf{Time Steps**: 1000 time steps
-    \item \textbf{Accuracy**: Maximum error < $1.2\%$
+    \item \textbf{Accuracy}: Maximum error < $1.2\%$
     \item \textbf{Computation Time**: 2.3 seconds (GPU) vs 8.9 seconds (CPU)
 \end{itemize}
 
@@ -99,7 +99,7 @@ Accuracy metrics:
 \begin{itemize}
     \item \textbf{Stationary Distribution**: Excellent agreement with $\mathcal{N}(\mu, \sigma^2/(2\theta))$
     \item \textbf{Mean Reversion**: Accurate capture of mean-reverting dynamics
-    \item \textbf{Convergence**: All solvers achieve theoretical convergence orders
+    \item \textbf{Convergence}: All solvers achieve theoretical convergence orders
 \end{itemize}
 
 \paragraph{Multi-dimensional Coupled SDEs}
@@ -114,7 +114,7 @@ Performance characteristics:
 \begin{itemize}
     \item \textbf{Dimensionality**: 2D system with coupling
     \item \textbf{Stability**: All solvers maintain numerical stability
-    \item \textbf{Accuracy**: Excellent preservation of coupling dynamics
+    \item \textbf{Accuracy}: Excellent preservation of coupling dynamics
 \end{itemize}
 
 \subsection{Performance Benchmarks}
@@ -360,7 +360,7 @@ Performance metrics:
 \begin{itemize}
     \item \textbf{Physics Loss**: $3.2 \times 10^{-6}$
     \item \textbf{Boundary Loss**: $1.8 \times 10^{-6}$
-    \item \textbf{Training Time**: 38.7 seconds
+    \item \textbf{Training Time}: 38.7 seconds
     \item \textbf{Memory Usage**: 2.8 GB
 \end{itemize}
 
@@ -374,7 +374,7 @@ Wave propagation with memory effects:
 Accuracy metrics:
 \begin{itemize}
     \item \textbf{Maximum Error**: 2.5\%
-    \item \textbf{Convergence**: Stable across all time steps
+    \item \textbf{Convergence}: Stable across all time steps
     \item \textbf{Memory Efficiency**: Linear scaling with spatial resolution
 \end{itemize}
 
@@ -386,7 +386,7 @@ Fractional volatility models:
 \begin{itemize}
     \item \textbf{Model Complexity**: Neural fractional ODE with 3 hidden layers
     \item \textbf{Training Data**: 10,000 option price samples
-    \item \textbf{Accuracy**: 95\% agreement with Monte Carlo simulation
+    \item \textbf{Accuracy}: 95\% agreement with Monte Carlo simulation
     \item \textbf{Computation Time**: 10x faster than Monte Carlo
 \end{itemize}
 

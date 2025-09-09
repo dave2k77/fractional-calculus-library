@@ -9,13 +9,13 @@ This work presents \hpfracc, a comprehensive high-performance framework that suc
 The framework introduces several key technical innovations that advance the state of the art:
 
 \begin{itemize}
-    \item \textbf{Spectral Autograd Framework**: The first practical implementation of automatic differentiation for fractional operators, resolving the fundamental challenge of gradient flow through non-local fractional derivatives. This breakthrough enables fractional calculus-based neural networks with 4.67x performance improvement, 2.0x smaller gradients, and proper gradient preservation. The framework maintains rigorous mathematical properties including semigroup, adjoint, and limit behavior with verified precision to $10^{-6}$, and includes robust MKL FFT error handling for production deployment.
+    \item \textbf{Spectral Autograd Framework}: The first practical implementation of automatic differentiation for fractional operators, resolving the fundamental challenge of gradient flow through non-local fractional derivatives. This breakthrough enables fractional calculus-based neural networks with 4.67x performance improvement, 2.0x smaller gradients, and proper gradient preservation. The framework maintains rigorous mathematical properties including semigroup, adjoint, and limit behavior with verified precision to $10^{-6}$, and includes robust MKL FFT error handling for production deployment.
     
-    \item \textbf{First Neural Fractional ODE Framework**: \hpfracc provides the first complete implementation of neural networks for fractional differential equations, extending the Neural ODE paradigm to fractional calculus with support for arbitrary fractional orders $\alpha \in (0, 2)$.
+    \item \textbf{First Neural Fractional ODE Framework}: \hpfracc provides the first complete implementation of neural networks for fractional differential equations, extending the Neural ODE paradigm to fractional calculus with support for arbitrary fractional orders $\alpha \in (0, 2)$.
     
-    \item \textbf{Production-Ready SDE Solvers**: Robust implementations of Euler-Maruyama, Milstein, and Heun methods for stochastic differential equations, achieving theoretical convergence orders and providing comprehensive error estimation and stability analysis.
+    \item \textbf{Production-Ready SDE Solvers}: Robust implementations of Euler-Maruyama, Milstein, and Heun methods for stochastic differential equations, achieving theoretical convergence orders and providing comprehensive error estimation and stability analysis.
     
-    \item \textbf{Unified Architecture**: A modular, extensible design that seamlessly integrates multiple mathematical domains (fractional calculus, neural ODEs, SDEs) through consistent APIs and factory patterns.
+    \item \textbf{Unified Architecture}: A modular, extensible design that seamlessly integrates multiple mathematical domains (fractional calculus, neural ODEs, SDEs) through consistent APIs and factory patterns.
     
     \item \textbf{Multi-Backend Support**: Comprehensive support for PyTorch, JAX, and NUMBA backends, enabling users to choose the most appropriate platform for their specific use case while maintaining consistent functionality.
 \end{itemize}
@@ -55,9 +55,9 @@ The framework opens new research directions and applications:
 Our comprehensive experimental evaluation demonstrates the framework's exceptional performance:
 
 \begin{itemize}
-    \item \textbf{Mathematical Accuracy**: Validation against analytical solutions shows maximum relative errors below $0.04\%$ for fractional relaxation equations and $L^2$ errors below $2.1 \times 10^{-5}$ across all fractional orders.
+    \item \textbf{Mathematical Accuracy}: Validation against analytical solutions shows maximum relative errors below $0.04\%$ for fractional relaxation equations and $L^2$ errors below $2.1 \times 10^{-5}$ across all fractional orders.
     
-    \item \textbf{Numerical Convergence**: SDE solvers achieve theoretical convergence orders (Euler-Maruyama: 0.5, Milstein: 1.0, Heun: 1.0) with excellent agreement between experimental and theoretical results.
+    \item \textbf{Numerical Convergence}: SDE solvers achieve theoretical convergence orders (Euler-Maruyama: 0.5, Milstein: 1.0, Heun: 1.0) with excellent agreement between experimental and theoretical results.
     
     \item \textbf{Performance Characteristics**: GPU acceleration provides consistent speedups of 3-7x depending on problem size, with larger problems benefiting more from parallelization.
     
@@ -165,7 +165,7 @@ The framework's development roadmap includes several immediate priorities:
     
     \item \textbf{Performance Optimization**: Further improvements in GPU utilization, memory management, and parallel processing capabilities.
     
-    \item \textbf{Extended Documentation**: Additional tutorials, examples, and case studies demonstrating advanced usage patterns and applications.
+    \item \textbf{Extended Documentation}: Additional tutorials, examples, and case studies demonstrating advanced usage patterns and applications.
 \end{itemize}
 
 \subsubsection{Long-term Vision}

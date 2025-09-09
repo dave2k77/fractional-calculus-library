@@ -1,0 +1,1894 @@
+This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2025/dev/Debian) (preloaded format=pdflatex 2025.9.9)  9 SEP 2025 12:36
+entering extended mode
+ restricted \write18 enabled.
+ %&-line parsing enabled.
+**hpfracc_paper.tex
+(./hpfracc_paper.tex
+LaTeX2e <2024-11-01> patch level 2
+L3 programming layer <2025-01-18>
+(/usr/share/texlive/texmf-dist/tex/latex/base/article.cls
+Document Class: article 2024/06/29 v1.4n Standard LaTeX document class
+(/usr/share/texlive/texmf-dist/tex/latex/base/size12.clo
+File: size12.clo 2024/06/29 v1.4n Standard LaTeX file (size option)
+)
+\c@part=\count196
+\c@section=\count197
+\c@subsection=\count198
+\c@subsubsection=\count199
+\c@paragraph=\count266
+\c@subparagraph=\count267
+\c@figure=\count268
+\c@table=\count269
+\abovecaptionskip=\skip49
+\belowcaptionskip=\skip50
+\bibindent=\dimen141
+)
+(/usr/share/texlive/texmf-dist/tex/latex/base/inputenc.sty
+Package: inputenc 2024/02/08 v1.3d Input encoding file
+\inpenc@prehook=\toks17
+\inpenc@posthook=\toks18
+)
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsmath.sty
+Package: amsmath 2024/11/05 v2.17t AMS math features
+\@mathmargin=\skip51
+
+For additional information on amsmath, use the `?' option.
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amstext.sty
+Package: amstext 2021/08/26 v2.01 AMS text
+
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsgen.sty
+File: amsgen.sty 1999/11/30 v2.0 generic functions
+\@emptytoks=\toks19
+\ex@=\dimen142
+))
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsbsy.sty
+Package: amsbsy 1999/11/29 v1.2d Bold Symbols
+\pmbraise@=\dimen143
+)
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsopn.sty
+Package: amsopn 2022/04/08 v2.04 operator names
+)
+\inf@bad=\count270
+LaTeX Info: Redefining \frac on input line 233.
+\uproot@=\count271
+\leftroot@=\count272
+LaTeX Info: Redefining \overline on input line 398.
+LaTeX Info: Redefining \colon on input line 409.
+\classnum@=\count273
+\DOTSCASE@=\count274
+LaTeX Info: Redefining \ldots on input line 495.
+LaTeX Info: Redefining \dots on input line 498.
+LaTeX Info: Redefining \cdots on input line 619.
+\Mathstrutbox@=\box52
+\strutbox@=\box53
+LaTeX Info: Redefining \big on input line 721.
+LaTeX Info: Redefining \Big on input line 722.
+LaTeX Info: Redefining \bigg on input line 723.
+LaTeX Info: Redefining \Bigg on input line 724.
+\big@size=\dimen144
+LaTeX Font Info:    Redeclaring font encoding OML on input line 742.
+LaTeX Font Info:    Redeclaring font encoding OMS on input line 743.
+\macc@depth=\count275
+LaTeX Info: Redefining \bmod on input line 904.
+LaTeX Info: Redefining \pmod on input line 909.
+LaTeX Info: Redefining \smash on input line 939.
+LaTeX Info: Redefining \relbar on input line 969.
+LaTeX Info: Redefining \Relbar on input line 970.
+\c@MaxMatrixCols=\count276
+\dotsspace@=\muskip17
+\c@parentequation=\count277
+\dspbrk@lvl=\count278
+\tag@help=\toks20
+\row@=\count279
+\column@=\count280
+\maxfields@=\count281
+\andhelp@=\toks21
+\eqnshift@=\dimen145
+\alignsep@=\dimen146
+\tagshift@=\dimen147
+\tagwidth@=\dimen148
+\totwidth@=\dimen149
+\lineht@=\dimen150
+\@envbody=\toks22
+\multlinegap=\skip52
+\multlinetaggap=\skip53
+\mathdisplay@stack=\toks23
+LaTeX Info: Redefining \[ on input line 2953.
+LaTeX Info: Redefining \] on input line 2954.
+)
+(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/amsfonts.sty
+Package: amsfonts 2013/01/14 v3.01 Basic AMSFonts support
+\symAMSa=\mathgroup4
+\symAMSb=\mathgroup5
+LaTeX Font Info:    Redeclaring math symbol \hbar on input line 98.
+LaTeX Font Info:    Overwriting math alphabet `\mathfrak' in version `bold'
+(Font)                  U/euf/m/n --> U/euf/b/n on input line 106.
+)
+(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/amssymb.sty
+Package: amssymb 2013/01/14 v3.01 AMS font symbols
+)
+(/usr/share/texlive/texmf-dist/tex/latex/amscls/amsthm.sty
+Package: amsthm 2020/05/29 v2.20.6
+\thm@style=\toks24
+\thm@bodyfont=\toks25
+\thm@headfont=\toks26
+\thm@notefont=\toks27
+\thm@headpunct=\toks28
+\thm@preskip=\skip54
+\thm@postskip=\skip55
+\thm@headsep=\skip56
+\dth@everypar=\toks29
+)
+\c@theorem=\count282
+\c@corollary=\count283
+\c@definition=\count284
+
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/graphicx.sty
+Package: graphicx 2021/09/16 v1.2d Enhanced LaTeX Graphics (DPC,SPQR)
+
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/keyval.sty
+Package: keyval 2022/05/29 v1.15 key=value parser (DPC)
+\KV@toks@=\toks30
+)
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/graphics.sty
+Package: graphics 2024/08/06 v1.4g Standard LaTeX Graphics (DPC,SPQR)
+
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/trig.sty
+Package: trig 2023/12/02 v1.11 sin cos tan (DPC)
+)
+(/usr/share/texlive/texmf-dist/tex/latex/graphics-cfg/graphics.cfg
+File: graphics.cfg 2016/06/04 v1.11 sample graphics configuration
+)
+Package graphics Info: Driver file: pdftex.def on input line 106.
+
+(/usr/share/texlive/texmf-dist/tex/latex/graphics-def/pdftex.def
+File: pdftex.def 2024/04/13 v1.2c Graphics/color driver for pdftex
+))
+\Gin@req@height=\dimen151
+\Gin@req@width=\dimen152
+)
+(/usr/share/texlive/texmf-dist/tex/latex/hyperref/hyperref.sty
+Package: hyperref 2024-11-05 v7.01l Hypertext links for LaTeX
+
+(/usr/share/texlive/texmf-dist/tex/generic/iftex/iftex.sty
+Package: iftex 2024/12/12 v1.0g TeX engine tests
+)
+(/usr/share/texlive/texmf-dist/tex/latex/kvsetkeys/kvsetkeys.sty
+Package: kvsetkeys 2022-10-05 v1.19 Key value parser (HO)
+)
+(/usr/share/texlive/texmf-dist/tex/generic/kvdefinekeys/kvdefinekeys.sty
+Package: kvdefinekeys 2019-12-19 v1.6 Define keys (HO)
+)
+(/usr/share/texlive/texmf-dist/tex/generic/pdfescape/pdfescape.sty
+Package: pdfescape 2019/12/09 v1.15 Implements pdfTeX's escape features (HO)
+
+(/usr/share/texlive/texmf-dist/tex/generic/ltxcmds/ltxcmds.sty
+Package: ltxcmds 2023-12-04 v1.26 LaTeX kernel commands for general use (HO)
+)
+(/usr/share/texlive/texmf-dist/tex/generic/pdftexcmds/pdftexcmds.sty
+Package: pdftexcmds 2020-06-27 v0.33 Utility functions of pdfTeX for LuaTeX (HO
+)
+
+(/usr/share/texlive/texmf-dist/tex/generic/infwarerr/infwarerr.sty
+Package: infwarerr 2019/12/03 v1.5 Providing info/warning/error messages (HO)
+)
+Package pdftexcmds Info: \pdf@primitive is available.
+Package pdftexcmds Info: \pdf@ifprimitive is available.
+Package pdftexcmds Info: \pdfdraftmode found.
+))
+(/usr/share/texlive/texmf-dist/tex/latex/hycolor/hycolor.sty
+Package: hycolor 2020-01-27 v1.10 Color options for hyperref/bookmark (HO)
+)
+(/usr/share/texlive/texmf-dist/tex/latex/hyperref/nameref.sty
+Package: nameref 2023-11-26 v2.56 Cross-referencing by name of section
+
+(/usr/share/texlive/texmf-dist/tex/latex/refcount/refcount.sty
+Package: refcount 2019/12/15 v3.6 Data extraction from label references (HO)
+)
+(/usr/share/texlive/texmf-dist/tex/generic/gettitlestring/gettitlestring.sty
+Package: gettitlestring 2019/12/15 v1.6 Cleanup title references (HO)
+
+(/usr/share/texlive/texmf-dist/tex/latex/kvoptions/kvoptions.sty
+Package: kvoptions 2022-06-15 v3.15 Key value format for package options (HO)
+))
+\c@section@level=\count285
+)
+(/usr/share/texlive/texmf-dist/tex/latex/etoolbox/etoolbox.sty
+Package: etoolbox 2025/02/11 v2.5l e-TeX tools for LaTeX (JAW)
+\etb@tempcnta=\count286
+)
+(/usr/share/texlive/texmf-dist/tex/generic/stringenc/stringenc.sty
+Package: stringenc 2019/11/29 v1.12 Convert strings between diff. encodings (HO
+)
+)
+\@linkdim=\dimen153
+\Hy@linkcounter=\count287
+\Hy@pagecounter=\count288
+
+(/usr/share/texlive/texmf-dist/tex/latex/hyperref/pd1enc.def
+File: pd1enc.def 2024-11-05 v7.01l Hyperref: PDFDocEncoding definition (HO)
+Now handling font encoding PD1 ...
+... no UTF-8 mapping file for font encoding PD1
+)
+(/usr/share/texlive/texmf-dist/tex/generic/intcalc/intcalc.sty
+Package: intcalc 2019/12/15 v1.3 Expandable calculations with integers (HO)
+)
+\Hy@SavedSpaceFactor=\count289
+
+(/usr/share/texlive/texmf-dist/tex/latex/hyperref/puenc.def
+File: puenc.def 2024-11-05 v7.01l Hyperref: PDF Unicode definition (HO)
+Now handling font encoding PU ...
+... no UTF-8 mapping file for font encoding PU
+)
+Package hyperref Info: Hyper figures OFF on input line 4157.
+Package hyperref Info: Link nesting OFF on input line 4162.
+Package hyperref Info: Hyper index ON on input line 4165.
+Package hyperref Info: Plain pages OFF on input line 4172.
+Package hyperref Info: Backreferencing OFF on input line 4177.
+Package hyperref Info: Implicit mode ON; LaTeX internals redefined.
+Package hyperref Info: Bookmarks ON on input line 4424.
+\c@Hy@tempcnt=\count290
+
+(/usr/share/texlive/texmf-dist/tex/latex/url/url.sty
+\Urlmuskip=\muskip18
+Package: url 2013/09/16  ver 3.4  Verb mode for urls, etc.
+)
+LaTeX Info: Redefining \url on input line 4763.
+\XeTeXLinkMargin=\dimen154
+
+(/usr/share/texlive/texmf-dist/tex/generic/bitset/bitset.sty
+Package: bitset 2019/12/09 v1.3 Handle bit-vector datatype (HO)
+
+(/usr/share/texlive/texmf-dist/tex/generic/bigintcalc/bigintcalc.sty
+Package: bigintcalc 2019/12/15 v1.5 Expandable calculations on big integers (HO
+)
+))
+\Fld@menulength=\count291
+\Field@Width=\dimen155
+\Fld@charsize=\dimen156
+Package hyperref Info: Hyper figures OFF on input line 6042.
+Package hyperref Info: Link nesting OFF on input line 6047.
+Package hyperref Info: Hyper index ON on input line 6050.
+Package hyperref Info: backreferencing OFF on input line 6057.
+Package hyperref Info: Link coloring OFF on input line 6062.
+Package hyperref Info: Link coloring with OCG OFF on input line 6067.
+Package hyperref Info: PDF/A mode OFF on input line 6072.
+
+(/usr/share/texlive/texmf-dist/tex/latex/base/atbegshi-ltx.sty
+Package: atbegshi-ltx 2021/01/10 v1.0c Emulation of the original atbegshi
+package with kernel methods
+)
+\Hy@abspage=\count292
+\c@Item=\count293
+\c@Hfootnote=\count294
+)
+Package hyperref Info: Driver (autodetected): hpdftex.
+
+(/usr/share/texlive/texmf-dist/tex/latex/hyperref/hpdftex.def
+File: hpdftex.def 2024-11-05 v7.01l Hyperref driver for pdfTeX
+
+(/usr/share/texlive/texmf-dist/tex/latex/base/atveryend-ltx.sty
+Package: atveryend-ltx 2020/08/19 v1.0a Emulation of the original atveryend pac
+kage
+with kernel methods
+)
+\Fld@listcount=\count295
+\c@bookmark@seq@number=\count296
+
+(/usr/share/texlive/texmf-dist/tex/latex/rerunfilecheck/rerunfilecheck.sty
+Package: rerunfilecheck 2022-07-10 v1.10 Rerun checks for auxiliary files (HO)
+
+(/usr/share/texlive/texmf-dist/tex/generic/uniquecounter/uniquecounter.sty
+Package: uniquecounter 2019/12/15 v1.4 Provide unlimited unique counter (HO)
+)
+Package uniquecounter Info: New unique counter `rerunfilecheck' on input line 2
+85.
+)
+\Hy@SectionHShift=\skip57
+)
+(/usr/share/texlive/texmf-dist/tex/latex/natbib/natbib.sty
+Package: natbib 2010/09/13 8.31b (PWD, AO)
+\bibhang=\skip58
+\bibsep=\skip59
+LaTeX Info: Redefining \cite on input line 694.
+\c@NAT@ctr=\count297
+)
+(/usr/share/texlive/texmf-dist/tex/latex/listings/listings.sty
+\lst@mode=\count298
+\lst@gtempboxa=\box54
+\lst@token=\toks31
+\lst@length=\count299
+\lst@currlwidth=\dimen157
+\lst@column=\count300
+\lst@pos=\count301
+\lst@lostspace=\dimen158
+\lst@width=\dimen159
+\lst@newlines=\count302
+\lst@lineno=\count303
+\lst@maxwidth=\dimen160
+
+(/usr/share/texlive/texmf-dist/tex/latex/listings/lstpatch.sty
+File: lstpatch.sty 2024/09/23 1.10c (Carsten Heinz)
+)
+(/usr/share/texlive/texmf-dist/tex/latex/listings/lstmisc.sty
+File: lstmisc.sty 2024/09/23 1.10c (Carsten Heinz)
+\c@lstnumber=\count304
+\lst@skipnumbers=\count305
+\lst@framebox=\box55
+)
+(/usr/share/texlive/texmf-dist/tex/latex/listings/listings.cfg
+File: listings.cfg 2024/09/23 1.10c listings configuration
+))
+Package: listings 2024/09/23 1.10c (Carsten Heinz)
+
+(/usr/share/texlive/texmf-dist/tex/latex/xcolor/xcolor.sty
+Package: xcolor 2024/09/29 v3.02 LaTeX color extensions (UK)
+
+(/usr/share/texlive/texmf-dist/tex/latex/graphics-cfg/color.cfg
+File: color.cfg 2016/01/02 v1.6 sample color configuration
+)
+Package xcolor Info: Driver file: pdftex.def on input line 274.
+
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/mathcolor.ltx)
+Package xcolor Info: Model `cmy' substituted by `cmy0' on input line 1349.
+Package xcolor Info: Model `hsb' substituted by `rgb' on input line 1353.
+Package xcolor Info: Model `RGB' extended on input line 1365.
+Package xcolor Info: Model `HTML' substituted by `rgb' on input line 1367.
+Package xcolor Info: Model `Hsb' substituted by `hsb' on input line 1368.
+Package xcolor Info: Model `tHsb' substituted by `hsb' on input line 1369.
+Package xcolor Info: Model `HSB' substituted by `hsb' on input line 1370.
+Package xcolor Info: Model `Gray' substituted by `gray' on input line 1371.
+Package xcolor Info: Model `wave' substituted by `hsb' on input line 1372.
+)
+(/usr/share/texlive/texmf-dist/tex/latex/booktabs/booktabs.sty
+Package: booktabs 2020/01/12 v1.61803398 Publication quality tables
+\heavyrulewidth=\dimen161
+\lightrulewidth=\dimen162
+\cmidrulewidth=\dimen163
+\belowrulesep=\dimen164
+\belowbottomsep=\dimen165
+\aboverulesep=\dimen166
+\abovetopsep=\dimen167
+\cmidrulesep=\dimen168
+\cmidrulekern=\dimen169
+\defaultaddspace=\dimen170
+\@cmidla=\count306
+\@cmidlb=\count307
+\@aboverulesep=\dimen171
+\@belowrulesep=\dimen172
+\@thisruleclass=\count308
+\@lastruleclass=\count309
+\@thisrulewidth=\dimen173
+)
+(/usr/share/texlive/texmf-dist/tex/latex/multirow/multirow.sty
+Package: multirow 2024/11/12 v2.9 Span multiple rows of a table
+\multirow@colwidth=\skip60
+\multirow@cntb=\count310
+\multirow@dima=\skip61
+\bigstrutjot=\dimen174
+)
+(/usr/share/texlive/texmf-dist/tex/latex/caption/subcaption.sty
+Package: subcaption 2023/07/28 v1.6b Sub-captions (AR)
+
+(/usr/share/texlive/texmf-dist/tex/latex/caption/caption.sty
+Package: caption 2023/08/05 v3.6o Customizing captions (AR)
+
+(/usr/share/texlive/texmf-dist/tex/latex/caption/caption3.sty
+Package: caption3 2023/07/31 v2.4d caption3 kernel (AR)
+\caption@tempdima=\dimen175
+\captionmargin=\dimen176
+\caption@leftmargin=\dimen177
+\caption@rightmargin=\dimen178
+\caption@width=\dimen179
+\caption@indent=\dimen180
+\caption@parindent=\dimen181
+\caption@hangindent=\dimen182
+Package caption Info: Standard document class detected.
+)
+\c@caption@flags=\count311
+\c@continuedfloat=\count312
+Package caption Info: hyperref package is loaded.
+Package caption Info: listings package is loaded.
+)
+Package caption Info: New subtype `subfigure' on input line 238.
+\c@subfigure=\count313
+Package caption Info: New subtype `subtable' on input line 238.
+\c@subtable=\count314
+)
+(/usr/share/texlive/texmf-dist/tex/latex/algorithms/algorithm.sty
+Package: algorithm 2009/08/24 v0.1 Document Style `algorithm' - floating enviro
+nment
+
+(/usr/share/texlive/texmf-dist/tex/latex/float/float.sty
+Package: float 2001/11/08 v1.3d Float enhancements (AL)
+\c@float@type=\count315
+\float@exts=\toks32
+\float@box=\box56
+\@float@everytoks=\toks33
+\@floatcapt=\box57
+)
+(/usr/share/texlive/texmf-dist/tex/latex/base/ifthen.sty
+Package: ifthen 2024/03/16 v1.1e Standard LaTeX ifthen package (DPC)
+)
+\@float@every@algorithm=\toks34
+\c@algorithm=\count316
+)
+(/usr/share/texlive/texmf-dist/tex/latex/algorithmicx/algpseudocode.sty
+Package: algpseudocode 
+
+(/usr/share/texlive/texmf-dist/tex/latex/algorithmicx/algorithmicx.sty
+Package: algorithmicx 2005/04/27 v1.2 Algorithmicx
+
+Document Style algorithmicx 1.2 - a greatly improved `algorithmic' style
+\c@ALG@line=\count317
+\c@ALG@rem=\count318
+\c@ALG@nested=\count319
+\ALG@tlm=\skip62
+\ALG@thistlm=\skip63
+\c@ALG@Lnr=\count320
+\c@ALG@blocknr=\count321
+\c@ALG@storecount=\count322
+\c@ALG@tmpcounter=\count323
+\ALG@tmplength=\skip64
+)
+Document Style - pseudocode environments for use with the `algorithmicx' style
+) (/usr/share/texlive/texmf-dist/tex/generic/babel/babel.sty
+Package: babel 2025/02/14 v25.4 The multilingual framework for pdfLaTeX, LuaLaT
+eX and XeLaTeX
+\babel@savecnt=\count324
+\U@D=\dimen183
+\l@unhyphenated=\language7
+
+(/usr/share/texlive/texmf-dist/tex/generic/babel/txtbabel.def)
+\bbl@readstream=\read2
+\bbl@dirlevel=\count325
+
+(/usr/share/texlive/texmf-dist/tex/generic/babel-english/english.ldf
+Language: english 2017/06/06 v3.3r English support from the babel system
+Package babel Info: Hyphen rules for 'british' set to \l@english
+(babel)             (\language0). Reported on input line 82.
+Package babel Info: Hyphen rules for 'UKenglish' set to \l@english
+(babel)             (\language0). Reported on input line 83.
+Package babel Info: Hyphen rules for 'canadian' set to \l@english
+(babel)             (\language0). Reported on input line 102.
+Package babel Info: Hyphen rules for 'australian' set to \l@english
+(babel)             (\language0). Reported on input line 105.
+Package babel Info: Hyphen rules for 'newzealand' set to \l@english
+(babel)             (\language0). Reported on input line 108.
+))
+(/usr/share/texlive/texmf-dist/tex/generic/babel/locale/en/babel-english.tex
+Package babel Info: Importing font and identification data for english
+(babel)             from babel-en.ini. Reported on input line 11.
+)
+(/usr/share/texlive/texmf-dist/tex/latex/l3backend/l3backend-pdftex.def
+File: l3backend-pdftex.def 2024-05-08 L3 backend support: PDF output (pdfTeX)
+\l__color_backend_stack_int=\count326
+\l__pdf_internal_box=\box58
+)
+(./hpfracc_paper.aux)
+\openout1 = `hpfracc_paper.aux'.
+
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 49.
+LaTeX Font Info:    ... okay on input line 49.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 49.
+LaTeX Font Info:    ... okay on input line 49.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 49.
+LaTeX Font Info:    ... okay on input line 49.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 49.
+LaTeX Font Info:    ... okay on input line 49.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 49.
+LaTeX Font Info:    ... okay on input line 49.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 49.
+LaTeX Font Info:    ... okay on input line 49.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 49.
+LaTeX Font Info:    ... okay on input line 49.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 49.
+LaTeX Font Info:    ... okay on input line 49.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 49.
+LaTeX Font Info:    ... okay on input line 49.
+
+(/usr/share/texlive/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
+[Loading MPS to PDF converter (version 2006.09.02).]
+\scratchcounter=\count327
+\scratchdimen=\dimen184
+\scratchbox=\box59
+\nofMPsegments=\count328
+\nofMParguments=\count329
+\everyMPshowfont=\toks35
+\MPscratchCnt=\count330
+\MPscratchDim=\dimen185
+\MPnumerator=\count331
+\makeMPintoPDFobject=\count332
+\everyMPtoPDFconversion=\toks36
+) (/usr/share/texlive/texmf-dist/tex/latex/epstopdf-pkg/epstopdf-base.sty
+Package: epstopdf-base 2020-01-24 v2.11 Base part for package epstopdf
+
+(/usr/share/texlive/texmf-dist/tex/latex/grfext/grfext.sty
+Package: grfext 2019/12/03 v1.3 Manage graphics extensions (HO)
+)
+Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 4
+85.
+Package grfext Info: Graphics extension search list:
+(grfext)             [.pdf,.png,.jpg,.mps,.jpeg,.jbig2,.jb2,.PDF,.PNG,.JPG,.JPE
+G,.JBIG2,.JB2,.eps]
+(grfext)             \AppendGraphicsExtensions on input line 504.
+
+(/usr/share/texlive/texmf-dist/tex/latex/latexconfig/epstopdf-sys.cfg
+File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Liv
+e
+))
+Package hyperref Info: Link coloring OFF on input line 49.
+
+(./hpfracc_paper.out) (./hpfracc_paper.out)
+\@outlinefile=\write3
+\openout3 = `hpfracc_paper.out'.
+
+\c@lstlisting=\count333
+Package caption Info: Begin \AtBeginDocument code.
+Package caption Info: float package is loaded.
+Package caption Info: End \AtBeginDocument code.
+LaTeX Font Info:    Trying to load font information for U+msa on input line 52.
+
+
+(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsa.fd
+File: umsa.fd 2013/01/14 v3.01 AMS symbols A
+)
+LaTeX Font Info:    Trying to load font information for U+msb on input line 52.
+
+
+(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsb.fd
+File: umsb.fd 2013/01/14 v3.01 AMS symbols B
+)
+
+[1
+
+{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}]
+(./sections/01_introduction.tex
+
+[2]
+Overfull \hbox (2.31537pt too wide) in paragraph at lines 19--20
+\OT1/cmr/m/n/12 paradigm shift en-ables the so-lu-tion of pre-vi-ously in-tract
+able prob-lems through
+ []
+
+
+Overfull \hbox (5.78897pt too wide) in paragraph at lines 29--30
+[]\OT1/cmr/m/n/12 Physics-informed neu-ral net-works (PINNs) ([]Raissi et al.[]
+ []2019[]) have demon-
+ []
+
+
+
+[3]
+Overfull \hbox (20.21243pt too wide) in paragraph at lines 38--39
+\OT1/cmr/m/n/12 gest po-ten-tial for EEG-based brain-computer in-ter-face ap-pl
+i-ca-tions through
+ []
+
+
+
+[4]
+Overfull \hbox (2.90286pt too wide) in paragraph at lines 49--50
+\OT1/cmr/m/n/12 train-ing over stan-dard meth-ods while pro-vid-ing the first c
+om-pre-hen-sive frame-
+ []
+
+
+Overfull \hbox (6.03616pt too wide) in paragraph at lines 49--50
+\OT1/cmr/m/n/12 work for neu-ral frac-tional cal-cu-lus, open-ing new re-search
+ di-rec-tions in learning-
+ []
+
+)
+Overfull \hbox (50.9549pt too wide) in paragraph at lines 57--59
+\OT1/cmr/m/n/12 tu-to-ri-als and API ref-er-ences, is avail-able at []$\OT1/cmt
+t/m/n/12 https : / / fractional-[]calculus-[]library .
+ []
+
+(./sections/02_theoretical_foundations.tex
+
+[5]
+
+[6]
+
+[7]
+
+[8]
+
+[9]
+Overfull \hbox (2.2503pt too wide) in paragraph at lines 173--174
+ []\OT1/cmr/bx/n/12 Euler-Maruyama Method[] \OT1/cmr/m/n/12 The Euler-Maruyama 
+method pro-vides a first-
+ []
+
+
+
+[10]
+
+[11]
+
+[12]
+
+[13]
+
+[14]
+Overfull \hbox (2.13406pt too wide) in paragraph at lines 369--370
+ []\OT1/cmr/bx/n/12 Adomian De-com-po-si-tion Method[] \OT1/cmr/m/n/12 The Ado-
+mian de-com-po-si-tion method
+ []
+
+
+Overfull \hbox (2.3736pt too wide) in paragraph at lines 385--386
+[]\OT1/cmr/m/n/12 where $\OML/cmm/m/it/12 A[]\OT1/cmr/m/n/12 (\OML/cmm/m/it/12 
+t\OT1/cmr/m/n/12 )$ are the Ado-mian poly-no-mi-als for the non-lin-ear term $\
+OML/cmm/m/it/12 f\OT1/cmr/m/n/12 (\OML/cmm/m/it/12 t; y\OT1/cmr/m/n/12 (\OML/cm
+m/m/it/12 t\OT1/cmr/m/n/12 ))$. 
+ []
+
+
+
+[15]
+
+[16]
+
+[17]
+
+[18]
+
+[19]
+
+[20]
+
+[21]
+
+[22]
+Overfull \hbox (1.39102pt too wide) in paragraph at lines 707--708
+\OT1/cmr/m/n/12 ma-tor de-vi-ates from its mean by more than $\OML/cmm/m/it/12 
+^^O$ \OT1/cmr/m/n/12 is bounded by $2 [](\OMS/cmsy/m/n/12 ^^@\OT1/cmr/m/n/12 2\
+OML/cmm/m/it/12 K^^O[]=C[]\OT1/cmr/m/n/12 )$.
+ []
+
+
+
+[23]
+Overfull \hbox (3.24004pt too wide) in paragraph at lines 743--744
+ []\OT1/cmr/bx/n/12 Stability Re-gions[] \OT1/cmr/m/n/12 The sta-bil-ity re-gio
+n for the FFT-based frac-tional deriva-
+ []
+
+
+
+[24]
+
+[25]
+
+[26]
+Overfull \hbox (34.60124pt too wide) in paragraph at lines 835--835
+[]\OT1/cmr/bx/n/14.4 Rigorous Con-ver-gence Anal-y-sis for Frac-tional Stochas-
+
+ []
+
+
+
+[27]
+
+[28]
+
+[29]
+
+[30]
+Overfull \hbox (3.40508pt too wide) in paragraph at lines 984--986
+[]\OT1/cmr/bx/n/12 Step 1: For-ward Spec-tral Ap-prox-i-ma-tion \OT1/cmr/m/n/12
+ De-fine $[]\OML/cmm/m/it/12 ^^^ \OT1/cmr/m/n/12 := \OML/cmm/m/it/12 D[]P[]^^^$
+\OT1/cmr/m/n/12 .
+ []
+
+
+
+[31]
+
+[32]
+
+[33]
+
+[34]
+
+[35]
+
+[36]) (./sections/03_literature_review.tex
+
+[37]
+Overfull \hbox (2.90286pt too wide) in paragraph at lines 7--8
+\OT1/cmr/m/n/12 The com-pu-ta-tional so-lu-tion of frac-tional dif-fer-en-tial 
+equa-tions presents unique
+ []
+
+
+
+[38]
+Overfull \hbox (0.6311pt too wide) in paragraph at lines 38--39
+[]\OT1/cmr/bx/n/12 Machine Learn-ing In-te-gra-tion\OT1/cmr/m/n/12 : The sur-ve
+y pre-dates the widespread
+ []
+
+
+
+[39]
+
+[40]
+
+[41]
+Overfull \hbox (12.58195pt too wide) in paragraph at lines 92--93
+\OT1/cmr/m/n/12 The re-view of re-cent de-vel-op-ments re-veals sev-eral re-sea
+rch gaps that HPFRACC
+ []
+
+
+Overfull \hbox (8.33765pt too wide) in paragraph at lines 102--103
+[]\OT1/cmr/m/n/12 HPFRACC ad-dresses these gaps by pro-vid-ing a com-pre-hen-si
+ve, production-
+ []
+
+
+
+[42]
+Overfull \hbox (3.93456pt too wide) in paragraph at lines 112--113
+[]\OT1/cmr/bx/n/12 Core Func-tion-al-ity\OT1/cmr/m/n/12 : The pack-age pro-vide
+s im-ple-men-ta-tions of Riemann-
+ []
+
+
+
+[43]
+Overfull \hbox (4.90288pt too wide) in paragraph at lines 150--151
+\OT1/cmr/m/n/12 a-tors be-yond the clas-si-cal Riemann-Liouville, Ca-puto, and 
+Gr^^?unwald-Letnikov
+ []
+
+
+Overfull \hbox (6.51486pt too wide) in paragraph at lines 150--151
+\OT1/cmr/m/n/12 def-i-ni-tions. These in-clude op-er-a-tors with non-singular k
+er-nels, such as Caputo-
+ []
+
+
+
+[44]
+
+[45]
+Overfull \hbox (3.9473pt too wide) in paragraph at lines 195--196
+\OT1/cmr/m/n/12 The in-ter-sec-tion of neu-ral net-works and frac-tional cal-cu
+-lus rep-re-sents a rapidly
+ []
+
+
+
+[46]
+
+[47]
+Overfull \hbox (1.8042pt too wide) in paragraph at lines 244--245
+[]\OT1/cmr/bx/n/12 Autograd In-te-gra-tion\OT1/cmr/m/n/12 : The fractional-orde
+r Ja-co-bian frame-work pro-
+ []
+
+
+
+[48]
+Overfull \hbox (1.72238pt too wide) in paragraph at lines 292--293
+[]\OT1/cmr/bx/n/12 Computational Speedup\OT1/cmr/m/n/12 : Quan-tifi-ca-tion of 
+the com-pu-ta-tional speedup
+ []
+
+
+
+[49]
+
+[50]
+
+[51]
+
+[52]
+
+[53]
+Overfull \hbox (3.38544pt too wide) in paragraph at lines 407--408
+[]\OT1/cmr/bx/n/12 Stochastic Frac-tional Deriva-tives\OT1/cmr/m/n/12 : The sto
+chas-tic com-pu-ta-tion graphs
+ []
+
+
+Overfull \hbox (2.3295pt too wide) in paragraph at lines 413--414
+[]\OT1/cmr/bx/n/12 Uncertainty Quan-tifi-ca-tion\OT1/cmr/m/n/12 : The prob-a-bi
+lis-tic frame-work en-ables prin-
+ []
+
+
+
+[54]) (./sections/04_framework_architecture.tex
+<../figures/architecture_overview.pdf, id=1736, 845.07718pt x 597.19106pt>
+File: ../figures/architecture_overview.pdf Graphic file (type pdf)
+<use ../figures/architecture_overview.pdf>
+Package pdftex.def Info: ../figures/architecture_overview.pdf  used on input li
+ne 5.
+(pdftex.def)             Requested size: 350.99762pt x 248.03926pt.
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+
+
+[55]
+Overfull \hbox (2.15993pt too wide) in paragraph at lines 24--25
+\OT1/cmr/m/n/12 whether it's GPU ac-cel-er-a-tion, au-to-matic dif-fer-en-ti-a-
+tion, or high-performance
+ []
+
+
+
+[56 <../figures/architecture_overview.pdf>]
+
+[57] (/usr/share/texlive/texmf-dist/tex/latex/listings/lstlang1.sty
+File: lstlang1.sty 2024/09/23 1.10c listings language file
+)
+Package hyperref Info: bookmark level for unknown lstlisting defaults to 0 on i
+nput line 76.
+
+Overfull \hbox (11.8493pt too wide) in paragraph at lines 78--79
+[][][][][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (89.39917pt too wide) in paragraph at lines 79--80
+[][][][][][][][][][][][][][][][][][] 
+ []
+
+
+
+[58]
+Overfull \hbox (11.8493pt too wide) in paragraph at lines 112--113
+[][][][][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (82.34918pt too wide) in paragraph at lines 113--114
+[][][][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (4.79932pt too wide) in paragraph at lines 114--115
+[][][][][][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (25.94928pt too wide) in paragraph at lines 115--116
+[][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (32.99927pt too wide) in paragraph at lines 116--117
+[][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (32.99927pt too wide) in paragraph at lines 123--124
+[][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+
+
+[59]
+Overfull \hbox (11.8493pt too wide) in paragraph at lines 143--144
+[][][][][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (110.54913pt too wide) in paragraph at lines 144--145
+[][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (47.09924pt too wide) in paragraph at lines 145--146
+[][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (25.94928pt too wide) in paragraph at lines 146--147
+[][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (32.99927pt too wide) in paragraph at lines 147--148
+[][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (61.19922pt too wide) in paragraph at lines 148--149
+[][][][][][][][][][][][][][] 
+ []
+
+
+
+[60]
+Overfull \hbox (18.89929pt too wide) in paragraph at lines 174--175
+[][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (11.8493pt too wide) in paragraph at lines 178--179
+[][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (68.2492pt too wide) in paragraph at lines 179--181
+[][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (4.55411pt too wide) in paragraph at lines 189--190
+[]\OT1/cmr/bx/n/12 Multiple Op-ti-miz-ers\OT1/cmr/m/n/12 : Adam, SGD, RM-Sprop 
+with con-fig-urable learn-
+ []
+
+
+Overfull \hbox (96.44916pt too wide) in paragraph at lines 203--204
+[][][][][][][][][][][][][][][][][][][] 
+ []
+
+
+
+[61]
+
+[62]
+Overfull \hbox (25.94928pt too wide) in paragraph at lines 258--259
+[][][][][][][][][][][][][][][][][] 
+ []
+
+LaTeX Font Info:    Trying to load font information for OMS+cmr on input line 2
+76.
+(/usr/share/texlive/texmf-dist/tex/latex/base/omscmr.fd
+File: omscmr.fd 2024/11/19 v2.5n Standard LaTeX font definitions
+)
+LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <12> not available
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 276.
+
+Overfull \hbox (40.04926pt too wide) in paragraph at lines 276--278
+[][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+
+
+[63]
+Overfull \hbox (54.14923pt too wide) in paragraph at lines 295--296
+[][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+
+
+[64]
+Overfull \hbox (96.44916pt too wide) in paragraph at lines 340--341
+[][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (11.8493pt too wide) in paragraph at lines 341--342
+[][][][][][][][][] 
+ []
+
+LaTeX Font Info:    Trying to load font information for OML+cmr on input line 3
+42.
+(/usr/share/texlive/texmf-dist/tex/latex/base/omlcmr.fd
+File: omlcmr.fd 2024/11/19 v2.5n Standard LaTeX font definitions
+)
+LaTeX Font Info:    Font shape `OML/cmr/m/n' in size <12> not available
+(Font)              Font shape `OML/cmm/m/it' tried instead on input line 342.
+
+Overfull \hbox (4.79932pt too wide) in paragraph at lines 342--343
+[][][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (61.19922pt too wide) in paragraph at lines 343--344
+[][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (18.89929pt too wide) in paragraph at lines 344--345
+[][][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (68.2492pt too wide) in paragraph at lines 345--346
+[][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (18.89929pt too wide) in paragraph at lines 346--347
+[][][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (68.2492pt too wide) in paragraph at lines 347--348
+[][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (18.89929pt too wide) in paragraph at lines 348--349
+[][][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (68.2492pt too wide) in paragraph at lines 349--350
+[][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (131.6991pt too wide) in paragraph at lines 351--352
+[][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+
+
+[65]
+
+[66]
+
+[67]
+
+[68]
+Overfull \hbox (16.21939pt too wide) in paragraph at lines 443--444
+\OT1/cmr/m/n/12 The im-ple-men-ta-tion of au-to-matic dif-fer-en-ti-a-tion for 
+frac-tional op-er-a-tors presents
+ []
+
+
+Overfull \hbox (28.65636pt too wide) in paragraph at lines 458--459
+[]\OT1/cmr/bx/n/12 Chain rule break-down\OT1/cmr/m/n/12 : The stan-dard chain r
+ule $[]\OML/cmm/m/it/12 f\OT1/cmr/m/n/12 (\OML/cmm/m/it/12 g\OT1/cmr/m/n/12 (\O
+ML/cmm/m/it/12 x\OT1/cmr/m/n/12 )) = \OML/cmm/m/it/12 f[]\OT1/cmr/m/n/12 (\OML/
+cmm/m/it/12 g\OT1/cmr/m/n/12 (\OML/cmm/m/it/12 x\OT1/cmr/m/n/12 ))\OML/cmm/m/it
+/12 g[]\OT1/cmr/m/n/12 (\OML/cmm/m/it/12 x\OT1/cmr/m/n/12 )$
+ []
+
+
+Overfull \hbox (12.92638pt too wide) in paragraph at lines 463--464
+ []\OT1/cmr/bx/n/12 Memory De-pen-den-cies[] \OT1/cmr/m/n/12 Frac-tional deriva
+-tives ex-hibit mem-ory ef-fects where
+ []
+
+
+
+[69]
+Overfull \hbox (6.53116pt too wide) in paragraph at lines 507--508
+ []\OT1/cmr/bx/n/12 Backward Pass Im-ple-men-ta-tion[] \OT1/cmr/m/n/12 Our au-t
+o-grad im-ple-men-ta-tion ad-dresses
+ []
+
+
+
+[70]
+Package hyperref Info: bookmark level for unknown algorithm defaults to 0 on in
+put line 534.
+
+
+[71]
+Overfull \hbox (2.98573pt too wide) in paragraph at lines 568--569
+\OT1/cmr/m/n/12 proach to back-prop-a-ga-tion through non-local frac-tional op-
+er-a-tors. We present
+ []
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+
+Overfull \hbox (2.34456pt too wide) in paragraph at lines 617--618
+ []\OT1/cmr/bx/n/12 Mathematical Con-sis-tency: Ad-joint Prop-erty[] \OT1/cmr/m
+/n/12 For the ad-joint method
+ []
+
+
+
+[72]
+Overfull \hbox (12.87524pt too wide) in paragraph at lines 646--647
+[][]\OT1/cmr/bx/n/12 Theorem 38 \OT1/cmr/m/n/12 (Mellin Trans-form Au-to-grad C
+or-rect-ness)\OT1/cmr/bx/n/12 . []\OT1/cmr/m/it/12 The Mellin transform-
+ []
+
+
+
+[73]
+
+[74]
+
+[75]
+Overfull \hbox (32.99927pt too wide) in paragraph at lines 753--754
+[][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (61.19922pt too wide) in paragraph at lines 757--758
+[][][][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (195.14899pt too wide) in paragraph at lines 766--767
+[][][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+
+
+[76]
+
+[77]
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+
+
+[78]
+
+[79]
+
+[80]) (./sections/05_implementation_details.tex
+Overfull \hbox (1.93117pt too wide) in paragraph at lines 10--11
+[]\OT1/cmr/bx/n/12 Spectral Ker-nel Gen-er-a-tion: \OT1/cmr/m/n/12 Complex-valu
+ed ker-nels $\OML/cmm/m/it/12 K[]\OT1/cmr/m/n/12 (\OML/cmm/m/it/12 ^^X\OT1/cmr/
+m/n/12 ) = (\OML/cmm/m/it/12 i^^X\OT1/cmr/m/n/12 )[]$
+ []
+
+
+
+[81]
+Overfull \hbox (16.93213pt too wide) in paragraph at lines 32--33
+[]\OT1/cmr/bx/n/12 Multi-Backend Sup-port: \OT1/cmr/m/n/12 Uni-fied API across 
+Py-Torch, JAX, and NUMBA
+ []
+
+) (./sections/06_experimental_results.tex
+Overfull \hbox (59.23601pt too wide) in paragraph at lines 17--25
+ [][] 
+ []
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+
+
+[82]
+Overfull \hbox (93.24706pt too wide) in paragraph at lines 49--60
+ [][] 
+ []
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+
+
+[83]
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+
+
+[84]
+
+[85]
+<../spectral_autograd_comparison.png, id=2145, 1076.823pt x 714.5094pt>
+File: ../spectral_autograd_comparison.png Graphic file (type png)
+<use ../spectral_autograd_comparison.png>
+Package pdftex.def Info: ../spectral_autograd_comparison.png  used on input lin
+e 135.
+(pdftex.def)             Requested size: 350.99762pt x 232.89966pt.
+
+
+[86 <../spectral_autograd_comparison.png>]
+<../figures/memory_scaling.pdf, id=2153, 711.31844pt x 564.42729pt>
+File: ../figures/memory_scaling.pdf Graphic file (type pdf)
+<use ../figures/memory_scaling.pdf>
+Package pdftex.def Info: ../figures/memory_scaling.pdf  used on input line 180.
+
+(pdftex.def)             Requested size: 312.00119pt x 247.56505pt.
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+
+
+[87]
+<../figures/multi_gpu_scaling_realistic.pdf, id=2163, 714.31552pt x 568.96751pt
+>
+File: ../figures/multi_gpu_scaling_realistic.pdf Graphic file (type pdf)
+<use ../figures/multi_gpu_scaling_realistic.pdf>
+Package pdftex.def Info: ../figures/multi_gpu_scaling_realistic.pdf  used on in
+put line 199.
+(pdftex.def)             Requested size: 312.00119pt x 248.51462pt.
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+
+
+[88 <../figures/memory_scaling.pdf>]
+Overfull \hbox (2.60698pt too wide) in paragraph at lines 213--214
+ []\OT1/cmr/bx/n/12 EEG Anal-y-sis Po-ten-tial[] \OT1/cmr/m/n/12 The frame-work
+'s abil-ity to cap-ture long-memory
+ []
+
+
+
+[89 <../figures/multi_gpu_scaling_realistic.pdf>]
+Overfull \hbox (1.61658pt too wide) in paragraph at lines 234--235
+[]\OT1/cmr/bx/n/12 Statistical Anal-y-sis\OT1/cmr/m/n/12 : Proper sta-tis-ti-ca
+l sig-nif-i-cance test-ing with larger
+ []
+
+
+
+[90]
+
+[91]
+Overfull \hbox (13.30368pt too wide) in paragraph at lines 317--318
+\OT1/cmr/m/n/12 the two com-po-nents. The frame-work suc-cess-fully han-dled th
+e multi-dimensional
+ []
+
+
+
+[92]
+Overfull \hbox (1.04013pt too wide) in paragraph at lines 331--332
+[]\OT1/cmr/bx/n/12 Outlier De-tec-tion\OT1/cmr/m/n/12 : Sta-tis-ti-cal out-lier
+ de-tec-tion us-ing the IQR method
+ []
+
+
+Overfull \hbox (41.13492pt too wide) in paragraph at lines 344--355
+ [][] 
+ []
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+
+Overfull \hbox (4.87689pt too wide) in paragraph at lines 359--360
+ []\OT1/cmr/bx/n/12 Statistical Sig-nif-i-cance Test-ing[] \OT1/cmr/m/n/12 We i
+m-ple-mented rig-or-ous sta-tis-ti-cal test-
+ []
+
+
+
+[93]
+Overfull \hbox (9.92676pt too wide) in paragraph at lines 377--388
+ [][] 
+ []
+
+
+
+[94]
+Overfull \hbox (2.18481pt too wide) in paragraph at lines 399--400
+\OT1/cmr/m/n/12 To ad-dress the re-viewer's con-cern about in-con-sis-tent and 
+un-re-al-is-tic speedups,
+ []
+
+
+Overfull \hbox (20.96178pt too wide) in paragraph at lines 407--418
+ [][] 
+ []
+
+
+Overfull \hbox (98.86565pt too wide) in paragraph at lines 455--465
+ [][] 
+ []
+
+
+
+[95]
+Overfull \hbox (6.27162pt too wide) in paragraph at lines 476--485
+ [][] 
+ []
+
+
+Overfull \hbox (32.29564pt too wide) in paragraph at lines 493--494
+\OT1/cmr/m/n/12 ory com-plex-ity for dif-fer-ent frac-tional cal-cu-lus meth-od
+s im-ple-mented in HPFRACC: 
+ []
+
+
+Overfull \hbox (10.55751pt too wide) in paragraph at lines 499--510
+ [][] 
+ []
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+
+Overfull \hbox (38.52132pt too wide) in paragraph at lines 522--533
+ [][] 
+ []
+
+
+
+[96]
+File: ../figures/memory_scaling.pdf Graphic file (type pdf)
+<use ../figures/memory_scaling.pdf>
+Package pdftex.def Info: ../figures/memory_scaling.pdf  used on input line 543.
+
+(pdftex.def)             Requested size: 312.00119pt x 247.56505pt.
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+
+Overfull \hbox (15.8172pt too wide) in paragraph at lines 565--573
+ [][] 
+ []
+
+
+
+[97]
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+
+
+[98]
+Overfull \hbox (18.86581pt too wide) in paragraph at lines 606--616
+ [][] 
+ []
+
+File: ../figures/multi_gpu_scaling_realistic.pdf Graphic file (type pdf)
+<use ../figures/multi_gpu_scaling_realistic.pdf>
+Package pdftex.def Info: ../figures/multi_gpu_scaling_realistic.pdf  used on in
+put line 627.
+(pdftex.def)             Requested size: 312.00119pt x 248.51462pt.
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+
+
+[99]
+
+[100]
+Overfull \hbox (14.48541pt too wide) in paragraph at lines 658--669
+ [][] 
+ []
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+
+Overfull \hbox (7.16132pt too wide) in paragraph at lines 697--698
+ []\OT1/cmr/bx/n/12 Regularization Strate-gies[] \OT1/cmr/m/n/12 We im-ple-ment
+ed mul-ti-ple reg-u-lar-iza-tion strate-
+ []
+
+
+Overfull \hbox (135.1175pt too wide) in paragraph at lines 703--713
+ [][] 
+ []
+
+
+
+[101]
+Overfull \hbox (37.37823pt too wide) in paragraph at lines 747--757
+ [][] 
+ []
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+
+Overfull \hbox (56.86832pt too wide) in paragraph at lines 769--779
+ [][] 
+ []
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+
+
+[102]
+Overfull \hbox (2.61452pt too wide) in paragraph at lines 805--806
+ []\OT1/cmr/bx/n/12 Fractional Re-lax-ation Equa-tion[] \OT1/cmr/m/n/12 We val-
+i-dated the neu-ral frac-tional ODE
+ []
+
+
+
+[103]
+
+[104]
+Overfull \hbox (2.08482pt too wide) in paragraph at lines 864--865
+[]\OT1/cmr/m/n/12 Larger net-works achieve lower fi-nal train-ing loss but re-q
+uire more epochs 
+ []
+
+
+
+[105]
+Overfull \hbox (71.02519pt too wide) in paragraph at lines 920--930
+ [][] 
+ []
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+
+
+[106]
+Overfull \hbox (109.50325pt too wide) in paragraph at lines 948--959
+ [][] 
+ []
+
+
+Overfull \hbox (4.77794pt too wide) in paragraph at lines 963--964
+[]\OT1/cmr/m/n/12 HPFRACC sig-nif-i-cantly out-per-forms all tra-di-tional meth
+-ods ($\OML/cmm/m/it/12 p < \OT1/cmr/m/n/12 0\OML/cmm/m/it/12 :\OT1/cmr/m/n/12 
+001$) 
+ []
+
+
+Overfull \hbox (90.97842pt too wide) in paragraph at lines 976--986
+ [][] 
+ []
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+<../figures/eeg_classification_results.pdf, id=2526, 1072.8143pt x 850.97488pt>
+
+File: ../figures/eeg_classification_results.pdf Graphic file (type pdf)
+<use ../figures/eeg_classification_results.pdf>
+Package pdftex.def Info: ../figures/eeg_classification_results.pdf  used on inp
+ut line 994.
+(pdftex.def)             Requested size: 350.99762pt x 278.42038pt.
+
+
+[107]
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+
+Overfull \hbox (66.47237pt too wide) in paragraph at lines 1007--1016
+ [][] 
+ []
+
+
+
+[108]
+Overfull \hbox (12.55624pt too wide) in paragraph at lines 1038--1039
+[]\OT1/cmr/m/n/12 with source term $\OML/cmm/m/it/12 f\OT1/cmr/m/n/12 (\OML/cmm
+/m/it/12 x; t\OT1/cmr/m/n/12 ) = [](\OML/cmm/m/it/12 ^^Yx\OT1/cmr/m/n/12 ) [](\
+OML/cmm/m/it/12 ^^Yt\OT1/cmr/m/n/12 )$ and bound-ary con-di-tions $\OML/cmm/m/i
+t/12 u\OT1/cmr/m/n/12 (0\OML/cmm/m/it/12 ; t\OT1/cmr/m/n/12 ) =
+ []
+
+
+
+[109 <../figures/eeg_classification_results.pdf>]
+Overfull \hbox (16.73776pt too wide) in paragraph at lines 1052--1053
+ []\OT1/cmr/bx/n/12 Fractional ARIMA Mod-els[] \OT1/cmr/m/n/12 We im-ple-mented
+ frac-tional ARIMA (FARIMA)
+ []
+
+
+Overfull \hbox (5.15285pt too wide) in paragraph at lines 1060--1061
+\OT1/cmr/m/n/12 volatil-ity, pro-vid-ing more ac-cu-rate op-tion prices than tr
+a-di-tional Black-Scholes
+ []
+
+
+
+[110]
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+
+Overfull \hbox (9.66385pt too wide) in paragraph at lines 1127--1137
+ [][] 
+ []
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+
+
+[111]
+
+[112]
+
+[113]
+Overfull \hbox (12.37845pt too wide) in paragraph at lines 1193--1194
+[]\OT1/cmr/m/n/12 Fractional deriva-tive com-pu-ta-tion: $\OML/cmm/m/it/12 O\OT
+1/cmr/m/n/12 (\OML/cmm/m/it/12 N[]\OT1/cmr/m/n/12 )$ for di-rect meth-ods, $\OM
+L/cmm/m/it/12 O\OT1/cmr/m/n/12 (\OML/cmm/m/it/12 N [] N\OT1/cmr/m/n/12 )$
+ []
+
+
+
+[114])
+Overfull \hbox (34.76967pt too wide) in paragraph at lines 1229--69
+[]\OT1/cmr/m/n/12 This com-pre-hen-sive ex-per-i-men-tal eval-u-a-tion demon-st
+rates that \OT1/cmtt/m/n/12 hpfracc\OT1/cmr/m/n/12 provides
+ []
+
+(./sections/07_discussion_future_work.tex
+Overfull \hbox (10.241pt too wide) in paragraph at lines 17--18
+\OT1/cmr/bx/n/12 Immediate Pri-or-i-ties (Re-lease 2.1)\OT1/cmr/m/n/12 : Ex-ten
+-sion to neu-ral frac-tional stochas-
+ []
+
+
+
+[115]
+Overfull \hbox (1.26918pt too wide) in paragraph at lines 39--40
+ []\OT1/cmr/bx/n/12 Computational Re-source Re-quire-ments[] \OT1/cmr/m/n/12 Th
+e frame-work's per-for-mance
+ []
+
+
+
+[116]
+Overfull \hbox (0.39607pt too wide) in paragraph at lines 68--69
+ []\OT1/cmr/bx/n/12 Algorithmic Con-straints[] \OT1/cmr/m/n/12 Cur-rent al-go-r
+ith-mic im-ple-men-ta-tions have spe-
+ []
+
+
+
+[117]
+
+[118]
+Overfull \hbox (12.81116pt too wide) in paragraph at lines 102--102
+[]\OT1/cmr/bx/n/12 Release 2.0.0: Production-Ready Frame-work (COM-PLETED) 
+ []
+
+
+Overfull \hbox (3.182pt too wide) in paragraph at lines 112--113
+[]\OT1/cmr/bx/n/12 Memory Man-age-ment\OT1/cmr/m/n/12 : Gra-di-ent check-point-
+ing and memory-efficient
+ []
+
+
+
+[119]
+Overfull \hbox (0.30635pt too wide) in paragraph at lines 153--154
+ []\OT1/cmr/bx/n/12 Advanced Math-e-mat-i-cal Meth-ods[] \OT1/cmr/m/n/12 Fu-tur
+e re-search will ex-plore cutting-
+ []
+
+
+
+[120]
+Overfull \hbox (6.29774pt too wide) in paragraph at lines 163--164
+ []\OT1/cmr/bx/n/12 Machine Learn-ing In-no-va-tions[] \OT1/cmr/m/n/12 In-te-gr
+a-tion with ad-vanced ma-chine learn-
+ []
+
+
+
+[121]
+Overfull \hbox (2.46387pt too wide) in paragraph at lines 191--192
+[]\OT1/cmr/bx/n/12 Turbulence Mod-el-ing\OT1/cmr/m/n/12 : Neu-ral network-based
+ tur-bu-lence mod-els with
+ []
+
+
+Overfull \hbox (10.79027pt too wide) in paragraph at lines 200--201
+[]\OT1/cmr/bx/n/12 Viscoelastic Ma-te-ri-als\OT1/cmr/m/n/12 : Mod-el-ing of ma-
+te-ri-als with memory-dependent
+ []
+
+
+
+[122]
+Overfull \hbox (3.85979pt too wide) in paragraph at lines 246--247
+[]\OT1/cmr/bx/n/12 Portfolio Op-ti-miza-tion\OT1/cmr/m/n/12 : Dy-namic port-fo-
+lio op-ti-miza-tion with learned
+ []
+
+
+
+[123]
+Overfull \hbox (8.15009pt too wide) in paragraph at lines 268--269
+[]\OT1/cmr/bx/n/12 Advanced Math-e-mat-ics\OT1/cmr/m/n/12 : Prac-ti-cal im-ple-
+men-ta-tion of ad-vanced math-
+ []
+
+
+Overfull \hbox (0.58594pt too wide) in paragraph at lines 269--270
+[]\OT1/cmr/bx/n/12 Machine Learn-ing\OT1/cmr/m/n/12 : Hands-on ex-pe-ri-ence wi
+th mod-ern ma-chine learn-
+ []
+
+
+
+[124])
+Runaway argument?
+{Examples**: Rich collection of examples and use cases \end {itemize}\ETC.
+! File ended while scanning use of \textbf .
+<inserted text> 
+                \par 
+l.70 \input{sections/07_discussion_future_work}
+                                               
+I suspect you have forgotten a `}', causing me
+to read past where you wanted me to stop.
+I'll try to recover; but if the error is serious,
+you'd better type `E' or `X' now and fix your file.
+
+(./sections/08_conclusion.tex
+
+[125])
+Runaway argument?
+{Multi-Backend Support**: Comprehensive support for PyTorch, JAX, and\ETC.
+! File ended while scanning use of \textbf .
+<inserted text> 
+                \par 
+l.72 \input{sections/08_conclusion}
+                                   
+I suspect you have forgotten a `}', causing me
+to read past where you wanted me to stop.
+I'll try to recover; but if the error is serious,
+you'd better type `E' or `X' now and fix your file.
+
+(./sections/appendix_a_installation.tex
+Overfull \hbox (18.35828pt too wide) in paragraph at lines 1--1
+[][]\OT1/cmr/bx/n/17.28 Installation and Sys-tem Re-quire-ments 
+ []
+
+
+
+[126] (/usr/share/texlive/texmf-dist/tex/latex/listings/lstlang1.sty
+File: lstlang1.sty 2024/09/23 1.10c listings language file
+)
+(/usr/share/texlive/texmf-dist/tex/latex/listings/lstlang1.sty
+File: lstlang1.sty 2024/09/23 1.10c listings language file
+)
+
+[127]
+Overfull \hbox (15.97147pt too wide) in paragraph at lines 80--81
+[][][][][][][][][][][][]  
+ []
+
+LaTeX Font Info:    Font shape `OT1/cmtt/bx/n' in size <10> not available
+(Font)              Font shape `OT1/cmtt/m/n' tried instead on input line 81.
+
+
+[128]
+Overfull \hbox (6.46pt too wide) in paragraph at lines 131--132
+[]\OT1/cmr/bx/n/12 Gradient Check-point-ing\OT1/cmr/m/n/12 : En-able for memory
+-efficient train-
+ []
+
+
+
+[129]
+
+[130]
+
+[131]
+Overfull \hbox (6.46pt too wide) in paragraph at lines 257--258
+[]\OT1/cmr/bx/n/12 Gradient Check-point-ing\OT1/cmr/m/n/12 : En-able for memory
+-efficient train-
+ []
+
+
+
+[132]
+
+[133]
+Overfull \hbox (31.7201pt too wide) in paragraph at lines 329--331
+[][][][][][][][][][][][][][][][]  
+ []
+
+) (./sections/appendix_b_benchmarks.tex
+Overfull \hbox (25.72227pt too wide) in paragraph at lines 1--1
+[]\OT1/cmr/bx/n/17.28 Benchmark Prob-lems and Per-for-mance
+ []
+
+
+
+[134])
+Runaway argument?
+{Final Loss**: MSE < $2.3 \times 10^{-6}$ \item \textbf {Memory Usage\ETC.
+! File ended while scanning use of \textbf .
+<inserted text> 
+                \par 
+l.77 \input{sections/appendix_b_benchmarks}
+                                           
+I suspect you have forgotten a `}', causing me
+to read past where you wanted me to stop.
+I'll try to recover; but if the error is serious,
+you'd better type `E' or `X' now and fix your file.
+
+(./sections/appendix_c_performance.tex
+
+[135]
+Overfull \hbox (4.25444pt too wide) in paragraph at lines 29--30
+ []\OT1/cmr/bx/n/12 Training Loop Anal-y-sis[] \OT1/cmr/m/n/12 Train-ing per-fo
+r-mance break-down: 
+ []
+
+
+Overfull \hbox (5.87566pt too wide) in paragraph at lines 54--64
+ [][] 
+ []
+
+
+Overfull \hbox (9.60178pt too wide) in paragraph at lines 71--72
+ []\OT1/cmr/bx/n/12 CUDA Ker-nel Op-ti-miza-tion[] \OT1/cmr/m/n/12 Key op-ti-mi
+za-tion tech-niques: 
+ []
+
+
+
+[136]
+Overfull \hbox (0.40771pt too wide) in paragraph at lines 75--76
+[]\OT1/cmr/bx/n/12 Warp Di-ver-gence Min-i-miza-tion\OT1/cmr/m/n/12 : Re-duced 
+con-di-tional
+ []
+
+
+Overfull \hbox (0.68654pt too wide) in paragraph at lines 76--77
+[]\OT1/cmr/bx/n/12 Occupancy Op-ti-miza-tion\OT1/cmr/m/n/12 : Max-i-mized GPU o
+c-cu-pancy
+ []
+
+
+Overfull \hbox (10.3073pt too wide) in paragraph at lines 80--81
+ []\OT1/cmr/bx/n/12 Mixed Pre-ci-sion Train-ing[] \OT1/cmr/m/n/12 Im-ple-men-ta
+-tion us-ing Py-Torch's
+ []
+
+
+Overfull \hbox (3.78781pt too wide) in paragraph at lines 98--99
+ []\OT1/cmr/bx/n/12 Gradient Check-point-ing[] \OT1/cmr/m/n/12 Im-ple-men-ta-ti
+on us-ing Py-Torch's
+ []
+
+
+
+[137]
+Overfull \hbox (5.89194pt too wide) in paragraph at lines 129--130
+ []\OT1/cmr/bx/n/12 Adaptive Time Step-ping[] \OT1/cmr/m/n/12 Im-ple-men-ta-tio
+n of adap-tive time
+ []
+
+
+Overfull \hbox (1.55424pt too wide) in paragraph at lines 147--148
+ []\OT1/cmr/bx/n/12 Parallel Pro-cess-ing[] \OT1/cmr/m/n/12 Multi-process par-a
+l-leliza-tion for batch
+ []
+
+
+
+[138]
+
+[139]
+Overfull \hbox (37.94368pt too wide) in paragraph at lines 202--203
+[][][][][][][][][][][][][][][][][]  
+ []
+
+
+
+[140]
+Overfull \hbox (25.16438pt too wide) in paragraph at lines 253--263
+ [][] 
+ []
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+
+Overfull \hbox (5.87022pt too wide) in paragraph at lines 287--288
+ []\OT1/cmr/bx/n/12 General Op-ti-miza-tion Guide-lines[] \OT1/cmr/m/n/12 Key o
+p-ti-miza-tion prin-
+ []
+
+
+
+[141]
+Overfull \hbox (4.3371pt too wide) in paragraph at lines 296--297
+ []\OT1/cmr/bx/n/12 Implementation-Specific Guide-lines[] \OT1/cmr/m/n/12 Frame
+work-specific
+ []
+
+
+Overfull \hbox (1.99272pt too wide) in paragraph at lines 298--299
+[]\OT1/cmr/bx/n/12 Neural ODEs\OT1/cmr/m/n/12 : Use gra-di-ent check-point-ing 
+for large mod-
+ []
+
+
+
+[142]) (./hpfracc_paper.bbl
+
+[143]
+
+[144]
+Overfull \hbox (59.06607pt too wide) in paragraph at lines 122--125
+\OT1/cmr/bx/n/12 URL: \OT1/cmr/m/it/12 https://www.mathworks.com/matlabcentral/
+fileexchange/36570-
+ []
+
+
+
+[145]
+Underfull \hbox (badness 2689) in paragraph at lines 175--179
+[]\OT1/cmr/m/n/12 Wang, J., Chen, L., Liu, M. & Zhang, X. (2024),
+ []
+
+
+
+[146])
+
+! LaTeX Error: \begin{itemize} on input line 45 ended by \end{document}.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.83 \end{document}
+                   
+Your command was ignored.
+Type  I <command> <return>  to replace it with another command,
+or  <return>  to continue without it.
+
+
+
+[147] (./hpfracc_paper.aux)
+ ***********
+LaTeX2e <2024-11-01> patch level 2
+L3 programming layer <2025-01-18>
+ ***********
+Package rerunfilecheck Info: File `hpfracc_paper.out' has not changed.
+(rerunfilecheck)             Checksum: 0CC58C57BE31118F6E0EB917710FE10B;59655.
+ )
+(\end occurred inside a group at level 3)
+
+### semi simple group (level 3) entered at line 45 (\begingroup)
+### semi simple group (level 2) entered at line 11 (\begingroup)
+### semi simple group (level 1) entered at line 289 (\begingroup)
+### bottom level 
+Here is how much of TeX's memory you used:
+ 18078 strings out of 475102
+ 283131 string characters out of 5764878
+ 934709 words of memory out of 5000000
+ 39462 multiletter control sequences out of 15000+600000
+ 573982 words of font info for 94 fonts, out of 8000000 for 9000
+ 59 hyphenation exceptions out of 8191
+ 75i,15n,79p,1694b,2523s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ </home/davianc/.texlive2025/texmf-var/fonts/pk/ljfour/jknappen
+/ec/tctt1000.600pk> </home/davianc/.texlive2025/texmf-var/fonts/pk/ljfour/jknap
+pen/ec/tcti1200.600pk> </home/davianc/.texlive2025/texmf-var/fonts/pk/ljfour/jk
+nappen/ec/tcrm1200.600pk></usr/share/texlive/texmf-dist/fonts/type1/public/amsf
+onts/cm/cmbx10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/c
+m/cmbx12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx
+8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbxti10.pf
+b></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></us
+r/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cmextra/cmex8.pfb></usr/
+share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmitt10.pfb></usr/share
+/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texli
+ve/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi12.pfb></usr/share/texlive/tex
+mf-dist/fonts/type1/public/amsfonts/cm/cmmi6.pfb></usr/share/texlive/texmf-dist
+/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/share/texlive/texmf-dist/fonts/
+type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/p
+ublic/amsfonts/cm/cmr12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/a
+msfonts/cm/cmr17.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts
+/cm/cmr6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8
+.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb><
+/usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy6.pfb></usr/sh
+are/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/share/tex
+live/texmf-dist/fonts/type1/public/amsfonts/cm/cmti12.pfb></usr/share/texlive/t
+exmf-dist/fonts/type1/public/amsfonts/cm/cmti8.pfb></usr/share/texlive/texmf-di
+st/fonts/type1/public/amsfonts/cm/cmtt10.pfb></usr/share/texlive/texmf-dist/fon
+ts/type1/public/amsfonts/cm/cmtt12.pfb></usr/share/texlive/texmf-dist/fonts/typ
+e1/public/amsfonts/symbols/msam10.pfb></usr/share/texlive/texmf-dist/fonts/type
+1/public/amsfonts/symbols/msbm10.pfb>
+Output written on hpfracc_paper.pdf (147 pages, 1367303 bytes).
+PDF statistics:
+ 3557 PDF objects out of 3580 (max. 8388607)
+ 3033 compressed objects within 31 object streams
+ 1368 named destinations out of 1440 (max. 500000)
+ 2290 words of extra memory for PDF output out of 10000 (max. 10000000)
+

@@ -291,6 +291,14 @@
 % ADDITIONAL FRACTIONAL CALCULUS REFERENCES
 % =============================================================================
 
+@book{kilbas2006theory,
+  title={Theory and Applications of Fractional Differential Equations},
+  author={Kilbas, Anatoly A and Srivastava, Hari M and Trujillo, Juan J},
+  year={2006},
+  publisher={Elsevier},
+  volume={204},
+  series={North-Holland Mathematics Studies}
+}
 
 @book{podlubny1998fractional,
   title={Fractional Differential Equations: An Introduction to Fractional Derivatives, Fractional Differential Equations, to Methods of their Solution and some of their Applications},

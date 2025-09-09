@@ -192,7 +192,7 @@ The scaling analysis reveals:
 \subsubsection{Scalability Analysis}
 
 \paragraph{Multi-GPU Scaling Analysis}
-We analyzed the framework's potential for multi-GPU scaling based on single-GPU performance data and realistic communication overhead modeling. Figure \ref{fig:multi_gpu_scaling} shows the estimated scaling efficiency.
+We analyzed the framework's potential for multi-GPU scaling based on single-GPU performance data and realistic communication overhead modeling. Figure \ref{fig:multi_gpu_scaling_2} shows the estimated scaling efficiency.
 
 \begin{figure}[h]
 \centering
@@ -542,7 +542,7 @@ We analyzed how memory usage scales with problem size for different methods:
 \centering
 \includegraphics[width=0.8\textwidth]{../figures/memory_scaling.pdf}
 \caption{Memory usage scaling analysis showing logarithmic scaling for optimized \hpfracc methods versus quadratic scaling for direct methods. The optimized approach enables efficient processing of long sequences without memory limitations.}
-\label{fig:memory_scaling}
+\label{fig:memory_scaling_2}
 \end{figure}
 
 The scaling analysis reveals:
@@ -620,13 +620,13 @@ Stochastic and chunked methods show significantly lower memory fragmentation, le
 \subsubsection{Scalability Analysis}
 
 \paragraph{Multi-GPU Scaling Analysis}
-We analyzed the framework's potential for multi-GPU scaling based on single-GPU performance data and realistic communication overhead modeling. Figure \ref{fig:multi_gpu_scaling} shows the estimated scaling efficiency.
+We analyzed the framework's potential for multi-GPU scaling based on single-GPU performance data and realistic communication overhead modeling. Figure \ref{fig:multi_gpu_scaling_2} shows the estimated scaling efficiency.
 
 \begin{figure}[h]
 \centering
 \includegraphics[width=0.8\textwidth]{../figures/multi_gpu_scaling_realistic.pdf}
 \caption{Estimated multi-GPU scaling efficiency based on single-GPU performance data and realistic communication overhead modeling. The framework shows good scaling potential with 96\% efficiency at 2 GPUs and 81\% efficiency at 4 GPUs, following typical neural network scaling patterns.}
-\label{fig:multi_gpu_scaling}
+\label{fig:multi_gpu_scaling_2}
 \end{figure}
 
 The scaling analysis is based on actual single-GPU performance measurements combined with realistic models of communication overhead, memory bandwidth effects, and gradient synchronization costs typical in neural network training. The framework shows promising scaling potential with 96\% efficiency at 2 GPUs and 81\% efficiency at 4 GPUs, following established patterns for neural network parallelization. Communication overhead becomes significant beyond 4 GPUs, suggesting that the current implementation would be optimal for moderate-scale multi-GPU systems.
