@@ -2,7 +2,7 @@
 
 \subsection{Core Scientific Problem and Hypothesis}
 
-The fundamental challenge in computational fractional calculus is the **non-local nature of fractional operators**, which creates a fundamental incompatibility with standard automatic differentiation frameworks used in modern machine learning. Unlike classical derivatives that depend only on local neighbourhoods, fractional derivatives require the entire function history, making traditional backpropagation techniques inapplicable.
+The fundamental challenge in computational fractional calculus is the **non-local nature of fractional operators**, which creates a fundamental incompatibility with standard automatic differentiation frameworks used in modern machine learning \citep{Gong2015ComputationalChallengeFDE, baydin2018automatic}. Unlike classical derivatives that depend only on local neighbourhoods, fractional derivatives require the entire function history, making traditional backpropagation techniques inapplicable.
 
 **Our core hypothesis** is that spectral domain transformations can resolve this incompatibility by converting non-local fractional operations into local operations in the frequency domain, enabling the first practical implementation of automatic differentiation for fractional operators in neural networks.
 
