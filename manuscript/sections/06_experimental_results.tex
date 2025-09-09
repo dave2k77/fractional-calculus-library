@@ -132,7 +132,7 @@ The spectral autograd framework achieves complete production readiness with the 
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=0.9\textwidth]{../spectral_autograd_comparison.png}
+\includegraphics[width=0.9\textwidth]{figures/spectral_autograd_comparison.png}
 \caption{Comprehensive comparison of spectral autograd framework against standard fractional autograd implementation. The results demonstrate successful gradient flow restoration, significant performance improvements (4.67x average speedup), and better neural network convergence.}
 \label{fig:spectral_autograd_comparison}
 \end{figure}
@@ -177,7 +177,7 @@ We analyzed how memory usage scales with problem size for different methods:
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=0.8\textwidth]{../figures/memory_scaling.pdf}
+\includegraphics[width=0.8\textwidth]{figures/memory_scaling.pdf}
 \caption{Memory usage scaling analysis showing logarithmic scaling for optimized \hpfracc methods versus quadratic scaling for direct methods. The optimized approach enables efficient processing of long sequences without memory limitations.}
 \label{fig:memory_scaling}
 \end{figure}
@@ -196,7 +196,7 @@ We analyzed the framework's potential for multi-GPU scaling based on single-GPU 
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=0.8\textwidth]{../figures/multi_gpu_scaling_realistic.pdf}
+\includegraphics[width=0.8\textwidth]{figures/multi_gpu_scaling_realistic.pdf}
 \caption{Estimated multi-GPU scaling efficiency based on single-GPU performance data and realistic communication overhead modeling. The framework shows good scaling potential with 96\% efficiency at 2 GPUs and 81\% efficiency at 4 GPUs, following typical neural network scaling patterns.}
 \label{fig:multi_gpu_scaling}
 \end{figure}
@@ -540,7 +540,7 @@ We analyzed how memory usage scales with problem size for different methods:
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=0.8\textwidth]{../figures/memory_scaling.pdf}
+\includegraphics[width=0.8\textwidth]{figures/memory_scaling.pdf}
 \caption{Memory usage scaling analysis showing logarithmic scaling for optimized \hpfracc methods versus quadratic scaling for direct methods. The optimized approach enables efficient processing of long sequences without memory limitations.}
 \label{fig:memory_scaling_2}
 \end{figure}
@@ -624,7 +624,7 @@ We analyzed the framework's potential for multi-GPU scaling based on single-GPU 
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=0.8\textwidth]{../figures/multi_gpu_scaling_realistic.pdf}
+\includegraphics[width=0.8\textwidth]{figures/multi_gpu_scaling_realistic.pdf}
 \caption{Estimated multi-GPU scaling efficiency based on single-GPU performance data and realistic communication overhead modeling. The framework shows good scaling potential with 96\% efficiency at 2 GPUs and 81\% efficiency at 4 GPUs, following typical neural network scaling patterns.}
 \label{fig:multi_gpu_scaling_2}
 \end{figure}
@@ -991,7 +991,7 @@ The fractional neural network captured the long-memory effects in EEG signals, p
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=0.9\textwidth]{../figures/eeg_classification_results.pdf}
+\includegraphics[width=0.9\textwidth]{figures/eeg_classification_results.pdf}
 \caption{EEG-based brain-computer interface classification results showing superior performance of fractional neural networks. \hpfracc achieves 91.5\% accuracy compared to 87.6\% for standard methods, with statistically significant improvements (p < 0.001) and large effect sizes (Cohen's d = 1.8-2.9).}
 \label{fig:eeg_classification}
 \end{figure}
