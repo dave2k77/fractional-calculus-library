@@ -1,91 +1,38 @@
 \section{Implementation Details}
 
-\subsection{Core Algorithms Implementation}
+The \hpfracc library is implemented in Python with comprehensive support for PyTorch, JAX, and NUMBA backends. The complete source code, documentation, and examples are publicly available at \url{https://github.com/dave2k77/fractional_calculus_library}.
 
-The framework implements fractional derivatives using multiple numerical approaches to ensure accuracy and efficiency across different problem types.
+\subsection{Spectral Autograd Framework}
 
-\subsubsection{Fractional Derivative Computations}
+The core innovation is the spectral autograd framework that enables gradient flow through fractional derivatives. The implementation uses FFT-based spectral methods with the following key components:
 
-\textbf{Grünwald-Letnikov Implementation:} The discrete approximation uses optimized memory management with pre-computed binomial coefficients for O(N²) complexity. The implementation includes adaptive step size control and numerical stability checks.
-
-\textbf{Caputo Derivative Implementation:} Uses the L1 approximation for improved accuracy, with specialized handling for boundary conditions and automatic error estimation. The method achieves O(N log N) complexity through optimized coefficient computation.
-
-\textbf{Riemann-Liouville Implementation:} Implements the classical definition with numerical integration using adaptive quadrature methods, ensuring convergence for all fractional orders α ∈ (0,2).
-
-\subsubsection{Neural Network Architectures}
-
-The framework implements flexible neural network architectures optimized for differential equation solving. Networks are constructed dynamically based on configuration parameters, with support for batch normalization, dropout, and custom activation functions.
-
-\textbf{Architecture Features:}
 \begin{itemize}
-    \item Dynamic layer construction with configurable depth and width
-    \item Xavier initialization for optimal training dynamics
-    \item Batch normalization and dropout for regularization
-    \item Support for custom activation functions and layer types
+    \item \textbf{Spectral Kernel Generation:} Complex-valued kernels $K_\alpha(\xi) = (i\xi)^\alpha$ computed using optimized FFT routines
+    \item \textbf{Adjoint Operator:} Backward pass uses conjugate kernels $K_\alpha^*(\xi) = (-i\xi)^\alpha$ for proper gradient flow
+    \item \textbf{Error Handling:} Multi-level fallback from PyTorch MKL FFT to NumPy and manual implementations
+    \item \textbf{Learnable Parameters:} Bounded alpha parameterization with automatic gradient computation
 \end{itemize}
 
-\subsection{ODE/SDE Integration Methods}
+\subsection{Fractional Derivative Algorithms}
 
-\subsubsection{Adaptive Time Stepping}
+The library implements three classical fractional derivative definitions:
 
-The framework implements adaptive time stepping with error estimation for improved accuracy and efficiency. The method uses Richardson extrapolation to estimate local truncation errors and automatically adjusts step sizes based on user-defined tolerances.
+\textbf{Riemann-Liouville:} Numerical integration using adaptive quadrature with convergence guarantees for α ∈ (0,2).
 
-\subsubsection{Neural ODE Solver Integration}
+\textbf{Caputo:} L1 approximation with O(N log N) complexity and specialized boundary condition handling.
 
-Integration with advanced ODE solvers through torchdiffeq provides access to state-of-the-art numerical methods including Dormand-Prince, Runge-Kutta, and Adams-Bashforth schemes. The implementation supports both forward and adjoint methods for memory-efficient gradient computation.
+\textbf{Grünwald-Letnikov:} Discrete approximation with pre-computed binomial coefficients and adaptive step size control.
 
-\subsection{Performance Optimization Strategies}
+\subsection{Performance Optimizations}
 
-\subsubsection{GPU Acceleration}
+\textbf{GPU Acceleration:} Automatic device detection, mixed-precision training, and cuDNN optimization for PyTorch backends.
 
-The framework provides seamless GPU acceleration through PyTorch with automatic device detection and tensor management. Features include mixed-precision training, cuDNN optimization, and automatic memory management.
+\textbf{Memory Management:} Gradient checkpointing and memory-efficient algorithms for large-scale problems.
 
-\subsubsection{Memory Optimization}
+\textbf{Multi-Backend Support:} Unified API across PyTorch, JAX, and NUMBA with backend-specific optimizations.
 
-Gradient checkpointing and memory-efficient algorithms reduce memory usage for large models. The implementation includes automatic memory monitoring and optimization strategies for different hardware configurations.
+\subsection{Validation and Testing}
 
-\subsubsection{Parallel Processing}
+The implementation includes comprehensive testing with 90% code coverage, validation against analytical solutions, and automated performance benchmarking. All numerical methods are validated against known analytical solutions for fractional relaxation equations and harmonic oscillators.
 
-Multi-processing support enables efficient batch operations with automatic load balancing and process management. The framework automatically detects optimal parallelization strategies based on problem size and available resources.
-
-\subsection{Numerical Stability and Error Control}
-
-\subsubsection{Error Estimation}
-
-Built-in error estimation provides comprehensive analysis including absolute and relative errors, Richardson extrapolation for convergence analysis, and automatic error reporting for all numerical methods.
-
-\subsubsection{Stability Analysis}
-
-Automatic stability checking detects numerical instabilities including infinite values, NaN propagation, exponential growth, and solution blow-up. The system provides real-time warnings and automatic fallback strategies.
-
-\subsection{Backend Integration and Abstraction}
-
-\subsubsection{Backend Manager Implementation}
-
-The backend manager provides unified access to PyTorch, JAX, and NUMBA platforms with automatic tensor creation, gradient computation, and device management. The abstraction layer ensures consistent API across different computation backends.
-
-\subsubsection{Backend-Specific Optimizations}
-
-Each backend includes specialized optimizations: PyTorch with mixed-precision training and cuDNN optimization, JAX with JIT compilation and XLA acceleration, and NUMBA with parallel processing and fast math operations.
-
-\subsection{Testing and Validation Infrastructure}
-
-\subsubsection{Automated Testing Framework}
-
-Comprehensive testing includes unit tests, integration tests, and performance benchmarks with 90% code coverage. The framework uses pytest for automated testing with continuous integration support.
-
-\subsubsection{Validation Against Analytical Solutions}
-
-Automatic validation against known analytical solutions for fractional relaxation equations, harmonic oscillators, and stochastic processes ensures numerical accuracy and convergence.
-
-\subsection{Documentation and Code Quality}
-
-\subsubsection{Automated Documentation Generation}
-
-The framework automatically generates comprehensive API documentation from docstrings and provides interactive examples for all major features.
-
-\subsubsection{Code Quality Metrics}
-
-Continuous monitoring includes lines of code analysis, complexity metrics, documentation coverage, and automated code quality checks.
-
-This comprehensive implementation ensures that \hpfracc is not only mathematically correct but also highly performant, reliable, and maintainable. The combination of advanced numerical methods, efficient algorithms, and robust testing makes the framework suitable for both research and production use.
+The complete implementation details, including full source code, extensive documentation, and interactive examples, are available in the public repository.
