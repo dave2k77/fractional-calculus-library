@@ -677,18 +677,18 @@ We implemented robust singularity detection and handling mechanisms:
 \begin{algorithm}[h]
 \caption{Singularity Detection and Handling}
 \begin{algorithmic}[1]
-\REQUIRE Fractional order $\alpha$, time points $t_i$, tolerance $\epsilon$
-\ENSURE Stable computation result
-\STATE Compute condition number: $\kappa = \|K\| \|K^{-1}\|$
-\IF{$\kappa > \kappa_{threshold}$}
-    \STATE Apply regularization: $K_{reg} = K + \epsilon I$
-    \STATE Use adaptive precision: increase floating point precision
-\ENDIF
-\IF{$\alpha < \alpha_{critical}$}
-    \STATE Use asymptotic expansion for small $\alpha$
-    \STATE Apply Richardson extrapolation for convergence acceleration
-\ENDIF
-\RETURN Stable result
+\Require Fractional order $\alpha$, time points $t_i$, tolerance $\epsilon$
+\Ensure Stable computation result
+\State Compute condition number: $\kappa = \|K\| \|K^{-1}\|$
+\If{$\kappa > \kappa_{threshold}$}
+    \State Apply regularization: $K_{reg} = K + \epsilon I$
+    \State Use adaptive precision: increase floating point precision
+\EndIf
+\If{$\alpha < \alpha_{critical}$}
+    \State Use asymptotic expansion for small $\alpha$
+    \State Apply Richardson extrapolation for convergence acceleration
+\EndIf
+\Return Stable result
 \end{algorithmic}
 \end{algorithm}
 

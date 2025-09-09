@@ -533,14 +533,14 @@ This shows that the gradient depends on the entire function history, not just th
 \begin{algorithm}[h]
 \caption{Fractional Autograd Backward Pass}
 \begin{algorithmic}[1]
-\REQUIRE Forward pass result $y$, gradient $\frac{\partial L}{\partial y}$, memory kernel $K$
-\ENSURE Gradient $\frac{\partial L}{\partial x}$
-\STATE Initialize gradient accumulator $\nabla x = 0$
-\FOR{$i = 0$ to $N-1$}
-    \STATE Compute memory contribution: $m_i = \sum_{j=0}^{i} K(i,j) \frac{\partial L}{\partial y_j}$
-    \STATE Accumulate gradient: $\nabla x_i += m_i$
-\ENDFOR
-\RETURN $\nabla x$
+\Require Forward pass result $y$, gradient $\frac{\partial L}{\partial y}$, memory kernel $K$
+\Ensure Gradient $\frac{\partial L}{\partial x}$
+\State Initialize gradient accumulator $\nabla x = 0$
+\For{$i = 0$ to $N-1$}
+    \State Compute memory contribution: $m_i = \sum_{j=0}^{i} K(i,j) \frac{\partial L}{\partial y_j}$
+    \State Accumulate gradient: $\nabla x_i += m_i$
+\EndFor
+\Return $\nabla x$
 \end{algorithmic}
 \end{algorithm}
 
@@ -703,12 +703,12 @@ To address memory limitations, we implement stochastic memory sampling for gradi
 \begin{algorithm}[h]
 \caption{Stochastic Memory Gradient Computation}
 \begin{algorithmic}[1]
-\REQUIRE Function history $f(t)$, gradient $\frac{\partial L}{\partial y}$, sampling size $K$
-\ENSURE Approximate gradient $\frac{\partial L}{\partial x}$
-\STATE Sample $K$ memory points: $\{t_{i_1}, t_{i_2}, \ldots, t_{i_K}\}$
-\STATE Compute importance weights: $w_k = \frac{K(t, t_{i_k})}{\sum_{j=1}^K K(t, t_{i_j})}$
-\STATE Approximate gradient: $\frac{\partial L}{\partial x} \approx \sum_{k=1}^K w_k \frac{\partial L}{\partial y_{i_k}}$
-\RETURN $\frac{\partial L}{\partial x}$
+\Require Function history $f(t)$, gradient $\frac{\partial L}{\partial y}$, sampling size $K$
+\Ensure Approximate gradient $\frac{\partial L}{\partial x}$
+\State Sample $K$ memory points: $\{t_{i_1}, t_{i_2}, \ldots, t_{i_K}\}$
+\State Compute importance weights: $w_k = \frac{K(t, t_{i_k})}{\sum_{j=1}^K K(t, t_{i_j})}$
+\State Approximate gradient: $\frac{\partial L}{\partial x} \approx \sum_{k=1}^K w_k \frac{\partial L}{\partial y_{i_k}}$
+\Return $\frac{\partial L}{\partial x}$
 \end{algorithmic}
 \end{algorithm}
 
@@ -828,18 +828,18 @@ We implement adaptive memory management that automatically selects the optimal s
 \begin{algorithm}[h]
 \caption{Adaptive Memory Management for Fractional Operators}
 \begin{algorithmic}[1]
-\REQUIRE Sequence length $N$, available memory $M$, fractional order $\alpha$
-\ENSURE Optimal memory allocation strategy
-\IF{$N^2 \leq M$}
-    \STATE Use direct convolution method
-\ELSIF{$N \log N \leq M$}
-    \STATE Use spectral method with FFT
-\ELSIF{$K \leq M$ where $K = \lceil \log N \rceil$}
-    \STATE Use stochastic sampling with $K$ samples
-\ELSE
-    \STATE Use chunked processing with chunk size $C = \lfloor \sqrt{M} \rfloor$
-\ENDIF
-\RETURN Selected strategy and memory allocation
+\Require Sequence length $N$, available memory $M$, fractional order $\alpha$
+\Ensure Optimal memory allocation strategy
+\If{$N^2 \leq M$}
+    \State Use direct convolution method
+\ElsIf{$N \log N \leq M$}
+    \State Use spectral method with FFT
+\ElsIf{$K \leq M$ where $K = \lceil \log N \rceil$}
+    \State Use stochastic sampling with $K$ samples
+\Else
+    \State Use chunked processing with chunk size $C = \lfloor \sqrt{M} \rfloor$
+\EndIf
+\Return Selected strategy and memory allocation
 \end{algorithmic}
 \end{algorithm}
 
@@ -904,18 +904,18 @@ We implement adaptive precision control that automatically adjusts the numerical
 \begin{algorithm}[h]
 \caption{Adaptive Precision Control}
 \begin{algorithmic}[1]
-\REQUIRE Input data $x$, fractional order $\alpha$, tolerance $\epsilon$
-\ENSURE Stable computation result
-\STATE Compute condition number: $\kappa = \|D^{\alpha}\| \|(D^{\alpha})^{-1}\|$
-\IF{$\kappa > \kappa_{threshold}$}
-    \STATE Increase precision to double or extended precision
-    \STATE Apply regularization: $D^{\alpha}_{reg} = D^{\alpha} + \epsilon I$
-\ENDIF
-\IF{$\alpha < \alpha_{critical}$}
-    \STATE Use asymptotic expansion for small $\alpha$
-    \STATE Apply Richardson extrapolation
-\ENDIF
-\RETURN Stable result with appropriate precision
+\Require Input data $x$, fractional order $\alpha$, tolerance $\epsilon$
+\Ensure Stable computation result
+\State Compute condition number: $\kappa = \|D^{\alpha}\| \|(D^{\alpha})^{-1}\|$
+\If{$\kappa > \kappa_{threshold}$}
+    \State Increase precision to double or extended precision
+    \State Apply regularization: $D^{\alpha}_{reg} = D^{\alpha} + \epsilon I$
+\EndIf
+\If{$\alpha < \alpha_{critical}$}
+    \State Use asymptotic expansion for small $\alpha$
+    \State Apply Richardson extrapolation
+\EndIf
+\Return Stable result with appropriate precision
 \end{algorithmic}
 \end{algorithm}
 
