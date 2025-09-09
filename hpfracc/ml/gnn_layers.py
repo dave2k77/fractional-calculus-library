@@ -43,7 +43,7 @@ class BaseFractionalGNNLayer(ABC):
         self.use_fractional = use_fractional
         self.activation = activation
         self.dropout = dropout
-        self.bias = bias
+        self.bias = bias if bias else None
         self.backend = backend or get_backend_manager().active_backend
 
         # Initialize tensor operations for the chosen backend
@@ -456,6 +456,59 @@ class FractionalGraphConv(BaseFractionalGNNLayer):
         else:
             return x
 
+    def train(self, mode: bool = True):
+        """Set the layer in training mode."""
+        self.training = mode
+        return self
+
+    def eval(self):
+        """Set the layer in evaluation mode."""
+        return self.train(False)
+
+    def reset_parameters(self):
+        """Reset layer parameters to initial values."""
+        self._initialize_weights()
+
+    def parameters(self):
+        """Return an iterator over module parameters."""
+        if self.backend == BackendType.TORCH:
+            if self.bias is not None:
+                return iter([self.weight, self.bias])
+            else:
+                return iter([self.weight])
+        else:
+            # For non-PyTorch backends, return empty iterator
+            return iter([])
+
+    def named_parameters(self):
+        """Return an iterator over module parameters, yielding both the name and the parameter."""
+        if self.backend == BackendType.TORCH:
+            if self.bias is not None:
+                return iter([('weight', self.weight), ('bias', self.bias)])
+            else:
+                return iter([('weight', self.weight)])
+        else:
+            # For non-PyTorch backends, return empty iterator
+            return iter([])
+
+    def state_dict(self):
+        """Return a dictionary containing a whole state of the module."""
+        if self.backend == BackendType.TORCH:
+            state = {'weight': self.weight}
+            if self.bias is not None:
+                state['bias'] = self.bias
+            return state
+        else:
+            return {}
+
+    def load_state_dict(self, state_dict):
+        """Load state dictionary."""
+        if self.backend == BackendType.TORCH:
+            if 'weight' in state_dict:
+                self.weight = state_dict['weight']
+            if 'bias' in state_dict and self.bias is not None:
+                self.bias = state_dict['bias']
+
 
 class FractionalGraphAttention(BaseFractionalGNNLayer):
     """
@@ -513,10 +566,11 @@ class FractionalGraphAttention(BaseFractionalGNNLayer):
             init.xavier_uniform_(self.output_weight)
 
             # Initialize bias
-            if self.bias:
+            if isinstance(self.bias, bool) and self.bias:
                 self.bias = torch.zeros(self.out_channels, requires_grad=True)
-            else:
+            elif isinstance(self.bias, bool) and not self.bias:
                 self.bias = None
+            # If self.bias is already a tensor, keep it as is
 
         elif self.backend == BackendType.JAX:
             import jax.numpy as jnp
@@ -745,6 +799,63 @@ class FractionalGraphAttention(BaseFractionalGNNLayer):
         return self.tensor_ops.dropout(
             x, p=self.dropout, training=self.training)
 
+    def train(self, mode: bool = True):
+        """Set the layer in training mode."""
+        self.training = mode
+        return self
+
+    def eval(self):
+        """Set the layer in evaluation mode."""
+        return self.train(False)
+
+    def reset_parameters(self):
+        """Reset layer parameters to initial values."""
+        self._initialize_layer()
+
+    def parameters(self):
+        """Return an iterator over module parameters."""
+        if self.backend == BackendType.TORCH:
+            params = []
+            if hasattr(self, 'weight') and self.weight is not None:
+                params.append(self.weight)
+            if hasattr(self, 'bias') and self.bias is not None:
+                params.append(self.bias)
+            return iter(params)
+        else:
+            return iter([])
+
+    def named_parameters(self):
+        """Return an iterator over module parameters, yielding both the name and the parameter."""
+        if self.backend == BackendType.TORCH:
+            params = []
+            if hasattr(self, 'weight') and self.weight is not None:
+                params.append(('weight', self.weight))
+            if hasattr(self, 'bias') and self.bias is not None:
+                params.append(('bias', self.bias))
+            return iter(params)
+        else:
+            return iter([])
+
+    def state_dict(self):
+        """Return a dictionary containing a whole state of the module."""
+        if self.backend == BackendType.TORCH:
+            state = {}
+            if hasattr(self, 'weight') and self.weight is not None:
+                state['weight'] = self.weight
+            if hasattr(self, 'bias') and self.bias is not None:
+                state['bias'] = self.bias
+            return state
+        else:
+            return {}
+
+    def load_state_dict(self, state_dict):
+        """Load state dictionary."""
+        if self.backend == BackendType.TORCH:
+            if 'weight' in state_dict and hasattr(self, 'weight'):
+                self.weight = state_dict['weight']
+            if 'bias' in state_dict and hasattr(self, 'bias') and self.bias is not None:
+                self.bias = state_dict['bias']
+
 
 class FractionalGraphPooling(BaseFractionalGNNLayer):
     """
@@ -757,10 +868,14 @@ class FractionalGraphPooling(BaseFractionalGNNLayer):
     def __init__(
         self,
         in_channels: int,
+        out_channels: int = None,
         pooling_ratio: float = 0.5,
         fractional_order: Union[float, FractionalOrder] = 0.5,
         method: str = "RL",
         use_fractional: bool = True,
+        activation: str = "relu",
+        dropout: float = 0.1,
+        bias: bool = True,
         backend: Optional[BackendType] = None,
         **kwargs
     ):
@@ -768,9 +883,14 @@ class FractionalGraphPooling(BaseFractionalGNNLayer):
         if 'ratio' in kwargs:
             pooling_ratio = kwargs['ratio']
         self.pooling_ratio = pooling_ratio
+        
+        # Use in_channels as out_channels if not specified
+        if out_channels is None:
+            out_channels = in_channels
+            
         super().__init__(
-            in_channels, in_channels, fractional_order, method,
-            use_fractional, "identity", 0.0, False, backend
+            in_channels, out_channels, fractional_order, method,
+            use_fractional, activation, dropout, bias, backend
         )
 
     def _initialize_layer(self):
@@ -783,6 +903,12 @@ class FractionalGraphPooling(BaseFractionalGNNLayer):
             self.score_network = torch.randn(
                 self.in_channels, 1, requires_grad=True)
             init.xavier_uniform_(self.score_network)
+            
+            # Linear layer for channel reduction
+            self.linear = torch.nn.Linear(self.in_channels, self.out_channels)
+            init.xavier_uniform_(self.linear.weight)
+            if self.linear.bias is not None:
+                init.zeros_(self.linear.bias)
 
         elif self.backend == BackendType.JAX:
             import jax.numpy as jnp
@@ -793,6 +919,15 @@ class FractionalGraphPooling(BaseFractionalGNNLayer):
             # Scale for Xavier-like initialization
             scale = jnp.sqrt(2.0 / (self.in_channels + 1))
             self.score_network = self.score_network * scale
+            
+            # Linear layer for channel reduction
+            key, subkey = random.split(key)
+            self.linear_weight = random.normal(subkey, (self.out_channels, self.in_channels))
+            self.linear_bias = random.normal(subkey, (self.out_channels,))
+            # Xavier initialization
+            scale = jnp.sqrt(2.0 / (self.in_channels + self.out_channels))
+            self.linear_weight = self.linear_weight * scale
+            self.linear_bias = self.linear_bias * 0.1
 
         elif self.backend == BackendType.NUMBA:
             import numpy as np
@@ -801,6 +936,14 @@ class FractionalGraphPooling(BaseFractionalGNNLayer):
             # Scale for Xavier-like initialization
             scale = np.sqrt(2.0 / (self.in_channels + 1))
             self.score_network = self.score_network * scale
+            
+            # Linear layer for channel reduction
+            self.linear_weight = np.random.randn(self.out_channels, self.in_channels)
+            self.linear_bias = np.random.randn(self.out_channels)
+            # Xavier initialization
+            scale = np.sqrt(2.0 / (self.in_channels + self.out_channels))
+            self.linear_weight = self.linear_weight * scale
+            self.linear_bias = self.linear_bias * 0.1
 
     def forward(self, x: Any, edge_index: Any,
                 batch: Optional[Any] = None) -> Tuple[Any, Any, Any]:
@@ -856,6 +999,16 @@ class FractionalGraphPooling(BaseFractionalGNNLayer):
 
         # Pool features
         pooled_features = x[indices]
+        
+        # Apply linear transformation to reduce channels
+        if self.backend == BackendType.TORCH:
+            pooled_features = self.linear(pooled_features)
+        elif self.backend == BackendType.JAX:
+            import jax.numpy as jnp
+            pooled_features = jnp.dot(pooled_features, self.linear_weight.T) + self.linear_bias
+        elif self.backend == BackendType.NUMBA:
+            import numpy as np
+            pooled_features = np.dot(pooled_features, self.linear_weight.T) + self.linear_bias
 
         # Pool edge index and batch (simplified)
         # In practice, you'd want to filter edges to only include connections
@@ -864,3 +1017,63 @@ class FractionalGraphPooling(BaseFractionalGNNLayer):
         pooled_batch = batch[indices] if batch is not None else None
 
         return pooled_features, pooled_edge_index, pooled_batch
+
+    def train(self, mode: bool = True):
+        """Set the layer in training mode."""
+        self.training = mode
+        return self
+
+    def eval(self):
+        """Set the layer in evaluation mode."""
+        return self.train(False)
+
+    def reset_parameters(self):
+        """Reset layer parameters to initial values."""
+        if hasattr(self, '_initialize_weights'):
+            self._initialize_weights()
+        else:
+            self._initialize_layer()
+
+    def parameters(self):
+        """Return an iterator over module parameters."""
+        if self.backend == BackendType.TORCH:
+            params = []
+            if hasattr(self, 'weight') and self.weight is not None:
+                params.append(self.weight)
+            if hasattr(self, 'bias') and self.bias is not None:
+                params.append(self.bias)
+            return iter(params)
+        else:
+            return iter([])
+
+    def named_parameters(self):
+        """Return an iterator over module parameters, yielding both the name and the parameter."""
+        if self.backend == BackendType.TORCH:
+            params = []
+            if hasattr(self, 'weight') and self.weight is not None:
+                params.append(('weight', self.weight))
+            if hasattr(self, 'bias') and self.bias is not None:
+                params.append(('bias', self.bias))
+            return iter(params)
+        else:
+            return iter([])
+
+    def state_dict(self):
+        """Return a dictionary containing a whole state of the module."""
+        if self.backend == BackendType.TORCH:
+            state = {}
+            if hasattr(self, 'weight') and self.weight is not None:
+                state['weight'] = self.weight
+            if hasattr(self, 'bias') and self.bias is not None:
+                state['bias'] = self.bias
+            return state
+        else:
+            return {}
+
+    def load_state_dict(self, state_dict):
+        """Load state dictionary."""
+        if self.backend == BackendType.TORCH:
+            if 'weight' in state_dict and hasattr(self, 'weight'):
+                self.weight = state_dict['weight']
+            if 'bias' in state_dict and hasattr(self, 'bias') and self.bias is not None:
+                self.bias = state_dict['bias']
