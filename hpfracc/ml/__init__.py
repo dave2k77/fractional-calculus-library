@@ -97,10 +97,10 @@ from .gnn_models import (
 
 # Spectral Fractional Autograd
 from .spectral_autograd import (
-    FractionalAutogradFunction,
-    FractionalAutogradLayer,
-    spectral_fractional_derivative,
-    create_spectral_fractional_layer,
+    SpectralFractionalDerivative,
+    SpectralFractionalLayer,
+    BoundedAlphaParameter,
+    test_robust_spectral_autograd,
 )
 
 # Stochastic Memory Sampling

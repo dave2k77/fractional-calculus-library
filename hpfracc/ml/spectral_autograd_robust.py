@@ -1,25 +1,17 @@
 """
-Robust Spectral Autograd Implementation for Fractional Derivatives
+Robust Spectral Autograd Framework with MKL FFT Error Handling
 
-This module implements the production-ready spectral autograd framework that enables proper
-gradient flow through fractional derivatives using FFT and Mellin transforms.
-
-Features:
-- Robust MKL FFT error handling with fallback mechanisms
-- Production-grade performance optimization
-- Complete neural network integration
-- Mathematical rigor with verified properties
-
-Based on the mathematical framework in fractional_chain_rule_mathematics.md
+This module provides a production-ready implementation of the spectral autograd framework
+with comprehensive error handling and fallback mechanisms for MKL FFT issues.
 """
 
 import torch
 import torch.nn as nn
-import numpy as np
+import torch.nn.functional as F
 from typing import Tuple, Optional, Union, List
 from functools import lru_cache
 import warnings
-import math
+import numpy as np
 
 # Global configuration for FFT backend
 FFT_BACKEND = "auto"  # "auto", "mkl", "fftw", "numpy"
@@ -242,7 +234,7 @@ def _get_cached_kernel(alpha: float, size: int, device: str, dtype: str, axes: T
 def _manual_kernel_generation(alpha: float, size: int, device: str, dtype: str, axes: Tuple[int, ...]) -> torch.Tensor:
     """Manual kernel generation without MKL dependencies."""
     # Create frequency array manually
-    freqs = torch.linspace(0, 1, size, device=device, dtype=torch.float32)
+    freqs = torch.linspace(0, 1, size, device=device, dtype=dtype)
     freqs = torch.where(freqs > 0.5, freqs - 1, freqs) * 2 * torch.pi
     
     # Generate kernel
@@ -271,37 +263,13 @@ class BoundedAlphaParameter(nn.Module):
         alpha = self.alpha_min + (self.alpha_max - self.alpha_min) * torch.sigmoid(self.rho)
         return alpha
 
-
 class SpectralFractionalDerivative(torch.autograd.Function):
-    """
-    Robust spectral fractional derivative with proper chain rule implementation.
-    
-    This class implements the production-ready spectral autograd framework that converts
-    non-local fractional operations into local operations in the frequency domain,
-    enabling proper gradient flow through neural networks.
-    
-    Features:
-    - Robust MKL FFT error handling with fallback mechanisms
-    - Production-grade performance optimization
-    - Complete neural network integration
-    - Mathematical rigor with verified properties
-    """
+    """Spectral fractional derivative with robust MKL error handling."""
     
     @staticmethod
     def forward(ctx, x: torch.Tensor, alpha: Union[float, torch.Tensor], 
                 axes: Union[int, Tuple[int, ...]] = -1, method: str = "fft") -> torch.Tensor:
-        """
-        Forward pass: Compute fractional derivative in spectral domain.
-        
-        Args:
-            x: Input tensor
-            alpha: Fractional order (0 < alpha < 2) or learnable tensor
-            axes: Dimensions to apply derivative to
-            method: Spectral method ("fft" or "rfft")
-            
-        Returns:
-            Fractional derivative tensor with preserved computation graph
-        """
+        """Forward pass of spectral fractional derivative."""
         if isinstance(axes, int):
             axes = (axes,)
         
@@ -321,18 +289,7 @@ class SpectralFractionalDerivative(torch.autograd.Function):
     
     @staticmethod
     def backward(ctx, grad_output: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor, None, None]:
-        """
-        Backward pass: Apply spectral chain rule.
-        
-        The key insight is that the backward pass in the frequency domain
-        is identical to the forward pass, but with the adjoint kernel.
-        
-        Args:
-            grad_output: Gradient from the next layer
-            
-        Returns:
-            Gradient with respect to input tensor and alpha
-        """
+        """Backward pass of spectral fractional derivative."""
         x, alpha = ctx.saved_tensors
         axes = ctx.axes
         method = ctx.method
@@ -435,196 +392,7 @@ def _fallback_spectral_derivative(x: torch.Tensor, alpha: torch.Tensor,
         
         return result
 
-
-def _fft_spectral_kernel(alpha: float, size: int, device: torch.device, 
-                        dtype: torch.dtype, regularization: float) -> torch.Tensor:
-    """
-    Compute FFT-based spectral kernel for fractional derivatives.
-    
-    Kernel: K_α(ξ) = (iξ)^α with regularization
-    """
-    # Create frequency array
-    frequencies = torch.fft.fftfreq(size, device=device, dtype=dtype)
-    
-    # Compute spectral kernel: (iξ)^α
-    kernel = (1j * frequencies) ** alpha
-    
-    # Apply regularization for stability
-    if alpha >= 1.0:
-        kernel = kernel / (1 + regularization * torch.abs(frequencies) ** alpha)
-    
-    # Handle zero frequency
-    kernel[0] = 0.0
-    
-    return kernel
-
-
-def _mellin_spectral_kernel(alpha: float, size: int, device: torch.device, 
-                           dtype: torch.dtype, regularization: float) -> torch.Tensor:
-    """
-    Compute Mellin-based spectral kernel for fractional derivatives.
-    
-    Kernel: M_α(s) = Γ(s)/Γ(s-α) with regularization
-    """
-    # Create Mellin frequency array (logarithmic spacing)
-    s_values = torch.linspace(0.1, 10.0, size, device=device, dtype=dtype)
-    
-    # Compute gamma ratio kernel
-    try:
-        # Use PyTorch's gamma function if available, otherwise fall back to scipy
-        if hasattr(torch, 'gamma'):
-            gamma_ratio = torch.gamma(s_values) / torch.gamma(s_values - alpha)
-        else:
-            # Fallback to numpy/scipy
-            s_np = s_values.cpu().numpy()
-            gamma_ratio_np = gamma(s_np) / gamma(s_np - alpha)
-            gamma_ratio = torch.from_numpy(gamma_ratio_np).to(device).to(dtype)
-    except:
-        # Fallback for numerical issues
-        gamma_ratio = torch.ones_like(s_values)
-        warnings.warn("Gamma ratio computation failed, using identity kernel")
-    
-    # Apply regularization
-    if alpha >= 1.0:
-        gamma_ratio = gamma_ratio / (1 + regularization * torch.abs(s_values) ** alpha)
-    
-    return gamma_ratio
-
-
-def _mellin_adjoint_kernel(alpha: float, size: int, device: torch.device, 
-                          dtype: torch.dtype, regularization: float) -> torch.Tensor:
-    """
-    Compute Mellin-based adjoint kernel for fractional derivatives.
-    
-    Adjoint kernel: M_α*(s) = Γ(s+α)/Γ(s)
-    """
-    # Create Mellin frequency array
-    s_values = torch.linspace(0.1, 10.0, size, device=device, dtype=dtype)
-    
-    # Compute adjoint gamma ratio kernel
-    try:
-        if hasattr(torch, 'gamma'):
-            gamma_ratio = torch.gamma(s_values + alpha) / torch.gamma(s_values)
-        else:
-            s_np = s_values.cpu().numpy()
-            gamma_ratio_np = gamma(s_np + alpha) / gamma(s_np)
-            gamma_ratio = torch.from_numpy(gamma_ratio_np).to(device).to(dtype)
-    except:
-        gamma_ratio = torch.ones_like(s_values)
-        warnings.warn("Adjoint gamma ratio computation failed, using identity kernel")
-    
-    # Apply regularization
-    if alpha >= 1.0:
-        gamma_ratio = gamma_ratio / (1 + regularization * torch.abs(s_values) ** alpha)
-    
-    return gamma_ratio
-
-
-def _fft_fractional_derivative(x: torch.Tensor, kernel: torch.Tensor) -> torch.Tensor:
-    """
-    Apply FFT-based fractional derivative using spectral kernel.
-    
-    D^α f = FFT^{-1}[K_α(ξ) FFT[f]]
-    """
-    # Ensure input is complex for FFT
-    if x.is_complex():
-        x_complex = x
-    else:
-        x_complex = x.to(torch.complex64)
-    
-    # Apply FFT
-    x_fft = torch.fft.fft(x_complex, dim=-1)
-    
-    # Apply spectral kernel
-    result_fft = x_fft * kernel
-    
-    # Apply inverse FFT
-    result = torch.fft.ifft(result_fft, dim=-1)
-    
-    # Return real part
-    return result.real
-
-
-def _mellin_fractional_derivative(x: torch.Tensor, kernel: torch.Tensor) -> torch.Tensor:
-    """
-    Apply Mellin-based fractional derivative using spectral kernel.
-    
-    This is a simplified implementation. In practice, you'd need
-    proper Mellin transform implementation.
-    """
-    # For now, use FFT as approximation to Mellin
-    # In a full implementation, you'd use proper Mellin transform
-    warnings.warn("Mellin implementation using FFT approximation")
-    
-    # Convert to frequency domain
-    x_fft = torch.fft.fft(x, dim=-1)
-    frequencies = torch.fft.fftfreq(x.size(-1), device=x.device, dtype=x.dtype)
-    
-    # Apply kernel in frequency domain
-    result_fft = x_fft * kernel
-    
-    # Convert back to spatial domain
-    result = torch.fft.ifft(result_fft, dim=-1)
-    
-    return result.real
-
-
-def spectral_fractional_derivative(x: torch.Tensor, alpha: float, 
-                                 method: str = "fft", 
-                                 regularization: float = 1e-6) -> torch.Tensor:
-    """
-    Compute spectral fractional derivative with proper gradient support.
-    
-    This is the main function that should be used in neural networks.
-    It preserves the computation graph and enables proper backpropagation.
-    
-    Args:
-        x: Input tensor
-        alpha: Fractional order (0 < alpha < 2)
-        method: Spectral method ("fft" or "mellin")
-        regularization: Regularization parameter for stability
-        
-    Returns:
-        Fractional derivative tensor with preserved computation graph
-    """
-    return SpectralFractionalDerivative.apply(x, alpha, method, regularization)
-
-
-class SpectralFractionalLayer(nn.Module):
-    """
-    Neural network layer that applies spectral fractional derivatives.
-    
-    This layer can be used in neural networks to apply fractional
-    derivatives while maintaining proper gradient flow.
-    """
-    
-    def __init__(self, alpha: float, method: str = "fft", 
-                 regularization: float = 1e-6, learnable_alpha: bool = False):
-        """
-        Initialize spectral fractional layer.
-        
-        Args:
-            alpha: Fractional order
-            method: Spectral method ("fft" or "mellin")
-            regularization: Regularization parameter
-            learnable_alpha: Whether to make alpha learnable
-        """
-        super().__init__()
-        
-        if learnable_alpha:
-            self.alpha = nn.Parameter(torch.tensor(alpha))
-        else:
-            self.register_buffer('alpha', torch.tensor(alpha))
-        
-        self.method = method
-        self.regularization = regularization
-    
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        """Forward pass through spectral fractional layer."""
-        return spectral_fractional_derivative(x, self.alpha.item(), 
-                                            self.method, self.regularization)
-
-
+# Test function
 def test_robust_spectral_autograd():
     """Test the robust spectral autograd implementation."""
     print("Testing Robust Spectral Autograd Framework...")
@@ -635,17 +403,17 @@ def test_robust_spectral_autograd():
     
     # Test forward pass
     result = SpectralFractionalDerivative.apply(x, alpha, -1, "fft")
-    print(f"✅ Forward pass successful: {result.shape}")
+    print(f"Forward pass successful: {result.shape}")
     
     # Test backward pass
     loss = torch.sum(result)
     loss.backward()
-    print(f"✅ Backward pass successful: x.grad shape = {x.grad.shape}, alpha.grad = {alpha.grad}")
+    print(f"Backward pass successful: x.grad shape = {x.grad.shape}, alpha.grad = {alpha.grad}")
     
     # Test learnable alpha
     alpha_param = BoundedAlphaParameter(alpha_init=1.5)
     alpha_val = alpha_param()
-    print(f"✅ Learnable alpha: {alpha_val.item():.4f}")
+    print(f"Learnable alpha: {alpha_val.item():.4f}")
     
     print("✅ Robust Spectral Autograd Framework test passed!")
 
