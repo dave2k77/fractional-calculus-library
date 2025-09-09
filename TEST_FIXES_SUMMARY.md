@@ -85,6 +85,20 @@ pytest -q tests/test_ml_integration.py
 
 ---
 
+## 📋 **Current TODO List**
+
+### **✅ Completed Tasks**
+- **fix_analytics_remaining** - Fix remaining analytics test failures - API mismatches in PerformanceEvent, UsageEvent, WorkflowEvent classes
+- **fix_ml_remaining** - Fix remaining ML test failures - GNN layer attribute issues and abstract method implementations
+- **update_test_summary** - Update TEST_FIXES_SUMMARY.md with latest results and sync to GitHub
+
+### **🔄 Pending Tasks**
+- **fix_core_remaining** - Fix remaining core test failures - edge case handling and validation issues
+- **fix_advanced_methods** - Fix advanced methods test failures - edge case handling for zero alpha
+- **fix_probabilistic_gradients** - Fix probabilistic gradients test failures - gradient consistency and layer integration
+
+---
+
 ## 🏗️ **Architecture Improvements**
 
 ### **Enhanced Error Handling**
