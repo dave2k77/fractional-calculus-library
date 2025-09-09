@@ -288,7 +288,7 @@ HPFRACC supports various types of fractional integrals:
    # Create Caputo fractional integral
    result = caputo_integral(x, f(x), alpha)
 
-**Note**: Weyl and Hadamard integrals are available but require specific implementations. For now, use Riemann-Liouville and Caputo integrals which are fully implemented.
+**Note**: Weyl and Hadamard integrals are available but require specific implementations. For now, use Riemann-Liouville and Caputo integrals which are implemented.
 
 Special Functions
 ~~~~~~~~~~~~~~~~
