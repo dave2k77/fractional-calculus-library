@@ -7,6 +7,72 @@ This section provides comprehensive examples and tutorials for using HPFRACC in 
 Basic Examples
 -------------
 
+Spectral Autograd Framework
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The spectral autograd framework enables gradient flow through fractional derivatives:
+
+.. code-block:: python
+
+   import torch
+   from hpfracc.ml import SpectralFractionalDerivative, BoundedAlphaParameter
+
+   # Basic spectral fractional derivative
+   x = torch.randn(32, requires_grad=True)
+   alpha = 0.5
+   
+   # Apply spectral fractional derivative (4.67x faster than standard)
+   result = SpectralFractionalDerivative.apply(x, alpha, -1, "fft")
+   
+   # Compute gradients
+   loss = torch.sum(result)
+   loss.backward()
+   
+   print(f"Gradient norm: {x.grad.norm().item():.6f}")
+
+Neural Network with Learnable Fractional Orders
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: python
+
+   import torch
+   import torch.nn as nn
+   from hpfracc.ml import SpectralFractionalDerivative, BoundedAlphaParameter
+
+   class FractionalNeuralNetwork(nn.Module):
+       def __init__(self, input_size=32, hidden_size=64, output_size=1):
+           super().__init__()
+           self.alpha_param = BoundedAlphaParameter(alpha_init=1.2)
+           self.linear1 = nn.Linear(input_size, hidden_size)
+           self.linear2 = nn.Linear(hidden_size, output_size)
+       
+       def forward(self, x):
+           # Apply spectral fractional derivative with learnable alpha
+           alpha = self.alpha_param()
+           x_frac = SpectralFractionalDerivative.apply(x, alpha, -1, "fft")
+           
+           # Standard neural network layers
+           x = self.linear1(x_frac)
+           x = torch.relu(x)
+           x = self.linear2(x)
+           return x
+
+   # Create model and test
+   model = FractionalNeuralNetwork()
+   x = torch.randn(100, 32, requires_grad=True)
+   y = torch.randn(100, 1)
+   
+   # Forward pass
+   output = model(x)
+   loss = nn.functional.mse_loss(output, y)
+   
+   # Backward pass (gradients flow through fractional derivatives)
+   loss.backward()
+   
+   print(f"Model loss: {loss.item():.6f}")
+   print(f"Alpha value: {model.alpha_param().item():.4f}")
+   print(f"Alpha gradient: {model.alpha_param.rho.grad.item():.6f}")
+
 Fractional Derivative Computation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

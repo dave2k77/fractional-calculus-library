@@ -62,7 +62,7 @@ Machine Learning Module
 Fractional Autograd Framework
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. automodule:: hpfracc.ml.autograd.spectral_autograd
+.. automodule:: hpfracc.ml.spectral_autograd
    :members:
    :undoc-members:
    :show-inheritance:

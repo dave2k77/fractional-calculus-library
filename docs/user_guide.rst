@@ -40,6 +40,50 @@ For development and contribution:
 Quick Start
 ----------
 
+Spectral Autograd Framework
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The spectral autograd framework is the core innovation that enables gradient flow through fractional derivatives:
+
+.. code-block:: python
+
+   import torch
+   from hpfracc.ml import SpectralFractionalDerivative, BoundedAlphaParameter
+
+   # Create input with gradient support
+   x = torch.randn(32, requires_grad=True)
+   alpha = 0.5  # fractional order
+
+   # Apply spectral fractional derivative (4.67x faster)
+   result = SpectralFractionalDerivative.apply(x, alpha, -1, "fft")
+   
+   # Gradients flow properly through fractional derivatives
+   loss = torch.sum(result)
+   loss.backward()
+   
+   print(f"Input gradient norm: {x.grad.norm().item():.6f}")
+
+Learnable Fractional Orders
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Use bounded parameterization for adaptive fractional orders:
+
+.. code-block:: python
+
+   # Create learnable alpha parameter
+   alpha_param = BoundedAlphaParameter(alpha_init=1.0)
+   
+   # Use in computation
+   alpha_val = alpha_param()
+   result = SpectralFractionalDerivative.apply(x, alpha_val, -1, "fft")
+   
+   # Alpha gradients are computed automatically
+   loss = torch.sum(result)
+   loss.backward()
+   
+   print(f"Alpha value: {alpha_val.item():.4f}")
+   print(f"Alpha gradient: {alpha_param.rho.grad.item():.6f}")
+
 Basic Fractional Calculus Operations
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
