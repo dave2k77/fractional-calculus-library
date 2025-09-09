@@ -17,7 +17,7 @@ The framework introduces several key technical innovations that advance the stat
     
     \item \textbf{Unified Architecture}: A modular, extensible design that seamlessly integrates multiple mathematical domains (fractional calculus, neural ODEs, SDEs) through consistent APIs and factory patterns.
     
-    \item \textbf{Multi-Backend Support**: Comprehensive support for PyTorch, JAX, and NUMBA backends, enabling users to choose the most appropriate platform for their specific use case while maintaining consistent functionality.
+    \item \textbf{Multi-Backend Support}: Comprehensive support for PyTorch, JAX, and NUMBA backends, enabling users to choose the most appropriate platform for their specific use case while maintaining consistent functionality.
 \end{itemize}
 
 \subsubsection{Implementation Excellence}
@@ -25,13 +25,13 @@ The framework introduces several key technical innovations that advance the stat
 The framework demonstrates exceptional implementation quality and engineering practices:
 
 \begin{itemize}
-    \item \textbf{Comprehensive Testing**: Extensive test suite with 85\%+ coverage, including unit tests, integration tests, and validation against analytical solutions, ensuring reliability and correctness across all components.
+    \item \textbf{Comprehensive Testing}: Extensive test suite with 85\%+ coverage, including unit tests, integration tests, and validation against analytical solutions, ensuring reliability and correctness across all components.
     
-    \item \textbf{Performance Optimization**: Advanced optimization strategies including GPU acceleration, memory management, parallel processing, and adaptive algorithms, achieving speedups of 3-7x over CPU implementations.
+    \item \textbf{Performance Optimization}: Advanced optimization strategies including GPU acceleration, memory management, parallel processing, and adaptive algorithms, achieving speedups of 3-7x over CPU implementations.
     
-    \item \textbf{Professional Software Engineering**: Implementation of best practices including error handling, parameter validation, comprehensive documentation, and continuous integration, making the framework suitable for both research and production use.
+    \item \textbf{Professional Software Engineering}: Implementation of best practices including error handling, parameter validation, comprehensive documentation, and continuous integration, making the framework suitable for both research and production use.
     
-    \item \textbf{Open-Source Accessibility**: Complete framework available as open-source software with PyPI package, comprehensive documentation, and extensive examples, enabling immediate adoption by the research community.
+    \item \textbf{Open-Source Accessibility}: Complete framework available as open-source software with PyPI package, comprehensive documentation, and extensive examples, enabling immediate adoption by the research community.
 \end{itemize}
 
 \subsubsection{Research Impact}
@@ -39,13 +39,13 @@ The framework demonstrates exceptional implementation quality and engineering pr
 The framework opens new research directions and applications:
 
 \begin{itemize}
-    \item \textbf{Neural Fractional Calculus**: Enables learning-based solution of fractional differential equations that were previously intractable through traditional numerical methods.
+    \item \textbf{Neural Fractional Calculus}: Enables learning-based solution of fractional differential equations that were previously intractable through traditional numerical methods.
     
-    \item \textbf{Physics-Informed Neural Networks**: Extends PINNs to fractional differential equations, providing more accurate and stable solutions for complex physical systems with memory effects.
+    \item \textbf{Physics-Informed Neural Networks}: Extends PINNs to fractional differential equations, providing more accurate and stable solutions for complex physical systems with memory effects.
     
-    \item \textbf{Stochastic Process Modeling**: Integrates neural networks with SDE solvers, enabling learning-based modeling of complex stochastic dynamics in physics, biology, and finance.
+    \item \textbf{Stochastic Process Modeling}: Integrates neural networks with SDE solvers, enabling learning-based modeling of complex stochastic dynamics in physics, biology, and finance.
     
-    \item \textbf{Multi-Domain Applications**: Demonstrates applicability across diverse scientific domains including quantum mechanics, fluid dynamics, neuroscience, and financial modeling.
+    \item \textbf{Multi-Domain Applications}: Demonstrates applicability across diverse scientific domains including quantum mechanics, fluid dynamics, neuroscience, and financial modeling.
 \end{itemize}
 
 \subsection{Experimental Validation}
@@ -59,9 +59,9 @@ Our comprehensive experimental evaluation demonstrates the framework's exception
     
     \item \textbf{Numerical Convergence}: SDE solvers achieve theoretical convergence orders (Euler-Maruyama: 0.5, Milstein: 1.0, Heun: 1.0) with excellent agreement between experimental and theoretical results.
     
-    \item \textbf{Performance Characteristics**: GPU acceleration provides consistent speedups of 3-7x depending on problem size, with larger problems benefiting more from parallelization.
+    \item \textbf{Performance Characteristics}: GPU acceleration provides consistent speedups of 3-7x depending on problem size, with larger problems benefiting more from parallelization.
     
-    \item \textbf{Memory Efficiency**: Gradient checkpointing reduces memory usage by 62\% with only a 15\% increase in training time, enabling training of larger models on limited hardware.
+    \item \textbf{Memory Efficiency}: Gradient checkpointing reduces memory usage by 62\% with only a 15\% increase in training time, enabling training of larger models on limited hardware.
 \end{itemize}
 
 \subsubsection{Real-World Applicability}
@@ -69,13 +69,13 @@ Our comprehensive experimental evaluation demonstrates the framework's exception
 The framework successfully addresses practical problems across multiple domains:
 
 \begin{itemize}
-    \item \textbf{Physics Applications**: Solution of fractional heat equations, wave equations, and harmonic oscillators with excellent agreement to analytical solutions and numerical simulations.
+    \item \textbf{Physics Applications}: Solution of fractional heat equations, wave equations, and harmonic oscillators with excellent agreement to analytical solutions and numerical simulations.
     
-    \item \textbf{Financial Modeling**: Implementation of option pricing models with fractional volatility and risk management using neural SDEs, demonstrating practical utility in quantitative finance.
+    \item \textbf{Financial Modeling}: Implementation of option pricing models with fractional volatility and risk management using neural SDEs, demonstrating practical utility in quantitative finance.
     
-    \item \textbf{Biological Systems**: Modeling of neural dynamics with memory effects and population dynamics with environmental memory, showcasing applications in systems biology.
+    \item \textbf{Biological Systems}: Modeling of neural dynamics with memory effects and population dynamics with environmental memory, showcasing applications in systems biology.
     
-    \item \textbf{Time Series Analysis**: Implementation of fractional ARIMA models and stochastic time series prediction, providing new approaches to long-memory processes.
+    \item \textbf{Time Series Analysis}: Implementation of fractional ARIMA models and stochastic time series prediction, providing new approaches to long-memory processes.
 \end{itemize}
 
 \subsection{Comparison with Existing Work}
@@ -85,13 +85,13 @@ The framework successfully addresses practical problems across multiple domains:
 \hpfracc provides significant advantages over existing fractional calculus and differential equation solving approaches:
 
 \begin{itemize}
-    \item \textbf{Generalization Capability**: Neural fractional ODEs provide better generalization to unseen parameter values compared to traditional numerical methods, which require re-computation for each parameter set.
+    \item \textbf{Generalization Capability}: Neural fractional ODEs provide better generalization to unseen parameter values compared to traditional numerical methods, which require re-computation for each parameter set.
     
-    \item \textbf{Memory Efficiency**: The framework's memory management strategies enable longer-time simulations than traditional methods, which often have quadratic memory scaling with time horizon.
+    \item \textbf{Memory Efficiency}: The framework's memory management strategies enable longer-time simulations than traditional methods, which often have quadratic memory scaling with time horizon.
     
-    \item \textbf{Unified Interface**: Single framework for multiple mathematical domains eliminates the need to integrate separate libraries for fractional calculus, neural ODEs, and SDEs.
+    \item \textbf{Unified Interface}: Single framework for multiple mathematical domains eliminates the need to integrate separate libraries for fractional calculus, neural ODEs, and SDEs.
     
-    \item \textbf{GPU Acceleration**: Comprehensive GPU support provides significant speedup over CPU-based implementations, making the framework suitable for large-scale computations.
+    \item \textbf{GPU Acceleration}: Comprehensive GPU support provides significant speedup over CPU-based implementations, making the framework suitable for large-scale computations.
 \end{itemize}
 
 \subsubsection{Advantages over Existing ML Frameworks}
@@ -99,13 +99,13 @@ The framework successfully addresses practical problems across multiple domains:
 The framework extends existing machine learning frameworks in important ways:
 
 \begin{itemize}
-    \item \textbf{Fractional Calculus Support**: First implementation of neural fractional ODEs, enabling modeling of systems with memory effects that cannot be captured by standard neural ODEs.
+    \item \textbf{Fractional Calculus Support}: First implementation of neural fractional ODEs, enabling modeling of systems with memory effects that cannot be captured by standard neural ODEs.
     
-    \item \textbf{SDE Integration**: Seamless integration of SDE solvers with neural networks, providing a unified approach to learning-based stochastic modeling.
+    \item \textbf{SDE Integration}: Seamless integration of SDE solvers with neural networks, providing a unified approach to learning-based stochastic modeling.
     
-    \item \textbf{Physics-Informed Learning**: Extension of PINNs to fractional differential equations, enabling solution of previously intractable physics problems.
+    \item \textbf{Physics-Informed Learning}: Extension of PINNs to fractional differential equations, enabling solution of previously intractable physics problems.
     
-    \item \textbf{Multi-Backend Flexibility**: Support for multiple computation backends allows users to choose the most appropriate platform for their specific requirements.
+    \item \textbf{Multi-Backend Flexibility}: Support for multiple computation backends allows users to choose the most appropriate platform for their specific requirements.
 \end{itemize}
 
 \subsection{Impact on the Field}
@@ -115,13 +115,13 @@ The framework extends existing machine learning frameworks in important ways:
 The framework significantly advances the field of computational fractional calculus and neural differential equations:
 
 \begin{itemize}
-    \item \textbf{New Problem Classes**: Enables solution of fractional differential equations that were previously beyond the reach of existing methods, opening new research directions in physics, biology, and engineering.
+    \item \textbf{New Problem Classes}: Enables solution of fractional differential equations that were previously beyond the reach of existing methods, opening new research directions in physics, biology, and engineering.
     
-    \item \textbf{Methodology Development**: Establishes new methodology for combining neural networks with fractional calculus, providing a foundation for future research in this emerging field.
+    \item \textbf{Methodology Development}: Establishes new methodology for combining neural networks with fractional calculus, providing a foundation for future research in this emerging field.
     
-    \item \textbf{Benchmark Standards**: Provides comprehensive benchmarks and test problems that establish new standards for evaluating neural differential equation methods.
+    \item \textbf{Benchmark Standards}: Provides comprehensive benchmarks and test problems that establish new standards for evaluating neural differential equation methods.
     
-    \item \textbf{Reproducible Research**: Open-source implementation with comprehensive documentation enables reproducible research and facilitates comparison between different approaches.
+    \item \textbf{Reproducible Research}: Open-source implementation with comprehensive documentation enables reproducible research and facilitates comparison between different approaches.
 \end{itemize}
 
 \subsubsection{Educational Impact}
@@ -129,13 +129,13 @@ The framework significantly advances the field of computational fractional calcu
 The framework serves as an excellent educational resource:
 
 \begin{itemize}
-    \item \textbf{Advanced Mathematics**: Provides practical implementation of advanced mathematical concepts including fractional calculus, stochastic processes, and neural networks.
+    \item \textbf{Advanced Mathematics}: Provides practical implementation of advanced mathematical concepts including fractional calculus, stochastic processes, and neural networks.
     
-    \item \textbf{Software Engineering**: Demonstrates best practices in scientific software development, serving as a reference implementation for students and researchers.
+    \item \textbf{Software Engineering}: Demonstrates best practices in scientific software development, serving as a reference implementation for students and researchers.
     
-    \item \textbf{Interdisciplinary Learning**: Integrates concepts from mathematics, physics, computer science, and engineering, providing a comprehensive learning experience.
+    \item \textbf{Interdisciplinary Learning}: Integrates concepts from mathematics, physics, computer science, and engineering, providing a comprehensive learning experience.
     
-    \item \textbf{Hands-on Experience**: Extensive examples and tutorials enable hands-on learning of complex concepts through practical implementation.
+    \item \textbf{Hands-on Experience}: Extensive examples and tutorials enable hands-on learning of complex concepts through practical implementation.
 \end{itemize}
 
 \subsubsection{Community Development}
@@ -143,13 +143,13 @@ The framework serves as an excellent educational resource:
 The framework contributes to the broader scientific computing community:
 
 \begin{itemize}
-    \item \textbf{Open Source Contribution**: High-quality, well-documented open-source software that serves the computational science community.
+    \item \textbf{Open Source Contribution}: High-quality, well-documented open-source software that serves the computational science community.
     
-    \item \textbf{Standardization**: Establishes standards for neural differential equation implementations, facilitating collaboration and comparison between research groups.
+    \item \textbf{Standardization}: Establishes standards for neural differential equation implementations, facilitating collaboration and comparison between research groups.
     
-    \item \textbf{Knowledge Sharing**: Comprehensive documentation and examples enable knowledge transfer and accelerate research progress in the field.
+    \item \textbf{Knowledge Sharing}: Comprehensive documentation and examples enable knowledge transfer and accelerate research progress in the field.
     
-    \item \textbf{Collaboration Facilitation**: Unified framework reduces barriers to collaboration between researchers working on different aspects of neural differential equations.
+    \item \textbf{Collaboration Facilitation}: Unified framework reduces barriers to collaboration between researchers working on different aspects of neural differential equations.
 \end{itemize}
 
 \subsection{Future Directions}
@@ -159,11 +159,11 @@ The framework contributes to the broader scientific computing community:
 The framework's development roadmap includes several immediate priorities:
 
 \begin{itemize}
-    \item \textbf{Neural Fractional SDEs**: Extension to neural fractional stochastic differential equations, building on the foundation established in the current release.
+    \item \textbf{Neural Fractional SDEs}: Extension to neural fractional stochastic differential equations, building on the foundation established in the current release.
     
-    \item \textbf{Advanced SDE Solvers**: Implementation of higher-order methods including stochastic Runge-Kutta schemes and multi-scale methods.
+    \item \textbf{Advanced SDE Solvers}: Implementation of higher-order methods including stochastic Runge-Kutta schemes and multi-scale methods.
     
-    \item \textbf{Performance Optimization**: Further improvements in GPU utilization, memory management, and parallel processing capabilities.
+    \item \textbf{Performance Optimization}: Further improvements in GPU utilization, memory management, and parallel processing capabilities.
     
     \item \textbf{Extended Documentation}: Additional tutorials, examples, and case studies demonstrating advanced usage patterns and applications.
 \end{itemize}
@@ -173,13 +173,13 @@ The framework's development roadmap includes several immediate priorities:
 The long-term vision for \hpfracc includes:
 
 \begin{itemize}
-    \item \textbf{Production Deployment**: Enterprise-ready features including model serving, monitoring, and security for production deployment.
+    \item \textbf{Production Deployment}: Enterprise-ready features including model serving, monitoring, and security for production deployment.
     
-    \item \textbf{Advanced Mathematical Methods**: Support for multi-fractional calculus, distributed order operators, and complex fractional orders.
+    \item \textbf{Advanced Mathematical Methods}: Support for multi-fractional calculus, distributed order operators, and complex fractional orders.
     
-    \item \textbf{Machine Learning Integration**: Incorporation of attention mechanisms, graph neural networks, and reinforcement learning for enhanced modeling capabilities.
+    \item \textbf{Machine Learning Integration}: Incorporation of attention mechanisms, graph neural networks, and reinforcement learning for enhanced modeling capabilities.
     
-    \item \textbf{Hardware Optimization**: Integration with specialized hardware including TPUs and quantum computers for next-generation computing platforms.
+    \item \textbf{Hardware Optimization}: Integration with specialized hardware including TPUs and quantum computers for next-generation computing platforms.
 \end{itemize}
 
 \subsection{Broader Implications}
@@ -189,13 +189,13 @@ The long-term vision for \hpfracc includes:
 The framework represents a paradigm shift in scientific computing:
 
 \begin{itemize}
-    \item \textbf{Learning-Based Methods**: Demonstrates the power of learning-based approaches for solving complex mathematical problems, complementing traditional numerical methods.
+    \item \textbf{Learning-Based Methods}: Demonstrates the power of learning-based approaches for solving complex mathematical problems, complementing traditional numerical methods.
     
-    \item \textbf{Interdisciplinary Integration**: Successfully integrates concepts from multiple disciplines, showing the value of cross-disciplinary approaches in scientific computing.
+    \item \textbf{Interdisciplinary Integration}: Successfully integrates concepts from multiple disciplines, showing the value of cross-disciplinary approaches in scientific computing.
     
-    \item \textbf{Open Source Science**: Establishes a model for open-source scientific software development that balances research innovation with practical utility.
+    \item \textbf{Open Source Science}: Establishes a model for open-source scientific software development that balances research innovation with practical utility.
     
-    \item \textbf{Reproducible Research**: Provides tools and methodology for reproducible research in computational science, addressing a critical need in the research community.
+    \item \textbf{Reproducible Research}: Provides tools and methodology for reproducible research in computational science, addressing a critical need in the research community.
 \end{itemize}
 
 \subsubsection{Research Methodology}
@@ -203,13 +203,13 @@ The framework represents a paradigm shift in scientific computing:
 The work establishes new methodology for research in neural differential equations:
 
 \begin{itemize}
-    \item \textbf{Comprehensive Testing**: Demonstrates the importance of comprehensive testing and validation in scientific software development.
+    \item \textbf{Comprehensive Testing}: Demonstrates the importance of comprehensive testing and validation in scientific software development.
     
-    \item \textbf{Performance Benchmarking**: Establishes standards for performance evaluation and comparison between different approaches.
+    \item \textbf{Performance Benchmarking}: Establishes standards for performance evaluation and comparison between different approaches.
     
-    \item \textbf{Documentation Standards**: Sets new standards for documentation and usability in scientific software.
+    \item \textbf{Documentation Standards}: Sets new standards for documentation and usability in scientific software.
     
-    \item \textbf{Community Engagement**: Shows the value of community engagement and open-source development in advancing scientific research.
+    \item \textbf{Community Engagement}: Shows the value of community engagement and open-source development in advancing scientific research.
 \end{itemize}
 
 \subsection{Final Remarks}
