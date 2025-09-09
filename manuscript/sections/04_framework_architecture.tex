@@ -572,20 +572,20 @@ The spectral autograd framework provides a mathematically rigorous approach to b
 \begin{algorithm}[h]
 \caption{Spectral Fractional Forward Pass}
 \begin{algorithmic}[1]
-\REQUIRE Input array $x$, fractional order $\alpha$, method $\in \{\text{fourier}, \text{mellin}\}$
-\ENSURE Fractional derivative $y = D^{\alpha} x$
-\IF{method == 'fourier'}
-    \STATE $X_{\text{spectral}} = \text{FFT}(x)$
-    \STATE $\omega = \text{frequency\_vector}(\text{length}(x))$
-    \STATE $Y_{\text{spectral}} = (i\omega)^{\alpha} \cdot X_{\text{spectral}}$
-\ELSIF{method == 'mellin'}
-    \STATE $X_{\text{spectral}} = \text{MellinTransform}(x)$
-    \STATE $s = \text{mellin\_variable}(\text{length}(x))$
-    \STATE $Y_{\text{spectral}} = s^{\alpha} \cdot X_{\text{spectral}}$
-\ENDIF
-\STATE $y = \text{IFFT}(Y_{\text{spectral}})$ \COMMENT{or appropriate inverse transform}
-\STATE $\text{save\_for\_backward}(X_{\text{spectral}}, Y_{\text{spectral}}, \alpha, \text{method})$
-\RETURN $y$
+\Require Input array $x$, fractional order $\alpha$, method $\in \{\text{fourier}, \text{mellin}\}$
+\Ensure Fractional derivative $y = D^{\alpha} x$
+\If{method == 'fourier'}
+    \State $X_{\text{spectral}} = \text{FFT}(x)$
+    \State $\omega = \text{frequency\_vector}(\text{length}(x))$
+    \State $Y_{\text{spectral}} = (i\omega)^{\alpha} \cdot X_{\text{spectral}}$
+\ElsIf{method == 'mellin'}
+    \State $X_{\text{spectral}} = \text{MellinTransform}(x)$
+    \State $s = \text{mellin\_variable}(\text{length}(x))$
+    \State $Y_{\text{spectral}} = s^{\alpha} \cdot X_{\text{spectral}}$
+\EndIf
+\State $y = \text{IFFT}(Y_{\text{spectral}})$ \Comment{or appropriate inverse transform}
+\State $\text{save\_for\_backward}(X_{\text{spectral}}, Y_{\text{spectral}}, \alpha, \text{method})$
+\Return $y$
 \end{algorithmic}
 \end{algorithm}
 
@@ -596,19 +596,19 @@ The critical insight is that the adjoint of a fractional operator in spectral do
 \begin{algorithm}[h]
 \caption{Spectral Fractional Backward Pass}
 \begin{algorithmic}[1]
-\REQUIRE Gradient $\text{grad\_output}$, saved spectral data
-\ENSURE Input gradient $\text{grad\_input}$
-\STATE $X_{\text{spectral}}, Y_{\text{spectral}}, \alpha, \text{method} = \text{saved\_spectral\_data}$
-\STATE $\text{Grad\_spectral} = \text{FFT}(\text{grad\_output})$ \COMMENT{or appropriate transform}
-\IF{method == 'fourier'}
-    \STATE $\omega = \text{frequency\_vector}(\text{length}(\text{grad\_output}))$
-    \STATE $\text{Adj\_spectral} = ((-i\omega)^{\alpha}) \cdot \text{Grad\_spectral}$
-\ELSIF{method == 'mellin'}
-    \STATE $s = \text{mellin\_variable}(\text{length}(\text{grad\_output}))$
-    \STATE $\text{Adj\_spectral} = s^{-\alpha} \cdot \text{Grad\_spectral}$
-\ENDIF
-\STATE $\text{grad\_input} = \text{IFFT}(\text{Adj\_spectral})$ \COMMENT{or appropriate inverse transform}
-\RETURN $\text{grad\_input}$
+\Require Gradient $\text{grad\_output}$, saved spectral data
+\Ensure Input gradient $\text{grad\_input}$
+\State $X_{\text{spectral}}, Y_{\text{spectral}}, \alpha, \text{method} = \text{saved\_spectral\_data}$
+\State $\text{Grad\_spectral} = \text{FFT}(\text{grad\_output})$ \Comment{or appropriate transform}
+\If{method == 'fourier'}
+    \State $\omega = \text{frequency\_vector}(\text{length}(\text{grad\_output}))$
+    \State $\text{Adj\_spectral} = ((-i\omega)^{\alpha}) \cdot \text{Grad\_spectral}$
+\ElsIf{method == 'mellin'}
+    \State $s = \text{mellin\_variable}(\text{length}(\text{grad\_output}))$
+    \State $\text{Adj\_spectral} = s^{-\alpha} \cdot \text{Grad\_spectral}$
+\EndIf
+\State $\text{grad\_input} = \text{IFFT}(\text{Adj\_spectral})$ \Comment{or appropriate inverse transform}
+\Return $\text{grad\_input}$
 \end{algorithmic}
 \end{algorithm}
 
