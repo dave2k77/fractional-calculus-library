@@ -16,40 +16,35 @@
 \subsection{System Requirements}
 
 \subsubsection{Hardware Requirements}
-
 The framework supports a wide range of hardware configurations:
-
 \begin{itemize}
     \item \textbf{CPU}: Any modern x86-64 processor (Intel i5/AMD Ryzen 5 or better recommended)
     \item \textbf{RAM}: Minimum 8GB, 16GB or more recommended for large problems
     \item \textbf{GPU}: NVIDIA GPU with CUDA support (RTX 3050 or better recommended)
-    \item \textbf{Storage**: 2GB free space for installation, additional space for models and data
+    \item \textbf{Storage}: 2GB free space for installation, additional space for models and data
 \end{itemize}
 
 \subsubsection{Software Requirements}
 
 \paragraph{Operating Systems}
 Supported operating systems include:
-
 \begin{itemize}
-    \item \textbf{Linux**: Ubuntu 18.04+, CentOS 7+, RHEL 7+
-    \item \textbf{macOS**: macOS 10.14+ (Mojave or later)
-    \item \textbf{Windows**: Windows 10+ with WSL2 or native Python installation
+    \item \textbf{Linux}: Ubuntu 18.04+, CentOS 7+, RHEL 7+
+    \item \textbf{macOS}: macOS 10.14+ (Mojave or later)
+    \item \textbf{Windows}: Windows 10+ with WSL2 or native Python installation
 \end{itemize}
 
 \paragraph{Python Environment}
 Python requirements:
-
 \begin{itemize}
-    \item \textbf{Python Version**: Python 3.8, 3.9, 3.10, or 3.11
-    \item \textbf{Package Manager**: pip 20.0+ or conda 4.8+
-    \item \textbf{Virtual Environment**: Recommended for isolation
+    \item \textbf{Python Version}: Python 3.8, 3.9, 3.10, or 3.11
+    \item \textbf{Package Manager}: pip 20.0+ or conda 4.8+
+    \item \textbf{Virtual Environment}: Recommended for isolation
 \end{itemize}
 
 \subsection{Installation Methods}
 
 \subsubsection{PyPI Installation (Recommended)}
-
 The simplest installation method is through PyPI:
 
 \begin{lstlisting}[language=bash, caption=PyPI Installation]
@@ -64,7 +59,6 @@ pip install hpfracc[all]
 \end{lstlisting}
 
 \subsubsection{Conda Installation}
-
 For conda users, installation is available through conda-forge:
 
 \begin{lstlisting}[language=bash, caption=Conda Installation]
@@ -79,7 +73,6 @@ conda install hpfracc pytorch cudatoolkit
 \end{lstlisting}
 
 \subsubsection{Source Installation}
-
 For development or custom modifications:
 
 \begin{lstlisting}[language=bash, caption=Source Installation]
@@ -97,42 +90,27 @@ pip install -r requirements_dev.txt
 \subsection{Dependency Management}
 
 \subsubsection{Core Dependencies}
-
 The framework has the following core dependencies:
-
 \begin{itemize}
-    \item \textbf{NumPy**: Numerical computing foundation
-    \item \textbf{SciPy**: Scientific computing algorithms
-    \item \textbf{Matplotlib**: Plotting and visualization
-    \item \textbf{PyTorch**: Deep learning framework (optional for basic usage)
+    \item \textbf{NumPy}: Numerical computing foundation
+    \item \textbf{SciPy}: Scientific computing algorithms
+    \item \textbf{Matplotlib}: Plotting and visualization
+    \item \textbf{PyTorch}: Deep learning framework (optional for basic usage)
 \end{itemize}
 
 \subsubsection{Optional Dependencies}
-
 Optional dependencies provide additional functionality:
-
 \begin{itemize}
-    \item \textbf{PyTorch**: Full neural ODE and GPU support
-    \item \textbf{JAX**: Alternative computation backend
-    \item \textbf{NUMBA**: Just-in-time compilation for performance
-    \item \textbf{torchdiffeq**: Advanced ODE solvers
-    \item \textbf{torch-geometric**: Graph neural network support
-\end{itemize}
-
-\subsubsection{Dependency Conflicts}
-
-Common dependency conflicts and solutions:
-
-\begin{itemize}
-    \item \textbf{PyTorch Version**: Ensure compatibility between PyTorch and CUDA versions
-    \item \textbf{NumPy Version**: Some older NumPy versions may have compatibility issues
-    \item \textbf{Python Version**: Python 3.12+ may have compatibility issues with some dependencies
+    \item \textbf{PyTorch}: Full neural ODE and GPU support
+    \item \textbf{JAX}: Alternative computation backend
+    \item \textbf{NUMBA}: Just-in-time compilation for performance
+    \item \textbf{torchdiffeq}: Advanced ODE solvers
+    \item \textbf{torch-geometric}: Graph neural network support
 \end{itemize}
 
 \subsection{GPU Setup}
 
 \subsubsection{CUDA Installation}
-
 For NVIDIA GPU support:
 
 \begin{lstlisting}[language=bash, caption=CUDA Installation]
@@ -147,20 +125,17 @@ python -c "import torch; print(torch.cuda.is_available())"
 \end{lstlisting}
 
 \subsubsection{GPU Memory Management}
-
 Tips for managing GPU memory:
-
 \begin{itemize}
-    \item \textbf{Batch Size**: Adjust batch size based on available GPU memory
-    \item \textbf{Gradient Checkpointing**: Enable for memory-efficient training
-    \item \textbf{Mixed Precision**: Use mixed precision training when available
-    \item \textbf{Memory Monitoring**: Monitor GPU memory usage during training
+    \item \textbf{Batch Size}: Adjust batch size based on available GPU memory
+    \item \textbf{Gradient Checkpointing}: Enable for memory-efficient training
+    \item \textbf{Mixed Precision}: Use mixed precision training when available
+    \item \textbf{Memory Monitoring}: Monitor GPU memory usage during training
 \end{itemize}
 
 \subsection{Environment Setup}
 
 \subsubsection{Virtual Environment Creation}
-
 Creating isolated Python environments:
 
 \begin{lstlisting}[language=bash, caption=Virtual Environment Setup]
@@ -175,7 +150,6 @@ conda activate hpfracc_env
 \end{lstlisting}
 
 \subsubsection{Environment Variables}
-
 Recommended environment variables:
 
 \begin{lstlisting}[language=bash, caption=Environment Variables]
@@ -192,7 +166,6 @@ export JAX_PLATFORM_NAME=gpu
 \subsection{Verification and Testing}
 
 \subsubsection{Basic Verification}
-
 Verify the installation:
 
 \begin{lstlisting}[language=python, caption=Installation Verification]
@@ -205,7 +178,6 @@ print("Basic functionality working")
 \end{lstlisting}
 
 \subsubsection{Running Tests}
-
 Run the test suite:
 
 \begin{lstlisting}[language=bash, caption=Running Tests]
@@ -271,28 +243,25 @@ if torch.cuda.is_available():
 
 \paragraph{Slow Performance}
 Improving performance:
-
 \begin{itemize}
-    \item \textbf{GPU Usage**: Ensure PyTorch is using GPU acceleration
-    \item \textbf{Batch Processing**: Use appropriate batch sizes for your hardware
-    \item \textbf{Memory Management**: Enable gradient checkpointing for large models
-    \item \textbf{Backend Selection**: Choose the most appropriate backend for your use case
+    \item \textbf{GPU Usage}: Ensure PyTorch is using GPU acceleration
+    \item \textbf{Batch Processing}: Use appropriate batch sizes for your hardware
+    \item \textbf{Memory Management}: Enable gradient checkpointing for large models
+    \item \textbf{Backend Selection}: Choose the most appropriate backend for your use case
 \end{itemize}
 
 \paragraph{Memory Issues}
 Managing memory usage:
-
 \begin{itemize}
-    \item \textbf{Reduce Batch Size**: Decrease batch size to fit in available memory
-    \item \textbf{Gradient Checkpointing**: Enable for memory-efficient training
-    \item \textbf{Model Complexity**: Reduce model complexity for limited memory
-    \item \textbf{Data Types**: Use appropriate data types (float32 vs float64)
+    \item \textbf{Reduce Batch Size}: Decrease batch size to fit in available memory
+    \item \textbf{Gradient Checkpointing}: Enable for memory-efficient training
+    \item \textbf{Model Complexity}: Reduce model complexity for limited memory
+    \item \textbf{Data Types}: Use appropriate data types (float32 vs float64)
 \end{itemize}
 
 \subsection{Development Setup}
 
 \subsubsection{Development Dependencies}
-
 For contributing to the framework:
 
 \begin{lstlisting}[language=bash, caption=Development Setup]
@@ -307,20 +276,17 @@ pip install -e .
 \end{lstlisting}
 
 \subsubsection{Code Quality Tools}
-
 Development tools include:
-
 \begin{itemize}
-    \item \textbf{Black**: Code formatting
-    \item \textbf{Flake8**: Linting and style checking
-    \item \textbf{MyPy**: Type checking
-    \item \textbf{Pre-commit**: Git hooks for code quality
+    \item \textbf{Black}: Code formatting
+    \item \textbf{Flake8}: Linting and style checking
+    \item \textbf{MyPy}: Type checking
+    \item \textbf{Pre-commit}: Git hooks for code quality
 \end{itemize}
 
 \subsection{Container Deployment}
 
 \subsubsection{Docker Installation}
-
 Using Docker for deployment:
 
 \begin{lstlisting}[language=dockerfile, caption=Dockerfile Example]
@@ -349,7 +315,6 @@ CMD ["python", "app.py"]
 \end{lstlisting}
 
 \subsubsection{Singularity Installation}
-
 For HPC environments:
 
 \begin{lstlisting}[language=bash, caption=Singularity Recipe]
