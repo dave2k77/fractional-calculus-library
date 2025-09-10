@@ -3,6 +3,9 @@ numpy>=1.21.0
 scipy>=1.7.0
 matplotlib>=3.5.0
 
+# Deep learning framework
+torch>=1.12.0
+
 # JAX ecosystem for automatic differentiation and GPU acceleration
 jax>=0.4.0
 jaxlib>=0.4.0
