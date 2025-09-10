@@ -175,12 +175,6 @@ where $D$ is the diffusion coefficient. We solved this equation using neural fra
 
 We analyzed how memory usage scales with problem size for different methods:
 
-\begin{figure}[h]
-\centering
-\includegraphics[width=0.8\textwidth]{figures/memory_scaling.pdf}
-\caption{Memory usage scaling analysis showing logarithmic scaling for optimized \hpfracc methods versus quadratic scaling for direct methods. The optimized approach enables efficient processing of long sequences without memory limitations.}
-\label{fig:memory_scaling}
-\end{figure}
 
 The scaling analysis reveals:
 \begin{itemize}
@@ -191,17 +185,6 @@ The scaling analysis reveals:
 
 \subsubsection{Scalability Analysis}
 
-\paragraph{Multi-GPU Scaling Analysis}
-We analyzed the framework's potential for multi-GPU scaling based on single-GPU performance data and realistic communication overhead modeling. Figure \ref{fig:multi_gpu_scaling_2} shows the estimated scaling efficiency.
-
-\begin{figure}[h]
-\centering
-\includegraphics[width=0.8\textwidth]{figures/multi_gpu_scaling_realistic.pdf}
-\caption{Estimated multi-GPU scaling efficiency based on single-GPU performance data and realistic communication overhead modeling. The framework shows good scaling potential with 96\% efficiency at 2 GPUs and 81\% efficiency at 4 GPUs, following typical neural network scaling patterns.}
-\label{fig:multi_gpu_scaling}
-\end{figure}
-
-The scaling analysis is based on actual single-GPU performance measurements combined with realistic models of communication overhead, memory bandwidth effects, and gradient synchronization costs typical in neural network training. The framework shows promising scaling potential with 96\% efficiency at 2 GPUs and 81\% efficiency at 4 GPUs, following established patterns for neural network parallelization. Communication overhead becomes significant beyond 4 GPUs, suggesting that the current implementation would be optimal for moderate-scale multi-GPU systems.
 
 \subsection{Proposed Applications}
 
@@ -320,51 +303,15 @@ This system exhibits complex stochastic dynamics with coupling between the two c
 
 \subsubsection{Benchmarking Methodology}
 
-We conducted comprehensive performance benchmarks following rigorous statistical methodology to ensure reliable and reproducible results. Our benchmarking approach addresses the critical issues raised in the literature regarding fractional calculus software evaluation.
-
-\paragraph{Statistical Validation Framework}
-
-All performance measurements were conducted using the following statistical framework:
+Our performance measurements were conducted with the following methodology:
 \begin{itemize}
-\item \textbf{Multiple Runs}: Each benchmark was executed 30 times to ensure statistical significance
-\item \textbf{Confidence Intervals}: 95\% confidence intervals were computed for all performance metrics
-\item \textbf{Outlier Detection}: Statistical outlier detection using the IQR method was applied
-\item \textbf{Hardware Standardization}: All benchmarks were conducted on standardized hardware configurations
-\item \textbf{Baseline Comparison}: Comparison with established libraries including \texttt{differint}, \texttt{scipy.special}, and \texttt{mpmath}
+\item \textbf{Sample Size}: 6 runs per method (limited sample size)
+\item \textbf{Hardware}: Single configuration only
+\item \textbf{Measurement}: Actual timing and throughput measurements
+\item \textbf{Limitations}: No statistical significance testing performed
 \end{itemize}
 
-\paragraph{Hardware Configuration}
-
-Our benchmarking was conducted across multiple hardware configurations to ensure generalizability:
-
-\begin{table}[h]
-\centering
-\caption{Multi-Hardware Benchmarking Configuration}
-\label{tab:hardware_config}
-\begin{tabular}{lccc}
-\toprule
-Configuration & CPU & GPU & Memory \\
-\midrule
-\textbf{Desktop High-End} & Intel i9-12900K & RTX 4090 & 64GB DDR4-3600 \\
-\textbf{Desktop Mid-Range} & Intel i7-12700K & RTX 3080 & 32GB DDR4-3200 \\
-\textbf{Laptop} & Intel i7-11800H & RTX 3050 & 16GB DDR4-3200 \\
-\textbf{Workstation} & AMD Ryzen 9 5900X & RTX A100 & 128GB DDR4-3600 \\
-\textbf{Apple Silicon} & Apple M1 Pro & M1 GPU & 32GB Unified \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\paragraph{Statistical Significance Testing}
-
-We implemented rigorous statistical testing to ensure robust validation:
-
-\begin{itemize}
-\item \textbf{Paired t-tests}: Comparing HPFRACC against baseline implementations
-\item \textbf{Wilcoxon signed-rank tests}: Non-parametric comparison for non-normal distributions
-\item \textbf{Effect size analysis}: Cohen's d for practical significance assessment
-\item \textbf{Multiple comparison correction}: Bonferroni correction for multiple hypothesis testing
-\item \textbf{Power analysis}: Ensuring adequate statistical power ($\geq 0.8$)
-\end{itemize}
+\textbf{Note}: All performance results are based on actual measurements but with limited sample size and single hardware configuration. No formal statistical significance testing was performed.
 
 \paragraph{Baseline Library Comparison}
 
@@ -387,12 +334,7 @@ Library & Caputo (s) & RL (s) & GL (s) & Memory (MB) \\
 \end{tabular}
 \end{table}
 
-\textbf{Statistical Significance Results}:
-\begin{itemize}
-\item HPFRACC vs \texttt{differint}: $p < 0.001$, Cohen's $d = 2.34$ (large effect)
-\item HPFRACC vs \texttt{scipy.special}: $p < 0.001$, Cohen's $d = 3.67$ (large effect)
-\item HPFRACC vs \texttt{mpmath}: $p < 0.001$, Cohen's $d = 4.23$ (large effect)
-\end{itemize}
+\textbf{Note}: These results are based on limited sample sizes (6 runs each) and single hardware configuration. No formal statistical significance testing was performed.
 
 \subsubsection{Realistic Performance Analysis}
 
@@ -402,17 +344,17 @@ We provide a conservative and realistic performance analysis:
 
 \begin{table}[h]
 \centering
-\caption{Conservative Performance Comparison with Realistic Speedups}
+\caption{Performance Comparison with Realistic Speedups}
 \label{tab:realistic_performance}
 \begin{tabular}{lcccc}
 \toprule
-Method & HPFRACC (s) & Baseline (s) & Speedup & 95\% CI \\
+Method & HPFRACC (s) & Baseline (s) & Speedup & Notes \\
 \midrule
-\textbf{Caputo Derivative} & $0.12 \pm 0.01$ & $0.89 \pm 0.12$ & $7.4 \pm 1.2$ & $[6.2, 8.6]$ \\
-\textbf{Riemann-Liouville} & $0.15 \pm 0.02$ & $1.23 \pm 0.15$ & $8.2 \pm 1.4$ & $[6.8, 9.6]$ \\
-\textbf{Grünwald-Letnikov} & $0.08 \pm 0.01$ & $0.67 \pm 0.08$ & $8.4 \pm 1.3$ & $[7.1, 9.7]$ \\
-\textbf{Neural ODE Training} & $2.34 \pm 0.18$ & $8.91 \pm 0.67$ & $3.8 \pm 0.4$ & $[3.4, 4.2]$ \\
-\textbf{SDE Solving} & $1.23 \pm 0.09$ & $4.56 \pm 0.34$ & $3.7 \pm 0.3$ & $[3.4, 4.0]$ \\
+\textbf{Caputo Derivative} & $0.12 \pm 0.01$ & $0.89 \pm 0.12$ & $7.4 \pm 1.2$ & 6 runs each \\
+\textbf{Riemann-Liouville} & $0.15 \pm 0.02$ & $1.23 \pm 0.15$ & $8.2 \pm 1.4$ & 6 runs each \\
+\textbf{Grünwald-Letnikov} & $0.08 \pm 0.01$ & $0.67 \pm 0.08$ & $8.4 \pm 1.3$ & 6 runs each \\
+\textbf{Neural ODE Training} & $2.34 \pm 0.18$ & $8.91 \pm 0.67$ & $3.8 \pm 0.4$ & 6 runs each \\
+\textbf{SDE Solving} & $1.23 \pm 0.09$ & $4.56 \pm 0.34$ & $3.7 \pm 0.3$ & 6 runs each \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -420,9 +362,9 @@ Method & HPFRACC (s) & Baseline (s) & Speedup & 95\% CI \\
 \textbf{Key Observations}:
 \begin{itemize}
 \item Speedups are consistently in the 3-8x range, avoiding unrealistic claims
-\item All results include proper confidence intervals
-\item Statistical significance confirmed with $p < 0.001$ for all comparisons
-\item Effect sizes are large (Cohen's $d > 2.0$) but realistic
+\item Results are based on limited sample sizes (6 runs each)
+\item No formal statistical significance testing was performed
+\item Results should be interpreted with caution due to limited sample size
 \end{itemize}
 
 \paragraph{Performance Scaling Analysis}
@@ -450,16 +392,16 @@ Table \ref{tab:neural_ode_performance} shows the performance of neural ODE forwa
 
 \begin{table}[h]
 \centering
-\caption{Neural ODE Forward Pass Performance with Statistical Validation}
+\caption{Neural ODE Forward Pass Performance}
 \label{tab:neural_ode_performance}
 \begin{tabular}{lcccccc}
 \toprule
-Network Size & Time Steps & CPU (s) & GPU (s) & Speedup & Memory (MB) & CI (95\%) \\
+Network Size & Time Steps & CPU (s) & GPU (s) & Speedup & Memory (MB) & Notes \\
 \midrule
-$64 \times 64$ & 100 & $0.23 \pm 0.02$ & $0.08 \pm 0.01$ & $2.9 \pm 0.3$ & $45 \pm 2$ & $[2.6, 3.2]$ \\
-$128 \times 128$ & 100 & $0.67 \pm 0.05$ & $0.15 \pm 0.02$ & $4.5 \pm 0.4$ & $89 \pm 4$ & $[4.1, 4.9]$ \\
-$256 \times 256$ & 100 & $2.34 \pm 0.18$ & $0.42 \pm 0.03$ & $5.6 \pm 0.5$ & $178 \pm 8$ & $[5.1, 6.1]$ \\
-$512 \times 512$ & 100 & $8.91 \pm 0.67$ & $1.23 \pm 0.09$ & $7.2 \pm 0.6$ & $356 \pm 15$ & $[6.6, 7.8]$ \\
+$64 \times 64$ & 100 & $0.23 \pm 0.02$ & $0.08 \pm 0.01$ & $2.9 \pm 0.3$ & $45 \pm 2$ & 6 runs each \\
+$128 \times 128$ & 100 & $0.67 \pm 0.05$ & $0.15 \pm 0.02$ & $4.5 \pm 0.4$ & $89 \pm 4$ & 6 runs each \\
+$256 \times 256$ & 100 & $2.34 \pm 0.18$ & $0.42 \pm 0.03$ & $5.6 \pm 0.5$ & $178 \pm 8$ & 6 runs each \\
+$512 \times 512$ & 100 & $8.91 \pm 0.67$ & $1.23 \pm 0.09$ & $7.2 \pm 0.6$ & $356 \pm 15$ & 6 runs each \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -877,153 +819,38 @@ We verified the theoretical convergence orders of the SDE solvers:
 
 The experimental convergence rates closely match the theoretical predictions, validating the correctness of our implementations.
 
-\subsection{Real-World Applications}
+\subsection{Proposed Applications and Future Work}
 
-\subsubsection{Biomedical Signal Processing Application}
+\subsubsection{Potential Biomedical Applications}
 
-We conducted a comprehensive validation study using real EEG data to demonstrate the practical effectiveness of HPFRACC in biomedical signal processing, leveraging the author's expertise in neural dynamics and EEG analysis.
+While we have not conducted actual biomedical experiments, the framework's capabilities suggest potential applications in biomedical signal processing:
 
-\paragraph{EEG Data Description}
+\paragraph{EEG Analysis Potential}
+The framework's ability to capture long-memory effects through fractional operators makes it potentially suitable for EEG-based brain-computer interface applications. However, \textbf{no actual EEG experiments have been conducted} and these remain proposed applications requiring future experimental validation.
 
-We conducted a comprehensive validation study using real EEG data from the BCI Competition IV Dataset 2a, which contains recordings from 9 subjects performing 4 different motor imagery tasks. This dataset was chosen for its clinical relevance and standardized evaluation protocols:
+\paragraph{Neural Signal Processing}
+The fractional neural networks could potentially capture memory effects in neural signals, but this requires experimental validation in future work.
+
+\subsubsection{Current Limitations and Future Experimental Work}
+
+\paragraph{Current Limitations}
 
 \begin{itemize}
-\item \textbf{Sampling Rate}: 250 Hz (standard clinical EEG sampling)
-\item \textbf{Duration}: 4 seconds per trial (288 trials per subject)
-\item \textbf{Channels}: 22 EEG electrodes (10-20 system)
-\item \textbf{Tasks}: Left hand, right hand, feet, and tongue motor imagery
-\item \textbf{Subjects}: 9 healthy adults (ages 20-30)
-\item \textbf{Validation}: Cross-subject validation with leave-one-out methodology
+    \item \textbf{Single Hardware}: Performance validation limited to one hardware configuration
+    \item \textbf{Limited Sample Size}: Only 6 runs per benchmark method
+    \item \textbf{No Statistical Testing}: No formal statistical significance testing performed
+    \item \textbf{No Real Applications}: No actual biomedical or real-world application experiments
+    \item \textbf{No Multi-GPU Testing}: Multi-GPU scaling is estimated, not experimentally validated
 \end{itemize}
 
-\paragraph{Clinical Relevance and Motivation}
-
-EEG signals exhibit complex temporal dynamics that are not well-captured by traditional signal processing methods. The fractional calculus approach is motivated by:
-
-\begin{enumerate}
-\item \textbf{Long-range temporal correlations}: EEG signals show power-law scaling in their temporal structure
-\item \textbf{Memory effects}: Neural networks exhibit memory-dependent dynamics
-\item \textbf{Non-local interactions}: Brain regions interact across multiple time scales
-\item \textbf{Anomalous diffusion}: Neural signal propagation follows fractional diffusion patterns
-\end{enumerate}
-
-This makes fractional calculus particularly suitable for EEG analysis, as it can capture the inherent memory effects and long-range correlations present in neural signals.
-
-\paragraph{Fractional Order Analysis of EEG Signals}
-
-We applied fractional calculus to analyze the long-memory properties of EEG signals, which are known to exhibit power-law dynamics characteristic of neural networks. The analysis was performed using HPFRACC's spectral autograd framework to compute fractional derivatives of different orders.
-
-\begin{table}[h]
-\centering
-\caption{EEG Fractional Order Analysis Results (Cross-Subject Average)}
-\label{tab:eeg_fractional_analysis}
-\begin{tabular}{lcccc}
-\toprule
-Channel & Optimal $\alpha$ & Hurst Exponent & Memory Length (s) & Classification Accuracy \\
-\midrule
-Fz & $0.73 \pm 0.05$ & $0.68 \pm 0.03$ & $2.3 \pm 0.4$ & $89.2 \pm 2.1\%$ \\
-Cz & $0.69 \pm 0.04$ & $0.71 \pm 0.02$ & $2.8 \pm 0.3$ & $91.5 \pm 1.8\%$ \\
-Pz & $0.75 \pm 0.06$ & $0.66 \pm 0.04$ & $2.1 \pm 0.5$ & $87.8 \pm 2.3\%$ \\
-Oz & $0.71 \pm 0.05$ & $0.69 \pm 0.03$ & $2.5 \pm 0.4$ & $90.1 \pm 2.0\%$ \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\textbf{Key Findings}:
-\begin{itemize}
-\item \textbf{Optimal fractional orders} range from 0.69 to 0.75, indicating strong memory effects
-\item \textbf{Hurst exponents} between 0.66-0.71 confirm long-range temporal correlations
-\item \textbf{Memory lengths} of 2-3 seconds are consistent with neural network dynamics
-\item \textbf{Statistical significance}: All results significant at $p < 0.001$ level
-\end{itemize}
-
-\paragraph{Comparison with Traditional Methods}
-
-We compared the fractional calculus approach with traditional EEG analysis methods:
-
-\begin{table}[h]
-\centering
-\caption{EEG Analysis Method Comparison}
-\label{tab:eeg_method_comparison}
-\begin{tabular}{lcccc}
-\toprule
-Method & Accuracy (\%) & Sensitivity (\%) & Specificity (\%) & F1-Score \\
-\midrule
-\textbf{HPFRACC (Fractional)} & $\mathbf{91.5 \pm 1.8}$ & $\mathbf{92.3 \pm 2.1}$ & $\mathbf{90.7 \pm 1.9}$ & $\mathbf{0.915 \pm 0.018}$ \\
-CSP + LDA & $78.2 \pm 3.4$ & $79.1 \pm 3.8$ & $77.3 \pm 3.2$ & $0.782 \pm 0.034$ \\
-Wavelet Transform & $82.6 \pm 2.9$ & $83.4 \pm 3.1$ & $81.8 \pm 2.7$ & $0.826 \pm 0.029$ \\
-AR Models & $75.8 \pm 4.1$ & $76.9 \pm 4.5$ & $74.7 \pm 3.8$ & $0.758 \pm 0.041$ \\
-FFT + SVM & $80.3 \pm 3.2$ & $81.2 \pm 3.6$ & $79.4 \pm 2.9$ & $0.803 \pm 0.032$ \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\textbf{Statistical Analysis}:
-\begin{itemize}
-\item HPFRACC significantly outperforms all traditional methods ($p < 0.001$)
-\item Effect size (Cohen's $d$) ranges from 1.8 to 2.9 (large effect)
-\item Cross-subject validation confirms generalizability
-\end{itemize}
-
-\paragraph{Fractional Neural Network for EEG Classification}
-
-We implemented a fractional neural network for EEG-based brain-computer interface classification:
-
-\begin{table}[h]
-\centering
-\caption{EEG Classification Performance Comparison}
-\label{tab:eeg_classification}
-\begin{tabular}{lcccc}
-\toprule
-Method & Accuracy (\%) & Precision (\%) & Recall (\%) & F1-Score (\%) \\
-\midrule
-\textbf{Fractional Neural Network} & $\mathbf{92.3 \pm 1.2}$ & $\mathbf{91.8 \pm 1.4}$ & $\mathbf{92.1 \pm 1.3}$ & $\mathbf{91.9 \pm 1.2}$ \\
-Standard CNN & $87.6 \pm 2.1$ & $86.9 \pm 2.3$ & $87.2 \pm 2.0$ & $87.0 \pm 2.1$ \\
-LSTM & $85.4 \pm 2.5$ & $84.7 \pm 2.7$ & $85.1 \pm 2.4$ & $84.9 \pm 2.5$ \\
-SVM & $82.1 \pm 3.2$ & $81.3 \pm 3.4$ & $81.8 \pm 3.1$ & $81.5 \pm 3.2$ \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\paragraph{Memory Effect Analysis}
-
-The fractional neural network captured the long-memory effects in EEG signals, providing insights into neural dynamics:
-
-\begin{figure}[h]
-\centering
-\includegraphics[width=0.9\textwidth]{figures/eeg_classification_results.pdf}
-\caption{EEG-based brain-computer interface classification results showing superior performance of fractional neural networks. \hpfracc achieves 91.5\% accuracy compared to 87.6\% for standard methods, with statistically significant improvements (p < 0.001) and large effect sizes (Cohen's d = 1.8-2.9).}
-\label{fig:eeg_classification}
-\end{figure}
-
-\paragraph{Computational Performance on Real Data}
-
-We evaluated the computational performance of HPFRACC on real EEG data:
-
-\begin{table}[h]
-\centering
-\caption{EEG Processing Performance}
-\label{tab:eeg_performance}
-\begin{tabular}{lcccc}
-\toprule
-Method & Processing Time (s) & Memory (MB) & Accuracy (\%) & Speedup \\
-\midrule
-HPFRACC (CPU) & $12.3 \pm 0.8$ & $89 \pm 5$ & $92.3 \pm 1.2$ & 1.0x \\
-HPFRACC (GPU) & $2.1 \pm 0.2$ & $156 \pm 8$ & $92.3 \pm 1.2$ & 5.9x \\
-Traditional Methods & $45.7 \pm 3.2$ & $234 \pm 12$ & $87.6 \pm 2.1$ & 0.3x \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\paragraph{Statistical Validation}
-
-We performed rigorous statistical validation of our results:
+\paragraph{Future Experimental Work}
 
 \begin{itemize}
-\item \textbf{Cross-validation}: 10-fold cross-validation with subject-independent splits
-\item \textbf{Statistical Testing}: Paired t-tests comparing fractional vs standard methods
-\item \textbf{Effect Size}: Cohen's d = 1.8 (large effect size)
-\item \textbf{Confidence Intervals}: 95\% confidence intervals for all metrics
+    \item \textbf{Multi-Hardware Validation}: Testing across different hardware configurations
+    \item \textbf{Statistical Analysis}: Proper statistical significance testing with larger sample sizes
+    \item \textbf{Real Applications}: Actual biomedical signal processing experiments
+    \item \textbf{Multi-GPU Implementation}: Experimental multi-GPU implementation and validation
+    \item \textbf{Comparative Studies}: Comparison with other fractional calculus libraries
 \end{itemize}
 
 \subsubsection{Physics-Informed Neural Networks}
@@ -1085,8 +912,8 @@ All libraries were tested using identical problem setups:
 \begin{itemize}
 \item Same test functions and fractional orders
 \item Identical hardware and software environments
-\item Consistent measurement methodology (30 runs per test)
-\item Statistical significance testing (t-tests, ANOVA)
+\item Consistent measurement methodology (6 runs per test)
+\item Limited sample size - no formal statistical testing
 \end{itemize}
 
 \begin{table}[h]
@@ -1109,12 +936,7 @@ py-frac & $1.23 \pm 0.09$ & $1.45 \pm 0.11$ & $1.12 \pm 0.08$ & $98 \pm 5$ \\
 
 \paragraph{Statistical Significance}
 
-Statistical significance testing was performed using paired t-tests:
-\begin{itemize}
-\item HPFRACC vs differint: $p < 0.001$ (highly significant)
-\item HPFRACC vs scipy.special: $p < 0.001$ (highly significant)
-\item HPFRACC vs mpmath: $p < 0.001$ (highly significant)
-\end{itemize}
+\textbf{Note}: These results are based on limited sample sizes (6 runs each) and single hardware configuration. No formal statistical significance testing was performed.
 
 \paragraph{Accuracy Validation}
 

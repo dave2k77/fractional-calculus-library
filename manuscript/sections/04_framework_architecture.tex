@@ -69,6 +69,19 @@ A centralized configuration system manages framework-wide settings including:
 
 \subsection{Neural fODE Framework Architecture}
 
+% Code formatting settings to prevent overflow
+\lstset{
+    basicstyle=\ttfamily\footnotesize,
+    breaklines=true,
+    breakatwhitespace=true,
+    columns=fullflexible,
+    keepspaces=true,
+    showstringspaces=false,
+    frame=none,
+    xleftmargin=2em,
+    xrightmargin=0em
+}
+
 \subsubsection{BaseNeuralODE Implementation}
 
 The \texttt{BaseNeuralODE} class provides the foundation for all neural ODE implementations:
@@ -233,7 +246,6 @@ Common functionality includes:
 
 \subsubsection{Concrete SDE Solver Implementations}
 
-\paragraph{Euler-Maruyama Solver}
 \begin{lstlisting}[language=Python, caption=EulerMaruyama Implementation]
 class EulerMaruyama(BaseSDESolver):
     def solve(self):
@@ -242,7 +254,8 @@ class EulerMaruyama(BaseSDESolver):
         pass
 \end{lstlisting}
 
-\paragraph{Milstein Solver}
+\vspace{0.5em}
+
 \begin{lstlisting}[language=Python, caption=Milstein Implementation]
 class Milstein(BaseSDESolver):
     def solve(self):
@@ -251,7 +264,8 @@ class Milstein(BaseSDESolver):
         pass
 \end{lstlisting}
 
-\paragraph{Heun Solver}
+\vspace{0.5em}
+
 \begin{lstlisting}[language=Python, caption=Heun Implementation]
 class Heun(BaseSDESolver):
     def solve(self):

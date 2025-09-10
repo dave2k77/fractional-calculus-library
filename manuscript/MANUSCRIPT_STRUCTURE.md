@@ -87,7 +87,7 @@ The main manuscript file now properly integrates all sections using `\input{}` c
 ### 5. Implementation Details (`sections/05_implementation_details.tex`)
 - Core fractional operators
 - Machine learning integration
-- GPU optimization
+- GPU optimisation
 - Testing and validation
 
 ### 6. Experimental Results (`sections/06_experimental_results.tex`)
@@ -147,7 +147,7 @@ The main manuscript file now properly integrates all sections using `\input{}` c
 ### 3. Technical Implementation
 - **Complete algorithmic framework** with mathematical foundations
 - **Detailed autograd implementation** with rigorous proofs
-- **Performance optimization analysis** with complexity bounds
+- **Performance optimisation analysis** with complexity bounds
 - **Numerical stability analysis** with condition number analysis
 
 ### 4. Academic Standards

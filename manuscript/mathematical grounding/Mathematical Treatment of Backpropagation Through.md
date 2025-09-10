@@ -392,7 +392,7 @@ This mathematical treatment provides the rigorous foundation needed to implement
 
 [^114]: https://project.inria.fr/dash/files/2019/06/RR-9273.pdf
 
-[^115]: https://pubs.aip.org/aip/adv/article/14/2/025143/3267331/Shape-optimization-using-the-adjoint-solver-in
+[^115]: https://pubs.aip.org/aip/adv/article/14/2/025143/3267331/Shape-optimisation-using-the-adjoint-solver-in
 
 [^116]: https://www.tandfonline.com/doi/full/10.1080/01630563.2025.2525313
 

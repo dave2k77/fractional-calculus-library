@@ -49,7 +49,7 @@ Email: d.r.chin@pgr.reading.ac.uk
    - Control variate sampling for variance reduction
 
 3. **Probabilistic Fractional Orders**
-   - Reparameterization trick for gradient-based optimization
+   - Reparameterisation trick for gradient-based optimisation
    - Score function estimator for non-reparameterizable distributions
    - Uncertainty quantification in neural networks
 

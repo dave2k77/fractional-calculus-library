@@ -63,17 +63,17 @@ Intermediate Results & 15 MB & 59 MB & 237 MB \\
 \end{tabular}
 \end{table}
 
-\subsection{Optimization Strategies}
+\subsection{Optimisation Strategies}
 
-\subsubsection{GPU Optimization}
+\subsubsection{GPU Optimisation}
 
-\paragraph{CUDA Kernel Optimization}
-Key optimization techniques:
+\paragraph{CUDA Kernel Optimisation}
+Key optimisation techniques:
 \begin{itemize}
-    \item \textbf{Memory Coalescing}: Optimized memory access patterns for GPU
+    \item \textbf{Memory Coalescing}: Optimised memory access patterns for GPU
     \item \textbf{Shared Memory Usage}: Efficient use of shared memory for intermediate results
     \item \textbf{Warp Divergence Minimization}: Reduced conditional branching in GPU kernels
-    \item \textbf{Occupancy Optimization}: Maximized GPU occupancy through optimal thread block sizes
+    \item \textbf{Occupancy Optimisation}: Maximised GPU occupancy through optimal thread block sizes
 \end{itemize}
 
 \paragraph{Mixed Precision Training}
@@ -279,21 +279,21 @@ NUMBA & 0.12 & 0.089 & 1.8 \\
 \end{tabular}
 \end{table}
 
-\subsection{Performance Optimization Guidelines}
+\subsection{Performance Optimisation Guidelines}
 
 \subsubsection{Best Practices}
 
-\paragraph{General Optimization Guidelines}
-Key optimization principles:
+\paragraph{General Optimisation Guidelines}
+Key optimisation principles:
 \begin{itemize}
-    \item \textbf{Profile First}: Always profile before optimizing
-    \item \textbf{Memory First}: Optimize memory usage before computation
+    \item \textbf{Profile First}: Always profile before optimising
+    \item \textbf{Memory First}: Optimise memory usage before computation
     \item \textbf{Batch Processing}: Use appropriate batch sizes for your hardware
-    \item \textbf{GPU Utilization}: Maximize GPU utilization through proper workload sizing
+    \item \textbf{GPU Utilisation}: Maximise GPU utilisation through proper workload sizing
 \end{itemize}
 
 \paragraph{Implementation-Specific Guidelines}
-Framework-specific optimizations:
+Framework-specific optimisations:
 \begin{itemize}
     \item \textbf{Neural ODEs}: Use gradient checkpointing for large models
     \item \textbf{SDE Solvers}: Choose appropriate solver based on accuracy requirements
@@ -308,7 +308,7 @@ Identification and solutions:
 \begin{itemize}
     \item \textbf{Low GPU Utilization}: Check batch size and model complexity
     \item \textbf{High Memory Usage}: Enable gradient checkpointing and reduce batch size
-    \item \textbf{Slow Training}: Check learning rate and optimizer settings
+    \item \textbf{Slow Training}: Check learning rate and optimiser settings
     \item \textbf{Memory Leaks}: Monitor memory usage and check for tensor accumulation
 \end{itemize}
 
@@ -325,4 +325,4 @@ def debug_performance_issues():
     print(f"CUDA available: {torch.cuda.is_available()}")
 \end{lstlisting}
 
-This streamlined performance analysis guide provides essential optimization strategies and monitoring techniques for the \hpfracc framework while maintaining conciseness appropriate for JCP submission.
+This streamlined performance analysis guide provides essential optimisation strategies and monitoring techniques for the \hpfracc framework while maintaining conciseness appropriate for JCP submission.
