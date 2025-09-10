@@ -225,20 +225,51 @@ logs/
 *.dmp
 .pypirc
 
-# Manuscript and research papers (not relevant for community)
+# Research and manuscript files (not relevant for community)
 manuscript/
+research/
+papers/
+thesis/
+dissertation/
+conference/
+journal/
+
+# LaTeX files
 *.tex
+*.aux
+*.bbl
+*.blg
+*.log
+*.out
+*.toc
+*.lof
+*.lot
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.nav
+*.snm
+*.vrb
+*.bcf
+*.run.xml
+
+# Bibliography files
 *.bib
-*.md
-RELEASE_*.md
-DOCUMENTATION_*.md
-ML_INTEGRATION_*.md
-PROBABILISTIC_*.md
-FRACTIONAL_*.md
-GNN_FIXES_*.md
-TEST_FIXES_*.md
-COMPREHENSIVE_*.md
-ENVIRONMENT_*.md
-PYPI_*.md
-CHANGELOG.md
 sources.bib
+references.bib
+
+# Research-specific markdown files
+*JCP*
+*_SUBMISSION_*
+*_COVER_LETTER*
+*_CHECKLIST*
+*_REVIEW_*
+*_RESPONSE_*
+
+# Keep important library documentation
+!README.md
+!CONTRIBUTING.md
+!LICENSE.md
+!CHANGELOG.md
+!PROGRESS_REPORT.md
+!TODAY_SUMMARY.md
