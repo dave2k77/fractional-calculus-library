@@ -266,6 +266,13 @@ references.bib
 *_REVIEW_*
 *_RESPONSE_*
 
+# Research PDF files
+figures/*.pdf
+*_performance.pdf
+*_comparison.pdf
+*_results.pdf
+*_scaling.pdf
+
 # Keep important library documentation
 !README.md
 !CONTRIBUTING.md
