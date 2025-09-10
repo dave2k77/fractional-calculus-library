@@ -675,7 +675,7 @@ class FractionalZTransform:
 
         for n in range(N):
             integrand = F * (z_contour ** (self.alpha_val * n - 1))
-            result[n] = np.real(np.trapezoid(integrand, theta)) / (2 * np.pi)
+            result[n] = np.real(np.trapz(integrand, theta)) / (2 * np.pi)
 
         return result
 
@@ -800,7 +800,7 @@ class FractionalMellinTransform:
         for i, s_val in enumerate(s):
             # Integrand: f(x) * x^(s-1+α)
             integrand = f * (x ** (s_val - 1 + self.alpha_val))
-            result[i] = np.trapezoid(integrand, x)
+            result[i] = np.trapz(integrand, x)
 
         return result[0] if len(s) == 1 else result
 
@@ -903,7 +903,7 @@ class FractionalMellinTransform:
         for i, xi in enumerate(x):
             # Inverse integrand: F(s) * x^(-s-α)
             integrand = F * (xi ** (-s - self.alpha_val))
-            result[i] = np.real(np.trapezoid(integrand, s)) / (2 * np.pi * 1j)
+            result[i] = np.real(np.trapz(integrand, s)) / (2 * np.pi * 1j)
 
         return result
 

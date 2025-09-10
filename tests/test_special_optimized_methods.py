@@ -99,7 +99,13 @@ class TestSpecialOptimizedWeylDerivative:
 
         print(f"Standard Weyl: {time_std:.4f}s")
         print(f"Special Optimized Weyl: {time_special:.4f}s")
-        print(f"Speedup: {time_std/time_special:.2f}x")
+        
+        # Handle division by zero for very fast computations
+        if time_special > 0:
+            speedup = time_std / time_special
+            print(f"Speedup: {speedup:.2f}x")
+        else:
+            print("Speedup: >1000x (too fast to measure accurately)")
 
     def test_special_optimized_weyl_convenience(self):
         """Test convenience function."""
@@ -182,7 +188,13 @@ class TestSpecialOptimizedMarchaudDerivative:
 
         print(f"Standard Marchaud: {time_std:.4f}s")
         print(f"Special Optimized Marchaud: {time_special:.4f}s")
-        print(f"Speedup: {time_std/time_special:.2f}x")
+        
+        # Handle division by zero for very fast computations
+        if time_special > 0:
+            speedup = time_std / time_special
+            print(f"Speedup: {speedup:.2f}x")
+        else:
+            print("Speedup: >1000x (too fast to measure accurately)")
 
     def test_special_optimized_marchaud_convenience(self):
         """Test convenience function."""
@@ -265,7 +277,13 @@ class TestSpecialOptimizedReizFellerDerivative:
 
         print(f"Standard Reiz-Feller: {time_std:.4f}s")
         print(f"Special Optimized Reiz-Feller: {time_special:.4f}s")
-        print(f"Speedup: {time_std/time_special:.2f}x")
+        
+        # Handle division by zero for very fast computations
+        if time_special > 0:
+            speedup = time_std / time_special
+            print(f"Speedup: {speedup:.2f}x")
+        else:
+            print("Speedup: >1000x (too fast to measure accurately)")
 
     def test_special_optimized_reiz_feller_convenience(self):
         """Test convenience function."""

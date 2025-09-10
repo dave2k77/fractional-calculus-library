@@ -131,8 +131,7 @@ def hypergeometric_series(a: Union[float,
                           b: Union[float,
                                    List[float]],
                           z: float,
-                          *args,
-                          **kwargs) -> float:
+                          max_terms: int = 100) -> float:
     """
     Compute hypergeometric series pFq(a; b; z).
 
@@ -145,15 +144,6 @@ def hypergeometric_series(a: Union[float,
     Returns:
         Hypergeometric series value
     """
-    # Handle max_terms parameter
-    max_terms = 100  # default value
-
-    # Check if max_terms is passed as keyword argument
-    if 'max_terms' in kwargs:
-        max_terms = kwargs['max_terms']
-    # Check if max_terms is passed as positional argument
-    elif len(args) > 0:
-        max_terms = args[0]
 
     # Call the internal implementation
     return _hypergeometric_series_impl(a, b, z, max_terms)

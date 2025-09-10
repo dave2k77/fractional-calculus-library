@@ -54,7 +54,7 @@ The spectral autograd framework is the core innovation that enables gradient flo
    x = torch.randn(32, requires_grad=True)
    alpha = 0.5  # fractional order
 
-   # Apply spectral fractional derivative (4.67x faster)
+   # Apply spectral fractional derivative
    result = SpectralFractionalDerivative.apply(x, alpha, -1, "fft")
    
    # Gradients flow properly through fractional derivatives

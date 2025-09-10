@@ -18,8 +18,8 @@ try:
     from ..special import gamma
 except ImportError:
     # Fallback for direct import
-    from core.definitions import FractionalOrder
-    from special import gamma
+    from hpfracc.core.definitions import FractionalOrder
+    from hpfracc.special import gamma
 
 
 class OptimizedRiemannLiouville:

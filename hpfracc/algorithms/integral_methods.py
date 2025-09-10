@@ -48,7 +48,7 @@ class RiemannLiouvilleIntegral:
             use_jax: Use JAX acceleration if available
         """
         if isinstance(alpha, FractionalOrder):
-            alpha = alpha.value
+            alpha = alpha.alpha
 
         if alpha <= 0:
             raise ValueError(
@@ -257,7 +257,7 @@ class CaputoIntegral:
             use_jax: Use JAX acceleration if available
         """
         if isinstance(alpha, FractionalOrder):
-            alpha = alpha.value
+            alpha = alpha.alpha
 
         if alpha <= 0:
             raise ValueError(

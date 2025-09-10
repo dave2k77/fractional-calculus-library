@@ -249,8 +249,7 @@ Working with special functions in fractional calculus:
    plt.tight_layout()
    plt.show()
 
-# Green's functions have been removed from this release
-# They will be re-implemented in future releases with improved stability
+# Note: Green's functions are not available in this release
 
 .. code-block:: python
 
@@ -968,25 +967,8 @@ Analyze convergence of iterative methods:
 
    import numpy as np
    import matplotlib.pyplot as plt
-   # HPM and VIM solvers removed - focusing on implemented methods
-
-   # HPM and VIM solvers removed - focusing on implemented methods
-
-   # HPM and VIM solvers removed - focusing on implemented methods
-
-   # HPM and VIM plotting removed - focusing on implemented methods
-   
-   # VIM plotting removed
-   
-   # Solutions comparison removed
-   
-   plt.subplot(2, 2, 4)
-   # HPM convergence rates removed
-   # VIM convergence rates removed
-   # All HPM/VIM plotting removed
-   
+   # Note: HPM and VIM solvers are not available in this release
    # Focus on implemented methods: SDE solvers, fractional operators, and ML integration
-   print("HPM and VIM solvers have been removed - focusing on implemented methods")
 
 Advanced Fractional Operators
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~

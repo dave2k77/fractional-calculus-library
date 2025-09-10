@@ -8,10 +8,10 @@ Overview
 
 The spectral autograd framework transforms non-local fractional operations into local operations in the frequency domain, enabling efficient computation while maintaining mathematical rigor. The framework achieves:
 
-* **4.67x average speedup** over standard fractional autograd methods
-* **2.0x smaller gradients** for better optimization
+* **Significant speedup** over standard fractional autograd methods
+* **Improved gradient properties** for better optimization
 * **Production-ready implementation** with robust error handling
-* **Mathematical rigor** with all properties verified to 10⁻⁶ precision
+* **Mathematical rigor** with verified properties
 
 Key Features
 ------------

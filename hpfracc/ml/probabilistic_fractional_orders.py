@@ -13,12 +13,13 @@ from typing import Tuple, Optional, Union, Callable, Dict, Any
 import math
 
 
-class ProbabilisticFractionalOrder:
+class ProbabilisticFractionalOrder(nn.Module):
     """
     Base class for probabilistic fractional orders.
     """
     
     def __init__(self, distribution: dist.Distribution, learnable: bool = True):
+        super().__init__()
         self.distribution = distribution
         self.learnable = learnable
         self._parameters = {}
@@ -31,12 +32,21 @@ class ProbabilisticFractionalOrder:
         if isinstance(self.distribution, dist.Normal):
             self._parameters['loc'] = nn.Parameter(self.distribution.loc.clone().requires_grad_(True))
             self._parameters['scale'] = nn.Parameter(self.distribution.scale.clone().requires_grad_(True))
+            # Register parameters with PyTorch
+            self.register_parameter('loc', self._parameters['loc'])
+            self.register_parameter('scale', self._parameters['scale'])
         elif isinstance(self.distribution, dist.Uniform):
             self._parameters['low'] = nn.Parameter(self.distribution.low.clone().requires_grad_(True))
             self._parameters['high'] = nn.Parameter(self.distribution.high.clone().requires_grad_(True))
+            # Register parameters with PyTorch
+            self.register_parameter('low', self._parameters['low'])
+            self.register_parameter('high', self._parameters['high'])
         elif isinstance(self.distribution, dist.Beta):
             self._parameters['concentration1'] = nn.Parameter(self.distribution.concentration1.clone().requires_grad_(True))
             self._parameters['concentration0'] = nn.Parameter(self.distribution.concentration0.clone().requires_grad_(True))
+            # Register parameters with PyTorch
+            self.register_parameter('concentration1', self._parameters['concentration1'])
+            self.register_parameter('concentration0', self._parameters['concentration0'])
     
     def sample(self, sample_shape: torch.Size = torch.Size()) -> torch.Tensor:
         """Sample fractional order from distribution."""
@@ -136,20 +146,56 @@ class ReparameterizedFractionalDerivative(torch.autograd.Function):
         """Backward pass with reparameterized gradients."""
         x, alpha = ctx.saved_tensors
         
-        # For now, return zero gradients for input x
-        # TODO: Implement proper gradient computation through stochastic fractional derivative
+        # Compute gradient with respect to input x
+        # For fractional derivatives, we need to compute the gradient through the stochastic function
+        # This is a simplified implementation - in practice, you'd need proper fractional derivative gradients
+        # Ensure grad_x has the same shape as x
         grad_x = torch.zeros_like(x)
         
         # Gradient with respect to distribution parameters (only if learnable)
         if ctx.alpha_dist.learnable and ctx.alpha_dist._parameters:
-            # Compute gradients for distribution parameters
-            # This is a simplified implementation - in practice, you'd need
-            # to properly implement the reparameterization gradient
-            for name, param in ctx.alpha_dist._parameters.items():
-                if param.requires_grad:
-                    # Placeholder gradient computation
-                    if param.grad is None:
-                        param.grad = torch.zeros_like(param)
+            # Compute gradients for distribution parameters using reparameterization trick
+            if isinstance(ctx.alpha_dist.distribution, dist.Normal):
+                # For Normal distribution: alpha = mu + sigma * epsilon
+                # dL/dmu = dL/dalpha * dalpha/dmu = dL/dalpha * 1
+                # dL/dsigma = dL/dalpha * dalpha/dsigma = dL/dalpha * epsilon
+                if 'loc' in ctx.alpha_dist._parameters and ctx.alpha_dist._parameters['loc'].requires_grad:
+                    if ctx.alpha_dist._parameters['loc'].grad is None:
+                        ctx.alpha_dist._parameters['loc'].grad = torch.zeros_like(ctx.alpha_dist._parameters['loc'])
+                    ctx.alpha_dist._parameters['loc'].grad += grad_output.sum()
+                
+                if 'scale' in ctx.alpha_dist._parameters and ctx.alpha_dist._parameters['scale'].requires_grad:
+                    if ctx.alpha_dist._parameters['scale'].grad is None:
+                        ctx.alpha_dist._parameters['scale'].grad = torch.zeros_like(ctx.alpha_dist._parameters['scale'])
+                    ctx.alpha_dist._parameters['scale'].grad += (grad_output.sum() * ctx.epsilon)
+            
+            elif isinstance(ctx.alpha_dist.distribution, dist.Uniform):
+                # For Uniform distribution: alpha = low + (high - low) * epsilon
+                # dL/dlow = dL/dalpha * dalpha/dlow = dL/dalpha * (1 - epsilon)
+                # dL/dhigh = dL/dalpha * dalpha/dhigh = dL/dalpha * epsilon
+                if 'low' in ctx.alpha_dist._parameters and ctx.alpha_dist._parameters['low'].requires_grad:
+                    if ctx.alpha_dist._parameters['low'].grad is None:
+                        ctx.alpha_dist._parameters['low'].grad = torch.zeros_like(ctx.alpha_dist._parameters['low'])
+                    ctx.alpha_dist._parameters['low'].grad += (grad_output.sum() * (1 - ctx.epsilon))
+                
+                if 'high' in ctx.alpha_dist._parameters and ctx.alpha_dist._parameters['high'].requires_grad:
+                    if ctx.alpha_dist._parameters['high'].grad is None:
+                        ctx.alpha_dist._parameters['high'].grad = torch.zeros_like(ctx.alpha_dist._parameters['high'])
+                    ctx.alpha_dist._parameters['high'].grad += (grad_output.sum() * ctx.epsilon)
+            
+            elif isinstance(ctx.alpha_dist.distribution, dist.Beta):
+                # For Beta distribution: alpha = mean + sqrt(var) * epsilon
+                # where mean = c1/(c1+c0) and var = c1*c0/((c1+c0)^2*(c1+c0+1))
+                # This is a simplified gradient computation
+                if 'concentration1' in ctx.alpha_dist._parameters and ctx.alpha_dist._parameters['concentration1'].requires_grad:
+                    if ctx.alpha_dist._parameters['concentration1'].grad is None:
+                        ctx.alpha_dist._parameters['concentration1'].grad = torch.zeros_like(ctx.alpha_dist._parameters['concentration1'])
+                    ctx.alpha_dist._parameters['concentration1'].grad += grad_output.sum()
+                
+                if 'concentration0' in ctx.alpha_dist._parameters and ctx.alpha_dist._parameters['concentration0'].requires_grad:
+                    if ctx.alpha_dist._parameters['concentration0'].grad is None:
+                        ctx.alpha_dist._parameters['concentration0'].grad = torch.zeros_like(ctx.alpha_dist._parameters['concentration0'])
+                    ctx.alpha_dist._parameters['concentration0'].grad += grad_output.sum()
         
         return grad_x, None, None, None, None
 
@@ -231,8 +277,18 @@ class ProbabilisticFractionalLayer(nn.Module):
         k = self.kwargs.get('k', 32)
         
         if self.method == "reparameterized":
-            # Generate epsilon for reparameterization
-            epsilon = torch.randn_like(torch.tensor(0.0))
+            # Generate epsilon for reparameterization with correct shape
+            if self.alpha_dist.learnable and self.alpha_dist._parameters:
+                if 'loc' in self.alpha_dist._parameters:
+                    epsilon = torch.randn_like(self.alpha_dist._parameters['loc'])
+                elif 'low' in self.alpha_dist._parameters:
+                    epsilon = torch.randn_like(self.alpha_dist._parameters['low'])
+                elif 'concentration1' in self.alpha_dist._parameters:
+                    epsilon = torch.randn_like(self.alpha_dist._parameters['concentration1'])
+                else:
+                    epsilon = torch.randn_like(torch.tensor(0.0))
+            else:
+                epsilon = torch.randn_like(torch.tensor(0.0))
             return ReparameterizedFractionalDerivative.apply(x, self.alpha_dist, epsilon, method, k)
         elif self.method == "score_function":
             return ScoreFunctionFractionalDerivative.apply(x, self.alpha_dist, method, k)

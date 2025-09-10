@@ -19,7 +19,7 @@ Fractional calculus extends the classical calculus of integer-order derivatives 
 ### Gamma Function
 The gamma function $\Gamma(z)$ is the foundation of fractional calculus:
 
-$$\Gamma(z) = \int {\operatorname{e}^{\infty} t^{z-1} \operatorname{e}^{-t} dt}$$
+$$\Gamma(z) = \int_0^{\infty} t^{z-1} e^{-t} dt$$
 
 **Properties**:
 
@@ -30,7 +30,7 @@ $$\Gamma(z) = \int {\operatorname{e}^{\infty} t^{z-1} \operatorname{e}^{-t} dt}$
 ### Fractional Order
 
 The fractional order α can be:
-- **Positive**: \alpha > 0$ (derivatives)
+- **Positive**: $\alpha > 0$ (derivatives)
 - **Negative**: α < 0 (integrals)
 - **Zero**: α = 0 (identity operator)
 

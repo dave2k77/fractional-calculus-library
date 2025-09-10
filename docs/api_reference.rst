@@ -67,17 +67,17 @@ Fractional Autograd Framework
    :undoc-members:
    :show-inheritance:
 
-.. automodule:: hpfracc.ml.autograd.stochastic_sampling
+.. automodule:: hpfracc.ml.stochastic_memory_sampling
    :members:
    :undoc-members:
    :show-inheritance:
 
-.. automodule:: hpfracc.ml.autograd.probabilistic_orders
+.. automodule:: hpfracc.ml.probabilistic_fractional_orders
    :members:
    :undoc-members:
    :show-inheritance:
 
-.. automodule:: hpfracc.ml.autograd.variance_aware_training
+.. automodule:: hpfracc.ml.variance_aware_training
    :members:
    :undoc-members:
    :show-inheritance:
@@ -435,7 +435,7 @@ Fractional Autograd Framework
 SpectralAutogradEngine
 ^^^^^^^^^^^^^^^^^^^^^^
 
-.. autoclass:: hpfracc.ml.autograd.spectral_autograd.SpectralAutogradEngine
+.. autoclass:: hpfracc.ml.spectral_autograd.SpectralAutogradEngine
    :members:
    :undoc-members:
    :show-inheritance:
@@ -447,7 +447,7 @@ SpectralAutogradEngine
 StochasticMemorySampler
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-.. autoclass:: hpfracc.ml.autograd.stochastic_sampling.StochasticMemorySampler
+.. autoclass:: hpfracc.ml.stochastic_memory_sampling.StochasticMemorySampler
    :members:
    :undoc-members:
    :show-inheritance:
@@ -459,7 +459,7 @@ StochasticMemorySampler
 ProbabilisticFractionalLayer
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. autoclass:: hpfracc.ml.autograd.probabilistic_orders.ProbabilisticFractionalLayer
+.. autoclass:: hpfracc.ml.probabilistic_fractional_orders.ProbabilisticFractionalLayer
    :members:
    :undoc-members:
    :show-inheritance:
@@ -471,7 +471,7 @@ ProbabilisticFractionalLayer
 VarianceAwareTrainer
 ^^^^^^^^^^^^^^^^^^^^
 
-.. autoclass:: hpfracc.ml.autograd.variance_aware_training.VarianceAwareTrainer
+.. autoclass:: hpfracc.ml.variance_aware_training.VarianceAwareTrainer
    :members:
    :undoc-members:
    :show-inheritance:
@@ -737,9 +737,9 @@ Fractional Autograd Framework
 .. code-block:: python
 
    import torch
-   from hpfracc.ml.autograd.spectral_autograd import SpectralAutogradEngine
-   from hpfracc.ml.autograd.stochastic_sampling import StochasticMemorySampler
-   from hpfracc.ml.autograd.probabilistic_orders import ProbabilisticFractionalLayer
+   from hpfracc.ml.spectral_autograd import SpectralAutogradEngine
+   from hpfracc.ml.stochastic_memory_sampling import StochasticMemorySampler
+   from hpfracc.ml.probabilistic_fractional_orders import ProbabilisticFractionalLayer
 
    # Create spectral autograd engine
    spectral_engine = SpectralAutogradEngine(alpha=0.5, method="mellin")

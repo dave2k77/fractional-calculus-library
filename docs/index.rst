@@ -18,7 +18,7 @@ Key Features
 * **Graph Neural Networks**: GCN, GAT, GraphSAGE, and Graph U-Net architectures
 * **Advanced Solvers**: SDE solvers for fractional differential equations
 * **Neural fODE Framework**: Learning-based solution of fractional ODEs
-* **High Performance**: Optimized algorithms with GPU acceleration support (4.67x speedup)
+* **High Performance**: Optimized algorithms with GPU acceleration support
 * **Multi-Backend**: Seamless switching between computation backends
 * **Production Ready**: Robust MKL FFT error handling with fallback mechanisms
 * **Analytics**: Built-in performance monitoring and error analysis
@@ -70,7 +70,7 @@ Basic Usage
    t = torch.linspace(0, 10, 1000, requires_grad=True)
    x = torch.sin(t)
 
-   # Compute fractional derivative with spectral autograd (4.67x faster)
+   # Compute fractional derivative with spectral autograd
    alpha = 0.5  # fractional order
    result = SpectralFractionalDerivative.apply(x, alpha, -1, "fft")
    print(f"Spectral fractional derivative computed, shape: {result.shape}")
