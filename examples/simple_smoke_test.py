@@ -38,13 +38,13 @@ def test_basic_functionality():
 def test_ml_components():
     """Test ML components work."""
     try:
-        from hpfracc.ml import SpectralFractionalLayer
+        from hpfracc.ml.layers import FractionalConv1D
         
         # Create a simple layer
-        layer = SpectralFractionalLayer(input_size=10, alpha_init=0.5)
+        layer = FractionalConv1D(in_channels=1, out_channels=4, kernel_size=3)
         
         # Test forward pass
-        x = torch.randn(1, 10)
+        x = torch.randn(1, 1, 10)  # batch, channels, sequence
         output = layer(x)
         print(f"✅ ML layer test passed, output shape: {output.shape}")
         
