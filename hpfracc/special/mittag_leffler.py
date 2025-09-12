@@ -64,10 +64,21 @@ class MittagLefflerFunction:
         Returns:
             Mittag-Leffler function value(s)
         """
-        if self.use_jax and isinstance(z, (jnp.ndarray, float)):
-            return self._ml_jax(z, alpha, beta)
+        # Handle array inputs with fallback mechanism
+        if isinstance(z, np.ndarray):
+            return self._ml_numpy_array(z, alpha, beta)
+        elif self.use_jax and isinstance(z, (jnp.ndarray, float)):
+            try:
+                return self._ml_jax(z, alpha, beta)
+            except:
+                # Fallback to NumPy if JAX fails
+                return self._ml_numpy_array(np.array([z]), alpha, beta)[0] if np.isscalar(z) else self._ml_numpy_array(z, alpha, beta)
         elif self.use_numba and isinstance(z, (float, int)):
-            return self._ml_numba_scalar(z, alpha, beta)
+            try:
+                return self._ml_numba_scalar(z, alpha, beta)
+            except:
+                # Fallback to NumPy if Numba fails
+                return self._ml_numpy_array(np.array([z]), alpha, beta)[0]
         else:
             return self._ml_scipy(z, alpha, beta)
 
@@ -81,7 +92,7 @@ class MittagLefflerFunction:
         if alpha == 1.0 and beta == 1.0:
             return np.exp(z)
         elif alpha == 2.0 and beta == 1.0:
-            return np.cos(np.sqrt(z))
+            return np.cos(np.sqrt(-z))
         elif alpha == 2.0 and beta == 2.0:
             if z == 0:
                 return 1.0
@@ -100,10 +111,12 @@ class MittagLefflerFunction:
         Uses series expansion with early termination for convergence.
         """
         # Handle special cases
-        if alpha == 1.0 and beta == 1.0:
+        if abs(z) < 1e-15:  # Near zero case
+            return 1.0
+        elif alpha == 1.0 and beta == 1.0:
             return np.exp(z)
         elif alpha == 2.0 and beta == 1.0:
-            return np.cos(np.sqrt(z))
+            return np.cos(np.sqrt(-z))
         elif alpha == 2.0 and beta == 2.0:
             if z == 0:
                 return 1.0
@@ -120,8 +133,52 @@ class MittagLefflerFunction:
             k += 1
             if k > 0:
                 # Compute next term: z^k / Γ(αk + β)
-                term = term * z / (alpha * k + beta - alpha)
+                denominator = alpha * k + beta - alpha
+                if abs(denominator) < 1e-15:  # Avoid division by zero
+                    break
+                term = term * z / denominator
 
+        return result
+
+    @staticmethod
+    def _ml_numpy_array(z: np.ndarray, alpha: float, beta: float) -> np.ndarray:
+        """
+        NumPy implementation for array inputs (fallback method).
+        
+        Handles array inputs by applying the Mittag-Leffler function element-wise.
+        """
+        result = np.zeros_like(z)
+        
+        for i, zi in enumerate(z.flat):
+            # Handle special cases for each element
+            if abs(zi) < 1e-15:  # Near zero case
+                result.flat[i] = 1.0
+            elif alpha == 1.0 and beta == 1.0:
+                result.flat[i] = np.exp(zi)
+            elif alpha == 2.0 and beta == 1.0:
+                result.flat[i] = np.cos(np.sqrt(zi))
+            elif alpha == 2.0 and beta == 2.0:
+                if abs(zi) < 1e-15:
+                    result.flat[i] = 1.0
+                else:
+                    result.flat[i] = np.sin(np.sqrt(zi)) / np.sqrt(zi)
+            else:
+                # Series expansion for general case
+                term = 1.0
+                k = 0
+                series_sum = 0.0
+                
+                while k < 100 and abs(term) > 1e-15:
+                    series_sum += term
+                    k += 1
+                    if k > 0:
+                        denominator = alpha * k + beta - alpha
+                        if abs(denominator) < 1e-15:  # Avoid division by zero
+                            break
+                        term = term * zi / denominator
+                
+                result.flat[i] = series_sum
+        
         return result
 
     @staticmethod
@@ -146,7 +203,7 @@ class MittagLefflerFunction:
             lambda z: jnp.exp(z),
             lambda z: jax.lax.cond(
                 jnp.logical_and(alpha == 2.0, beta == 1.0),
-                lambda z: jnp.cos(jnp.sqrt(z)),
+                lambda z: jnp.cos(jnp.sqrt(-z)),
                 lambda z: jax.lax.cond(
                     jnp.logical_and(alpha == 2.0, beta == 2.0),
                     lambda z: jnp.where(

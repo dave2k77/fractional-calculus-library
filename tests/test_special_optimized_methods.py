@@ -10,7 +10,7 @@ import numpy as np
 import time
 from typing import Callable
 
-from hpfracc.algorithms.special_optimized_methods import (
+from hpfracc.algorithms.special_methods import (
     SpecialOptimizedWeylDerivative,
     SpecialOptimizedMarchaudDerivative,
     SpecialOptimizedReizFellerDerivative,

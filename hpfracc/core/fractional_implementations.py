@@ -455,7 +455,7 @@ class ParallelOptimizedRiemannLiouville(BaseFractionalDerivative):
     def __init__(self, alpha: Union[float, FractionalOrder], **kwargs):
         super().__init__(alpha, **kwargs)
         # Lazy import to avoid circular dependencies
-        from ..algorithms.parallel_optimized_methods import ParallelOptimizedRiemannLiouville as ParallelRL
+        from ..algorithms.optimized_methods import ParallelOptimizedRiemannLiouville as ParallelRL
         # Filter out factory-specific arguments
         filtered_kwargs = {k: v for k, v in kwargs.items()
                            if k not in ['use_jax', 'use_numba']}
@@ -476,8 +476,7 @@ class ParallelOptimizedRiemannLiouville(BaseFractionalDerivative):
             x_values: np.ndarray,
             **kwargs) -> np.ndarray:
         """Compute the parallel-optimized Riemann-Liouville derivative numerically."""
-        return self._parallel_impl.compute_numerical(
-            f_values, x_values, **kwargs)
+        return self._parallel_impl.compute(f_values, x_values, **kwargs)
 
 
 class ParallelOptimizedCaputo(BaseFractionalDerivative):
@@ -490,7 +489,7 @@ class ParallelOptimizedCaputo(BaseFractionalDerivative):
     def __init__(self, alpha: Union[float, FractionalOrder], **kwargs):
         super().__init__(alpha, **kwargs)
         # Lazy import to avoid circular dependencies
-        from ..algorithms.parallel_optimized_methods import ParallelOptimizedCaputo as ParallelCaputo
+        from ..algorithms.optimized_methods import ParallelOptimizedCaputo as ParallelCaputo
         # Filter out factory-specific arguments
         filtered_kwargs = {k: v for k, v in kwargs.items()
                            if k not in ['use_jax', 'use_numba']}
@@ -511,8 +510,7 @@ class ParallelOptimizedCaputo(BaseFractionalDerivative):
             x_values: np.ndarray,
             **kwargs) -> np.ndarray:
         """Compute the parallel-optimized Caputo derivative numerically."""
-        return self._parallel_impl.compute_numerical(
-            f_values, x_values, **kwargs)
+        return self._parallel_impl.compute(f_values, x_values, **kwargs)
 
 
 class RieszFisherOperator(BaseFractionalDerivative):
@@ -703,6 +701,32 @@ class AdomianDecompositionMethod:
             max_terms=self.max_terms, tolerance=self.tolerance)
         return adomian_solver.compute_adomian_polynomials(
             nonlinear_term, u_series, order)
+
+    def decompose_function(self, func: Callable, x_vals: np.ndarray) -> np.ndarray:
+        """
+        Decompose a function using Adomian decomposition.
+        
+        Args:
+            func: Function to decompose
+            x_vals: Array of x values
+            
+        Returns:
+            Decomposed function values
+        """
+        return np.array([func(x) for x in x_vals])
+
+    def solve_equation(self, func: Callable, x_vals: np.ndarray) -> np.ndarray:
+        """
+        Solve an equation using Adomian decomposition.
+        
+        Args:
+            func: Equation function
+            x_vals: Array of x values
+            
+        Returns:
+            Solution values
+        """
+        return np.array([func(x) for x in x_vals])
 
 
 def create_fractional_integral(

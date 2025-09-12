@@ -52,6 +52,11 @@ class FractionalOrder:
         return abs(self.alpha - round(self.alpha)) < 1e-10
 
     @property
+    def is_fractional(self) -> bool:
+        """Check if the order is fractional (not integer)."""
+        return not self.is_integer
+
+    @property
     def integer_part(self) -> int:
         """Get the integer part of the fractional order."""
         return int(np.floor(self.alpha))
@@ -70,7 +75,10 @@ class FractionalOrder:
     def __eq__(self, other) -> bool:
         if isinstance(other, FractionalOrder):
             return abs(self.alpha - other.alpha) < 1e-10
-        return abs(self.alpha - float(other)) < 1e-10
+        return False  # Different types are not equal
+
+    def __ne__(self, other) -> bool:
+        return not self.__eq__(other)
 
     def __hash__(self) -> int:
         return hash(self.alpha)
@@ -95,20 +103,19 @@ class FractionalDefinition:
     definitions of fractional derivatives and integrals.
     """
 
-    def __init__(self, definition_type: DefinitionType,
-                 alpha: Union[float, FractionalOrder]):
+    def __init__(self, order: Union[float, FractionalOrder],
+                 definition_type: DefinitionType):
         """
         Initialize fractional definition.
 
         Args:
+            order: Fractional order
             definition_type: Type of fractional definition
-            alpha: Fractional order
         """
+        self.order = FractionalOrder(order) if not isinstance(order, FractionalOrder) else order
         self.definition_type = definition_type
-        self.alpha = (
-            FractionalOrder(alpha) if isinstance(
-                alpha, (int, float)) else alpha
-        )
+        # Keep alpha for backward compatibility
+        self.alpha = self.order
 
     def get_definition_formula(self) -> str:
         """Get the mathematical formula for this definition."""
@@ -164,7 +171,7 @@ class CaputoDefinition(FractionalDefinition):
     """
 
     def __init__(self, alpha: Union[float, FractionalOrder]):
-        super().__init__(DefinitionType.CAPUTO, alpha)
+        super().__init__(alpha, DefinitionType.CAPUTO)
 
     @property
     def n(self) -> int:
@@ -200,7 +207,7 @@ class RiemannLiouvilleDefinition(FractionalDefinition):
     """
 
     def __init__(self, alpha: Union[float, FractionalOrder]):
-        super().__init__(DefinitionType.RIEMANN_LIOUVILLE, alpha)
+        super().__init__(alpha, DefinitionType.RIEMANN_LIOUVILLE)
 
     @property
     def n(self) -> int:
@@ -236,7 +243,7 @@ class GrunwaldLetnikovDefinition(FractionalDefinition):
     """
 
     def __init__(self, alpha: Union[float, FractionalOrder]):
-        super().__init__(DefinitionType.GRUNWALD_LETNIKOV, alpha)
+        super().__init__(alpha, DefinitionType.GRUNWALD_LETNIKOV)
 
     def get_advantages(self) -> list:
         """Get advantages of the Grünwald-Letnikov definition."""
@@ -288,6 +295,10 @@ class FractionalIntegral:
             "inverse_relationship": "I^α D^α f(x) = f(x) - Σ_{k=0}^{n-1} f^(k)(0) x^k/k!",
         }
 
+    def __str__(self) -> str:
+        """String representation of the fractional integral."""
+        return f"FractionalIntegral(α={self.alpha.alpha})"
+
 
 class FractionalCalculusProperties:
     """
@@ -331,6 +342,38 @@ class FractionalCalculusProperties:
             "exponential": "D^α e^x = x^(-α)/Γ(1-α)",
             "constant": "D^α c = c * x^(-α)/Γ(1-α)",
             "linear": "D^α x = x^(1-α)/Γ(2-α)",
+        }
+
+    def get_properties(self) -> Dict[str, Any]:
+        """Get all fractional calculus properties."""
+        return {
+            "definitions": self.get_definition_properties(),
+            "integrals": self.get_integral_properties(),
+            "relationships": self.relationship_between_definitions(),
+            "analytical_solutions": self.get_analytical_solutions()
+        }
+
+    def get_definition_properties(self) -> Dict[str, str]:
+        """Get properties specific to fractional derivative definitions."""
+        return {
+            "linearity": self.linearity_property(),
+            "semigroup": self.semigroup_property(),
+            "leibniz_rule": self.leibniz_rule(),
+            "chain_rule": self.chain_rule(),
+            "caputo": "D^α_C f = I^(n-α) f^(n)",
+            "riemann_liouville": "D^α_RL f = d^n/dx^n I^(n-α) f",
+            "grunwald_letnikov": "D^α_GL f = lim[h→0] (1/h^α) Σ[k=0]^∞ (-1)^k C(α,k) f(x-kh)"
+        }
+
+    def get_integral_properties(self) -> Dict[str, Any]:
+        """Get properties specific to fractional integrals."""
+        return {
+            "linearity": True,
+            "semigroup_property": True,
+            "commutativity": True,
+            "inverse_relationship": "I^α D^α f(x) = f(x) - Σ_{k=0}^{n-1} f^(k)(0) x^k/k!",
+            "riemann_liouville": "I^α_RL f = (1/Γ(α)) ∫₀^x (x-t)^(α-1) f(t) dt",
+            "caputo": "I^α_C f = (1/Γ(α)) ∫₀^x (x-t)^(α-1) f(t) dt"
         }
 
 

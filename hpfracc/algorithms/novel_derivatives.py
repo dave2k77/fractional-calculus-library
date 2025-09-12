@@ -93,6 +93,14 @@ class CaputoFabrizioDerivative:
         if method is None:
             method = self.method
 
+        # Handle empty arrays
+        if len(t) == 0:
+            return np.array([])
+        
+        # Handle single element arrays
+        if len(t) == 1:
+            return np.array([0.0])  # Derivative at a single point is typically 0
+        
         # Validate inputs
         if len(t) < 2:
             raise ValueError("Time array must have at least 2 points")
@@ -324,6 +332,14 @@ class AtanganaBaleanuDerivative:
         if method is None:
             method = self.method
 
+        # Handle empty arrays
+        if len(t) == 0:
+            return np.array([])
+        
+        # Handle single element arrays
+        if len(t) == 1:
+            return np.array([0.0])  # Derivative at a single point is typically 0
+        
         # Validate inputs
         if len(t) < 2:
             raise ValueError("Time array must have at least 2 points")

@@ -10,7 +10,38 @@ This module implements the most efficient computational methods for fractional c
 """
 
 import numpy as np
-from typing import Union, Optional, Tuple, Callable
+import time
+from typing import Union, Optional, Tuple, Callable, Dict, Any, List
+from concurrent.futures import ProcessPoolExecutor, as_completed
+import psutil
+from functools import partial
+
+# Optional imports for advanced parallel computing
+try:
+    from joblib import Parallel, delayed
+    JOBLIB_AVAILABLE = True
+except ImportError:
+    JOBLIB_AVAILABLE = False
+
+try:
+    import dask.array as da
+    from dask.distributed import Client, LocalCluster
+    DASK_AVAILABLE = True
+except ImportError:
+    DASK_AVAILABLE = False
+
+try:
+    import ray
+    RAY_AVAILABLE = True
+except ImportError:
+    RAY_AVAILABLE = False
+
+try:
+    import numba
+    from numba import jit, prange
+    NUMBA_AVAILABLE = True
+except ImportError:
+    NUMBA_AVAILABLE = False
 
 # Import from relative paths for package structure
 try:
@@ -20,6 +51,133 @@ except ImportError:
     # Fallback for direct import
     from hpfracc.core.definitions import FractionalOrder
     from hpfracc.special import gamma
+
+
+# =============================================================================
+# PARALLEL CONFIGURATION
+# =============================================================================
+
+class ParallelConfig:
+    """Configuration for parallel processing."""
+    
+    def __init__(
+        self,
+        n_jobs: int = -1,
+        backend: str = "multiprocessing",
+        chunk_size: Optional[int] = None,
+        memory_limit: Optional[str] = None,
+        timeout: Optional[float] = None,
+        verbose: int = 0,
+        enabled: bool = True,
+        monitor_performance: bool = True,
+        enable_streaming: bool = False,
+        load_balancing: bool = True
+    ):
+        """
+        Initialize parallel configuration.
+        
+        Args:
+            n_jobs: Number of parallel jobs (-1 for all CPUs)
+            backend: Parallel backend ("multiprocessing", "threading", "ray", "dask")
+            chunk_size: Size of data chunks for parallel processing
+            memory_limit: Memory limit per worker
+            timeout: Timeout for parallel operations
+            verbose: Verbosity level
+            enabled: Whether parallel processing is enabled
+            monitor_performance: Whether to monitor performance metrics
+            enable_streaming: Whether to enable streaming processing
+            load_balancing: Whether to use load balancing
+        """
+        self.n_jobs = n_jobs if n_jobs > 0 else psutil.cpu_count()
+        
+        # Handle auto-configuration of backend
+        if backend == "auto":
+            self.backend = self._auto_configure_backend()
+        else:
+            self.backend = backend
+        self.chunk_size = chunk_size
+        self.memory_limit = memory_limit
+        self.timeout = timeout
+        self.verbose = verbose
+        self.enabled = enabled
+        self.monitor_performance = monitor_performance
+        self.enable_streaming = enable_streaming
+        self.load_balancing = load_balancing
+        
+        # Initialize performance stats
+        self.performance_stats = {
+            'total_time': 0.0,
+            'parallel_time': 0.0,
+            'serial_time': 0.0,
+            'speedup': 1.0,
+            'memory_usage': 0.0,
+            'chunk_sizes': []
+        }
+        
+        # Validate backend availability
+        if self.backend == "ray" and not RAY_AVAILABLE:
+            self.backend = "multiprocessing"
+        elif self.backend == "dask" and not DASK_AVAILABLE:
+            self.backend = "multiprocessing"
+    
+    def _auto_configure_backend(self) -> str:
+        """Auto-configure the best available backend."""
+        # Priority order: ray > dask > joblib > multiprocessing
+        if RAY_AVAILABLE:
+            return "ray"
+        elif DASK_AVAILABLE:
+            return "dask"
+        else:
+            return "multiprocessing"
+
+
+class ParallelLoadBalancer:
+    """Intelligent load balancer for parallel processing."""
+    
+    def __init__(self, config: ParallelConfig):
+        """Initialize load balancer."""
+        self.config = config
+        self.worker_stats = {}
+        self.worker_loads = {}  # Track load per worker
+        self.chunk_history = []
+    
+    def create_chunks(self, data: np.ndarray, chunk_size: Optional[int] = None) -> List[np.ndarray]:
+        """Create chunks from data for parallel processing."""
+        if chunk_size is None:
+            if self.config.chunk_size is None:
+                # Auto-determine chunk size
+                chunk_size = max(1, len(data) // self.config.n_jobs)
+            else:
+                chunk_size = self.config.chunk_size
+        
+        chunks = []
+        for i in range(0, len(data), chunk_size):
+            chunk = data[i:i + chunk_size]
+            chunks.append(chunk)
+        
+        # Record chunk history
+        self.chunk_history.append({
+            'total_size': len(data),
+            'data_size': len(data),
+            'chunk_size': chunk_size,
+            'num_chunks': len(chunks),
+            'timestamp': time.time()
+        })
+        
+        return chunks
+    
+    def distribute_workload(
+        self, chunks: List[np.ndarray], workers: List[str]
+    ) -> Dict[str, List[np.ndarray]]:
+        """Distribute workload across available workers."""
+        distribution = {worker: [] for worker in workers}
+        
+        # Simple round-robin distribution
+        for i, chunk in enumerate(chunks):
+            worker = workers[i % len(workers)]
+            distribution[worker].append(chunk)
+        
+        return distribution
 
 
 class OptimizedRiemannLiouville:
@@ -32,7 +190,7 @@ class OptimizedRiemannLiouville:
     The integral part is computed efficiently using FFT convolution.
     """
 
-    def __init__(self, alpha: Union[float, FractionalOrder]):
+    def __init__(self, alpha: Union[float, FractionalOrder], parallel_config: Optional[ParallelConfig] = None):
         """Initialize optimized RL derivative calculator."""
         if isinstance(alpha, (int, float)):
             self.alpha = FractionalOrder(alpha)
@@ -40,6 +198,7 @@ class OptimizedRiemannLiouville:
             self.alpha = alpha
 
         self.alpha_val = self.alpha.alpha
+        self.parallel_config = parallel_config or ParallelConfig()
 
         # Validate alpha
         if self.alpha_val < 0:
@@ -48,6 +207,10 @@ class OptimizedRiemannLiouville:
             )
 
         self.n = int(np.ceil(self.alpha_val))
+        
+        # Initialize parallel components
+        self.load_balancer = ParallelLoadBalancer(self.parallel_config)
+        self._initialize_backend()
 
     def compute(
         self,
@@ -57,11 +220,30 @@ class OptimizedRiemannLiouville:
     ) -> Union[float, np.ndarray]:
         """Compute optimized RL derivative using the most efficient method."""
         if callable(f):
-            t_max = np.max(t) if hasattr(t, "__len__") else t
-            if h is None:
-                h = t_max / 1000
-            t_array = np.arange(0, t_max + h, h)
-            f_array = np.array([f(ti) for ti in t_array])
+            # Check if t is an array-like object
+            t_is_array = hasattr(t, "__len__")
+            if t_is_array:
+                t_len = len(t)
+                # If specific points are provided, evaluate at those points
+                if t_len > 1:
+                    t_array = np.array(t)
+                    f_array = np.array([f(ti) for ti in t_array])
+                elif t_len == 1:
+                    # Single point case
+                    t_max = t[0]
+                    t_array = np.array([t_max])
+                    f_array = np.array([f(t_max)])
+                else:
+                    # Empty array case
+                    t_array = np.array([])
+                    f_array = np.array([])
+            else:
+                # For single point or when h is specified, use dense grid
+                t_max = t
+                if h is None:
+                    h = t_max / 1000
+                t_array = np.arange(0, t_max + h, h)
+                f_array = np.array([f(ti) for ti in t_array])
         else:
             f_array = f
             if hasattr(t, "__len__"):
@@ -95,6 +277,11 @@ class OptimizedRiemannLiouville:
     ) -> np.ndarray:
         """Highly optimized FFT convolution using numpy and JAX."""
         N = len(f)
+        
+        # Handle empty arrays
+        if N == 0:
+            return np.array([])
+            
         n = self.n
         alpha = self.alpha_val
 
@@ -145,6 +332,126 @@ class OptimizedRiemannLiouville:
 
         return result * h
 
+    def _initialize_backend(self):
+        """Initialize the parallel processing backend."""
+        if self.parallel_config.backend == "ray" and RAY_AVAILABLE:
+            if not ray.is_initialized():
+                ray.init()
+        elif self.parallel_config.backend == "dask" and DASK_AVAILABLE:
+            self.dask_client = Client(
+                LocalCluster(n_workers=self.parallel_config.n_jobs)
+            )
+
+    def compute_parallel(
+        self,
+        f: Union[Callable, np.ndarray],
+        t: Union[float, np.ndarray],
+        h: Optional[float] = None,
+    ) -> Union[float, np.ndarray]:
+        """Compute optimized RL derivative using parallel processing."""
+        if callable(f):
+            if hasattr(t, "__len__") and len(t) == 0:
+                return np.array([])
+            
+            # If specific points are provided, evaluate at those points
+            if hasattr(t, "__len__") and len(t) > 1:
+                t_array = np.array(t)
+                f_array = np.array([f(ti) for ti in t_array])
+            else:
+                # For single point or when h is specified, use dense grid
+                t_max = np.max(t) if hasattr(t, "__len__") else t
+                if h is None:
+                    h = t_max / 1000
+                t_array = np.arange(0, t_max + h, h)
+                f_array = np.array([f(ti) for ti in t_array])
+        else:
+            f_array = f
+            if hasattr(t, "__len__"):
+                t_array = t
+            else:
+                t_array = np.arange(len(f)) * (h or 1.0)
+
+        # Input validation
+        if len(f_array) != len(t_array):
+            raise ValueError(
+                "Function array and time array must have the same length")
+        
+        if h is not None and h <= 0:
+            raise ValueError("Step size must be positive")
+        step_size = h or 1.0
+
+        # For small arrays, use serial computation
+        if len(f_array) < 1000:
+            return self._fft_convolution_rl_numpy(f_array, t_array, step_size)
+
+        # Chunk the data for parallel processing
+        chunk_size = self.parallel_config.chunk_size or len(f_array) // self.parallel_config.n_jobs
+        chunks = [f_array[i:i + chunk_size] for i in range(0, len(f_array), chunk_size)]
+        t_chunks = [t_array[i:i + chunk_size] for i in range(0, len(t_array), chunk_size)]
+
+        if self.parallel_config.backend == "multiprocessing":
+            return self._compute_multiprocessing(chunks, t_chunks, step_size)
+        elif self.parallel_config.backend == "ray" and RAY_AVAILABLE:
+            return self._compute_ray(chunks, t_chunks, step_size)
+        elif self.parallel_config.backend == "dask" and DASK_AVAILABLE:
+            return self._compute_dask(chunks, t_chunks, step_size)
+        else:
+            # Fallback to serial computation
+            return self._fft_convolution_rl_numpy(f_array, t_array, step_size)
+
+    def _compute_multiprocessing(self, chunks, t_chunks, step_size):
+        """Compute using multiprocessing."""
+        with ProcessPoolExecutor(max_workers=self.parallel_config.n_jobs) as executor:
+            futures = []
+            for f_chunk, t_chunk in zip(chunks, t_chunks):
+                future = executor.submit(self._worker_rl, f_chunk, t_chunk, step_size)
+                futures.append(future)
+            
+            results = []
+            for future in as_completed(futures):
+                results.append(future.result())
+        
+        # Concatenate results
+        return np.concatenate(results)
+
+    def _compute_ray(self, chunks, t_chunks, step_size):
+        """Compute using Ray."""
+        if not RAY_AVAILABLE:
+            raise RuntimeError("Ray is not available")
+        
+        @ray.remote
+        def ray_worker(f_chunk, t_chunk, step_size):
+            return self._worker_rl(f_chunk, t_chunk, step_size)
+        
+        futures = []
+        for f_chunk, t_chunk in zip(chunks, t_chunks):
+            future = ray_worker.remote(f_chunk, t_chunk, step_size)
+            futures.append(future)
+        
+        results = ray.get(futures)
+        return np.concatenate(results)
+
+    def _compute_dask(self, chunks, t_chunks, step_size):
+        """Compute using Dask."""
+        if not DASK_AVAILABLE:
+            raise RuntimeError("Dask is not available")
+        
+        # Convert to Dask arrays
+        f_dask = da.from_array(np.concatenate(chunks), chunks=len(chunks[0]))
+        t_dask = da.from_array(np.concatenate(t_chunks), chunks=len(t_chunks[0]))
+        
+        # Apply computation
+        result = f_dask.map_blocks(
+            lambda x: self._worker_rl(x, x, step_size),
+            dtype=np.float64
+        )
+        
+        return result.compute()
+
+    def _worker_rl(self, f_chunk, t_chunk, step_size):
+        """Worker function for parallel RL computation."""
+        return self._fft_convolution_rl_numpy(f_chunk, t_chunk, step_size)
+
 
 class OptimizedCaputo:
     """
@@ -163,7 +470,11 @@ class OptimizedCaputo:
         # Validate alpha
         if self.alpha_val <= 0:
             raise ValueError("Alpha must be positive for Caputo derivative")
+        if self.alpha_val < 1e-6:
+            raise ValueError("Alpha must be positive for Caputo derivative")
         if self.alpha_val >= 1:
+            raise ValueError("L1 scheme requires 0 < α < 1")
+        if self.alpha_val > 0.999:
             raise ValueError("L1 scheme requires 0 < α < 1")
 
     def compute(
@@ -174,12 +485,22 @@ class OptimizedCaputo:
         method: str = "l1",
     ) -> Union[float, np.ndarray]:
         """Compute optimized Caputo derivative."""
+        # Handle empty arrays
+        if hasattr(t, "__len__") and len(t) == 0:
+            return np.array([])
+        
         if callable(f):
-            t_max = np.max(t) if hasattr(t, "__len__") else t
-            if h is None:
-                h = t_max / 1000
-            t_array = np.arange(0, t_max + h, h)
-            f_array = np.array([f(ti) for ti in t_array])
+            # If specific points are provided, evaluate at those points
+            if hasattr(t, "__len__") and len(t) > 1:
+                t_array = np.array(t)
+                f_array = np.array([f(ti) for ti in t_array])
+            else:
+                # For single point or when h is specified, use dense grid
+                t_max = np.max(t) if hasattr(t, "__len__") else t
+                if h is None:
+                    h = t_max / 1000
+                t_array = np.arange(0, t_max + h, h)
+                f_array = np.array([f(ti) for ti in t_array])
         else:
             f_array = f
             if hasattr(t, "__len__"):
@@ -283,11 +604,17 @@ class OptimizedGrunwaldLetnikov:
     ) -> Union[float, np.ndarray]:
         """Compute optimized GL derivative."""
         if callable(f):
-            t_max = np.max(t) if hasattr(t, "__len__") else t
-            if h is None:
-                h = t_max / 1000
-            t_array = np.arange(0, t_max + h, h)
-            f_array = np.array([f(ti) for ti in t_array])
+            # If specific points are provided, evaluate at those points
+            if hasattr(t, "__len__") and len(t) > 1:
+                t_array = np.array(t)
+                f_array = np.array([f(ti) for ti in t_array])
+            else:
+                # For single point or when h is specified, use dense grid
+                t_max = np.max(t) if hasattr(t, "__len__") else t
+                if h is None:
+                    h = t_max / 1000
+                t_array = np.arange(0, t_max + h, h)
+                f_array = np.array([f(ti) for ti in t_array])
         else:
             f_array = f
             if hasattr(t, "__len__"):
@@ -817,3 +1144,488 @@ class L1L2Schemes:
             "stability_parameter": r,
             "scheme": self.scheme,
         }
+
+
+# =============================================================================
+# PARALLEL ALIASES FOR BACKWARD COMPATIBILITY
+# =============================================================================
+
+class ParallelOptimizedRiemannLiouville(OptimizedRiemannLiouville):
+    """Alias for backward compatibility with parallel RL derivative."""
+    
+    def __init__(self, alpha: Union[float, FractionalOrder], parallel_config: Optional[ParallelConfig] = None):
+        """Initialize parallel-optimized RL derivative calculator."""
+        super().__init__(alpha, parallel_config)
+        # Ensure parallel processing is enabled
+        if self.parallel_config.n_jobs == 1:
+            self.parallel_config.n_jobs = psutil.cpu_count()
+    
+    def compute(self, f, t, h=None):
+        """Compute using parallel processing by default."""
+        return self.compute_parallel(f, t, h)
+
+
+class ParallelOptimizedCaputo(OptimizedCaputo):
+    """Alias for backward compatibility with parallel Caputo derivative."""
+    
+    def __init__(self, alpha: Union[float, FractionalOrder], parallel_config: Optional[ParallelConfig] = None):
+        """Initialize parallel-optimized Caputo derivative calculator."""
+        super().__init__(alpha)
+        self.parallel_config = parallel_config or ParallelConfig()
+        # Ensure parallel processing is enabled
+        if self.parallel_config.n_jobs == 1:
+            self.parallel_config.n_jobs = psutil.cpu_count()
+    
+    def compute_parallel(self, f, t, h=None):
+        """Compute using parallel processing."""
+        # For now, use serial computation as parallel Caputo is complex
+        # This can be enhanced later with proper parallel implementation
+        return super().compute(f, t, h)
+
+
+class ParallelOptimizedGrunwaldLetnikov(OptimizedGrunwaldLetnikov):
+    """Alias for backward compatibility with parallel GL derivative."""
+    
+    def __init__(self, alpha: Union[float, FractionalOrder], parallel_config: Optional[ParallelConfig] = None):
+        """Initialize parallel-optimized GL derivative calculator."""
+        super().__init__(alpha)
+        self.parallel_config = parallel_config or ParallelConfig()
+        # Ensure parallel processing is enabled
+        if self.parallel_config.n_jobs == 1:
+            self.parallel_config.n_jobs = psutil.cpu_count()
+    
+    def compute_parallel(self, f, t, h=None):
+        """Compute using parallel processing."""
+        # For now, use serial computation as parallel GL is complex
+        # This can be enhanced later with proper parallel implementation
+        return super().compute(f, t, h)
+
+
+# =============================================================================
+# CONVENIENCE FUNCTIONS
+# =============================================================================
+
+def parallel_optimized_riemann_liouville(
+    f: Union[Callable, np.ndarray],
+    t: Union[float, np.ndarray],
+    alpha: Union[float, FractionalOrder],
+    h: Optional[float] = None,
+    parallel_config: Optional[ParallelConfig] = None,
+) -> Union[float, np.ndarray]:
+    """Convenience function for parallel optimized RL derivative."""
+    calculator = ParallelOptimizedRiemannLiouville(alpha, parallel_config)
+    return calculator.compute(f, t, h)
+
+
+def parallel_optimized_caputo(
+    f: Union[Callable, np.ndarray],
+    t: Union[float, np.ndarray],
+    alpha: Union[float, FractionalOrder],
+    h: Optional[float] = None,
+    parallel_config: Optional[ParallelConfig] = None,
+) -> Union[float, np.ndarray]:
+    """Convenience function for parallel optimized Caputo derivative."""
+    calculator = ParallelOptimizedCaputo(alpha, parallel_config)
+    return calculator.compute_parallel(f, t, h)
+
+
+def parallel_optimized_grunwald_letnikov(
+    f: Union[Callable, np.ndarray],
+    t: Union[float, np.ndarray],
+    alpha: Union[float, FractionalOrder],
+    h: Optional[float] = None,
+    parallel_config: Optional[ParallelConfig] = None,
+) -> Union[float, np.ndarray]:
+    """Convenience function for parallel optimized GL derivative."""
+    calculator = ParallelOptimizedGrunwaldLetnikov(alpha, parallel_config)
+    return calculator.compute_parallel(f, t, h)
+
+
+class ParallelPerformanceMonitor:
+    """Monitor and analyze parallel processing performance."""
+    
+    def __init__(self):
+        """Initialize performance monitor."""
+        self.performance_history = []
+        self.optimization_suggestions = []
+    
+    def analyze_performance(
+        self, 
+        config: ParallelConfig, 
+        data_size: int, 
+        execution_time: float
+    ) -> Dict[str, Any]:
+        """
+        Analyze parallel processing performance.
+        
+        Args:
+            config: Parallel configuration used
+            data_size: Size of data processed
+            execution_time: Time taken for execution
+            
+        Returns:
+            Dictionary with performance analysis
+        """
+        throughput = data_size / execution_time if execution_time > 0 else 0
+        
+        # Calculate efficiency (simplified)
+        expected_serial_time = execution_time * config.n_jobs if config.n_jobs > 0 else execution_time
+        efficiency = min(1.0, execution_time / expected_serial_time) if expected_serial_time > 0 else 0
+        
+        analysis = {
+            'data_size': data_size,
+            'execution_time': execution_time,
+            'throughput': throughput,
+            'efficiency': efficiency,
+            'suggestions': self._generate_suggestions(config, data_size, execution_time, throughput, efficiency)
+        }
+        
+        # Store in history
+        self.performance_history.append({
+            'timestamp': time.time(),
+            'config': config,
+            'analysis': analysis
+        })
+        
+        return analysis
+    
+    def get_optimization_suggestions(self) -> List[str]:
+        """Get optimization suggestions based on performance history."""
+        suggestions = []
+        
+        if not self.performance_history:
+            return suggestions
+        
+        # Analyze recent performance
+        recent_analyses = [entry['analysis'] for entry in self.performance_history[-5:]]
+        
+        # Check for low efficiency
+        avg_efficiency = np.mean([analysis['efficiency'] for analysis in recent_analyses])
+        if avg_efficiency < 0.5:
+            suggestions.append("Consider reducing number of parallel jobs or increasing chunk size")
+        
+        # Check for low throughput
+        avg_throughput = np.mean([analysis['throughput'] for analysis in recent_analyses])
+        if avg_throughput < 1000:  # Arbitrary threshold
+            suggestions.append("Consider using a different parallel backend (e.g., ray or dask)")
+        
+        # Check for memory issues (simplified)
+        recent_configs = [entry['config'] for entry in self.performance_history[-3:]]
+        if any(config.chunk_size is None for config in recent_configs):
+            suggestions.append("Consider setting explicit chunk_size for better memory management")
+        
+        self.optimization_suggestions = suggestions
+        return suggestions
+    
+    def _generate_suggestions(
+        self, 
+        config: ParallelConfig, 
+        data_size: int, 
+        execution_time: float,
+        throughput: float,
+        efficiency: float
+    ) -> List[str]:
+        """Generate specific suggestions for current performance."""
+        suggestions = []
+        
+        if efficiency < 0.3:
+            suggestions.append("Very low efficiency detected - consider reducing parallel overhead")
+        
+        if throughput < 500:
+            suggestions.append("Low throughput - consider optimizing data processing")
+        
+        if config.chunk_size is None and data_size > 10000:
+            suggestions.append("Large dataset without chunk size - consider setting chunk_size")
+        
+        return suggestions
+
+
+class NumbaOptimizer:
+    """Numba-based optimization for fractional calculus kernels."""
+    
+    def __init__(self, parallel: bool = True, fastmath: bool = True, cache: bool = True):
+        """
+        Initialize Numba optimizer.
+        
+        Args:
+            parallel: Enable parallel execution
+            fastmath: Enable fast math optimizations
+            cache: Enable function caching
+        """
+        self.parallel = parallel
+        self.fastmath = fastmath
+        self.cache = cache
+    
+    def optimize_kernel(self, func):
+        """
+        Optimize a function using Numba JIT compilation.
+        
+        Args:
+            func: Function to optimize
+            
+        Returns:
+            Optimized function
+        """
+        if not NUMBA_AVAILABLE:
+            # Return original function if numba not available
+            return func
+        
+        # Create JIT decorator with options
+        jit_options = {
+            'nopython': True,
+            'parallel': self.parallel,
+            'fastmath': self.fastmath,
+            'cache': self.cache
+        }
+        
+        return jit(**jit_options)(func)
+
+
+class NumbaFractionalKernels:
+    """Numba-optimized fractional calculus kernels."""
+    
+    @staticmethod
+    def gamma_approx(x: float) -> float:
+        """
+        Approximate gamma function using Stirling's approximation.
+        
+        Args:
+            x: Input value
+            
+        Returns:
+            Approximate gamma value
+        """
+        if x <= 0:
+            raise ValueError("Gamma function not defined for non-positive values")
+        
+        if x == 1.0:
+            return 1.0
+        elif x == 0.5:
+            return np.sqrt(np.pi)  # Γ(0.5) = √π
+        
+        # Stirling's approximation: Γ(x) ≈ √(2π/x) * (x/e)^x
+        return np.sqrt(2 * np.pi / x) * (x / np.e) ** x
+    
+    @staticmethod
+    def binomial_coefficients_kernel(alpha: float, n: int) -> np.ndarray:
+        """
+        Compute binomial coefficients for fractional order α.
+        
+        Args:
+            alpha: Fractional order
+            n: Maximum order
+            
+        Returns:
+            Array of binomial coefficients
+        """
+        coeffs = np.zeros(n + 1)
+        coeffs[0] = 1.0
+        
+        for k in range(1, n + 1):
+            coeffs[k] = coeffs[k - 1] * (alpha - k + 1) / k
+        
+        return coeffs
+
+
+class NumbaParallelManager:
+    """Manager for Numba parallel execution settings."""
+    
+    def __init__(self, num_threads: Optional[int] = None):
+        """
+        Initialize Numba parallel manager.
+        
+        Args:
+            num_threads: Number of threads for parallel execution
+        """
+        if num_threads is None:
+            self.num_threads = psutil.cpu_count()
+        else:
+            self.num_threads = num_threads
+        
+        # Set Numba threading if available
+        if NUMBA_AVAILABLE:
+            numba.set_num_threads(self.num_threads)
+
+
+# Benchmarking functions
+def benchmark_parallel_vs_serial(
+    f: np.ndarray, 
+    t: np.ndarray, 
+    alpha: float, 
+    h: float
+) -> Dict[str, float]:
+    """
+    Benchmark parallel vs serial execution of fractional derivatives.
+    
+    Args:
+        f: Function values
+        t: Time points
+        alpha: Fractional order
+        h: Step size
+        
+    Returns:
+        Dictionary with timing results
+    """
+    results = {}
+    
+    # Serial execution
+    start_time = time.time()
+    try:
+        from ..algorithms.integral_methods import RiemannLiouvilleIntegral
+        serial_integral = RiemannLiouvilleIntegral(alpha)
+        serial_result = serial_integral.compute(f, t, h)
+        results['serial_time'] = time.time() - start_time
+        results['serial_success'] = True
+    except Exception as e:
+        results['serial_time'] = time.time() - start_time
+        results['serial_success'] = False
+        results['serial_error'] = str(e)
+    
+    # Parallel execution
+    start_time = time.time()
+    try:
+        config = ParallelConfig(n_jobs=2)
+        parallel_integral = ParallelOptimizedRiemannLiouville(alpha, config)
+        parallel_result = parallel_integral.compute_parallel(f, t, h)
+        results['parallel_time'] = time.time() - start_time
+        results['parallel_success'] = True
+    except Exception as e:
+        results['parallel_time'] = time.time() - start_time
+        results['parallel_success'] = False
+        results['parallel_error'] = str(e)
+    
+    # Calculate speedup if both succeeded
+    if results.get('serial_success') and results.get('parallel_success'):
+        results['speedup'] = results['serial_time'] / results['parallel_time']
+    else:
+        results['speedup'] = 0.0
+    
+    return results
+
+
+def optimize_parallel_parameters(
+    f: np.ndarray,
+    t: np.ndarray, 
+    alpha: float,
+    h: float
+) -> ParallelConfig:
+    """
+    Optimize parallel processing parameters.
+    
+    Args:
+        f: Function values
+        t: Time points
+        alpha: Fractional order
+        h: Step size
+        
+    Returns:
+        Optimized ParallelConfig object
+    """
+    # Test different numbers of jobs
+    best_config = None
+    best_time = float('inf')
+    
+    for n_jobs in [1, 2, 4, 8]:
+        try:
+            config = ParallelConfig(n_jobs=n_jobs, chunk_size=100)
+            parallel_integral = ParallelOptimizedRiemannLiouville(alpha, config)
+            
+            start_time = time.time()
+            parallel_result = parallel_integral.compute_parallel(f, t, h)
+            execution_time = time.time() - start_time
+            
+            if execution_time < best_time:
+                best_time = execution_time
+                best_config = config
+                
+        except Exception as e:
+            # If this configuration fails, continue with others
+            continue
+    
+    # Return the best config, or a default one if all failed
+    if best_config is not None:
+        return best_config
+    else:
+        # Return a reasonable default configuration
+        return ParallelConfig(n_jobs=2, chunk_size=100)
+
+
+# Memory efficient functions
+def memory_efficient_caputo(
+    f: np.ndarray,
+    alpha: float,
+    h: float,
+    memory_limit: str = "1GB"
+) -> np.ndarray:
+    """
+    Memory-efficient Caputo derivative computation.
+    
+    Args:
+        f: Function values
+        alpha: Fractional order
+        h: Step size
+        memory_limit: Memory limit string
+        
+    Returns:
+        Computed Caputo derivative
+    """
+    # Generate time array based on function length and step size
+    t = np.arange(len(f)) * h
+    
+    # Use block processing for large datasets
+    if len(f) > 10000:
+        block_size = min(1000, len(f) // 4)
+        result = np.zeros_like(f)
+        
+        for i in range(0, len(f), block_size):
+            end_idx = min(i + block_size, len(f))
+            block_f = f[i:end_idx]
+            block_t = t[i:end_idx]
+            
+            # Process block
+            config = ParallelConfig(chunk_size=100)
+            caputo_integral = ParallelOptimizedCaputo(alpha, config)
+            result[i:end_idx] = caputo_integral.compute_parallel(block_f, block_t, h)
+    else:
+        # Process normally for smaller datasets
+        config = ParallelConfig()
+        caputo_integral = ParallelOptimizedCaputo(alpha, config)
+        result = caputo_integral.compute_parallel(f, t, h)
+    
+    return result
+
+
+def block_processing_kernel(
+    data: np.ndarray,
+    alpha: float,
+    h: float,
+    block_size: int = 1000
+) -> np.ndarray:
+    """
+    Apply fractional derivative kernel to data in blocks for memory efficiency.
+    
+    Args:
+        data: Input data
+        alpha: Fractional order
+        h: Step size
+        block_size: Size of each block
+        
+    Returns:
+        Processed data
+    """
+    result = np.zeros_like(data)
+    
+    for i in range(0, len(data), block_size):
+        end_idx = min(i + block_size, len(data))
+        block_data = data[i:end_idx]
+        
+        # Generate time array for this block
+        block_t = np.arange(len(block_data)) * h
+        
+        # Apply fractional derivative using parallel Caputo method
+        config = ParallelConfig(chunk_size=50)
+        caputo_integral = ParallelOptimizedCaputo(alpha, config)
+        processed_block = caputo_integral.compute_parallel(block_data, block_t, h)
+        result[i:end_idx] = processed_block
+    
+    return result

@@ -62,20 +62,34 @@ class BinomialCoefficients:
         Returns:
             Binomial coefficient value(s)
         """
+        # Check cache for scalar inputs
+        if isinstance(n, (float, int)) and isinstance(k, (float, int)):
+            cache_key = (n, k)
+            if cache_key in self._cache:
+                return self._cache[cache_key]
+        
+        # Compute the result
         if (
             self.use_jax
             and isinstance(n, (jnp.ndarray, float, int))
             and isinstance(k, (jnp.ndarray, float, int))
         ):
-            return self._binomial_jax(n, k)
+            result = self._binomial_jax(n, k)
         elif (
             self.use_numba
             and isinstance(n, (float, int))
             and isinstance(k, (float, int))
         ):
-            return self._binomial_numba_scalar(n, k)
+            result = self._binomial_numba_scalar(n, k)
         else:
-            return self._binomial_scipy(n, k)
+            result = self._binomial_scipy(n, k)
+        
+        # Cache scalar results
+        if isinstance(n, (float, int)) and isinstance(k, (float, int)):
+            if len(self._cache) < self.cache_size:
+                self._cache[(n, k)] = result
+        
+        return result
 
     @staticmethod
     def _binomial_scipy(
@@ -126,11 +140,11 @@ class BinomialCoefficients:
     @staticmethod
     def _binomial_jax_impl(n: jnp.ndarray, k: jnp.ndarray) -> jnp.ndarray:
         """
-        JAX implementation of binomial coefficient.
+        JAX implementation of binomial coefficient using gamma function.
 
-        Uses JAX's built-in binomial function for vectorized operations.
+        Uses the gamma function formula: C(n,k) = Γ(n+1) / (Γ(k+1) * Γ(n-k+1))
         """
-        return jax.scipy.special.binom(n, k)
+        return jax.scipy.special.gamma(n + 1) / (jax.scipy.special.gamma(k + 1) * jax.scipy.special.gamma(n - k + 1))
 
     def compute_fractional(
         self,
@@ -196,11 +210,11 @@ class BinomialCoefficients:
             alpha: jnp.ndarray,
             k: jnp.ndarray) -> jnp.ndarray:
         """
-        JAX implementation of fractional binomial coefficient.
+        JAX implementation of fractional binomial coefficient using gamma function.
 
-        Uses JAX's built-in binomial function for vectorized operations.
+        Uses the gamma function formula: C(α,k) = Γ(α+1) / (Γ(k+1) * Γ(α-k+1))
         """
-        return jax.scipy.special.binom(alpha, k)
+        return jax.scipy.special.gamma(alpha + 1) / (jax.scipy.special.gamma(k + 1) * jax.scipy.special.gamma(alpha - k + 1))
 
     def compute_sequence(self, alpha: float, max_k: int) -> np.ndarray:
         """
@@ -245,18 +259,21 @@ class GrunwaldLetnikovCoefficients:
     D^α f(x) = lim_{h→0} h^(-α) * Σ_{k=0}^∞ (-1)^k * C(α,k) * f(x - kh)
     """
 
-    def __init__(self, use_jax: bool = False, use_numba: bool = True):
+    def __init__(self, use_jax: bool = False, use_numba: bool = True, cache_size: int = 1000):
         """
         Initialize Grünwald-Letnikov coefficients calculator.
 
         Args:
             use_jax: Whether to use JAX implementation
             use_numba: Whether to use NUMBA implementation
+            cache_size: Size of the cache for frequently used coefficients
         """
         self.use_jax = use_jax
         self.use_numba = use_numba
+        self.cache_size = cache_size
+        self._cache = {}
         self.binomial = BinomialCoefficients(
-            use_jax=use_jax, use_numba=use_numba)
+            use_jax=use_jax, use_numba=use_numba, cache_size=cache_size)
 
     def compute_coefficients(self, alpha: float, max_k: int) -> np.ndarray:
         """
@@ -271,7 +288,7 @@ class GrunwaldLetnikovCoefficients:
         """
         if self.use_jax:
             k = jnp.arange(max_k + 1)
-            return (-1) ** k * jax.scipy.special.binom(alpha, k)
+            return (-1) ** k * jax.scipy.special.gamma(alpha + 1) / (jax.scipy.special.gamma(k + 1) * jax.scipy.special.gamma(alpha - k + 1))
         else:
             k = np.arange(max_k + 1)
             return (-1) ** k * scipy_special.binom(alpha, k)
@@ -292,6 +309,19 @@ class GrunwaldLetnikovCoefficients:
         """
         coeffs = self.compute_coefficients(alpha, max_k)
         return coeffs / (h**alpha)
+
+    def compute(self, alpha: float, max_k: int) -> np.ndarray:
+        """
+        Compute Grünwald-Letnikov coefficients (alias for compute_coefficients).
+
+        Args:
+            alpha: Fractional order
+            max_k: Maximum number of coefficients
+
+        Returns:
+            Array of coefficients
+        """
+        return self.compute_coefficients(alpha, max_k)
 
 
 # Note: NUMBA vectorization removed for compatibility

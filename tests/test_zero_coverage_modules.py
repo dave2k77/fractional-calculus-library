@@ -166,38 +166,38 @@ class TestVarianceAwareTraining:
 class TestSpectralAutogradModules:
     """Test spectral autograd modules."""
     
-    def test_import_spectral_autograd_corrected(self):
-        """Test that spectral_autograd_corrected can be imported."""
+    def test_import_spectral_autograd(self):
+        """Test that spectral_autograd can be imported."""
         try:
-            from hpfracc.ml.spectral_autograd_corrected import (
-                SpectralFractionalAutograd, SpectralGradientFunction
+            from hpfracc.ml.spectral_autograd import (
+                SpectralFractionalDerivative, SpectralFractionalLayer
             )
             # If import succeeds, test basic functionality
             assert True
         except ImportError:
-            pytest.skip("spectral_autograd_corrected not available")
+            pytest.skip("spectral_autograd not available")
     
-    def test_import_spectral_autograd_production(self):
-        """Test that spectral_autograd_production can be imported."""
+    def test_import_spectral_autograd_2(self):
+        """Test that spectral_autograd can be imported (test 2)."""
         try:
-            from hpfracc.ml.spectral_autograd_production import (
-                ProductionSpectralAutograd, ProductionGradientFunction
+            from hpfracc.ml.spectral_autograd import (
+                SpectralFractionalDerivative, SpectralFractionalLayer
             )
             # If import succeeds, test basic functionality
             assert True
         except ImportError:
-            pytest.skip("spectral_autograd_production not available")
+            pytest.skip("spectral_autograd not available")
     
-    def test_import_spectral_autograd_robust(self):
-        """Test that spectral_autograd_robust can be imported."""
+    def test_import_spectral_autograd_3(self):
+        """Test that spectral_autograd can be imported (test 3)."""
         try:
-            from hpfracc.ml.spectral_autograd_robust import (
-                RobustSpectralAutograd, RobustGradientFunction
+            from hpfracc.ml.spectral_autograd import (
+                SpectralFractionalDerivative, SpectralFractionalLayer
             )
             # If import succeeds, test basic functionality
             assert True
         except ImportError:
-            pytest.skip("spectral_autograd_robust not available")
+            pytest.skip("spectral_autograd not available")
 
 
 class TestFractionalImplementationsBackup:
@@ -205,13 +205,8 @@ class TestFractionalImplementationsBackup:
     
     def test_import_fractional_implementations_backup(self):
         """Test that fractional_implementations_backup can be imported."""
-        try:
-            # Try to import the backup module
-            import hpfracc.core.fractional_implementations_backup
-            # If import succeeds, test basic functionality
-            assert True
-        except ImportError:
-            pytest.skip("fractional_implementations_backup not available")
+        # This file was removed as it was an unused backup
+        pytest.skip("fractional_implementations_backup was removed (unused backup file)")
 
 
 class TestZeroCoverageIntegration:

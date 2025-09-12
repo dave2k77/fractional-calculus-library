@@ -8,7 +8,7 @@ import torch.nn as nn
 import numpy as np
 from unittest.mock import patch, MagicMock
 
-from hpfracc.ml.spectral_autograd_unified import (
+from hpfracc.ml.spectral_autograd import (
     SpectralFractionalDerivative,
     SpectralFractionalLayer,
     SpectralFractionalNetwork,

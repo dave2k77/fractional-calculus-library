@@ -17,15 +17,15 @@ class TestOptimizedCaputo:
         """Test creating OptimizedCaputo instances."""
         # Test with float
         caputo = OptimizedCaputo(0.5)
-        assert caputo.alpha == 0.5
+        assert caputo.alpha.alpha == 0.5  # FractionalOrder object
         # Method is passed to compute(), not stored in __init__
 
         # Test with different alpha values
         caputo_alpha1 = OptimizedCaputo(0.3)
         caputo_alpha2 = OptimizedCaputo(0.7)
-
-        assert caputo_alpha1.alpha == 0.3
-        assert caputo_alpha2.alpha == 0.7
+        
+        assert caputo_alpha1.alpha.alpha == 0.3  # FractionalOrder object
+        assert caputo_alpha2.alpha.alpha == 0.7  # FractionalOrder object
 
     def test_optimized_caputo_validation(self):
         """Test OptimizedCaputo validation."""
@@ -187,7 +187,7 @@ class TestOptimizedCaputo:
         # Test valid alpha values (L1 scheme requires 0 < α < 1)
         for alpha in [0.1, 0.5, 0.9]:
             caputo = OptimizedCaputo(alpha)
-            assert caputo.alpha == alpha
+            assert caputo.alpha.alpha == alpha  # FractionalOrder object
 
         # Test invalid alpha values
         with pytest.raises(ValueError):

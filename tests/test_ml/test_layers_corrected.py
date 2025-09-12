@@ -510,7 +510,7 @@ class TestLayerBasicFunctionality:
         )
         
         x = torch.randn(5, 1, 10)  # (seq_len, batch, input_size)
-        result = layer.forward(x)
+        result, (hidden, cell) = layer.forward(x)
         
         assert result is not None
         assert result.shape[0] == 5  # seq_len preserved
@@ -580,7 +580,7 @@ class TestLayerBasicFunctionality:
     def test_layer_norm_forward_pass(self):
         """Test basic forward pass of LayerNorm."""
         layer = FractionalLayerNorm(
-            normalized_shape=16,
+            normalized_shape=10,  # Match the last dimension of input
             backend=BackendType.TORCH
         )
         

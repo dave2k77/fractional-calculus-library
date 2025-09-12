@@ -425,11 +425,19 @@ class FractionalCosineEmbeddingLoss(FractionalLossFunction):
     def compute_loss(self, predictions: Any, targets: Any) -> Any:
         if self.backend == BackendType.TORCH:
             import torch.nn.functional as F
-            return F.cosine_embedding_loss(
-                predictions,
-                targets,
-                margin=self.margin,
-                reduction=self.reduction)
+            # Handle multi-input loss: predictions is a tuple (input1, input2)
+            if isinstance(predictions, tuple) and len(predictions) == 2:
+                input1, input2 = predictions
+                return F.cosine_embedding_loss(
+                    input1, input2, targets,
+                    margin=self.margin,
+                    reduction=self.reduction)
+            else:
+                # Fallback for single input
+                return F.cosine_embedding_loss(
+                    predictions, targets,
+                    margin=self.margin,
+                    reduction=self.reduction)
         else:
             # JAX/NUMBA implementation
             # Cosine embedding loss
@@ -615,11 +623,17 @@ class FractionalCTCLoss(FractionalLossFunction):
     def compute_loss(self, predictions: Any, targets: Any) -> Any:
         if self.backend == BackendType.TORCH:
             import torch.nn.functional as F
-            return F.ctc_loss(
-                predictions,
-                targets,
-                blank=self.blank,
-                reduction=self.reduction)
+            # Handle CTC loss with additional parameters
+            if isinstance(predictions, tuple) and len(predictions) == 3:
+                log_probs, input_lengths, target_lengths = predictions
+                return F.ctc_loss(
+                    log_probs, targets, input_lengths, target_lengths,
+                    blank=self.blank, reduction=self.reduction)
+            else:
+                # Fallback for simple case
+                return F.ctc_loss(
+                    predictions, targets,
+                    blank=self.blank, reduction=self.reduction)
         else:
             # JAX/NUMBA implementation
             # Simplified CTC loss (in practice, you'd want a more sophisticated implementation)
@@ -660,6 +674,7 @@ class FractionalCustomLoss(FractionalLossFunction):
             backend: Optional[BackendType] = None):
         super().__init__(fractional_order, method, backend)
         self.loss_fn = loss_fn
+        self.custom_loss_fn = loss_fn  # Alias for backward compatibility
 
     def compute_loss(self, predictions: Any, targets: Any) -> Any:
         return self.loss_fn(predictions, targets)

@@ -17,7 +17,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 from ..core.definitions import FractionalOrder
 from ..special import gamma
-from .parallel_optimized_methods import ParallelConfig
+from .optimized_methods import ParallelConfig
 
 
 class WeylDerivative:
@@ -34,6 +34,7 @@ class WeylDerivative:
         self,
         alpha: Union[float, FractionalOrder],
         parallel_config: Optional[ParallelConfig] = None,
+        optimized: bool = True,
     ):
         """Initialize Weyl derivative calculator."""
         if isinstance(alpha, (int, float)):
@@ -44,6 +45,7 @@ class WeylDerivative:
         self.n = int(np.ceil(self.alpha.alpha))
         self.alpha_val = self.alpha.alpha
         self.parallel_config = parallel_config or ParallelConfig()
+        self.optimized = optimized
 
     def compute(
         self,
@@ -465,6 +467,7 @@ class ReizFellerDerivative:
     ) -> np.ndarray:
         """Compute using spectral method with FFT."""
         N = len(f)
+        original_len = N
 
         # Ensure N is even for FFT
         if N % 2 == 1:
@@ -488,7 +491,7 @@ class ReizFellerDerivative:
         # Inverse FFT
         result = np.real(np.fft.ifft(filtered_fft))
 
-        return result
+        return result[:original_len]  # Return original length
 
 
 class AdomianDecomposition:
@@ -690,4 +693,100 @@ def reiz_feller_derivative(
 ) -> Union[float, np.ndarray]:
     """Convenience function for Reiz-Feller derivative."""
     calculator = ReizFellerDerivative(alpha, **kwargs)
+    return calculator.compute(f, x, h)
+
+
+# =============================================================================
+# OPTIMIZED ALIASES FOR BACKWARD COMPATIBILITY
+# =============================================================================
+
+class OptimizedWeylDerivative(WeylDerivative):
+    """Alias for backward compatibility with optimized Weyl derivative."""
+    
+    def __init__(self, alpha: Union[float, FractionalOrder], **kwargs):
+        """Initialize optimized Weyl derivative calculator."""
+        super().__init__(alpha, optimized=True, **kwargs)
+
+
+class OptimizedMarchaudDerivative(MarchaudDerivative):
+    """Alias for backward compatibility with optimized Marchaud derivative."""
+    
+    def __init__(self, alpha: Union[float, FractionalOrder], **kwargs):
+        """Initialize optimized Marchaud derivative calculator."""
+        super().__init__(alpha, **kwargs)
+
+
+class OptimizedHadamardDerivative(HadamardDerivative):
+    """Alias for backward compatibility with optimized Hadamard derivative."""
+    
+    def __init__(self, alpha: Union[float, FractionalOrder], **kwargs):
+        """Initialize optimized Hadamard derivative calculator."""
+        super().__init__(alpha, **kwargs)
+
+
+class OptimizedReizFellerDerivative(ReizFellerDerivative):
+    """Alias for backward compatibility with optimized Reiz-Feller derivative."""
+    
+    def __init__(self, alpha: Union[float, FractionalOrder], **kwargs):
+        """Initialize optimized Reiz-Feller derivative calculator."""
+        super().__init__(alpha, **kwargs)
+
+
+class OptimizedAdomianDecomposition(AdomianDecomposition):
+    """Alias for backward compatibility with optimized Adomian decomposition."""
+    
+    def __init__(self, alpha: Union[float, FractionalOrder], **kwargs):
+        """Initialize optimized Adomian decomposition calculator."""
+        super().__init__(alpha, **kwargs)
+
+
+# =============================================================================
+# CONVENIENCE FUNCTIONS FOR OPTIMIZED METHODS
+# =============================================================================
+
+def optimized_weyl_derivative(
+    f: Union[Callable, np.ndarray],
+    x: Union[float, np.ndarray],
+    alpha: Union[float, FractionalOrder],
+    h: Optional[float] = None,
+    **kwargs,
+) -> Union[float, np.ndarray]:
+    """Convenience function for optimized Weyl derivative."""
+    calculator = OptimizedWeylDerivative(alpha, **kwargs)
+    return calculator.compute(f, x, h)
+
+
+def optimized_marchaud_derivative(
+    f: Union[Callable, np.ndarray],
+    x: Union[float, np.ndarray],
+    alpha: Union[float, FractionalOrder],
+    h: Optional[float] = None,
+    **kwargs,
+) -> Union[float, np.ndarray]:
+    """Convenience function for optimized Marchaud derivative."""
+    calculator = OptimizedMarchaudDerivative(alpha, **kwargs)
+    return calculator.compute(f, x, h)
+
+
+def optimized_hadamard_derivative(
+    f: Union[Callable, np.ndarray],
+    x: Union[float, np.ndarray],
+    alpha: Union[float, FractionalOrder],
+    h: Optional[float] = None,
+    **kwargs,
+) -> Union[float, np.ndarray]:
+    """Convenience function for optimized Hadamard derivative."""
+    calculator = OptimizedHadamardDerivative(alpha, **kwargs)
+    return calculator.compute(f, x, h)
+
+
+def optimized_reiz_feller_derivative(
+    f: Union[Callable, np.ndarray],
+    x: Union[float, np.ndarray],
+    alpha: Union[float, FractionalOrder],
+    h: Optional[float] = None,
+    **kwargs,
+) -> Union[float, np.ndarray]:
+    """Convenience function for optimized Reiz-Feller derivative."""
+    calculator = OptimizedReizFellerDerivative(alpha, **kwargs)
     return calculator.compute(f, x, h)

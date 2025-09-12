@@ -57,22 +57,21 @@ class TestAnalyticsBasic:
         """Test basic UsageTracker functionality."""
         tracker = UsageTracker(db_path=temp_db)
         
-        # Test recording a usage event
-        event = UsageEvent(
-            timestamp=time.time(),
-            method_name="grunwald_letnikov",
-            estimator_type="fractional_derivative",
-            parameters={"alpha": 0.5},
-            array_size=1000,
-            fractional_order=0.5,
-            execution_success=True
-        )
-        
-        # This might fail if the database methods aren't implemented
+        # Test tracking usage with the correct method
         try:
-            tracker.record_event(event)
-            events = tracker.get_events()
-            assert len(events) >= 0  # At least no error
+            tracker.track_usage(
+                method_name="grunwald_letnikov",
+                estimator_type="fractional_derivative",
+                parameters={"alpha": 0.5},
+                array_size=1000,
+                fractional_order=0.5,
+                execution_success=True
+            )
+            
+            # Test getting usage stats
+            stats = tracker.get_usage_stats()
+            assert isinstance(stats, dict)  # Should return a dictionary
+            
         except Exception as e:
             # If the method isn't implemented, that's okay for now
             pytest.skip(f"UsageTracker method not fully implemented: {e}")
@@ -98,9 +97,14 @@ class TestAnalyticsBasic:
     def test_analytics_manager_initialization(self, temp_db):
         """Test AnalyticsManager initialization."""
         try:
-            from hpfracc.analytics.analytics_manager import AnalyticsManager
-            manager = AnalyticsManager(db_path=temp_db)
-            assert manager.db_path == temp_db
+            from hpfracc.analytics.analytics_manager import AnalyticsManager, AnalyticsConfig
+            config = AnalyticsConfig()
+            manager = AnalyticsManager(config=config)
             assert manager.session_id is not None
+            assert manager.config is not None
+            assert hasattr(manager, 'usage_tracker')
+            assert hasattr(manager, 'performance_monitor')
+            assert hasattr(manager, 'error_analyzer')
+            assert hasattr(manager, 'workflow_insights')
         except Exception as e:
             pytest.skip(f"AnalyticsManager not fully implemented: {e}")

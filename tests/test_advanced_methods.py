@@ -26,7 +26,7 @@ from hpfracc.algorithms.advanced_methods import (
     reiz_feller_derivative,
 )
 
-from hpfracc.algorithms.advanced_optimized_methods import (
+from hpfracc.algorithms.advanced_methods import (
     OptimizedWeylDerivative,
     OptimizedMarchaudDerivative,
     OptimizedHadamardDerivative,
@@ -36,10 +36,9 @@ from hpfracc.algorithms.advanced_optimized_methods import (
     optimized_marchaud_derivative,
     optimized_hadamard_derivative,
     optimized_reiz_feller_derivative,
-    optimized_adomian_decomposition,
 )
 
-from hpfracc.algorithms.parallel_optimized_methods import ParallelConfig
+from hpfracc.algorithms.optimized_methods import ParallelConfig
 
 
 class TestWeylDerivative:
@@ -372,8 +371,8 @@ class TestOptimizedMethods:
         t = np.linspace(0, 1, 100)  # Create time array
 
         opt_adomian = OptimizedAdomianDecomposition(alpha)
-        solution = opt_adomian.solve(
-            equation, t, initial_condition, max_terms=5
+        solution, _ = opt_adomian.solve(
+            equation, {"y": initial_condition}, (0, 1), n_steps=100, n_terms=5
         )
 
         assert len(solution) == len(t)
@@ -382,7 +381,7 @@ class TestOptimizedMethods:
     def test_optimized_convenience_functions(self):
         """Test optimized convenience functions."""
         alpha = 0.5
-        x = np.linspace(0, 5, 50)
+        x = np.linspace(0.1, 5, 50)  # Start from 0.1 to avoid log(0)
         f = np.sin(x)
 
         # Test all optimized convenience functions

@@ -42,19 +42,35 @@ try:
 except ImportError:
     pass
 
-# Import optimized advanced methods
+# Import optimized methods
 try:
-    from .algorithms.advanced_optimized_methods import (
-        OptimizedWeylDerivative,
-        OptimizedMarchaudDerivative,
-        OptimizedHadamardDerivative,
-        OptimizedReizFellerDerivative,
-        OptimizedAdomianDecomposition,
-        optimized_weyl_derivative,
-        optimized_marchaud_derivative,
-        optimized_hadamard_derivative,
-        optimized_reiz_feller_derivative,
-        optimized_adomian_decomposition,
+    from .algorithms.optimized_methods import (
+        # Core optimized classes
+        OptimizedRiemannLiouville,
+        OptimizedCaputo,
+        OptimizedGrunwaldLetnikov,
+        OptimizedFractionalMethods,
+        AdvancedFFTMethods,
+        L1L2Schemes,
+        
+        # Parallel optimized classes
+        ParallelOptimizedRiemannLiouville,
+        ParallelOptimizedCaputo,
+        ParallelOptimizedGrunwaldLetnikov,
+        
+        # Parallel processing infrastructure
+        ParallelConfig,
+        ParallelLoadBalancer,
+        ParallelPerformanceMonitor,
+        NumbaOptimizer,
+        NumbaFractionalKernels,
+        NumbaParallelManager,
+        
+        # Utility functions
+        benchmark_parallel_vs_serial,
+        optimize_parallel_parameters,
+        memory_efficient_caputo,
+        block_processing_kernel,
     )
 except ImportError:
     pass
@@ -100,9 +116,9 @@ try:
 except ImportError:
     pass
 
-# Import special optimized methods
+# Import special optimized methods (now consolidated in special_methods)
 try:
-    from .algorithms.special_optimized_methods import (
+    from .algorithms.special_methods import (
         SpecialOptimizedWeylDerivative,
         SpecialOptimizedMarchaudDerivative,
         SpecialOptimizedReizFellerDerivative,

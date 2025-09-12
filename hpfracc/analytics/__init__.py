@@ -12,12 +12,13 @@ from .usage_tracker import UsageTracker
 from .performance_monitor import PerformanceMonitor
 from .error_analyzer import ErrorAnalyzer
 from .workflow_insights import WorkflowInsights
-from .analytics_manager import AnalyticsManager
+from .analytics_manager import AnalyticsManager, AnalyticsConfig
 
 __all__ = [
     'UsageTracker',
     'PerformanceMonitor',
     'ErrorAnalyzer',
     'WorkflowInsights',
-    'AnalyticsManager'
+    'AnalyticsManager',
+    'AnalyticsConfig'
 ]

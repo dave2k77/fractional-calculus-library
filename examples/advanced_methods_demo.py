@@ -11,13 +11,17 @@ This script demonstrates the new advanced fractional calculus methods:
 Includes performance comparisons and visualizations.
 """
 
-from hpfracc.algorithms.parallel_optimized_methods import ParallelConfig
-from hpfracc.algorithms.advanced_optimized_methods import (
-    OptimizedWeylDerivative,
-    OptimizedMarchaudDerivative,
-    OptimizedHadamardDerivative,
-    OptimizedReizFellerDerivative,
-    OptimizedAdomianDecomposition,
+from hpfracc.algorithms.optimized_methods import (
+    ParallelConfig,
+    # Note: These classes may need to be implemented
+    # OptimizedWeylDerivative,
+    # OptimizedMarchaudDerivative,
+    OptimizedCaputo,
+    OptimizedRiemannLiouville,
+    # Note: These classes may need to be implemented
+    # OptimizedHadamardDerivative,
+    # OptimizedReizFellerDerivative,
+    # OptimizedAdomianDecomposition,
 )
 from hpfracc.algorithms.advanced_methods import (
     WeylDerivative,

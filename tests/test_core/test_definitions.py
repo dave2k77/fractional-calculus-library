@@ -88,7 +88,7 @@ class TestCaputoDefinition:
         alpha = FractionalOrder(0.5)
         caputo = CaputoDefinition(alpha)
 
-        assert caputo.alpha == alpha
+        assert caputo.alpha.alpha == alpha.alpha
         assert caputo.definition_type == DefinitionType.CAPUTO
 
         # Test with different orders
@@ -171,7 +171,7 @@ class TestGrunwaldLetnikovDefinition:
         alpha = FractionalOrder(0.5)
         gl = GrunwaldLetnikovDefinition(alpha)
 
-        assert gl.alpha == alpha
+        assert gl.alpha.alpha == alpha.alpha
         assert gl.definition_type == DefinitionType.GRUNWALD_LETNIKOV
 
     def test_grunwald_letnikov_formula(self):

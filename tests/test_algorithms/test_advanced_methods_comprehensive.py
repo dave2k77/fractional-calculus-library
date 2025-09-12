@@ -18,7 +18,7 @@ from hpfracc.algorithms.advanced_methods import (
     reiz_feller_derivative
 )
 from hpfracc.core.definitions import FractionalOrder
-from hpfracc.algorithms.parallel_optimized_methods import ParallelConfig
+from hpfracc.algorithms.optimized_methods import ParallelConfig
 
 
 class TestWeylDerivative:

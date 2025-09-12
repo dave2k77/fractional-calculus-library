@@ -213,6 +213,5 @@ exclude = [
   "dist",
   "examples",
   "benchmarks",
-  "docs",
-  "hpfracc/core/fractional_implementations_backup.py"
+  "docs"
 ]

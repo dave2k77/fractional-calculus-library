@@ -20,7 +20,7 @@ class TestOptimizedRiemannLiouville:
         """Test creating OptimizedRiemannLiouville instances."""
         # Test with float
         rl = OptimizedRiemannLiouville(0.5)
-        assert rl.alpha == 0.5
+        assert rl.alpha.alpha == 0.5
         assert rl.n == 1  # n should be ceil(alpha)
         assert rl.alpha_val == 0.5
 
@@ -28,9 +28,9 @@ class TestOptimizedRiemannLiouville:
         rl_alpha1 = OptimizedRiemannLiouville(1.5)
         rl_alpha2 = OptimizedRiemannLiouville(2.3)
 
-        assert rl_alpha1.alpha == 1.5
+        assert rl_alpha1.alpha.alpha == 1.5
         assert rl_alpha1.n == 2  # ceil(1.5) = 2
-        assert rl_alpha2.alpha == 2.3
+        assert rl_alpha2.alpha.alpha == 2.3
         assert rl_alpha2.n == 3  # ceil(2.3) = 3
 
     def test_optimized_riemann_liouville_validation(self):
@@ -188,7 +188,7 @@ class TestOptimizedRiemannLiouville:
         # Test valid alpha values
         for alpha in [0.1, 0.5, 1.0, 1.5, 2.0]:
             rl = OptimizedRiemannLiouville(alpha)
-            assert rl.alpha == alpha
+            assert rl.alpha.alpha == alpha
 
         # Test invalid alpha values (negative)
         with pytest.raises(ValueError):

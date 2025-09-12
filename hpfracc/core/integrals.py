@@ -110,6 +110,19 @@ class RiemannLiouvilleIntegral(FractionalIntegral):
         else:
             raise TypeError(f"Unsupported type for x: {type(x)}")
 
+    def compute(self, f: Callable, x: Union[float, np.ndarray, torch.Tensor]) -> Union[float, np.ndarray, torch.Tensor]:
+        """
+        Compute Riemann-Liouville fractional integral (alias for __call__).
+        
+        Args:
+            f: Function to integrate
+            x: Point(s) at which to evaluate the integral
+            
+        Returns:
+            Fractional integral value(s)
+        """
+        return self(f, x)
+
     def _compute_scalar(self, f: Callable, x: float) -> float:
         """Compute fractional integral at a scalar point."""
         if x <= 0:
@@ -235,6 +248,12 @@ class WeylIntegral(FractionalIntegral):
             result[i] = self._compute_scalar(f, xi)
 
         return result
+
+    # Compatibility with tests expecting a compute(...) API
+    def compute(self,
+                f: Callable,
+                x: Union[float, np.ndarray, torch.Tensor]) -> Union[float, np.ndarray, torch.Tensor]:
+        return self.__call__(f, x)
 
     def _compute_array_torch(
             self,

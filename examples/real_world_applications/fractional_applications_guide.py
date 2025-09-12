@@ -32,8 +32,11 @@ from hpfracc.algorithms.advanced_methods import (
 )
 
 # Import optimized methods
-from hpfracc.algorithms.advanced_optimized_methods import (
-    optimized_weyl_derivative,
+from hpfracc.algorithms.optimized_methods import (
+    # Note: optimized_weyl_derivative function may need to be implemented
+    # optimized_weyl_derivative,
+    OptimizedCaputo,
+    OptimizedRiemannLiouville,
 )
 
 

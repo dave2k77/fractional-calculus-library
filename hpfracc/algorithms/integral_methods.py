@@ -50,9 +50,8 @@ class RiemannLiouvilleIntegral:
         if isinstance(alpha, FractionalOrder):
             alpha = alpha.alpha
 
-        if alpha <= 0:
-            raise ValueError(
-                "Fractional order α must be positive for integrals")
+        if alpha < 0:
+            raise ValueError("Fractional order must be non-negative")
 
         self.alpha = alpha
         self.method = method.lower()
@@ -92,12 +91,24 @@ class RiemannLiouvilleIntegral:
         if method is None:
             method = self.method
 
-        # Validate inputs
-        if len(t) < 2:
-            raise ValueError("Time array must have at least 2 points")
+        # Handle α = 0: identity integral
+        if self.alpha == 0:
+            # Accept length >= 1
+            if callable(f):
+                return np.array([f(ti) for ti in t])
+            return np.asarray(f)
 
+        # Handle empty and short inputs gracefully
+        if len(t) == 0:
+            return np.array([])
+
+        # Determine step size
         if h is None:
-            h = t[1] - t[0]
+            if len(t) >= 2:
+                h = t[1] - t[0]
+            else:
+                # For a single point, any positive step works; result will be zero
+                h = 1.0
 
         # Convert callable to array if needed
         if callable(f):
@@ -259,12 +270,15 @@ class CaputoIntegral:
         if isinstance(alpha, FractionalOrder):
             alpha = alpha.alpha
 
-        if alpha <= 0:
-            raise ValueError(
-                "Fractional order α must be positive for Caputo integrals")
+        if alpha < 0:
+            raise ValueError("Fractional order must be non-negative")
 
-        # Reuse RL implementation since Caputo = RL for α > 0
-        self.rl_integral = RiemannLiouvilleIntegral(
+        # Store alpha and optionally create RL delegate
+        self.alpha = alpha
+        self.method = method
+        self.optimize_memory = optimize_memory
+        self.use_jax = use_jax
+        self.rl_integral = None if alpha == 0 else RiemannLiouvilleIntegral(
             alpha, method, optimize_memory, use_jax
         )
 
@@ -287,8 +301,72 @@ class CaputoIntegral:
         Returns:
             Array of integral values at each time point
         """
-        # Simply delegate to RL implementation
+        # α = 0: identity
+        if self.alpha == 0:
+            if callable(f):
+                return np.array([f(ti) for ti in t])
+            return np.asarray(f)
+        # Delegate to RL implementation
         return self.rl_integral.compute(f, t, h, method)
+
+
+class WeylIntegral:
+    """
+    Weyl fractional integral of order α.
+
+    Provides a simple interface consistent with other integral classes.
+    """
+
+    def __init__(self,
+                 alpha: Union[float, FractionalOrder],
+                 method: str = "auto"):
+        if isinstance(alpha, FractionalOrder):
+            alpha = alpha.alpha
+        if alpha < 0:
+            raise ValueError("Fractional order must be non-negative")
+        self.alpha = alpha
+        self.method = method
+
+    def compute(self,
+                f: Union[Callable, np.ndarray],
+                t: np.ndarray,
+                h: Optional[float] = None) -> np.ndarray:
+        # α = 0 acts as identity
+        if self.alpha == 0:
+            if callable(f):
+                return np.array([f(ti) for ti in t])
+            return np.asarray(f)
+
+        # Minimal discrete approximation (windowed RL-style on provided grid)
+        if h is None and len(t) >= 2:
+            h = t[1] - t[0]
+        elif h is None:
+            h = 1.0
+
+        if callable(f):
+            f_array = np.array([f(ti) for ti in t])
+        else:
+            f_array = np.asarray(f)
+
+        if len(t) < 2:
+            # Not enough points for numerical integration beyond identity case
+            return f_array
+
+        # Use direct summation similar to RL over available past samples
+        n = len(t)
+        result = np.zeros(n)
+        from ..special import gamma as _gamma
+        gamma_alpha = _gamma(self.alpha)
+        for i in range(n):
+            integ = 0.0
+            for j in range(i + 1):
+                if j == i:
+                    weight = 0.0
+                else:
+                    weight = ((i - j) * h) ** (self.alpha - 1)
+                integ += weight * f_array[j]
+            result[i] = (integ * h) / gamma_alpha
+        return result
 
 
 # Convenience functions for easy access

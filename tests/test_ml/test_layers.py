@@ -277,10 +277,10 @@ class TestFractionalPooling:
         config = LayerConfig(fractional_order=FractionalOrder(0.5))
         layer = FractionalPooling(kernel_size=2, config=config)
         
-        assert layer.kernel_size == (2, 2)  # 2D layers use tuple format
+        assert layer.kernel_size == 2  # Integer kernel_size preserved
         assert layer.config.fractional_order.alpha == 0.5
-        assert layer.stride == (2, 2)  # 2D layers use tuple format
-        assert layer.padding == (0, 0)  # 2D layers use tuple format
+        assert layer.stride == 2  # Integer stride preserved
+        assert layer.padding == 0  # Integer padding preserved
     
     def test_fractional_pooling_forward_1d(self):
         """Test 1D pooling forward pass."""

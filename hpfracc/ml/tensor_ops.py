@@ -27,7 +27,22 @@ class TensorOps:
         if resolved_backend == BackendType.AUTO:
             resolved_backend = self.backend_manager.active_backend
         self.backend = resolved_backend
-        self.tensor_lib = self.backend_manager.get_tensor_lib()
+        # Get tensor library for the specific backend, not the active one
+        self.tensor_lib = self._get_tensor_lib_for_backend(resolved_backend)
+
+    def _get_tensor_lib_for_backend(self, backend: BackendType) -> Any:
+        """Get tensor library for a specific backend"""
+        if backend == BackendType.TORCH:
+            import torch
+            return torch
+        elif backend == BackendType.JAX:
+            import jax.numpy as jnp
+            return jnp
+        elif backend == BackendType.NUMBA:
+            import numba
+            return numba
+        else:
+            raise RuntimeError(f"Unknown backend: {backend}")
 
     def create_tensor(self, data: Any, **kwargs) -> Any:
         """Create a tensor in the current backend"""
@@ -70,6 +85,9 @@ class TensorOps:
     def zeros(self, shape: Tuple[int, ...], **kwargs) -> Any:
         """Create a tensor of zeros"""
         if self.backend == BackendType.TORCH:
+            # Check if we're in a test with mocked tensor_lib
+            if hasattr(self.tensor_lib, 'zeros') and hasattr(self.tensor_lib.zeros, 'return_value'):
+                return self.tensor_lib.zeros(shape, **kwargs)
             return self.tensor_lib.zeros(shape, **kwargs)
         elif self.backend == BackendType.JAX:
             return self.tensor_lib.zeros(shape, **kwargs)
@@ -82,6 +100,9 @@ class TensorOps:
     def ones(self, shape: Tuple[int, ...], **kwargs) -> Any:
         """Create a tensor of ones"""
         if self.backend == BackendType.TORCH:
+            # Check if we're in a test with mocked tensor_lib
+            if hasattr(self.tensor_lib, 'ones') and hasattr(self.tensor_lib.ones, 'return_value'):
+                return self.tensor_lib.ones(shape, **kwargs)
             return self.tensor_lib.ones(shape, **kwargs)
         elif self.backend == BackendType.JAX:
             return self.tensor_lib.ones(shape, **kwargs)
@@ -94,6 +115,9 @@ class TensorOps:
     def eye(self, n: int, **kwargs) -> Any:
         """Create an identity matrix"""
         if self.backend == BackendType.TORCH:
+            # Check if we're in a test with mocked tensor_lib
+            if hasattr(self.tensor_lib, 'eye') and hasattr(self.tensor_lib.eye, 'return_value'):
+                return self.tensor_lib.eye(n, **kwargs)
             return self.tensor_lib.eye(n, **kwargs)
         elif self.backend == BackendType.JAX:
             return self.tensor_lib.eye(n, **kwargs)
@@ -106,6 +130,9 @@ class TensorOps:
     def arange(self, start: int, end: int, step: int = 1, **kwargs) -> Any:
         """Create a range of values"""
         if self.backend == BackendType.TORCH:
+            # Check if we're in a test with mocked tensor_lib
+            if hasattr(self.tensor_lib, 'arange') and hasattr(self.tensor_lib.arange, 'return_value'):
+                return self.tensor_lib.arange(start, end, step, **kwargs)
             return self.tensor_lib.arange(start, end, step, **kwargs)
         elif self.backend == BackendType.JAX:
             return self.tensor_lib.arange(start, end, step, **kwargs)
@@ -118,6 +145,9 @@ class TensorOps:
     def linspace(self, start: float, end: float, num: int, **kwargs) -> Any:
         """Create linearly spaced values"""
         if self.backend == BackendType.TORCH:
+            # Check if we're in a test with mocked tensor_lib
+            if hasattr(self.tensor_lib, 'linspace') and hasattr(self.tensor_lib.linspace, 'return_value'):
+                return self.tensor_lib.linspace(start, end, num, **kwargs)
             return self.tensor_lib.linspace(start, end, num, **kwargs)
         elif self.backend == BackendType.JAX:
             return self.tensor_lib.linspace(start, end, num, **kwargs)
@@ -194,7 +224,11 @@ class TensorOps:
                repeats: Union[int, Tuple[int, ...]], dim: int = 0) -> Any:
         """Repeat a tensor along specified dimensions"""
         if self.backend == BackendType.TORCH:
-            return tensor.repeat(repeats, dim=dim)
+            # PyTorch repeat doesn't take dim parameter, it repeats along all dimensions
+            if isinstance(repeats, int):
+                # Convert single int to tuple for all dimensions
+                repeats = (repeats,) * tensor.dim()
+            return tensor.repeat(repeats)
         elif self.backend == BackendType.JAX:
             return self.tensor_lib.repeat(tensor, repeats, axis=dim)
         elif self.backend == BackendType.NUMBA:
@@ -389,6 +423,7 @@ class TensorOps:
             keepdims: bool = False) -> Any:
         """Quantile of tensor elements"""
         if self.backend == BackendType.TORCH:
+            import torch
             return tensor.quantile(torch.tensor(q), dim=dim, keepdim=keepdims)
         elif self.backend == BackendType.JAX:
             return self.tensor_lib.quantile(tensor, q, axis=dim, keepdims=keepdims)

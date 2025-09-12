@@ -178,94 +178,76 @@ class TestTensorOps:
 
     def test_zeros_torch(self):
         """Test zeros creation with PyTorch."""
-        with patch('hpfracc.ml.tensor_ops.get_backend_manager') as mock_get_manager:
-            mock_manager = MagicMock()
-            mock_manager.active_backend = BackendType.TORCH
-            mock_tensor_lib = MagicMock()
-            mock_tensor_lib.zeros.return_value = torch.zeros((2, 3), dtype=torch.float32)
-            mock_manager.get_tensor_lib.return_value = mock_tensor_lib
-            mock_get_manager.return_value = mock_manager
+        with patch('torch.zeros') as mock_zeros:
+            # Create a mock return value without calling the real function
+            mock_result = torch.tensor([[0.0, 0.0, 0.0], [0.0, 0.0, 0.0]], dtype=torch.float32)
+            mock_zeros.return_value = mock_result
             
             ops = TensorOps(BackendType.TORCH)
             result = ops.zeros((2, 3), dtype=torch.float32)
             
-            mock_tensor_lib.zeros.assert_called_once_with((2, 3), dtype=torch.float32)
+            mock_zeros.assert_called_once_with((2, 3), dtype=torch.float32)
 
     def test_ones_torch(self):
         """Test ones creation with PyTorch."""
-        with patch('hpfracc.ml.tensor_ops.get_backend_manager') as mock_get_manager:
-            mock_manager = MagicMock()
-            mock_manager.active_backend = BackendType.TORCH
-            mock_tensor_lib = MagicMock()
-            mock_tensor_lib.ones.return_value = torch.ones((2, 3), dtype=torch.float32)
-            mock_manager.get_tensor_lib.return_value = mock_tensor_lib
-            mock_get_manager.return_value = mock_manager
+        with patch('torch.ones') as mock_ones:
+            # Create a mock return value without calling the real function
+            mock_result = torch.tensor([[1.0, 1.0, 1.0], [1.0, 1.0, 1.0]], dtype=torch.float32)
+            mock_ones.return_value = mock_result
             
             ops = TensorOps(BackendType.TORCH)
             result = ops.ones((2, 3), dtype=torch.float32)
             
-            mock_tensor_lib.ones.assert_called_once_with((2, 3), dtype=torch.float32)
+            mock_ones.assert_called_once_with((2, 3), dtype=torch.float32)
 
     def test_eye_torch(self):
         """Test identity matrix creation with PyTorch."""
-        with patch('hpfracc.ml.tensor_ops.get_backend_manager') as mock_get_manager:
-            mock_manager = MagicMock()
-            mock_manager.active_backend = BackendType.TORCH
-            mock_tensor_lib = MagicMock()
-            mock_tensor_lib.eye.return_value = torch.eye(3, dtype=torch.float32)
-            mock_manager.get_tensor_lib.return_value = mock_tensor_lib
-            mock_get_manager.return_value = mock_manager
+        with patch('torch.eye') as mock_eye:
+            # Create a mock return value without calling the real function
+            mock_result = torch.tensor([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]], dtype=torch.float32)
+            mock_eye.return_value = mock_result
             
             ops = TensorOps(BackendType.TORCH)
             result = ops.eye(3, dtype=torch.float32)
             
-            mock_tensor_lib.eye.assert_called_once_with(3, dtype=torch.float32)
+            mock_eye.assert_called_once_with(3, dtype=torch.float32)
 
     def test_arange_torch(self):
         """Test arange creation with PyTorch."""
-        with patch('hpfracc.ml.tensor_ops.get_backend_manager') as mock_get_manager:
-            mock_manager = MagicMock()
-            mock_manager.active_backend = BackendType.TORCH
-            mock_tensor_lib = MagicMock()
-            mock_tensor_lib.arange.return_value = torch.arange(0, 5, 1, dtype=torch.float32)
-            mock_manager.get_tensor_lib.return_value = mock_tensor_lib
-            mock_get_manager.return_value = mock_manager
+        with patch('torch.arange') as mock_arange:
+            # Create a mock return value without calling the real function
+            mock_result = torch.tensor([0.0, 1.0, 2.0, 3.0, 4.0], dtype=torch.float32)
+            mock_arange.return_value = mock_result
             
             ops = TensorOps(BackendType.TORCH)
             result = ops.arange(0, 5, 1, dtype=torch.float32)
             
-            mock_tensor_lib.arange.assert_called_once_with(0, 5, 1, dtype=torch.float32)
+            mock_arange.assert_called_once_with(0, 5, 1, dtype=torch.float32)
 
     def test_linspace_torch(self):
         """Test linspace creation with PyTorch."""
-        with patch('hpfracc.ml.tensor_ops.get_backend_manager') as mock_get_manager:
-            mock_manager = MagicMock()
-            mock_manager.active_backend = BackendType.TORCH
-            mock_tensor_lib = MagicMock()
-            mock_tensor_lib.linspace.return_value = torch.linspace(0, 1, 10, dtype=torch.float32)
-            mock_manager.get_tensor_lib.return_value = mock_tensor_lib
-            mock_get_manager.return_value = mock_manager
+        with patch('torch.linspace') as mock_linspace:
+            # Create a mock return value without calling the real function
+            mock_result = torch.tensor([0.0, 0.111, 0.222, 0.333, 0.444, 0.556, 0.667, 0.778, 0.889, 1.0], dtype=torch.float32)
+            mock_linspace.return_value = mock_result
             
             ops = TensorOps(BackendType.TORCH)
             result = ops.linspace(0, 1, 10, dtype=torch.float32)
             
-            mock_tensor_lib.linspace.assert_called_once_with(0, 1, 10, dtype=torch.float32)
+            mock_linspace.assert_called_once_with(0, 1, 10, dtype=torch.float32)
 
     def test_zeros_like_torch(self):
         """Test zeros_like creation with PyTorch."""
-        with patch('hpfracc.ml.tensor_ops.get_backend_manager') as mock_get_manager:
-            mock_manager = MagicMock()
-            mock_manager.active_backend = BackendType.TORCH
-            mock_tensor_lib = MagicMock()
-            mock_tensor_lib.zeros_like.return_value = torch.zeros_like(torch.tensor([[1, 2], [3, 4]]), dtype=torch.float32)
-            mock_manager.get_tensor_lib.return_value = mock_tensor_lib
-            mock_get_manager.return_value = mock_manager
+        with patch('torch.zeros_like') as mock_zeros_like:
+            # Create a mock return value without calling the real function
+            mock_result = torch.tensor([[0.0, 0.0], [0.0, 0.0]], dtype=torch.float32)
+            mock_zeros_like.return_value = mock_result
             
             input_tensor = torch.tensor([[1, 2], [3, 4]])
             ops = TensorOps(BackendType.TORCH)
             result = ops.zeros_like(input_tensor, dtype=torch.float32)
             
-            mock_tensor_lib.zeros_like.assert_called_once_with(input_tensor, dtype=torch.float32)
+            mock_zeros_like.assert_called_once_with(input_tensor, dtype=torch.float32)
 
     def test_zeros_like_numba_with_shape(self):
         """Test zeros_like creation with NUMBA when tensor has shape."""
@@ -301,19 +283,16 @@ class TestTensorOps:
 
     def test_sqrt_torch(self):
         """Test sqrt operation with PyTorch."""
-        with patch('hpfracc.ml.tensor_ops.get_backend_manager') as mock_get_manager:
-            mock_manager = MagicMock()
-            mock_manager.active_backend = BackendType.TORCH
-            mock_tensor_lib = MagicMock()
-            mock_tensor_lib.sqrt.return_value = torch.sqrt(torch.tensor([4, 9, 16]))
-            mock_manager.get_tensor_lib.return_value = mock_tensor_lib
-            mock_get_manager.return_value = mock_manager
+        with patch('torch.sqrt') as mock_sqrt:
+            # Create a mock return value without calling the real function
+            mock_result = torch.tensor([2.0, 3.0, 4.0])
+            mock_sqrt.return_value = mock_result
             
             input_tensor = torch.tensor([4, 9, 16])
             ops = TensorOps(BackendType.TORCH)
             result = ops.sqrt(input_tensor)
             
-            mock_tensor_lib.sqrt.assert_called_once_with(input_tensor)
+            mock_sqrt.assert_called_once_with(input_tensor)
 
     def test_unknown_backend_error(self):
         """Test that unknown backend raises RuntimeError."""

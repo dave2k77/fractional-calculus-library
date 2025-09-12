@@ -95,12 +95,11 @@ from .gnn_models import (
     FractionalGNNFactory
 )
 
-# Spectral Fractional Autograd
+# Spectral Fractional Autograd (Hybrid Implementation)
 from .spectral_autograd import (
     SpectralFractionalDerivative,
-    SpectralFractionalLayer,
-    BoundedAlphaParameter,
-    test_robust_spectral_autograd,
+    fractional_derivative,
+    benchmark_backends,
 )
 
 # Stochastic Memory Sampling
@@ -189,10 +188,12 @@ __all__ = [
     'FractionalGNNFactory',
 
     # Spectral
-    'FractionalAutogradFunction',
-    'FractionalAutogradLayer',
+    'SpectralFractionalDerivative',
+    'SpectralFractionalLayer',
+    'SpectralFractionalNetwork',
+    'BoundedAlphaParameter',
     'spectral_fractional_derivative',
-    'create_spectral_fractional_layer',
+    'create_fractional_layer',
 
     # Stochastic
     'StochasticFractionalDerivative',

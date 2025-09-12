@@ -1,0 +1,46 @@
+{
+  "derivative_computation": {
+    "riemann_liouville_time": 0.0013391971588134766,
+    "riemann_liouville_throughput": 746716.0405910629,
+    "caputo_time": 0.13213229179382324,
+    "caputo_throughput": 7568.172673190149,
+    "grunwald_letnikov_time": 0.11475920677185059,
+    "grunwald_letnikov_throughput": 8713.897805063001
+  },
+  "neural_network_training": {
+    "spectral_network_time": 0.7204809188842773,
+    "spectral_network_throughput": 6.939809048299159,
+    "memory_efficient_time": 0.004664421081542969,
+    "memory_efficient_throughput": 1071.9443876507871
+  },
+  "tensor_operations": {
+    "matmul_time": 0.44033360481262207,
+    "matmul_throughput": 227.1005412874487,
+    "elementwise_time": 0.08890533447265625,
+    "elementwise_throughput": 1124.7918990817816,
+    "tensor_ops_time": 0.3584768772125244,
+    "tensor_ops_throughput": 278.95802032641177
+  },
+  "memory_usage": {
+    "memory_usage_mb": 0.0,
+    "memory_efficiency": 5000000.0
+  },
+  "gpu_operations": {
+    "gpu_matmul_time": 0.06017875671386719,
+    "gpu_throughput": 830.8579759754049
+  },
+  "optimized_methods": {
+    "optimized_rl_time": 0.0018880367279052734,
+    "optimized_rl_throughput": 1059301.426947847,
+    "optimized_caputo_time": 0.34222936630249023,
+    "optimized_caputo_throughput": 5844.033846681166
+  },
+  "comprehensive": {
+    "derivative_time": 0.0014483928680419922,
+    "derivative_throughput": 690420.4115226337,
+    "neural_network_time": 0.0031855106353759766,
+    "neural_network_throughput": 941.7642392036524,
+    "tensor_ops_time": 0.01007533073425293,
+    "tensor_ops_throughput": 1985.0464989706334
+  }
+}

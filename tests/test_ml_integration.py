@@ -350,7 +350,7 @@ class TestFractionalOptimizers:
         target = torch.randn(8, 2)
         
         # Training step
-        optimizer.zero_grad()
+        optimizer.zero_grad(net.parameters())
         output = net(x, use_fractional=True, method="RL")
         loss = nn.MSELoss()(output, target)
         loss.backward()
@@ -359,7 +359,7 @@ class TestFractionalOptimizers:
         param_values_before = [p.clone() for p in net.parameters()]
         
         # Perform optimization step
-        optimizer.step()
+        optimizer.step(net.parameters())
         
         # Check that parameters were updated
         param_values_after = [p.clone() for p in net.parameters()]

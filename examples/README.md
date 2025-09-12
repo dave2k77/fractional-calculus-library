@@ -10,8 +10,17 @@ examples/
 ├── jax_examples/         # JAX optimization examples
 ├── parallel_examples/    # Parallel computing examples
 ├── advanced_applications/ # Advanced PDE solver examples
-├── minimal_probabilistic_fractional_training.py  # End-to-end training example
-├── variance_aware_training_example.py            # Variance monitoring example
+├── benchmarks/           # Performance benchmarking examples
+├── ml_examples/          # Machine learning and neural network examples
+├── physics_examples/     # Physics and scientific computing examples
+├── real_world_applications/ # Real-world application examples
+├── scientific_tutorials/ # Scientific tutorials and guides
+├── advanced_methods_demo.py      # Advanced methods demonstration
+├── analytics_demo.py            # Analytics and monitoring demo
+├── fractional_operators_demo.py # Fractional operators demo
+├── minimal_fractional_demo.py   # Minimal fractional calculus demo
+├── multi_backend_demo.py        # Multi-backend comparison demo
+├── special_methods_examples.py  # Special methods examples
 └── README.md            # This file
 ```
 
@@ -80,45 +89,83 @@ Features demonstrated:
 - Predictor-corrector methods
 - 3D visualization of solutions
 
-### Fractional Autograd (Spectral, Stochastic, Probabilistic)
+### Machine Learning Examples
 
-#### End-to-End Training Example
+#### Fractional GNN Demo
+
+Explore fractional graph neural networks:
+
+```bash
+cd examples/ml_examples
+python fractional_gnn_demo.py
+```
+
+#### ML Integration Demo
+
+Learn about machine learning integration:
+
+```bash
+cd examples/ml_examples
+python ml_integration_demo.py
+```
+
+#### Probabilistic Fractional Training
 
 Run a minimal end-to-end training loop that combines spectral autograd, stochastic memory sampling, and probabilistic fractional orders:
 
 ```bash
-python examples/minimal_probabilistic_fractional_training.py
+cd examples/ml_examples
+python minimal_probabilistic_fractional_training.py
 ```
 
-Features:
-- Spectral fractional autograd (Mellin/FFT/Laplacian engines)
-- Stochastic memory sampling (importance/stratified/control variate)
-- Probabilistic fractional orders (reparameterization/score function)
-- End-to-end neural network training
-- Performance monitoring and visualization
-
-#### Variance-Aware Training Example
+#### Variance-Aware Training
 
 Learn how to monitor and control variance in stochastic fractional derivatives:
 
 ```bash
-python examples/variance_aware_training_example.py
+cd examples/ml_examples
+python variance_aware_training_example.py
 ```
 
-Features:
-- Real-time variance monitoring
-- Adaptive sampling parameter adjustment
-- Seed management for reproducibility
-- Comprehensive training visualization
-- Integration with stochastic and probabilistic layers
+### Physics Examples
 
-What it shows:
-- Spectral fractional layer (FFT/Laplacian-based)
-- Stochastic memory sampling with importance sampling
-- Probabilistic fractional orders (Normal) for uncertainty
-- Tiny training loop with decreasing loss and a “Training completed.” success flag
+#### Fractional Physics Demo
 
-Tip: In CI and local smoke tests we assert the success flag; you can do the same via `scripts/smoke_test.sh`.
+Explore fractional physics applications:
+
+```bash
+cd examples/physics_examples
+python fractional_physics_demo.py
+```
+
+#### Fractional PINO Experiment
+
+Learn about Physics-Informed Neural Operators:
+
+```bash
+cd examples/physics_examples
+python fractional_pino_experiment.py
+```
+
+#### Fractional vs Integer Comparison
+
+Compare fractional and integer calculus:
+
+```bash
+cd examples/physics_examples
+python fractional_vs_integer_comparison.py
+```
+
+### Benchmarking Examples
+
+#### Performance Benchmarking
+
+Run comprehensive performance benchmarks:
+
+```bash
+cd examples/benchmarks
+python benchmark_demo.py
+```
 
 ## 📊 Example Outputs
 
@@ -156,6 +203,25 @@ Each example generates:
 - **3D Visualization**: Surface plots and contour maps
 - **Stability Analysis**: Numerical stability assessment
 - **Convergence Studies**: Method comparison and validation
+
+### 5. Machine Learning (`ml_examples/`)
+- **Fractional GNNs**: Graph neural networks with fractional derivatives
+- **ML Integration**: PyTorch and JAX backends
+- **Probabilistic Orders**: Uncertainty quantification in fractional orders
+- **Variance-Aware Training**: Monitoring and controlling training variance
+- **Spectral Autograd**: Advanced automatic differentiation
+
+### 6. Physics Examples (`physics_examples/`)
+- **Fractional Physics**: Real-world physics applications
+- **PINO Experiments**: Physics-Informed Neural Operators
+- **Fractional vs Integer**: Comparative analysis
+- **Scientific Computing**: Domain-specific applications
+
+### 7. Benchmarking (`benchmarks/`)
+- **Performance Analysis**: Comprehensive performance testing
+- **Accuracy Comparisons**: Method validation and comparison
+- **Scaling Studies**: Performance across different scales
+- **Resource Monitoring**: Memory and computational efficiency
 
 ## 🔧 Requirements
 

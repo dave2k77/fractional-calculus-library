@@ -6,10 +6,10 @@ This example demonstrates the use of parallel computing backends (Joblib, Dask, 
 for accelerating fractional calculus computations.
 """
 
-from hpfracc.algorithms.optimized_methods import OptimizedCaputo
-from hpfracc.algorithms.parallel_optimized_methods import (
+from hpfracc.algorithms.optimized_methods import (
+    OptimizedCaputo,
     ParallelConfig,
-    parallel_optimized_caputo,
+    ParallelOptimizedCaputo,
 )
 import numpy as np
 import matplotlib.pyplot as plt
@@ -297,7 +297,7 @@ def load_balancing_demo():
     print("\n⚖️ Load Balancing Demo")
     print("=" * 50)
 
-    from hpfracc.algorithms.parallel_optimized_methods import (
+    from hpfracc.algorithms.optimized_methods import (
         ParallelLoadBalancer as LoadBalancer,
     )
 

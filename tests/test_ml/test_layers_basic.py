@@ -83,7 +83,7 @@ class TestFractionalConv1D:
         assert layer.padding == 0
         assert layer.dilation == 1
         assert layer.groups == 1
-        assert layer.bias is True
+        assert layer.bias is not None
         assert layer.config is not None
         assert layer.backend is not None
         assert layer.tensor_ops is not None
@@ -118,7 +118,7 @@ class TestFractionalConv1D:
         assert layer.padding == 1
         assert layer.dilation == 2
         assert layer.groups == 1
-        assert layer.bias is False
+        assert layer.bias is None
         assert layer.config == config
         assert layer.backend == BackendType.TORCH
     
@@ -205,7 +205,7 @@ class TestFractionalConv2D:
         assert layer.padding == (0, 0)
         assert layer.dilation == (1, 1)
         assert layer.groups == 1
-        assert layer.bias is True
+        assert layer.bias is not None
     
     def test_initialize_weights_torch(self):
         """Test weight initialization for PyTorch backend."""
@@ -243,7 +243,7 @@ class TestFractionalLSTM:
         assert layer.num_layers == 2
         assert layer.bidirectional is False
         assert layer.dropout == 0.0
-        assert layer.bias is True
+        assert layer.bias is not None
     
     def test_initialization_bidirectional(self):
         """Test initialization with bidirectional LSTM."""
@@ -260,7 +260,7 @@ class TestFractionalLSTM:
         assert layer.num_layers == 2
         assert layer.bidirectional is True
         assert layer.dropout == 0.1
-        assert layer.bias is True
+        assert layer.bias is not None
 
 
 class TestFractionalTransformer:

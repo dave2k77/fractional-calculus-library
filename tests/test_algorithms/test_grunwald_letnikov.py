@@ -20,16 +20,16 @@ class TestOptimizedGrunwaldLetnikov:
         """Test creating OptimizedGrunwaldLetnikov instances."""
         # Test with float
         gl = OptimizedGrunwaldLetnikov(0.5)
-        assert gl.alpha == 0.5
+        assert gl.alpha.alpha == 0.5  # FractionalOrder object
         assert gl.alpha_val == 0.5
 
         # Test with different alpha values
         gl_alpha1 = OptimizedGrunwaldLetnikov(1.5)
         gl_alpha2 = OptimizedGrunwaldLetnikov(2.3)
 
-        assert gl_alpha1.alpha == 1.5
+        assert gl_alpha1.alpha.alpha == 1.5  # FractionalOrder object
         assert gl_alpha1.alpha_val == 1.5
-        assert gl_alpha2.alpha == 2.3
+        assert gl_alpha2.alpha.alpha == 2.3  # FractionalOrder object
         assert gl_alpha2.alpha_val == 2.3
 
     def test_optimized_grunwald_letnikov_validation(self):
@@ -187,7 +187,7 @@ class TestOptimizedGrunwaldLetnikov:
         # Test valid alpha values
         for alpha in [0.1, 0.5, 1.0, 1.5, 2.0]:
             gl = OptimizedGrunwaldLetnikov(alpha)
-            assert gl.alpha == alpha
+            assert gl.alpha.alpha == alpha  # FractionalOrder object
 
         # Test invalid alpha values (negative)
         with pytest.raises(ValueError):

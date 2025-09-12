@@ -99,33 +99,29 @@ class TestTensorOps:
 
     def test_matmul_tensors(self):
         """Test matrix multiplication of tensors."""
-        with patch('hpfracc.ml.tensor_ops.get_backend_manager') as mock_backend_manager:
-            mock_manager = Mock()
-            mock_manager.active_backend = BackendType.TORCH
-            mock_tensor_lib = Mock()
-            mock_tensor_lib.matmul.return_value = "matmul_result"
-            mock_manager.get_tensor_lib.return_value = mock_tensor_lib
-            mock_backend_manager.return_value = mock_manager
-
-            ops = TensorOps(BackendType.TORCH)
-            result = ops.matmul("tensor1", "tensor2")
-            assert result == "matmul_result"
-            mock_tensor_lib.matmul.assert_called_once_with("tensor1", "tensor2")
+        import torch
+        
+        ops = TensorOps(BackendType.TORCH)
+        tensor1 = torch.randn(2, 3)
+        tensor2 = torch.randn(3, 4)
+        result = ops.matmul(tensor1, tensor2)
+        
+        # Check that result is a tensor with correct shape
+        assert isinstance(result, torch.Tensor)
+        assert result.shape == (2, 4)
 
     def test_einsum_operation(self):
         """Test Einstein summation operation."""
-        with patch('hpfracc.ml.tensor_ops.get_backend_manager') as mock_backend_manager:
-            mock_manager = Mock()
-            mock_manager.active_backend = BackendType.TORCH
-            mock_tensor_lib = Mock()
-            mock_tensor_lib.einsum.return_value = "einsum_result"
-            mock_manager.get_tensor_lib.return_value = mock_tensor_lib
-            mock_backend_manager.return_value = mock_manager
-
-            ops = TensorOps(BackendType.TORCH)
-            result = ops.einsum("ij,jk->ik", "tensor1", "tensor2")
-            assert result == "einsum_result"
-            mock_tensor_lib.einsum.assert_called_once_with("ij,jk->ik", "tensor1", "tensor2")
+        import torch
+        
+        ops = TensorOps(BackendType.TORCH)
+        tensor1 = torch.randn(2, 3)
+        tensor2 = torch.randn(3, 4)
+        result = ops.einsum("ij,jk->ik", tensor1, tensor2)
+        
+        # Check that result is a tensor with correct shape
+        assert isinstance(result, torch.Tensor)
+        assert result.shape == (2, 4)
 
     def test_transpose_tensor(self):
         """Test tensor transpose."""
@@ -205,198 +201,156 @@ class TestTensorOps:
 
     def test_sqrt_tensor(self):
         """Test tensor square root."""
-        with patch('hpfracc.ml.tensor_ops.get_backend_manager') as mock_backend_manager:
-            mock_manager = Mock()
-            mock_manager.active_backend = BackendType.TORCH
-            mock_tensor_lib = Mock()
-            mock_tensor_lib.sqrt.return_value = "sqrt_result"
-            mock_manager.get_tensor_lib.return_value = mock_tensor_lib
-            mock_backend_manager.return_value = mock_manager
-
-            ops = TensorOps(BackendType.TORCH)
-            result = ops.sqrt("tensor")
-            assert result == "sqrt_result"
-            mock_tensor_lib.sqrt.assert_called_once_with("tensor")
+        import torch
+        
+        ops = TensorOps(BackendType.TORCH)
+        tensor = torch.tensor([4.0, 9.0, 16.0])
+        result = ops.sqrt(tensor)
+        
+        # Check that result is a tensor
+        assert isinstance(result, torch.Tensor)
+        assert torch.allclose(result, torch.tensor([2.0, 3.0, 4.0]))
 
     def test_log_tensor(self):
         """Test tensor logarithm."""
-        with patch('hpfracc.ml.tensor_ops.get_backend_manager') as mock_backend_manager:
-            mock_manager = Mock()
-            mock_manager.active_backend = BackendType.TORCH
-            mock_tensor_lib = Mock()
-            mock_tensor_lib.log.return_value = "log_result"
-            mock_manager.get_tensor_lib.return_value = mock_tensor_lib
-            mock_backend_manager.return_value = mock_manager
-
-            ops = TensorOps(BackendType.TORCH)
-            result = ops.log("tensor")
-            assert result == "log_result"
-            mock_tensor_lib.log.assert_called_once_with("tensor")
+        import torch
+        
+        ops = TensorOps(BackendType.TORCH)
+        tensor = torch.tensor([1.0, 2.718, 7.389])  # e^0, e^1, e^2
+        result = ops.log(tensor)
+        
+        # Check that result is a tensor
+        assert isinstance(result, torch.Tensor)
+        assert torch.allclose(result, torch.tensor([0.0, 1.0, 2.0]), atol=1e-3)
 
     def test_stack_tensors(self):
         """Test tensor stacking."""
-        with patch('hpfracc.ml.tensor_ops.get_backend_manager') as mock_backend_manager:
-            mock_manager = Mock()
-            mock_manager.active_backend = BackendType.TORCH
-            mock_tensor_lib = Mock()
-            mock_tensor_lib.stack.return_value = "stacked_tensor"
-            mock_manager.get_tensor_lib.return_value = mock_tensor_lib
-            mock_backend_manager.return_value = mock_manager
-
-            ops = TensorOps(BackendType.TORCH)
-            result = ops.stack(["tensor1", "tensor2"], dim=0)
-            assert result == "stacked_tensor"
-            mock_tensor_lib.stack.assert_called_once_with(["tensor1", "tensor2"], dim=0)
+        import torch
+        
+        ops = TensorOps(BackendType.TORCH)
+        tensor1 = torch.tensor([1, 2, 3])
+        tensor2 = torch.tensor([4, 5, 6])
+        result = ops.stack([tensor1, tensor2], dim=0)
+        
+        # Check that result is a tensor with correct shape
+        assert isinstance(result, torch.Tensor)
+        assert result.shape == (2, 3)
+        assert torch.allclose(result, torch.tensor([[1, 2, 3], [4, 5, 6]]))
 
     def test_cat_tensors(self):
         """Test tensor concatenation."""
-        with patch('hpfracc.ml.tensor_ops.get_backend_manager') as mock_backend_manager:
-            mock_manager = Mock()
-            mock_manager.active_backend = BackendType.TORCH
-            mock_tensor_lib = Mock()
-            mock_tensor_lib.cat.return_value = "concat_result"
-            mock_manager.get_tensor_lib.return_value = mock_tensor_lib
-            mock_backend_manager.return_value = mock_manager
-
-            ops = TensorOps(BackendType.TORCH)
-            result = ops.cat(["tensor1", "tensor2"], dim=0)
-            assert result == "concat_result"
-            mock_tensor_lib.cat.assert_called_once_with(["tensor1", "tensor2"], dim=0)
+        import torch
+        
+        ops = TensorOps(BackendType.TORCH)
+        tensor1 = torch.tensor([[1, 2], [3, 4]])
+        tensor2 = torch.tensor([[5, 6], [7, 8]])
+        result = ops.cat([tensor1, tensor2], dim=0)
+        
+        # Check that result is a tensor with correct shape
+        assert isinstance(result, torch.Tensor)
+        assert result.shape == (4, 2)
+        assert torch.allclose(result, torch.tensor([[1, 2], [3, 4], [5, 6], [7, 8]]))
 
     def test_zeros_creation(self):
         """Test creating zeros tensor."""
-        with patch('hpfracc.ml.tensor_ops.get_backend_manager') as mock_backend_manager:
-            mock_manager = Mock()
-            mock_manager.active_backend = BackendType.TORCH
-            mock_tensor_lib = Mock()
-            mock_tensor_lib.zeros.return_value = "zeros_tensor"
-            mock_manager.get_tensor_lib.return_value = mock_tensor_lib
-            mock_backend_manager.return_value = mock_manager
-
-            ops = TensorOps(BackendType.TORCH)
-            result = ops.zeros((2, 3))
-            assert result == "zeros_tensor"
-            mock_tensor_lib.zeros.assert_called_once_with((2, 3))
+        import torch
+        
+        ops = TensorOps(BackendType.TORCH)
+        result = ops.zeros((2, 3))
+        
+        # Check that result is a tensor with correct shape and values
+        assert isinstance(result, torch.Tensor)
+        assert result.shape == (2, 3)
+        assert torch.allclose(result, torch.zeros(2, 3))
 
     def test_ones_creation(self):
         """Test creating ones tensor."""
-        with patch('hpfracc.ml.tensor_ops.get_backend_manager') as mock_backend_manager:
-            mock_manager = Mock()
-            mock_manager.active_backend = BackendType.TORCH
-            mock_tensor_lib = Mock()
-            mock_tensor_lib.ones.return_value = "ones_tensor"
-            mock_manager.get_tensor_lib.return_value = mock_tensor_lib
-            mock_backend_manager.return_value = mock_manager
-
-            ops = TensorOps(BackendType.TORCH)
-            result = ops.ones((2, 3))
-            assert result == "ones_tensor"
-            mock_tensor_lib.ones.assert_called_once_with((2, 3))
+        import torch
+        
+        ops = TensorOps(BackendType.TORCH)
+        result = ops.ones((2, 3))
+        
+        # Check that result is a tensor with correct shape and values
+        assert isinstance(result, torch.Tensor)
+        assert result.shape == (2, 3)
+        assert torch.allclose(result, torch.ones(2, 3))
 
     def test_eye_creation(self):
         """Test creating identity matrix."""
-        with patch('hpfracc.ml.tensor_ops.get_backend_manager') as mock_backend_manager:
-            mock_manager = Mock()
-            mock_manager.active_backend = BackendType.TORCH
-            mock_tensor_lib = Mock()
-            mock_tensor_lib.eye.return_value = "eye_tensor"
-            mock_manager.get_tensor_lib.return_value = mock_tensor_lib
-            mock_backend_manager.return_value = mock_manager
-
-            ops = TensorOps(BackendType.TORCH)
-            result = ops.eye(3)
-            assert result == "eye_tensor"
-            mock_tensor_lib.eye.assert_called_once_with(3)
+        import torch
+        
+        ops = TensorOps(BackendType.TORCH)
+        result = ops.eye(3)
+        
+        # Check that result is a tensor with correct shape and values
+        assert isinstance(result, torch.Tensor)
+        assert result.shape == (3, 3)
+        assert torch.allclose(result, torch.eye(3))
 
     def test_arange_creation(self):
         """Test creating arange tensor."""
-        with patch('hpfracc.ml.tensor_ops.get_backend_manager') as mock_backend_manager:
-            mock_manager = Mock()
-            mock_manager.active_backend = BackendType.TORCH
-            mock_tensor_lib = Mock()
-            mock_tensor_lib.arange.return_value = "arange_tensor"
-            mock_manager.get_tensor_lib.return_value = mock_tensor_lib
-            mock_backend_manager.return_value = mock_manager
-
-            ops = TensorOps(BackendType.TORCH)
-            result = ops.arange(0, 5, 1)
-            assert result == "arange_tensor"
-            mock_tensor_lib.arange.assert_called_once_with(0, 5, 1)
+        import torch
+        
+        ops = TensorOps(BackendType.TORCH)
+        result = ops.arange(0, 5, 1)
+        
+        # Check that result is a tensor with correct shape and values
+        assert isinstance(result, torch.Tensor)
+        assert result.shape == (5,)
+        assert torch.allclose(result, torch.arange(0, 5, 1))
 
     def test_linspace_creation(self):
         """Test creating linspace tensor."""
-        with patch('hpfracc.ml.tensor_ops.get_backend_manager') as mock_backend_manager:
-            mock_manager = Mock()
-            mock_manager.active_backend = BackendType.TORCH
-            mock_tensor_lib = Mock()
-            mock_tensor_lib.linspace.return_value = "linspace_tensor"
-            mock_manager.get_tensor_lib.return_value = mock_tensor_lib
-            mock_backend_manager.return_value = mock_manager
-
-            ops = TensorOps(BackendType.TORCH)
-            result = ops.linspace(0.0, 1.0, 10)
-            assert result == "linspace_tensor"
-            mock_tensor_lib.linspace.assert_called_once_with(0.0, 1.0, 10)
+        import torch
+        
+        ops = TensorOps(BackendType.TORCH)
+        result = ops.linspace(0.0, 1.0, 10)
+        
+        # Check that result is a tensor with correct shape and values
+        assert isinstance(result, torch.Tensor)
+        assert result.shape == (10,)
+        expected = torch.linspace(0.0, 1.0, 10)
+        assert torch.allclose(result, expected)
 
     def test_softmax_activation(self):
         """Test softmax activation function."""
-        with patch('hpfracc.ml.tensor_ops.get_backend_manager') as mock_backend_manager:
-            mock_manager = Mock()
-            mock_manager.active_backend = BackendType.TORCH
-            mock_tensor_lib = Mock()
-            mock_tensor_lib.softmax.return_value = "softmax_result"
-            mock_manager.get_tensor_lib.return_value = mock_tensor_lib
-            mock_backend_manager.return_value = mock_manager
+        with patch('torch.softmax') as mock_softmax:
+            mock_softmax.return_value = "softmax_result"
 
             ops = TensorOps(BackendType.TORCH)
             result = ops.softmax("tensor", dim=0)
             assert result == "softmax_result"
-            mock_tensor_lib.softmax.assert_called_once_with("tensor", dim=0)
+            mock_softmax.assert_called_once_with("tensor", dim=0)
 
     def test_relu_activation(self):
         """Test ReLU activation function."""
-        with patch('hpfracc.ml.tensor_ops.get_backend_manager') as mock_backend_manager:
-            mock_manager = Mock()
-            mock_manager.active_backend = BackendType.TORCH
-            mock_tensor_lib = Mock()
-            mock_tensor_lib.relu.return_value = "relu_result"
-            mock_manager.get_tensor_lib.return_value = mock_tensor_lib
-            mock_backend_manager.return_value = mock_manager
+        with patch('torch.relu') as mock_relu:
+            mock_relu.return_value = "relu_result"
 
             ops = TensorOps(BackendType.TORCH)
             result = ops.relu("tensor")
             assert result == "relu_result"
-            mock_tensor_lib.relu.assert_called_once_with("tensor")
+            mock_relu.assert_called_once_with("tensor")
 
     def test_sigmoid_activation(self):
         """Test sigmoid activation function."""
-        with patch('hpfracc.ml.tensor_ops.get_backend_manager') as mock_backend_manager:
-            mock_manager = Mock()
-            mock_manager.active_backend = BackendType.TORCH
-            mock_tensor_lib = Mock()
-            mock_tensor_lib.sigmoid.return_value = "sigmoid_result"
-            mock_manager.get_tensor_lib.return_value = mock_tensor_lib
-            mock_backend_manager.return_value = mock_manager
+        with patch('torch.sigmoid') as mock_sigmoid:
+            mock_sigmoid.return_value = "sigmoid_result"
 
             ops = TensorOps(BackendType.TORCH)
             result = ops.sigmoid("tensor")
             assert result == "sigmoid_result"
-            mock_tensor_lib.sigmoid.assert_called_once_with("tensor")
+            mock_sigmoid.assert_called_once_with("tensor")
 
     def test_tanh_activation(self):
         """Test tanh activation function."""
-        with patch('hpfracc.ml.tensor_ops.get_backend_manager') as mock_backend_manager:
-            mock_manager = Mock()
-            mock_manager.active_backend = BackendType.TORCH
-            mock_tensor_lib = Mock()
-            mock_tensor_lib.tanh.return_value = "tanh_result"
-            mock_manager.get_tensor_lib.return_value = mock_tensor_lib
-            mock_backend_manager.return_value = mock_manager
+        with patch('torch.tanh') as mock_tanh:
+            mock_tanh.return_value = "tanh_result"
 
             ops = TensorOps(BackendType.TORCH)
             result = ops.tanh("tensor")
             assert result == "tanh_result"
-            mock_tensor_lib.tanh.assert_called_once_with("tensor")
+            mock_tanh.assert_called_once_with("tensor")
 
     def test_error_handling_unsupported_operation(self):
         """Test error handling for unsupported operations."""

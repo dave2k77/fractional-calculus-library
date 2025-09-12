@@ -41,24 +41,15 @@ from .gpu_optimized_methods import (
     vectorize_fractional_derivatives,
 )
 
-# Parallel-optimized algorithms
-from .parallel_optimized_methods import (
+# Parallel-optimized algorithms (now consolidated in optimized_methods)
+from .optimized_methods import (
     ParallelConfig,
     ParallelOptimizedRiemannLiouville,
     ParallelOptimizedCaputo,
     ParallelOptimizedGrunwaldLetnikov,
-    ParallelLoadBalancer,
-    ParallelPerformanceMonitor,
-    NumbaOptimizer,
-    NumbaFractionalKernels,
-    NumbaParallelManager,
     parallel_optimized_riemann_liouville,
     parallel_optimized_caputo,
     parallel_optimized_grunwald_letnikov,
-    benchmark_parallel_vs_serial,
-    optimize_parallel_parameters,
-    memory_efficient_caputo,
-    block_processing_kernel,
 )
 
 # Advanced methods
@@ -70,8 +61,8 @@ from .advanced_methods import (
     AdomianDecomposition,
 )
 
-# Advanced optimized methods
-from .advanced_optimized_methods import (
+# Advanced optimized methods (now consolidated in advanced_methods)
+from .advanced_methods import (
     OptimizedWeylDerivative,
     OptimizedMarchaudDerivative,
     OptimizedHadamardDerivative,
@@ -81,7 +72,18 @@ from .advanced_optimized_methods import (
     optimized_marchaud_derivative,
     optimized_hadamard_derivative,
     optimized_reiz_feller_derivative,
-    optimized_adomian_decomposition,
+)
+
+# Special optimized methods (now consolidated in special_methods)
+from .special_methods import (
+    SpecialOptimizedWeylDerivative,
+    SpecialOptimizedMarchaudDerivative,
+    SpecialOptimizedReizFellerDerivative,
+    UnifiedSpecialMethods,
+    special_optimized_weyl_derivative,
+    special_optimized_marchaud_derivative,
+    special_optimized_reiz_feller_derivative,
+    unified_special_derivative,
 )
 
 # FFT methods (consolidated into optimized_methods.py)

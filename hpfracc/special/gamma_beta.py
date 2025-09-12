@@ -13,6 +13,40 @@ from typing import Union
 import scipy.special as scipy_special
 
 
+# Module-level gamma function for Numba compatibility
+@jit(nopython=True)
+def _gamma_numba_scalar(z: float) -> float:
+    """
+    NUMBA-optimized Gamma function for scalar inputs.
+
+    Uses Lanczos approximation for accuracy and performance.
+    """
+    # Lanczos approximation coefficients
+    g = 7.0
+    p = [
+        0.99999999999980993,
+        676.5203681218851,
+        -1259.1392167224028,
+        771.32342877765313,
+        -176.61502916214059,
+        12.507343278686905,
+        -0.13857109526572012,
+        9.9843695780195716e-6,
+        1.5056327351493116e-7
+    ]
+    
+    if z < 0.5:
+        return np.pi / (np.sin(np.pi * z) * _gamma_numba_scalar(1 - z))
+    
+    z -= 1
+    x = p[0]
+    for i in range(1, len(p)):
+        x += p[i] / (z + i)
+    
+    t = z + g + 0.5
+    return np.sqrt(2 * np.pi) * (t ** (z + 0.5)) * np.exp(-t) * x
+
+
 class GammaFunction:
     """
     Gamma function implementation with multiple optimization strategies.
@@ -23,16 +57,19 @@ class GammaFunction:
     For positive integers n: Γ(n) = (n-1)!
     """
 
-    def __init__(self, use_jax: bool = False, use_numba: bool = True):
+    def __init__(self, use_jax: bool = False, use_numba: bool = True, cache_size: int = 1000):
         """
         Initialize Gamma function calculator.
 
         Args:
             use_jax: Whether to use JAX implementation for vectorized operations
             use_numba: Whether to use NUMBA JIT compilation for scalar operations
+            cache_size: Size of the cache for frequently used values
         """
         self.use_jax = use_jax
         self.use_numba = use_numba
+        self.cache_size = cache_size
+        self._cache = {}
 
         if use_jax:
             self._gamma_jax = jax.jit(self._gamma_jax_impl)
@@ -62,41 +99,6 @@ class GammaFunction:
         """SciPy implementation for reference and fallback."""
         return scipy_special.gamma(z)
 
-    @staticmethod
-    @jit(nopython=True)
-    def _gamma_numba_scalar(z: float) -> float:
-        """
-        NUMBA-optimized Gamma function for scalar inputs.
-
-        Uses Lanczos approximation for accuracy and performance.
-        """
-        # Lanczos approximation coefficients
-        g = 7.0
-        p = [
-            0.99999999999980993,
-            676.5203681218851,
-            -1259.1392167224028,
-            771.32342877765313,
-            -176.61502916214059,
-            12.507343278686905,
-            -0.13857109526572012,
-            9.9843695780195716e-6,
-            1.5056327351493116e-7,
-        ]
-
-        # Handle negative values using reflection formula
-        if z < 0.5:
-            return np.pi / (
-                np.sin(np.pi * z) * GammaFunction._gamma_numba_scalar(1 - z)
-            )
-
-        z -= 1
-        x = p[0]
-        for i in range(1, len(p)):
-            x += p[i] / (z + i)
-
-        t = z + g + 0.5
-        return np.sqrt(2 * np.pi) * t ** (z + 0.5) * np.exp(-t) * x
 
     @staticmethod
     def _gamma_jax_impl(z: jnp.ndarray) -> jnp.ndarray:
@@ -133,17 +135,20 @@ class BetaFunction:
     B(x, y) = ∫₀¹ t^(x-1) (1-t)^(y-1) dt = Γ(x)Γ(y)/Γ(x+y)
     """
 
-    def __init__(self, use_jax: bool = False, use_numba: bool = True):
+    def __init__(self, use_jax: bool = False, use_numba: bool = True, cache_size: int = 1000):
         """
         Initialize Beta function calculator.
 
         Args:
             use_jax: Whether to use JAX implementation for vectorized operations
             use_numba: Whether to use NUMBA JIT compilation for scalar operations
+            cache_size: Size of the cache for frequently used values
         """
         self.use_jax = use_jax
         self.use_numba = use_numba
-        self.gamma = GammaFunction(use_jax=use_jax, use_numba=use_numba)
+        self.cache_size = cache_size
+        self._cache = {}
+        self.gamma = GammaFunction(use_jax=use_jax, use_numba=use_numba, cache_size=cache_size)
 
         if use_jax:
             self._beta_jax = jax.jit(self._beta_jax_impl)
@@ -174,6 +179,9 @@ class BetaFunction:
             and isinstance(x, (float, int))
             and isinstance(y, (float, int))
         ):
+            # For very large inputs, use SciPy to avoid numerical underflow
+            if x > 50 or y > 50 or (x + y) > 100:
+                return self._beta_scipy(x, y)
             return self._beta_numba_scalar(x, y)
         else:
             return self._beta_scipy(x, y)
@@ -193,9 +201,9 @@ class BetaFunction:
 
         Uses the relationship B(x,y) = Γ(x)Γ(y)/Γ(x+y)
         """
-        gamma_x = GammaFunction._gamma_numba_scalar(x)
-        gamma_y = GammaFunction._gamma_numba_scalar(y)
-        gamma_sum = GammaFunction._gamma_numba_scalar(x + y)
+        gamma_x = _gamma_numba_scalar(x)
+        gamma_y = _gamma_numba_scalar(y)
+        gamma_sum = _gamma_numba_scalar(x + y)
         return gamma_x * gamma_y / gamma_sum
 
     @staticmethod

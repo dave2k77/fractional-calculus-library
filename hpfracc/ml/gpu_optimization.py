@@ -8,7 +8,7 @@ chunked FFT operations, and performance profiling for fractional calculus operat
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch.cuda.amp import autocast, GradScaler
+from torch.amp import autocast, GradScaler
 import time
 import numpy as np
 from typing import Dict, List, Optional, Any, Tuple, Union
@@ -177,12 +177,12 @@ class AMPFractionalEngine:
         self.base_engine = base_engine
         self.use_amp = use_amp
         self.dtype = dtype
-        self.scaler = GradScaler() if use_amp else None
+        self.scaler = GradScaler('cuda') if use_amp else None
         
     def forward(self, x: torch.Tensor, alpha: float, **kwargs) -> torch.Tensor:
         """Forward pass with AMP support."""
         if self.use_amp and x.device.type == 'cuda':
-            with autocast(dtype=self.dtype):
+            with autocast(device_type='cuda', dtype=self.dtype):
                 return self.base_engine.forward(x, alpha, **kwargs)
         else:
             return self.base_engine.forward(x, alpha, **kwargs)
@@ -213,7 +213,7 @@ class GPUOptimizedSpectralEngine:
         self.profiler = GPUProfiler()
         
         # AMP scaler
-        self.scaler = GradScaler() if use_amp else None
+        self.scaler = GradScaler('cuda') if use_amp else None
         
     def forward(self, x: torch.Tensor, alpha: float) -> torch.Tensor:
         """GPU-optimized forward pass."""
@@ -221,7 +221,7 @@ class GPUOptimizedSpectralEngine:
         
         try:
             if self.use_amp and x.device.type == 'cuda':
-                with autocast(dtype=self.dtype):
+                with autocast(device_type='cuda', dtype=self.dtype):
                     result = self._compute_spectral_transform(x, alpha)
             else:
                 result = self._compute_spectral_transform(x, alpha)
@@ -300,7 +300,7 @@ class GPUOptimizedStochasticSampler:
         
         try:
             if self.use_amp and torch.cuda.is_available():
-                with autocast(dtype=torch.float16):
+                with autocast(device_type='cuda', dtype=torch.float16):
                     indices = self._gpu_sample_indices(n, k)
             else:
                 indices = self.base_sampler.sample_indices(n, k)
@@ -327,7 +327,7 @@ class GPUOptimizedStochasticSampler:
 def gpu_optimization_context(use_amp: bool = True, dtype: torch.dtype = torch.float16):
     """Context manager for GPU optimization."""
     if use_amp and torch.cuda.is_available():
-        with autocast(dtype=dtype):
+        with autocast(device_type='cuda', dtype=dtype):
             yield
     else:
         yield
