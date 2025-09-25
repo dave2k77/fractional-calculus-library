@@ -139,6 +139,19 @@ class ConvergenceTester:
 
         return convergence_rate
 
+    # Compatibility alias used by some tests
+    def estimate_convergence_rate(self, grid_sizes: List[int], errors: List[float]) -> float:
+        """Alias for computing convergence rate directly.
+
+        Args:
+            grid_sizes: List of grid sizes
+            errors: List of corresponding errors
+
+        Returns:
+            Estimated convergence rate
+        """
+        return self._compute_convergence_rate(grid_sizes, errors)
+
     def test_multiple_norms(
         self,
         method_func: Callable,

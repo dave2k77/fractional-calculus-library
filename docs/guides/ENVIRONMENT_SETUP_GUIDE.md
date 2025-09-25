@@ -25,7 +25,7 @@ If you prefer to configure manually, follow the sections below.
 1. **Conda/Miniconda installed** on your system
 2. **One of the supported environments** created:
    - `hpfracc-env` (recommended)
-   - `fracnn` (from environment.yml)
+   - `fracnn` (from config/environment.yml)
 
 ## 🔧 Environment Creation
 
@@ -39,7 +39,7 @@ pip install -r requirements_ml.txt
 
 ### Create from environment.yml
 ```bash
-conda env create -f environment.yml
+conda env create -f config/environment.yml
 conda activate fracnn
 ```
 
@@ -131,7 +131,8 @@ fractional-calculus-library/
 │   ├── settings.json        # VS Code workspace settings
 │   ├── extensions.json      # Recommended extensions
 │   └── launch.json          # Debug configurations
-├── activate_env.sh          # Manual activation script
+├── tools/
+│   ├── activate_env.sh      # Manual activation script
 ├── setup_auto_activation.sh # Auto-setup script
 ├── project.env              # Project environment variables
 └── ENVIRONMENT_SETUP_GUIDE.md # This file
@@ -142,7 +143,7 @@ fractional-calculus-library/
 If you need to manually activate the environment:
 
 ```bash
-source activate_env.sh
+source tools/activate_env.sh
 ```
 
 ## 🔍 Troubleshooting

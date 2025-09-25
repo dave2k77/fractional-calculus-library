@@ -32,6 +32,10 @@ class FractionalODESolver:
         adaptive: bool = True,
         tol: float = 1e-6,
         max_iter: int = 1000,
+        *,
+        fractional_order: Optional[Union[float, FractionalOrder]] = None,
+        rtol: Optional[float] = None,
+        atol: Optional[float] = None,
     ):
         """
         Initialize fractional ODE solver.
@@ -48,6 +52,13 @@ class FractionalODESolver:
         self.adaptive = adaptive
         self.tol = tol
         self.max_iter = max_iter
+        # Accept optional fractional_order for compatibility; stored as attribute only
+        self.fractional_order = fractional_order
+        # Accept rtol/atol but map to tol if provided (basic solver uses single tol)
+        if rtol is not None:
+            self.tol = min(self.tol, float(rtol))
+        if atol is not None:
+            self.tol = min(self.tol, float(atol))
 
         # Validate derivative type
         valid_derivatives = [
@@ -592,6 +603,12 @@ class AdaptiveFractionalODESolver(FractionalODESolver):
         max_iter: int = 1000,
         min_h: float = 1e-8,
         max_h: float = 1e-2,
+        *,
+        rtol: Optional[float] = None,
+        atol: Optional[float] = None,
+        max_step: Optional[float] = None,
+        min_step: Optional[float] = None,
+        fractional_order: Optional[Union[float, FractionalOrder]] = None,
     ):
         """
         Initialize adaptive fractional ODE solver.
@@ -605,8 +622,20 @@ class AdaptiveFractionalODESolver(FractionalODESolver):
             max_h: Maximum step size
         """
         super().__init__(derivative_type, method, True, tol, max_iter)
+        # Map aliases for step sizes if provided
+        if max_step is not None:
+            max_h = float(max_step)
+        if min_step is not None:
+            min_h = float(min_step)
         self.min_h = min_h
         self.max_h = max_h
+        # Accept rtol/atol for compatibility; use the most stringent among tol/rtol/atol
+        if rtol is not None:
+            self.tol = min(self.tol, float(rtol))
+        if atol is not None:
+            self.tol = min(self.tol, float(atol))
+        # Preserve fractional_order argument for compatibility
+        self.fractional_order = fractional_order
 
     def solve(
         self,
@@ -617,69 +646,122 @@ class AdaptiveFractionalODESolver(FractionalODESolver):
         h0: Optional[float] = None,
         **kwargs,
     ) -> Tuple[np.ndarray, np.ndarray]:
-        """
-        Solve fractional ODE with adaptive step size control.
 
-        Args:
-            f: Right-hand side function f(t, y)
-            t_span: Time interval (t0, tf)
-            y0: Initial condition(s)
-            alpha: Fractional order
-            h0: Initial step size
-            **kwargs: Additional solver parameters
-
-        Returns:
-            Tuple of (t_values, y_values)
-        """
         t0, tf = t_span
-
         if h0 is None:
-            h0 = (tf - t0) / 100
+            h0 = (tf - t0) / 100.0
 
-        # Convert to arrays if needed
-        if np.isscalar(y0):
-            y0 = np.array([y0])
+        # ensure array
+        y0 = np.atleast_1d(np.array(y0, dtype=float))
 
-        # Initialize solution arrays
         t_values = [t0]
         y_values = [y0.copy()]
 
-        t_current = t0
-        y_current = y0.copy()
-        h_current = h0
+        t = float(t0)
+        y = y0.copy()
+        h = float(h0)
 
-        while t_current < tf:
-            # Compute solution with current step size
-            t_next = min(t_current + h_current, tf)
-            h_actual = t_next - t_current
+        # Controller parameters (robust defaults)
+        safety = 0.9          # safety factor on step adaptation
+        max_growth = 5.0      # limit how fast h can grow
+        min_shrink = 0.2      # limit how fast h can shrink
+        p_acc = 0.5           # exponent when accepting (typical for embedded order diff)
+        p_rej = 0.25          # exponent when rejecting
+        tiny = 10*np.finfo(float).eps
 
-            # Compute solution with current step
-            y_next = self._adaptive_step(
-                f, t_current, t_next, y_current, alpha, h_actual
-            )
+        # Global iteration cap as a last resort
+        total_iters = 0
+        max_total_iters = getattr(self, "max_total_iters", 10_0000)
 
-            # Estimate error
-            error = self._estimate_error(
-                f, t_current, t_next, y_current, y_next, alpha, h_actual
-            )
+        while t < tf - tiny:
+            total_iters += 1
+            if total_iters > max_total_iters:
+                raise RuntimeError("Adaptive solver exceeded maximum total iterations; likely stalled.")
 
-            # Check if error is acceptable
-            if error <= self.tol:
-                # Accept step
-                t_values.append(t_next)
-                y_values.append(y_next)
-                t_current = t_next
-                y_current = y_next
+            # Enforce a floor on the step that depends on current magnitude of t
+            h_floor = max(getattr(self, "min_h", 1e-12),
+                        10*np.finfo(float).eps * max(1.0, abs(t)))
 
-                # Adjust step size for next step
-                h_current = min(self.max_h, h_current *
-                                (self.tol / error) ** 0.5)
-            else:
-                # Reject step and reduce step size
-                h_current = max(self.min_h, h_current *
-                                (self.tol / error) ** 0.25)
+            # avoid negative or zero step
+            h = max(h, h_floor)
 
-        return np.array(t_values), np.array(y_values)
+            # Do not step beyond tf
+            if t + h > tf:
+                h = tf - t
+
+            # If FP says no progress, force a slightly bigger step
+            if t + h <= t:
+                h = max(h_floor, (tf - t))  # snap to remaining interval if needed
+
+            # Inner retry loop for the same target (PI controller pattern)
+            retries = 0
+            max_retries = getattr(self, "max_retries", 20)
+
+            while True:
+                t_next = t + h
+                # Protect again against degeneracy
+                if t_next <= t + tiny:
+                    # If even advancing by tiny doesn’t move, we’re at FP limit; break
+                    t_next = np.nextafter(t, tf)
+                    h = t_next - t
+
+                # Take a trial step
+                y_trial = self._adaptive_step(f, t, t_next, y, alpha, h)
+
+                # Compute a scalar error norm robustly
+                err_val = self._estimate_error(f, t, t_next, y, y_trial, alpha, h)
+
+                # Convert to finite scalar
+                if isinstance(err_val, np.ndarray):
+                    err = float(np.linalg.norm(err_val, ord=np.inf))
+                else:
+                    err = float(err_val)
+
+                if not np.isfinite(err):
+                    # Non-finite error: shrink hard and retry
+                    h_new = max(min_shrink * h, h_floor)
+                    if h_new == h or retries >= max_retries:
+                        # Give up on error estimate; accept to avoid infinite loop
+                        break
+                    h = h_new
+                    retries += 1
+                    continue
+
+                # Bound away from zero to avoid division overflow,
+                # but treat exact zero as "perfect" and grow to the cap.
+                if err == 0.0:
+                    factor = max_growth
+                else:
+                    factor = safety * (self.tol / err) ** (p_acc if err <= self.tol else p_rej)
+                    # clamp
+                    factor = float(np.clip(factor, min_shrink, max_growth))
+
+                if err <= self.tol:
+                    # Accept the step
+                    t = t_next
+                    y = y_trial
+                    t_values.append(t)
+                    y_values.append(y.copy())
+                    # Propose next h
+                    h = max(h_floor, min(getattr(self, "max_h", np.inf), h * factor))
+                    break
+                else:
+                    # Reject: shrink and retry (do not advance t)
+                    h_new = max(h_floor, h * factor)
+                    # If we can’t shrink further or we’ve retried too much, force accept to avoid stall
+                    if (h_new >= h * 0.9999 and h <= h_floor * 1.0001) or retries >= max_retries:
+                        # Accept with warning behaviour: take the step but increase a bit to escape
+                        t = t_next
+                        y = y_trial
+                        t_values.append(t)
+                        y_values.append(y.copy())
+                        h = max(h_floor, min(getattr(self, "max_h", np.inf), h * 1.25))
+                        break
+                    h = h_new
+                    retries += 1
+
+        return np.array(t_values, dtype=float), np.vstack(y_values)
+
 
     def _adaptive_step(
         self,

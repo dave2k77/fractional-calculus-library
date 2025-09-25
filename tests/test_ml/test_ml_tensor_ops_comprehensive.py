@@ -94,7 +94,7 @@ class TestTensorOps:
             mock_backend_manager.return_value = mock_manager
 
             ops = TensorOps("UNKNOWN")
-            with pytest.raises(RuntimeError, match="Unknown backend"):
+            with pytest.raises(ValueError, match="Unknown backend"):
                 ops.create_tensor([1, 2, 3])
 
     def test_matmul_tensors(self):
@@ -133,14 +133,15 @@ class TestTensorOps:
             mock_manager.get_tensor_lib.return_value = mock_tensor_lib
             mock_backend_manager.return_value = mock_manager
 
-            # Create a mock tensor that has the permute method
+            # Create a mock tensor that has the t method (for 2D tensors)
             mock_tensor = Mock()
-            mock_tensor.permute.return_value = "transposed_tensor"
+            mock_tensor.t.return_value = "transposed_tensor"
+            mock_tensor.dim.return_value = 2
 
             ops = TensorOps(BackendType.TORCH)
-            result = ops.transpose(mock_tensor, (1, 0))
+            result = ops.transpose(mock_tensor)
             assert result == "transposed_tensor"
-            mock_tensor.permute.assert_called_once_with((1, 0))
+            mock_tensor.t.assert_called_once()
 
     def test_reshape_tensor(self):
         """Test tensor reshape."""
@@ -297,7 +298,7 @@ class TestTensorOps:
         # Check that result is a tensor with correct shape and values
         assert isinstance(result, torch.Tensor)
         assert result.shape == (5,)
-        assert torch.allclose(result, torch.arange(0, 5, 1))
+        assert torch.allclose(result, torch.arange(0, 5, 1, dtype=result.dtype))
 
     def test_linspace_creation(self):
         """Test creating linspace tensor."""

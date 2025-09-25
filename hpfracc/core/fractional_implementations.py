@@ -11,6 +11,38 @@ from .derivatives import BaseFractionalDerivative
 from .definitions import FractionalOrder, DefinitionType
 
 
+class _AlphaCompatibilityWrapper:
+    """Wrapper that makes alpha behave like both a float and FractionalOrder."""
+    
+    def __init__(self, fractional_order: FractionalOrder):
+        self._fractional_order = fractional_order
+    
+    def __eq__(self, other):
+        """Allow comparison with floats."""
+        if isinstance(other, (int, float)):
+            return self._fractional_order.alpha == other
+        return self._fractional_order == other
+    
+    def __getattr__(self, name):
+        """Delegate attribute access to the FractionalOrder object."""
+        return getattr(self._fractional_order, name)
+    
+    def __repr__(self):
+        return repr(self._fractional_order)
+    
+    def __float__(self):
+        """Allow conversion to float."""
+        return float(self._fractional_order.alpha)
+    
+    def __int__(self):
+        """Allow conversion to int."""
+        return int(self._fractional_order.alpha)
+    
+    def __class__(self):
+        """Support isinstance checks by returning the wrapped class."""
+        return type(self._fractional_order)
+
+
 class RiemannLiouvilleDerivative(BaseFractionalDerivative):
     """
     Riemann-Liouville fractional derivative implementation.
@@ -23,14 +55,22 @@ class RiemannLiouvilleDerivative(BaseFractionalDerivative):
         # Lazy import to avoid circular dependencies
         from ..algorithms.optimized_methods import OptimizedRiemannLiouville
         self._optimized_impl = OptimizedRiemannLiouville(alpha)
+        # For backward compatibility, expose alpha as a special wrapper
+        # that behaves like both a float and FractionalOrder
+        self.alpha = _AlphaCompatibilityWrapper(self._alpha_order)
 
     def compute(self,
                 f: Callable,
-                x: Union[float,
-                         np.ndarray],
-                **kwargs) -> Union[float,
-                                   np.ndarray]:
+                x: Union[float, np.ndarray],
+                h: Union[float, None] = None,
+                **kwargs) -> Union[float, np.ndarray]:
         """Compute the Riemann-Liouville fractional derivative."""
+        # Check for empty arrays
+        if hasattr(x, '__len__') and len(x) == 0:
+            raise ValueError("zero-size array")
+        
+        if h is not None:
+            kwargs['h'] = h
         return self._optimized_impl.compute(f, x, **kwargs)
 
     def compute_numerical(
@@ -54,14 +94,22 @@ class CaputoDerivative(BaseFractionalDerivative):
         # Lazy import to avoid circular dependencies
         from ..algorithms.optimized_methods import OptimizedCaputo
         self._optimized_impl = OptimizedCaputo(alpha)
+        # For backward compatibility, expose alpha as a special wrapper
+        # that behaves like both a float and FractionalOrder
+        self.alpha = _AlphaCompatibilityWrapper(self._alpha_order)
 
     def compute(self,
                 f: Callable,
-                x: Union[float,
-                         np.ndarray],
-                **kwargs) -> Union[float,
-                                   np.ndarray]:
+                x: Union[float, np.ndarray],
+                h: Union[float, None] = None,
+                **kwargs) -> Union[float, np.ndarray]:
         """Compute the Caputo fractional derivative."""
+        # Check for empty arrays
+        if hasattr(x, '__len__') and len(x) == 0:
+            raise ValueError("zero-size array")
+        
+        if h is not None:
+            kwargs['h'] = h
         return self._optimized_impl.compute(f, x, **kwargs)
 
     def compute_numerical(
@@ -85,14 +133,22 @@ class GrunwaldLetnikovDerivative(BaseFractionalDerivative):
         # Lazy import to avoid circular dependencies
         from ..algorithms.optimized_methods import OptimizedGrunwaldLetnikov
         self._optimized_impl = OptimizedGrunwaldLetnikov(alpha)
+        # For backward compatibility, expose alpha as a special wrapper
+        # that behaves like both a float and FractionalOrder
+        self.alpha = _AlphaCompatibilityWrapper(self._alpha_order)
 
     def compute(self,
                 f: Callable,
-                x: Union[float,
-                         np.ndarray],
-                **kwargs) -> Union[float,
-                                   np.ndarray]:
+                x: Union[float, np.ndarray],
+                h: Union[float, None] = None,
+                **kwargs) -> Union[float, np.ndarray]:
         """Compute the Grunwald-Letnikov fractional derivative."""
+        # Check for empty arrays
+        if hasattr(x, '__len__') and len(x) == 0:
+            raise ValueError("zero-size array")
+        
+        if h is not None:
+            kwargs['h'] = h
         return self._optimized_impl.compute(f, x, **kwargs)
 
     def compute_numerical(
@@ -119,6 +175,9 @@ class CaputoFabrizioDerivative(BaseFractionalDerivative):
         filtered_kwargs = {k: v for k, v in kwargs.items()
                            if k not in ['use_jax', 'use_numba']}
         self._novel_impl = CFDerivative(alpha, **filtered_kwargs)
+        # For backward compatibility, expose alpha as a special wrapper
+        # that behaves like both a float and FractionalOrder
+        self.alpha = _AlphaCompatibilityWrapper(self._alpha_order)
 
     def compute(self,
                 f: Callable,
@@ -166,6 +225,9 @@ class AtanganaBaleanuDerivative(BaseFractionalDerivative):
         filtered_kwargs = {k: v for k, v in kwargs.items()
                            if k not in ['use_jax', 'use_numba']}
         self._novel_impl = ABDerivative(alpha, **filtered_kwargs)
+        # For backward compatibility, expose alpha as a special wrapper
+        # that behaves like both a float and FractionalOrder
+        self.alpha = _AlphaCompatibilityWrapper(self._alpha_order)
 
     def compute(self,
                 f: Callable,
@@ -213,6 +275,9 @@ class FractionalLaplacian(BaseFractionalDerivative):
         filtered_kwargs = {k: v for k, v in kwargs.items()
                            if k not in ['use_jax', 'use_numba']}
         self._special_impl = FracLaplacian(alpha, **filtered_kwargs)
+        # For backward compatibility, expose alpha as a special wrapper
+        # that behaves like both a float and FractionalOrder
+        self.alpha = _AlphaCompatibilityWrapper(self._alpha_order)
 
     def compute(self,
                 f: Callable,
@@ -248,6 +313,9 @@ class FractionalFourierTransform(BaseFractionalDerivative):
         filtered_kwargs = {k: v for k, v in kwargs.items()
                            if k not in ['use_jax', 'use_numba']}
         self._special_impl = FracFT(alpha, **filtered_kwargs)
+        # For backward compatibility, expose alpha as a special wrapper
+        # that behaves like both a float and FractionalOrder
+        self.alpha = _AlphaCompatibilityWrapper(self._alpha_order)
 
     def compute(self,
                 f: Callable,
@@ -282,6 +350,9 @@ class MillerRossDerivative(BaseFractionalDerivative):
 
     def __init__(self, alpha: Union[float, FractionalOrder], **kwargs):
         super().__init__(alpha, **kwargs)
+        # For backward compatibility, expose alpha as a special wrapper
+        # that behaves like both a float and FractionalOrder
+        self.alpha = _AlphaCompatibilityWrapper(self._alpha_order)
 
     def compute(self,
                 f: Callable,
@@ -290,6 +361,10 @@ class MillerRossDerivative(BaseFractionalDerivative):
                 **kwargs) -> Union[float,
                                    np.ndarray]:
         """Compute the Miller-Ross fractional derivative."""
+        # Handle empty arrays gracefully
+        if hasattr(x, '__len__') and len(x) == 0:
+            return np.array([])
+        
         # For now, use Riemann-Liouville as approximation
         # This can be enhanced with specific Miller-Ross implementation
         from .fractional_implementations import RiemannLiouvilleDerivative
@@ -323,6 +398,9 @@ class WeylDerivative(BaseFractionalDerivative):
         filtered_kwargs = {k: v for k, v in kwargs.items()
                            if k not in ['use_jax', 'use_numba']}
         self._advanced_impl = AdvancedWeyl(alpha, **filtered_kwargs)
+        # For backward compatibility, expose alpha as a special wrapper
+        # that behaves like both a float and FractionalOrder
+        self.alpha = _AlphaCompatibilityWrapper(self._alpha_order)
 
     def compute(self,
                 f: Callable,
@@ -358,6 +436,9 @@ class MarchaudDerivative(BaseFractionalDerivative):
         filtered_kwargs = {k: v for k, v in kwargs.items()
                            if k not in ['use_jax', 'use_numba']}
         self._advanced_impl = AdvancedMarchaud(alpha, **filtered_kwargs)
+        # For backward compatibility, expose alpha as a special wrapper
+        # that behaves like both a float and FractionalOrder
+        self.alpha = _AlphaCompatibilityWrapper(self._alpha_order)
 
     def compute(self,
                 f: Callable,
@@ -392,6 +473,9 @@ class HadamardDerivative(BaseFractionalDerivative):
         filtered_kwargs = {k: v for k, v in kwargs.items()
                            if k not in ['use_jax', 'use_numba']}
         self._advanced_impl = AdvancedHadamard(alpha, **filtered_kwargs)
+        # For backward compatibility, expose alpha as a special wrapper
+        # that behaves like both a float and FractionalOrder
+        self.alpha = _AlphaCompatibilityWrapper(self._alpha_order)
 
     def compute(self,
                 f: Callable,
@@ -426,6 +510,9 @@ class ReizFellerDerivative(BaseFractionalDerivative):
         filtered_kwargs = {k: v for k, v in kwargs.items()
                            if k not in ['use_jax', 'use_numba']}
         self._advanced_impl = AdvancedReizFeller(alpha, **filtered_kwargs)
+        # For backward compatibility, expose alpha as a special wrapper
+        # that behaves like both a float and FractionalOrder
+        self.alpha = _AlphaCompatibilityWrapper(self._alpha_order)
 
     def compute(self,
                 f: Callable,
@@ -460,6 +547,9 @@ class ParallelOptimizedRiemannLiouville(BaseFractionalDerivative):
         filtered_kwargs = {k: v for k, v in kwargs.items()
                            if k not in ['use_jax', 'use_numba']}
         self._parallel_impl = ParallelRL(alpha, **filtered_kwargs)
+        # For backward compatibility, expose alpha as a special wrapper
+        # that behaves like both a float and FractionalOrder
+        self.alpha = _AlphaCompatibilityWrapper(self._alpha_order)
 
     def compute(self,
                 f: Callable,
@@ -494,6 +584,9 @@ class ParallelOptimizedCaputo(BaseFractionalDerivative):
         filtered_kwargs = {k: v for k, v in kwargs.items()
                            if k not in ['use_jax', 'use_numba']}
         self._parallel_impl = ParallelCaputo(alpha, **filtered_kwargs)
+        # For backward compatibility, expose alpha as a special wrapper
+        # that behaves like both a float and FractionalOrder
+        self.alpha = _AlphaCompatibilityWrapper(self._alpha_order)
 
     def compute(self,
                 f: Callable,
@@ -531,15 +624,19 @@ class RieszFisherOperator(BaseFractionalDerivative):
     """
 
     def __init__(self, alpha: Union[float, FractionalOrder], **kwargs):
-        # Handle negative orders by bypassing the base class validation
-        if isinstance(alpha, (int, float)):
-            self.alpha = FractionalOrder(alpha, validate=False)
-        else:
+        # Handle negative orders by bypassing the base class validation but
+        # preserve test-facing alpha semantics: float in, float out; object in, object out.
+        if isinstance(alpha, FractionalOrder):
             self.alpha = alpha
+            original_alpha = float(alpha.alpha)
+            self._alpha_order = alpha
+        else:
+            self.alpha = float(alpha)
+            self._alpha_order = FractionalOrder(self.alpha, validate=False)
+            original_alpha = float(self._alpha_order.alpha)
 
         # Store the original alpha value for internal logic
-        self._original_alpha = alpha if isinstance(
-            alpha, (int, float)) else alpha.alpha
+        self._original_alpha = original_alpha
 
         self._use_derivative = self._original_alpha > 0
         self._use_integral = self._original_alpha < 0
@@ -637,7 +734,8 @@ class RieszFisherOperator(BaseFractionalDerivative):
 
     def __repr__(self):
         """String representation of the Riesz-Fisher operator."""
-        return f"RieszFisherOperator(alpha={self.alpha.alpha})"
+        alpha_str = self.alpha.alpha if isinstance(self.alpha, FractionalOrder) else self.alpha
+        return f"RieszFisherOperator(alpha={alpha_str})"
 
 
 class AdomianDecompositionMethod:

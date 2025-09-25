@@ -42,7 +42,11 @@ class PredictorCorrectorSolver:
             min_h: Minimum step size
             max_h: Maximum step size
         """
-        self.derivative_type = derivative_type.lower()
+        # Accept both string types and objects (e.g., FractionalOrder) gracefully
+        try:
+            self.derivative_type = derivative_type.lower()  # type: ignore[attr-defined]
+        except Exception:
+            self.derivative_type = str(derivative_type).lower()
         self.order = order
         self.adaptive = adaptive
         self.tol = tol

@@ -13,6 +13,9 @@ import numpy as np
 import torch
 import warnings
 from typing import Union, Callable, Optional, Tuple, List, Dict, Any
+
+# Module-level warning tracking
+_warning_tracker = set()
 from functools import wraps
 import time
 import logging
@@ -459,8 +462,12 @@ def safe_divide(
         Division result or default value
     """
     if abs(denominator) < 1e-12:
-        warnings.warn(
-            f"Division by zero detected, using default value {default}")
+        # Only warn once per default value to avoid spam
+        warning_key = f"safe_divide_default_{default}"
+        if warning_key not in _warning_tracker:
+            warnings.warn(
+                f"Division by zero detected, using default value {default}")
+            _warning_tracker.add(warning_key)
         return default
     return numerator / denominator
 
@@ -688,7 +695,10 @@ def set_default_precision(precision: int):
         raise ValueError("Precision must be 32, 64, or 128")
 
     # This would typically set global precision settings
-    warnings.warn("Precision setting not fully implemented")
+    warning_key = "precision_setting_not_implemented"
+    if warning_key not in _warning_tracker:
+        warnings.warn("Precision setting not fully implemented")
+        _warning_tracker.add(warning_key)
 
 
 def get_available_methods() -> List[str]:

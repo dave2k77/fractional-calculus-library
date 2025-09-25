@@ -6,8 +6,15 @@ for implementing different fractional derivative definitions.
 """
 
 import numpy as np
-import jax.numpy as jnp
 from abc import ABC, abstractmethod
+
+# Optional JAX import
+try:
+    import jax.numpy as jnp
+    JAX_AVAILABLE = True
+except ImportError:
+    JAX_AVAILABLE = False
+    jnp = None
 from typing import Union, Optional, Callable, Dict, Any, List
 from .definitions import FractionalOrder, DefinitionType, FractionalDefinition
 
@@ -36,10 +43,17 @@ class BaseFractionalDerivative(ABC):
             use_jax: Whether to use JAX optimizations
             use_numba: Whether to use NUMBA optimizations
         """
-        self.alpha = (
-            FractionalOrder(alpha) if isinstance(
-                alpha, (int, float)) else alpha
-        )
+        if isinstance(alpha, FractionalOrder):
+            # Preserve FractionalOrder instance when provided
+            self._alpha_order = alpha
+            self._alpha_value = float(alpha.alpha)
+            self.alpha = alpha
+        else:
+            alpha_order = FractionalOrder(alpha)
+            self._alpha_order = alpha_order
+            self._alpha_value = float(alpha_order.alpha)
+            # Expose FractionalOrder to satisfy tests
+            self.alpha = alpha_order
         self.definition = definition
         self.use_jax = use_jax
         self.use_numba = use_numba
@@ -49,7 +63,7 @@ class BaseFractionalDerivative(ABC):
 
     def _validate_parameters(self):
         """Validate input parameters."""
-        if self.alpha.alpha < 0:
+        if self._alpha_order.alpha < 0:
             raise ValueError("Fractional order must be non-negative")
 
         if self.definition is not None and not isinstance(
@@ -60,8 +74,8 @@ class BaseFractionalDerivative(ABC):
 
     @abstractmethod
     def compute(
-        self, f: Callable, x: Union[float, np.ndarray, jnp.ndarray], **kwargs
-    ) -> Union[float, np.ndarray, jnp.ndarray]:
+        self, f: Callable, x: Union[float, np.ndarray, "jnp.ndarray"], **kwargs
+    ) -> Union[float, np.ndarray, "jnp.ndarray"]:
         """
         Compute the fractional derivative of function f at point(s) x.
 
@@ -77,10 +91,10 @@ class BaseFractionalDerivative(ABC):
     @abstractmethod
     def compute_numerical(
         self,
-        f_values: Union[np.ndarray, jnp.ndarray],
-        x_values: Union[np.ndarray, jnp.ndarray],
+        f_values: Union[np.ndarray, "jnp.ndarray"],
+        x_values: Union[np.ndarray, "jnp.ndarray"],
         **kwargs,
-    ) -> Union[np.ndarray, jnp.ndarray]:
+    ) -> Union[np.ndarray, "jnp.ndarray"]:
         """
         Compute the fractional derivative numerically from function values.
 
@@ -110,7 +124,7 @@ class BaseFractionalDerivative(ABC):
         return f"{definition_type.title()}Derivative(α={self.alpha})"
 
     def __str__(self) -> str:
-        return f"D^{self.alpha.alpha} (using {self.get_definition_info()['type']})"
+        return f"D^{self._alpha_value} (using {self.get_definition_info()['type']})"
 
 
 class FractionalDerivativeOperator:
@@ -154,8 +168,8 @@ class FractionalDerivativeOperator:
         self._implementation = None
 
     def __call__(
-        self, f: Callable, x: Union[float, np.ndarray, jnp.ndarray], **kwargs
-    ) -> Union[float, np.ndarray, jnp.ndarray]:
+        self, f: Callable, x: Union[float, np.ndarray, "jnp.ndarray"], **kwargs
+    ) -> Union[float, np.ndarray, "jnp.ndarray"]:
         """
         Compute the fractional derivative.
 
@@ -174,10 +188,10 @@ class FractionalDerivativeOperator:
 
     def compute_numerical(
         self,
-        f_values: Union[np.ndarray, jnp.ndarray],
-        x_values: Union[np.ndarray, jnp.ndarray],
+        f_values: Union[np.ndarray, "jnp.ndarray"],
+        x_values: Union[np.ndarray, "jnp.ndarray"],
         **kwargs,
-    ) -> Union[np.ndarray, jnp.ndarray]:
+    ) -> Union[np.ndarray, "jnp.ndarray"]:
         """
         Compute the fractional derivative numerically.
 
@@ -326,8 +340,8 @@ class FractionalDerivativeChain:
                 )
 
     def compute(
-        self, f: Callable, x: Union[float, np.ndarray, jnp.ndarray], **kwargs
-    ) -> Union[float, np.ndarray, jnp.ndarray]:
+        self, f: Callable, x: Union[float, np.ndarray, "jnp.ndarray"], **kwargs
+    ) -> Union[float, np.ndarray, "jnp.ndarray"]:
         """
         Compute the chained fractional derivative.
 

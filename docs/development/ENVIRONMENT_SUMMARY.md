@@ -9,7 +9,7 @@
 ## Quick Start
 ```bash
 # Activate the environment
-source activate_env.sh
+source tools/activate_env.sh
 
 # Or manually activate
 conda activate hpfracc-env
@@ -80,10 +80,10 @@ python examples/basic_usage/getting_started.py
 conda env list
 
 # Export environment
-conda env export > environment.yml
+conda env export > config/environment.yml
 
 # Recreate environment from file
-conda env create -f environment.yml
+conda env create -f config/environment.yml
 
 # Remove environment (if needed)
 conda env remove -n hpfracc-env

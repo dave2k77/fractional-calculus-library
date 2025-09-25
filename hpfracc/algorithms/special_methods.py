@@ -44,7 +44,7 @@ class FractionalLaplacian:
     and many physical applications.
     """
 
-    def __init__(self, alpha: Union[float, FractionalOrder]):
+    def __init__(self, alpha: Union[float, FractionalOrder], *, dimension: int = 1, boundary_conditions: Optional[str] = None):
         """Initialize fractional Laplacian calculator."""
         if isinstance(alpha, (int, float)):
             self.alpha = FractionalOrder(alpha)
@@ -52,11 +52,20 @@ class FractionalLaplacian:
             self.alpha = alpha
 
         self.alpha_val = self.alpha.alpha
+        self.dimension = int(dimension)
+        self.boundary_conditions = boundary_conditions or "dirichlet"
 
         # Validate alpha range
         if self.alpha_val <= 0 or self.alpha_val >= 2:
-            warnings.warn(
-                f"Alpha should be in (0, 2) for fractional Laplacian. Got {self.alpha_val}")
+            # Only warn once per alpha value to avoid spam
+            warning_key = f"fractional_laplacian_alpha_{self.alpha_val}"
+            if not hasattr(warnings, '_alpha_warning_tracker'):
+                warnings._alpha_warning_tracker = set()
+            if warning_key not in warnings._alpha_warning_tracker:
+                warnings.warn(
+                    f"Alpha should be in (0, 2) for fractional Laplacian. Got {self.alpha_val}. "
+                    f"Results may be inaccurate.")
+                warnings._alpha_warning_tracker.add(warning_key)
 
     def compute(
         self,
@@ -263,7 +272,7 @@ class FractionalFourierTransform:
     where K_α is the fractional Fourier kernel.
     """
 
-    def __init__(self, alpha: Union[float, FractionalOrder]):
+    def __init__(self, alpha: Union[float, FractionalOrder], *, method: str = "spectral"):
         """Initialize fractional Fourier transform calculator."""
         if isinstance(alpha, (int, float)):
             self.alpha = FractionalOrder(alpha)
@@ -271,6 +280,7 @@ class FractionalFourierTransform:
             self.alpha = alpha
 
         self.alpha_val = self.alpha.alpha
+        self.method = method
 
         # Normalize alpha to [0, 2π]
         self.alpha_val = self.alpha_val % (2 * np.pi)
@@ -618,7 +628,7 @@ class FractionalZTransform:
     Z^α[f](z) = Σ_{n=0}^∞ f[n] z^(-αn)
     """
 
-    def __init__(self, alpha: Union[float, FractionalOrder]):
+    def __init__(self, alpha: Union[float, FractionalOrder], *, method: str = "spectral"):
         """Initialize fractional Z-transform calculator."""
         if isinstance(alpha, (int, float)):
             self.alpha = FractionalOrder(alpha)
@@ -626,6 +636,7 @@ class FractionalZTransform:
             self.alpha = alpha
 
         self.alpha_val = self.alpha.alpha
+        self.method = method
 
     def transform(
         self,

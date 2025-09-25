@@ -20,9 +20,9 @@ class FractionalOrder:
     """
 
     def __init__(self,
-                 alpha: Union[float,
-                              "FractionalOrder"],
-                 validate: bool = True):
+                 alpha: Union[float, "FractionalOrder"],
+                 validate: bool = True,
+                 method: str = None):
         """
         Initialize fractional order.
 
@@ -32,8 +32,11 @@ class FractionalOrder:
         """
         if isinstance(alpha, FractionalOrder):
             self.alpha = alpha.alpha
+            # preserve method on copy if not explicitly provided
+            self.method = method if method is not None else getattr(alpha, "method", None)
         else:
             self.alpha = float(alpha)
+            self.method = method
 
         if validate:
             self._validate()
@@ -46,6 +49,11 @@ class FractionalOrder:
         if self.alpha < 0:
             raise ValueError("Fractional order must be non-negative")
 
+    @property
+    def value(self) -> float:
+        """Get the fractional order value."""
+        return self.alpha
+    
     @property
     def is_integer(self) -> bool:
         """Check if the order is an integer."""

@@ -27,18 +27,21 @@ This document presents a comprehensive design for a **Fractional Autograd Framew
 ## HPFRACC's Unique Advantages
 
 ### Advanced Spectral Methods
+
 - **Mellin Transform**: Enables efficient computation in the spectral domain
 - **Fractional FFT**: Fast computation of fractional derivatives via frequency domain
 - **Fractional Laplacian**: Spectral implementation with FFT optimization
 - **Z-Transform**: Discrete-time spectral analysis capabilities
 
 ### Comprehensive Operator Support
+
 - **Classical Methods**: RL, Caputo, GL with optimized implementations
 - **Novel Methods**: Caputo-Fabrizio, Atangana-Baleanu with non-singular kernels
 - **Advanced Methods**: Weyl, Marchaud, Hadamard, Reiz-Feller derivatives
 - **Special Operators**: Fractional Laplacian, fractional Fourier transform
 
 ### Production-Ready Infrastructure
+
 - **Multi-backend Support**: PyTorch, JAX, NUMBA compatibility
 - **Optimized Implementations**: Parallel processing, GPU acceleration
 - **Comprehensive Testing**: Validated against analytical solutions
@@ -57,27 +60,30 @@ The key insight is to perform automatic differentiation in the **spectral domain
 For a function $f(x)$, the fractional derivative in the spectral domain becomes:
 
 **Mellin Transform Approach**:
-```
-D^α f(x) = M^(-1)[s^α M[f](s)]
-```
+
+$$
+D^α f(x) = M^{-1}[s^α M[f](s)]
+$$
 
 **Fourier Transform Approach**:
-```
-D^α f(x) = F^(-1)[(iω)^α F[f](ω)]
-```
+
+$$
+D^α f(x) = F^{-1}[(iω)^α F[f](ω)]
+$$
 
 **Fractional Laplacian Approach**:
-```
-(-Δ)^(α/2) f(x) = F^(-1)[|ξ|^α F[f](ξ)]
-```
+
+$$
+(-Δ)^{α/2} f(x) = F^{-1}[|ξ|^α F[f](ξ)]
+$$
 
 #### 2. Fractional Chain Rule
 
 The fractional chain rule for composite functions $f(g(x))$:
 
-```
+$$
 D^α[f(g(x))] = D^α[f](g(x)) · D^α[g](x) + R_α(x)
-```
+$$
 
 where $R_α(x)$ is a remainder term that accounts for the non-local nature of fractional derivatives.
 
@@ -85,9 +91,9 @@ where $R_α(x)$ is a remainder term that accounts for the non-local nature of fr
 
 For the product of two functions $f(x)g(x)$:
 
-```
-D^α[fg](x) = Σ(k=0 to ∞) C(α,k) D^(α-k)[f](x) D^k[g](x)
-```
+$$
+D^α[fg](x) = \Sigma_{k=0}^\infty C(α,k) D^{α-k}[f](x) D^k[g](x)
+$$
 
 where $C(α,k)$ are fractional binomial coefficients.
 
@@ -100,98 +106,101 @@ class SpectralFractionalAutograd:
     """
     Core engine for spectral domain fractional automatic differentiation
     """
-    
+
     def __init__(self, method: str = "mellin", backend: str = "pytorch"):
         self.method = method  # "mellin", "fourier", "laplacian"
         self.backend = backend
         self.transform_cache = {}
-        
+
     def forward(self, x, alpha, method="auto"):
         """Forward pass in spectral domain"""
         # Transform to spectral domain
         x_spectral = self._to_spectral(x)
-        
+
         # Apply fractional operator in spectral domain
         result_spectral = self._apply_fractional_operator(x_spectral, alpha)
-        
+
         # Transform back to original domain
         result = self._from_spectral(result_spectral)
-        
+
         return result, (x_spectral, result_spectral)
-    
+
     def backward(self, grad_output, saved_tensors):
         """Backward pass with fractional chain rule"""
         x_spectral, result_spectral = saved_tensors
-        
+
         # Compute gradient in spectral domain
         grad_spectral = self._compute_spectral_gradient(grad_output, result_spectral)
-        
+
         # Apply fractional chain rule
         grad_input = self._apply_fractional_chain_rule(grad_spectral, x_spectral)
-        
+
         return grad_input
 ```
 
 #### 2. Method-Specific Implementations
 
 **Mellin Transform Autograd**:
+
 ```python
 class MellinFractionalAutograd(SpectralFractionalAutograd):
     """
     Fractional autograd using Mellin transform
     """
-    
+
     def _to_spectral(self, x):
         """Transform to Mellin domain"""
         return self.mellin_transform(x)
-    
+
     def _apply_fractional_operator(self, x_spectral, alpha):
         """Apply fractional derivative in Mellin domain"""
         s = self.get_mellin_variable()
         return x_spectral * (s ** alpha)
-    
+
     def _from_spectral(self, x_spectral):
         """Inverse Mellin transform"""
         return self.inverse_mellin_transform(x_spectral)
 ```
 
 **Fractional FFT Autograd**:
+
 ```python
 class FractionalFFTAutograd(SpectralFractionalAutograd):
     """
     Fractional autograd using fractional FFT
     """
-    
+
     def _to_spectral(self, x):
         """Transform to frequency domain"""
         return torch.fft.fft(x)
-    
+
     def _apply_fractional_operator(self, x_spectral, alpha):
         """Apply fractional derivative in frequency domain"""
         omega = self.get_frequency_variable()
         return x_spectral * ((1j * omega) ** alpha)
-    
+
     def _from_spectral(self, x_spectral):
         """Inverse FFT"""
         return torch.fft.ifft(x_spectral)
 ```
 
 **Fractional Laplacian Autograd**:
+
 ```python
 class FractionalLaplacianAutograd(SpectralFractionalAutograd):
     """
     Fractional autograd using fractional Laplacian
     """
-    
+
     def _to_spectral(self, x):
         """Transform to frequency domain"""
         return torch.fft.fft(x)
-    
+
     def _apply_fractional_operator(self, x_spectral, alpha):
         """Apply fractional Laplacian in frequency domain"""
         xi = self.get_frequency_variable()
         return x_spectral * (torch.abs(xi) ** alpha)
-    
+
     def _from_spectral(self, x_spectral):
         """Inverse FFT"""
         return torch.fft.ifft(x_spectral)
@@ -204,36 +213,36 @@ class FractionalAutogradFunction(torch.autograd.Function):
     """
     Unified fractional autograd function supporting multiple methods
     """
-    
+
     @staticmethod
     def forward(ctx, x, alpha, method="auto", spectral_method="mellin"):
         # Auto-select best method based on problem characteristics
         if method == "auto":
             method = _auto_select_method(x, alpha)
-        
+
         # Create appropriate spectral autograd engine
         engine = _create_spectral_engine(spectral_method)
-        
+
         # Perform forward pass
         result, saved_tensors = engine.forward(x, alpha, method)
-        
+
         # Save context for backward pass
         ctx.alpha = alpha
         ctx.method = method
         ctx.spectral_method = spectral_method
         ctx.engine = engine
         ctx.save_for_backward(*saved_tensors)
-        
+
         return result
-    
+
     @staticmethod
     def backward(ctx, grad_output):
         # Retrieve saved tensors
         saved_tensors = ctx.saved_tensors
-        
+
         # Perform backward pass
         grad_input = ctx.engine.backward(grad_output, saved_tensors)
-        
+
         return grad_input, None, None, None
 ```
 
@@ -251,7 +260,7 @@ def _auto_select_method(x, alpha):
     size = x.numel()
     dtype = x.dtype
     device = x.device
-    
+
     # Select method based on characteristics
     if size < 1000:
         return "grunwald_letnikov"  # Direct computation for small problems
@@ -270,23 +279,23 @@ class MemoryEfficientSpectralAutograd:
     """
     Memory-efficient implementation using streaming spectral transforms
     """
-    
+
     def __init__(self, chunk_size=1024, overlap=128):
         self.chunk_size = chunk_size
         self.overlap = overlap
-        
+
     def forward(self, x, alpha):
         """Process large tensors in chunks"""
         if x.numel() <= self.chunk_size:
             return self._process_chunk(x, alpha)
-        
+
         # Process in overlapping chunks
         result = torch.zeros_like(x)
         for i in range(0, x.numel(), self.chunk_size - self.overlap):
             chunk = x[i:i + self.chunk_size]
             chunk_result = self._process_chunk(chunk, alpha)
             result[i:i + self.chunk_size] = chunk_result
-            
+
         return result
 ```
 
@@ -297,11 +306,11 @@ class MultiBackendFractionalAutograd:
     """
     Support for multiple computation backends
     """
-    
+
     def __init__(self, backend="pytorch"):
         self.backend = backend
         self._setup_backend()
-    
+
     def _setup_backend(self):
         if self.backend == "pytorch":
             self.fft = torch.fft.fft
@@ -317,18 +326,21 @@ class MultiBackendFractionalAutograd:
 ### Implementation Plan
 
 #### Phase 1: Core Spectral Autograd Engine (2-3 weeks)
+
 1. Implement basic spectral autograd functions
 2. Create Mellin, FFT, and Laplacian autograd engines
 3. Develop unified autograd function
 4. Basic testing and validation
 
 #### Phase 2: Advanced Features (2-3 weeks)
+
 1. Adaptive method selection
 2. Memory-efficient implementations
 3. Multi-backend support
 4. Comprehensive testing suite
 
 #### Phase 3: Integration and Optimization (1-2 weeks)
+
 1. Integrate with existing HPFRACC ML components
 2. Performance optimization
 3. Documentation and examples
@@ -337,49 +349,56 @@ class MultiBackendFractionalAutograd:
 ### Theoretical Advantages
 
 #### 1. Computational Efficiency
+
 - **Spectral Domain**: Fractional operators become simple multiplications
 - **FFT Acceleration**: O(N log N) complexity vs O(N²) for direct methods
 - **Memory Efficiency**: Reduced memory requirements through spectral methods
 
 #### 2. Mathematical Rigor
+
 - **Exact Spectral Representation**: No approximation errors in spectral domain
 - **Fractional Chain Rule**: Proper handling of composite functions
 - **Method-Specific Kernels**: Each fractional method has optimal spectral representation
 
 #### 3. Flexibility
+
 - **Multiple Methods**: Support for all HPFRACC fractional operators
 - **Adaptive Selection**: Automatic method selection based on problem characteristics
 - **Backend Agnostic**: Works with PyTorch, JAX, and NUMBA
 
 ### Comparison with Existing Methods
 
-| Feature | FracGrad | Fractional Jacobian | HPFRACC Spectral |
-|---------|----------|-------------------|------------------|
-| Spectral Methods | ❌ | ❌ | ✅ |
-| Multiple Operators | ❌ | ❌ | ✅ |
-| Memory Efficiency | ❌ | ❌ | ✅ |
-| Adaptive Selection | ❌ | ❌ | ✅ |
-| Multi-Backend | ❌ | ❌ | ✅ |
-| Mathematical Rigor | ⚠️ | ✅ | ✅ |
+| Feature            | FracGrad | Fractional Jacobian | HPFRACC Spectral |
+| ------------------ | -------- | ------------------- | ---------------- |
+| Spectral Methods   | ❌        | ❌                   | ✅                |
+| Multiple Operators | ❌        | ❌                   | ✅                |
+| Memory Efficiency  | ❌        | ❌                   | ✅                |
+| Adaptive Selection | ❌        | ❌                   | ✅                |
+| Multi-Backend      | ❌        | ❌                   | ✅                |
+| Mathematical Rigor | ⚠️       | ✅                   | ✅                |
 
 ### Potential Applications
 
 #### 1. Neural Fractional ODEs
+
 - Efficient training of neural networks with fractional dynamics
 - Memory-enhanced learning through fractional derivatives
 - Improved convergence properties
 
 #### 2. Fractional PINNs
+
 - Physics-informed neural networks for fractional PDEs
 - Spectral domain physics constraints
 - Efficient solution of complex fractional systems
 
 #### 3. Fractional Graph Neural Networks
+
 - Fractional convolutions on graphs
 - Spectral graph neural networks with fractional operators
 - Memory-enhanced graph learning
 
 #### 4. Fractional Optimization
+
 - Fractional gradient descent methods
 - Adaptive learning rates with fractional dynamics
 - Escape from local minima through fractional gradients
@@ -387,18 +406,22 @@ class MultiBackendFractionalAutograd:
 ### Challenges and Solutions
 
 #### 1. Computational Complexity
+
 **Challenge**: Spectral transforms can be expensive for large problems
 **Solution**: Chunked processing, streaming algorithms, and adaptive method selection
 
 #### 2. Numerical Stability
+
 **Challenge**: Spectral methods can be sensitive to numerical errors
 **Solution**: Robust numerical implementations, error estimation, and fallback methods
 
 #### 3. Memory Requirements
+
 **Challenge**: Spectral methods may require significant memory
 **Solution**: Memory-efficient implementations, streaming processing, and backend optimization
 
 #### 4. Theoretical Complexity
+
 **Challenge**: Fractional chain rule and product rule are complex
 **Solution**: Rigorous mathematical foundation, comprehensive testing, and validation
 

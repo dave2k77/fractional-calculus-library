@@ -32,12 +32,7 @@ from hpfracc.algorithms.advanced_methods import (
 )
 
 # Import optimized methods
-from hpfracc.algorithms.optimized_methods import (
-    # Note: optimized_weyl_derivative function may need to be implemented
-    # optimized_weyl_derivative,
-    OptimizedCaputo,
-    OptimizedRiemannLiouville,
-)
+from hpfracc.algorithms.optimized_methods import OptimizedCaputo, OptimizedRiemannLiouville
 
 
 def setup_plotting():
@@ -849,7 +844,10 @@ def performance_comparison():
 
         # Optimized methods
         start_time = time.time()
-        optimized_weyl_derivative(test_function, x, alpha, h)
+        # Use OptimizedRiemannLiouville as a stand-in optimized method here
+        opt_rl = OptimizedRiemannLiouville(alpha)
+        start_time = time.time()
+        opt_rl.compute(np.array([test_function(xi) for xi in x]), x, h)
         time_opt = time.time() - start_time
 
         speedup = time_std / time_opt

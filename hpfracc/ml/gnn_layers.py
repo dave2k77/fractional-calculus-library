@@ -13,6 +13,7 @@ import torch
 from .backends import get_backend_manager, BackendType
 from .tensor_ops import get_tensor_ops
 from ..core.definitions import FractionalOrder
+from ..core.fractional_implementations import _AlphaCompatibilityWrapper
 
 
 class BaseFractionalGNNLayer(ABC):
@@ -37,8 +38,15 @@ class BaseFractionalGNNLayer(ABC):
     ):
         self.in_channels = in_channels
         self.out_channels = out_channels
-        self.fractional_order = FractionalOrder(fractional_order) if isinstance(
-            fractional_order, float) else fractional_order
+        # For backward compatibility, expose fractional_order as a special wrapper
+        # that behaves like both a float and FractionalOrder
+        if isinstance(fractional_order, float):
+            self.fractional_order = _AlphaCompatibilityWrapper(FractionalOrder(fractional_order))
+        elif isinstance(fractional_order, FractionalOrder):
+            # Preserve the original object for tests that check identity
+            self.fractional_order = fractional_order
+        else:
+            self.fractional_order = _AlphaCompatibilityWrapper(fractional_order)
         self.method = method
         self.use_fractional = use_fractional
         self.activation = activation
@@ -73,8 +81,8 @@ class BaseFractionalGNNLayer(ABC):
         # use the actual fractional calculus methods from your core module
         alpha = self.fractional_order.alpha
 
-        if self.backend == BackendType.TORCH:
-            # PyTorch implementation
+        if self.backend == BackendType.TORCH or self.backend == BackendType.AUTO:
+            # PyTorch implementation (AUTO defaults to TORCH)
             return self._torch_fractional_derivative(x, alpha)
         elif self.backend == BackendType.JAX:
             # JAX implementation
@@ -181,7 +189,7 @@ class FractionalGraphConv(BaseFractionalGNNLayer):
     def _initialize_layer(self):
         """Initialize the graph convolution layer"""
         # Create weight matrix with proper initialization
-        if self.backend == BackendType.TORCH:
+        if self.backend == BackendType.TORCH or self.backend == BackendType.AUTO:
             import torch
             self.weight = torch.randn(
                 self.in_channels, self.out_channels, requires_grad=True)
@@ -251,7 +259,7 @@ class FractionalGraphConv(BaseFractionalGNNLayer):
         x = self.apply_fractional_derivative(x)
 
         # Perform graph convolution
-        if self.backend == BackendType.TORCH:
+        if self.backend == BackendType.TORCH or self.backend == BackendType.AUTO:
             return self._torch_forward(x, edge_index, edge_weight)
         elif self.backend == BackendType.JAX:
             return self._jax_forward(x, edge_index, edge_weight)
@@ -269,8 +277,11 @@ class FractionalGraphConv(BaseFractionalGNNLayer):
         import torch
         import torch.nn.functional as F
 
+        # Ensure weight matrix matches input dtype
+        weight = self.weight.to(x.dtype)
+        
         # Linear transformation
-        out = torch.matmul(x, self.weight)
+        out = torch.matmul(x, weight)
 
         # Graph convolution (improved implementation)
         if edge_index is not None and edge_index.shape[1] > 0:
@@ -310,7 +321,8 @@ class FractionalGraphConv(BaseFractionalGNNLayer):
 
         # Add bias
         if self.bias is not None:
-            out = out + self.bias
+            bias = self.bias.to(x.dtype)
+            out = out + bias
 
         # Apply activation and dropout
         if self.activation == "relu":

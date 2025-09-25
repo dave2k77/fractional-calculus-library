@@ -6,11 +6,43 @@ which are fundamental special functions used throughout fractional calculus.
 """
 
 import numpy as np
-import jax
-import jax.numpy as jnp
-from numba import jit
 from typing import Union
 import scipy.special as scipy_special
+# Simple module-level convenience wrappers expected by tests
+def gamma_function(x: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
+    return scipy_special.gamma(x)
+
+
+def beta_function(a: Union[float, np.ndarray], b: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
+    return scipy_special.beta(a, b)
+
+
+def log_gamma_function(x: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
+    return scipy_special.gammaln(x)
+
+
+def digamma_function(x: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
+    return scipy_special.digamma(x)
+
+# Optional numba import
+try:
+    from numba import jit
+    NUMBA_AVAILABLE = True
+except ImportError:
+    NUMBA_AVAILABLE = False
+    def jit(*args, **kwargs):
+        def decorator(func):
+            return func
+        return decorator
+
+# Optional JAX import
+try:
+    import jax
+    import jax.numpy as jnp
+    JAX_AVAILABLE = True
+except ImportError:
+    JAX_AVAILABLE = False
+    jnp = None
 
 
 # Module-level gamma function for Numba compatibility
@@ -75,8 +107,8 @@ class GammaFunction:
             self._gamma_jax = jax.jit(self._gamma_jax_impl)
 
     def compute(
-        self, z: Union[float, np.ndarray, jnp.ndarray]
-    ) -> Union[float, np.ndarray, jnp.ndarray]:
+        self, z: Union[float, np.ndarray, "jnp.ndarray"]
+    ) -> Union[float, np.ndarray, "jnp.ndarray"]:
         """
         Compute the Gamma function.
 
@@ -86,7 +118,7 @@ class GammaFunction:
         Returns:
             Gamma function value(s)
         """
-        if self.use_jax and isinstance(z, (jnp.ndarray, float)):
+        if self.use_jax and JAX_AVAILABLE and isinstance(z, (jnp.ndarray, float, int)):
             return self._gamma_jax(z)
         elif self.use_numba and isinstance(z, (float, int)):
             # Temporarily disable Numba due to compilation issues
@@ -101,7 +133,7 @@ class GammaFunction:
 
 
     @staticmethod
-    def _gamma_jax_impl(z: jnp.ndarray) -> jnp.ndarray:
+    def _gamma_jax_impl(z: "jnp.ndarray") -> "jnp.ndarray":
         """
         JAX implementation of Gamma function.
 
@@ -110,8 +142,8 @@ class GammaFunction:
         return jax.scipy.special.gamma(z)
 
     def log_gamma(
-        self, z: Union[float, np.ndarray, jnp.ndarray]
-    ) -> Union[float, np.ndarray, jnp.ndarray]:
+        self, z: Union[float, np.ndarray, "jnp.ndarray"]
+    ) -> Union[float, np.ndarray, "jnp.ndarray"]:
         """
         Compute the natural logarithm of the Gamma function.
 
@@ -121,7 +153,7 @@ class GammaFunction:
         Returns:
             Log Gamma function value(s)
         """
-        if self.use_jax and isinstance(z, (jnp.ndarray, float)):
+        if self.use_jax and JAX_AVAILABLE and isinstance(z, (jnp.ndarray, float)):
             return jax.scipy.special.gammaln(z)
         else:
             return scipy_special.gammaln(z)
@@ -155,9 +187,9 @@ class BetaFunction:
 
     def compute(
         self,
-        x: Union[float, np.ndarray, jnp.ndarray],
-        y: Union[float, np.ndarray, jnp.ndarray],
-    ) -> Union[float, np.ndarray, jnp.ndarray]:
+        x: Union[float, np.ndarray, "jnp.ndarray"],
+        y: Union[float, np.ndarray, "jnp.ndarray"],
+    ) -> Union[float, np.ndarray, "jnp.ndarray"]:
         """
         Compute the Beta function.
 
@@ -170,8 +202,9 @@ class BetaFunction:
         """
         if (
             self.use_jax
-            and isinstance(x, (jnp.ndarray, float))
-            and isinstance(y, (jnp.ndarray, float))
+            and JAX_AVAILABLE
+            and isinstance(x, (jnp.ndarray, float, int))
+            and isinstance(y, (jnp.ndarray, float, int))
         ):
             return self._beta_jax(x, y)
         elif (
@@ -207,7 +240,7 @@ class BetaFunction:
         return gamma_x * gamma_y / gamma_sum
 
     @staticmethod
-    def _beta_jax_impl(x: jnp.ndarray, y: jnp.ndarray) -> jnp.ndarray:
+    def _beta_jax_impl(x: "jnp.ndarray", y: "jnp.ndarray") -> "jnp.ndarray":
         """
         JAX implementation of Beta function.
 
@@ -217,9 +250,9 @@ class BetaFunction:
 
     def log_beta(
         self,
-        x: Union[float, np.ndarray, jnp.ndarray],
-        y: Union[float, np.ndarray, jnp.ndarray],
-    ) -> Union[float, np.ndarray, jnp.ndarray]:
+        x: Union[float, np.ndarray, "jnp.ndarray"],
+        y: Union[float, np.ndarray, "jnp.ndarray"],
+    ) -> Union[float, np.ndarray, "jnp.ndarray"]:
         """
         Compute the natural logarithm of the Beta function.
 
@@ -232,6 +265,7 @@ class BetaFunction:
         """
         if (
             self.use_jax
+            and JAX_AVAILABLE
             and isinstance(x, (jnp.ndarray, float))
             and isinstance(y, (jnp.ndarray, float))
         ):
@@ -246,10 +280,10 @@ class BetaFunction:
 
 # Convenience functions
 def gamma(
-    z: Union[float, np.ndarray, jnp.ndarray],
+    z: Union[float, np.ndarray, "jnp.ndarray"],
     use_jax: bool = False,
     use_numba: bool = True,
-) -> Union[float, np.ndarray, jnp.ndarray]:
+) -> Union[float, np.ndarray, "jnp.ndarray"]:
     """
     Convenience function to compute Gamma function.
 
@@ -266,11 +300,11 @@ def gamma(
 
 
 def beta(
-    x: Union[float, np.ndarray, jnp.ndarray],
-    y: Union[float, np.ndarray, jnp.ndarray],
+    x: Union[float, np.ndarray, "jnp.ndarray"],
+    y: Union[float, np.ndarray, "jnp.ndarray"],
     use_jax: bool = False,
     use_numba: bool = True,
-) -> Union[float, np.ndarray, jnp.ndarray]:
+) -> Union[float, np.ndarray, "jnp.ndarray"]:
     """
     Convenience function to compute Beta function.
 
@@ -288,8 +322,8 @@ def beta(
 
 
 def log_gamma(
-    z: Union[float, np.ndarray, jnp.ndarray], use_jax: bool = False
-) -> Union[float, np.ndarray, jnp.ndarray]:
+    z: Union[float, np.ndarray, "jnp.ndarray"], use_jax: bool = False
+) -> Union[float, np.ndarray, "jnp.ndarray"]:
     """
     Convenience function to compute log Gamma function.
 
@@ -305,10 +339,10 @@ def log_gamma(
 
 
 def log_beta(
-    x: Union[float, np.ndarray, jnp.ndarray],
-    y: Union[float, np.ndarray, jnp.ndarray],
+    x: Union[float, np.ndarray, "jnp.ndarray"],
+    y: Union[float, np.ndarray, "jnp.ndarray"],
     use_jax: bool = False,
-) -> Union[float, np.ndarray, jnp.ndarray]:
+) -> Union[float, np.ndarray, "jnp.ndarray"]:
     """
     Convenience function to compute log Beta function.
 

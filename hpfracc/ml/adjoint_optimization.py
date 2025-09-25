@@ -13,6 +13,7 @@ from typing import Tuple, List
 from dataclasses import dataclass
 
 from ..core.definitions import FractionalOrder
+from ..core.fractional_implementations import _AlphaCompatibilityWrapper
 
 
 @dataclass
@@ -351,7 +352,9 @@ class MemoryEfficientFractionalNetwork(nn.Module):
         self.input_size = input_size
         self.hidden_sizes = hidden_sizes
         self.output_size = output_size
-        self.fractional_order = FractionalOrder(fractional_order)
+        # For backward compatibility, expose fractional_order as a special wrapper
+        # that behaves like both a float and FractionalOrder
+        self.fractional_order = _AlphaCompatibilityWrapper(FractionalOrder(fractional_order))
         self.activation = activation
         self.dropout = dropout
         self.adjoint_config = adjoint_config or AdjointConfig()

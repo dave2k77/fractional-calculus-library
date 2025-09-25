@@ -19,9 +19,9 @@ import time
 import warnings
 warnings.filterwarnings('ignore')
 
-# Import HPFRACC components
+# Import HPFRACC components (unified APIs)
 try:
-    from hpfracc.ml.spectral_autograd import SpectralFractionalDerivative, SpectralFractionalLayer
+    from hpfracc.ml.spectral_autograd import spectral_fractional_derivative, SpectralFractionalLayer
     print("✅ HPFRACC imported successfully")
 except ImportError as e:
     print(f"❌ HPFRACC import failed: {e}")
@@ -54,13 +54,13 @@ class FractionalPhysicsDemo:
         X, T = torch.meshgrid(x, t, indexing='ij')
         u = torch.exp(-X**2) * torch.sin(2 * np.pi * T)
         
-        # Compute fractional time derivative using spectral autograd
+        # Compute fractional time derivative using spectral autograd (unified)
         print("Computing fractional time derivative...")
         start_time = time.time()
         
         # Reshape for spectral autograd
         u_flat = u.flatten()
-        u_t_alpha = SpectralFractionalDerivative.apply(u_flat, alpha, -1, "fft")
+        u_t_alpha = spectral_fractional_derivative(u_flat, alpha)
         u_t_alpha = u_t_alpha.reshape(nx, nt)
         
         compute_time = time.time() - start_time
@@ -99,7 +99,7 @@ class FractionalPhysicsDemo:
         start_time = time.time()
         
         u_flat = u.flatten()
-        u_t_alpha = SpectralFractionalDerivative.apply(u_flat, alpha, -1, "fft")
+        u_t_alpha = spectral_fractional_derivative(u_flat, alpha)
         u_t_alpha = u_t_alpha.reshape(nx, nt)
         
         compute_time = time.time() - start_time
@@ -140,7 +140,7 @@ class FractionalPhysicsDemo:
         start_time = time.time()
         
         u_flat = u.flatten()
-        u_t_alpha = SpectralFractionalDerivative.apply(u_flat, alpha, -1, "fft")
+        u_t_alpha = spectral_fractional_derivative(u_flat, alpha)
         u_t_alpha = u_t_alpha.reshape(nx, nt)
         
         compute_time = time.time() - start_time
@@ -174,9 +174,9 @@ class FractionalPhysicsDemo:
         X, T = torch.meshgrid(x, t, indexing='ij')
         u_target = torch.exp(-X**2) * torch.sin(2 * np.pi * T)
         
-        # Create learnable alpha parameter
-        alpha_param = BoundedAlphaParameter(0.5).to(self.device)
-        optimizer = torch.optim.Adam(alpha_param.parameters(), lr=0.01)
+        # Learnable alpha via SpectralFractionalLayer
+        layer = SpectralFractionalLayer(alpha=0.5, learnable_alpha=True).to(self.device)
+        optimizer = torch.optim.Adam(layer.parameters(), lr=0.01)
         
         print("Training learnable alpha...")
         start_time = time.time()
@@ -184,9 +184,9 @@ class FractionalPhysicsDemo:
         for epoch in range(100):
             optimizer.zero_grad()
             
-            # Compute fractional derivative with current alpha
-            u_flat = u_target.flatten()
-            u_t_alpha = SpectralFractionalDerivative.apply(u_flat, alpha_param(), -1, "fft")
+            # Compute fractional derivative with current learnable alpha
+            u_flat = u_target.flatten().unsqueeze(0)  # [1, N]
+            u_t_alpha = layer(u_flat)
             
             # Simple loss: minimize the magnitude of the derivative
             loss = torch.mean(u_t_alpha**2)
@@ -195,16 +195,16 @@ class FractionalPhysicsDemo:
             optimizer.step()
             
             if epoch % 20 == 0:
-                print(f"Epoch {epoch}: α={alpha_param().item():.4f}, Loss={loss.item():.6f}")
+                print(f"Epoch {epoch}: α={layer.alpha:.4f}, Loss={loss.item():.6f}")
         
         training_time = time.time() - start_time
         print(f"Training completed in {training_time:.4f} seconds")
-        print(f"Final alpha: {alpha_param().item():.4f}")
+        print(f"Final alpha: {layer.alpha:.4f}")
         
         # Store results
         self.results['learnable_alpha'] = {
             'initial_alpha': 0.5,
-            'final_alpha': alpha_param().item(),
+            'final_alpha': float(layer.alpha),
             'training_time': training_time
         }
         

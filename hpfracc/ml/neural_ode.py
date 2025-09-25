@@ -340,8 +340,13 @@ class NeuralFODE(BaseNeuralODE):
         )
         super().__init__(config)
         self.alpha = validate_fractional_order(config.fractional_order)
+        self.solver = config.solver  # Expose solver attribute
         self.solver_name = config.solver
         self.has_torchdiffeq = self._check_torchdiffeq()
+    
+    def get_fractional_order(self) -> float:
+        """Get the fractional order"""
+        return float(self.alpha.alpha)
     
     def _check_torchdiffeq(self) -> bool:
         """Check if torchdiffeq is available"""
@@ -488,6 +493,54 @@ class NeuralODETrainer:
         self.performance_stats["loss_history"].append(loss.item())
         
         return loss.item()
+
+    # Minimal validate method expected by tests
+    def _validate(self, data_loader) -> float:
+        """Compute average validation loss over a data loader."""
+        device = next(self.model.parameters()).device if any(True for _ in self.model.parameters()) else torch.device('cpu')
+        total_loss = 0.0
+        count = 0
+        with torch.no_grad():
+            for batch in data_loader:
+                if isinstance(batch, (list, tuple)) and len(batch) == 3:
+                    xb, yb, tb = batch
+                else:
+                    # Fallback: assume (x, y)
+                    xb, yb = batch
+                    tb = torch.linspace(0, 1, yb.shape[1], device=yb.device)
+                    tb = tb.unsqueeze(0).expand(xb.shape[0], -1)
+                xb = xb.to(device)
+                yb = yb.to(device)
+                tb = tb.to(device)
+                yp = self.model(xb, tb)
+                loss = self.criterion(yp, yb)
+                total_loss += float(loss.detach().cpu())
+                count += 1
+        return total_loss / max(count, 1)
+
+    # Minimal training loop expected by tests
+    def train(self, data_loader, num_epochs: int = 1, verbose: bool = False):
+        history = {"loss": [], "epochs": []}
+        for epoch in range(num_epochs):
+            epoch_loss = 0.0
+            batches = 0
+            for batch in data_loader:
+                if isinstance(batch, (list, tuple)) and len(batch) == 3:
+                    xb, yb, tb = batch
+                else:
+                    # Fallback: assume (x, y)
+                    xb, yb = batch
+                    tb = torch.linspace(0, 1, yb.shape[1], device=yb.device)
+                    tb = tb.unsqueeze(0).expand(xb.shape[0], -1)
+                loss = self.train_step(xb, yb, tb)
+                epoch_loss += loss
+                batches += 1
+            avg_loss = epoch_loss / max(batches, 1)
+            history["loss"].append(avg_loss)
+            history["epochs"].append(epoch + 1)
+            if verbose:
+                print(f"Epoch {epoch+1}/{num_epochs} - loss: {avg_loss:.6f}")
+        return history
 
 # ============================================================================
 # FACTORY FUNCTIONS

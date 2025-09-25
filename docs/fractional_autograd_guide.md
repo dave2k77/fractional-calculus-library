@@ -21,15 +21,15 @@ The fractional autograd framework extends PyTorch's automatic differentiation to
 - **Stochastic Memory Sampling**: Approximate fractional operators by sampling from memory history
 - **Probabilistic Fractional Orders**: Treat fractional orders as random variables for uncertainty quantification
 
-## Spectral Autograd Engines
+## Spectral Autograd Engines (Unified by Default)
 
-### Basic Usage
+### Basic Usage (Unified)
 
 ```python
 import torch
-from hpfracc.ml.spectral_autograd import FractionalAutogradLayer
+from hpfracc.ml.spectral_autograd import FractionalAutogradLayer, SpectralFractionalNetwork
 
-# Create a spectral fractional layer
+# Create a spectral fractional layer (engine default: FFT)
 layer = FractionalAutogradLayer(
     engine_type="fft",  # or "mellin", "laplacian"
     alpha=0.5,
@@ -44,6 +44,31 @@ output = layer(x)
 loss = output.sum()
 loss.backward()
 print(f"Input gradient shape: {x.grad.shape}")
+### Unified Network Helper
+
+```python
+# Unified by default: specify dims
+net = SpectralFractionalNetwork(
+    input_dim=128, hidden_dims=[256, 256], output_dim=10,
+    alpha=0.5, mode="unified"
+)
+y = net(x)
+```
+
+### Model-Specific (Legacy) Mode
+
+```python
+# Opt-in to legacy/coverage-style args
+net_legacy = SpectralFractionalNetwork(
+    input_size=128, hidden_sizes=[64, 64], output_size=10,
+    alpha=0.5, mode="model"
+)
+```
+
+### Backends
+- Supported backends: `pytorch` (default), `jax`, `numba`.
+- Fallbacks: if a backend is unavailable, CPU-safe paths are used.
+- FFT fallbacks use NumPy FFTs isolated from PyTorch FFT to avoid mock leakage.
 ```
 
 ### Engine Types

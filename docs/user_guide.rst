@@ -2,7 +2,7 @@
 User Guide
 ==========
 
-Welcome to the HPFRACC User Guide! This guide will help you get started with the High-Performance Fractional Calculus Library and its machine learning integration.
+Welcome to the HPFRACC User Guide! This comprehensive guide will help you get started with the High-Performance Fractional Calculus Library v2.0.0, featuring the complete Fractional Autograd Framework, machine learning integration, and advanced optimization capabilities.
 
 Installation
 -----------

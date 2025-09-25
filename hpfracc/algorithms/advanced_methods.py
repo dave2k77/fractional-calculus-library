@@ -35,6 +35,7 @@ class WeylDerivative:
         alpha: Union[float, FractionalOrder],
         parallel_config: Optional[ParallelConfig] = None,
         optimized: bool = True,
+        **kwargs,
     ):
         """Initialize Weyl derivative calculator."""
         if isinstance(alpha, (int, float)):
@@ -44,8 +45,13 @@ class WeylDerivative:
 
         self.n = int(np.ceil(self.alpha.alpha))
         self.alpha_val = self.alpha.alpha
+        # accept alias 'config' if provided
+        if parallel_config is None and 'config' in kwargs:
+            parallel_config = kwargs.get('config')
         self.parallel_config = parallel_config or ParallelConfig()
         self.optimized = optimized
+        # expose for tests
+        self.fractional_order = self.alpha
 
     def compute(
         self,
@@ -172,6 +178,7 @@ class MarchaudDerivative:
         self,
         alpha: Union[float, FractionalOrder],
         parallel_config: Optional[ParallelConfig] = None,
+        **kwargs,
     ):
         """Initialize Marchaud derivative calculator."""
         if isinstance(alpha, (int, float)):
@@ -180,7 +187,10 @@ class MarchaudDerivative:
             self.alpha = alpha
 
         self.alpha_val = self.alpha.alpha
+        if parallel_config is None and 'config' in kwargs:
+            parallel_config = kwargs.get('config')
         self.parallel_config = parallel_config or ParallelConfig()
+        self.fractional_order = self.alpha
 
         # Precompute constants
         self.coeff = self.alpha_val / gamma(1 - self.alpha_val)
@@ -329,7 +339,7 @@ class HadamardDerivative:
     This implementation uses logarithmic transformation and efficient quadrature.
     """
 
-    def __init__(self, alpha: Union[float, FractionalOrder]):
+    def __init__(self, alpha: Union[float, FractionalOrder], **kwargs):
         """Initialize Hadamard derivative calculator."""
         if isinstance(alpha, (int, float)):
             self.alpha = FractionalOrder(alpha)
@@ -338,6 +348,7 @@ class HadamardDerivative:
 
         self.n = int(np.ceil(self.alpha.alpha))
         self.alpha_val = self.alpha.alpha
+        self.fractional_order = self.alpha
 
     def compute(
         self,
@@ -390,6 +401,8 @@ class HadamardDerivative:
             # Compute integral part
             integral = 0.0
             for j in range(i):
+                if x[j] <= 0:
+                    continue  # Skip zero or negative values
                 log_t = np.log(x[j])
                 log_kernel = (log_x - log_t) ** (self.n - self.alpha_val - 1)
                 integral += f[j] * log_kernel / x[j]
@@ -421,6 +434,7 @@ class ReizFellerDerivative:
         self,
         alpha: Union[float, FractionalOrder],
         parallel_config: Optional[ParallelConfig] = None,
+        **kwargs,
     ):
         """Initialize Reiz-Feller derivative calculator."""
         if isinstance(alpha, (int, float)):
@@ -429,7 +443,10 @@ class ReizFellerDerivative:
             self.alpha = alpha
 
         self.alpha_val = self.alpha.alpha
+        if parallel_config is None and 'config' in kwargs:
+            parallel_config = kwargs.get('config')
         self.parallel_config = parallel_config or ParallelConfig()
+        self.fractional_order = self.alpha
 
     def compute(
         self,
@@ -506,6 +523,7 @@ class AdomianDecomposition:
         self,
         alpha: Union[float, FractionalOrder],
         parallel_config: Optional[ParallelConfig] = None,
+        **kwargs,
     ):
         """Initialize Adomian Decomposition solver."""
         if isinstance(alpha, (int, float)):
@@ -514,7 +532,10 @@ class AdomianDecomposition:
             self.alpha = alpha
 
         self.alpha_val = self.alpha.alpha
+        if parallel_config is None and 'config' in kwargs:
+            parallel_config = kwargs.get('config')
         self.parallel_config = parallel_config or ParallelConfig()
+        self.fractional_order = self.alpha
 
     def solve(
         self,

@@ -15,11 +15,7 @@ from typing import Dict, Any
 import warnings
 
 # Import fractional calculus components
-from hpfracc.algorithms.optimized_methods import (
-    optimized_caputo,
-)
-from hpfracc.solvers import solve_advanced_fractional_ode
-from hpfracc.utils.plotting import PlotManager
+from hpfracc.algorithms.optimized_methods import optimized_caputo
 
 
 class FractionalBlackScholesModel:
@@ -64,8 +60,7 @@ class FractionalBlackScholesModel:
                 self.use_gpu = False
                 warnings.warn("GPU not available, falling back to CPU")
 
-        # Initialize plotting
-        self.plot_manager = PlotManager()
+        # Plotting handled locally with matplotlib
 
     def price_european_call(
         self,
@@ -87,35 +82,26 @@ class FractionalBlackScholesModel:
             Dictionary containing pricing results
         """
         # Time grid
-        np.linspace(0, T, t_points)
+        t = np.linspace(0, T, t_points)
+        dt = T / max(t_points - 1, 1)
 
         # Fractional Black-Scholes PDE
-        def fractional_pde(t, S):
-            """Fractional Black-Scholes PDE."""
-            # Drift term
-            drift = self.r * S
+        def fractional_step(S_hist: np.ndarray, t_hist: np.ndarray) -> float:
+            """One-step update using fractional diffusion term via Caputo on history."""
+            S_curr = S_hist[-1]
+            drift = self.r * S_curr
+            # Fractional diffusion term from history (last value)
+            diff_hist = optimized_caputo(S_hist, t_hist, self.alpha)
+            diffusion = 0.5 * (self.sigma ** 2) * diff_hist[-1]
+            return S_curr + (drift + diffusion) * dt
 
-            # Diffusion term with fractional derivative
-            # Use CPU implementation for now
-            diffusion = optimized_caputo(S, t, self.alpha)
-
-            diffusion *= 0.5 * self.sigma**2
-
-            return drift + diffusion
-
-        # Solve the fractional PDE
-        solution = solve_advanced_fractional_ode(
-            fractional_pde,
-            t_span=(0, T),
-            y0=S0,
-            alpha=self.alpha,
-            method="embedded_pairs",
-            tol=1e-6,
-        )
-
-        # Extract stock price evolution and time points from solution
-        S_t = solution["y"].flatten()
-        t_solution = solution["t"]
+        # Simulate stock path with fractional dynamics (explicit scheme)
+        S_t = np.zeros_like(t)
+        S_t[0] = S0
+        for i in range(1, len(t)):
+            S_t[:i]  # ensure slice exists
+            S_t[i] = fractional_step(S_t[:i], t[:i])
+        t_solution = t
 
         # Calculate option payoff
         payoff = np.maximum(S_t - K, 0)
@@ -129,7 +115,7 @@ class FractionalBlackScholesModel:
             "payoff": payoff,
             "option_price": option_price,
             "final_price": option_price[-1],
-            "solution_metadata": solution,
+            "solution_metadata": {"method": "explicit_fractional_step", "alpha": self.alpha},
         }
 
     def price_european_put(

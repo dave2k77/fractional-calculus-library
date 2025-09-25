@@ -670,6 +670,54 @@ D_I = lim[ε→0] Σ p_i log(p_i) / log(ε)
 
 ## Practical Implementation
 
+### Quickstart: hpfracc-based Workflow
+
+This section illustrates a minimal, runnable workflow using `hpfracc`.
+
+#### 1) Feature extraction with fractional operators (PyTorch)
+
+```python
+import torch
+from hpfracc.ml.spectral_autograd import SpectralFractionalNetwork
+
+# Suppose eeg_batch: [batch, channels] preprocessed segment features
+eeg_batch = torch.randn(64, 128)
+
+net = SpectralFractionalNetwork(
+    input_dim=128, hidden_dims=[256, 128], output_dim=32,
+    alpha=0.6, mode="unified"
+)
+features = net(eeg_batch)  # fractional spectral features
+```
+
+#### 2) Stochastic memory augmentation
+
+```python
+from hpfracc.ml.stochastic_memory_sampling import StochasticFractionalLayer
+
+mem_layer = StochasticFractionalLayer(alpha=0.5, k=32, method="importance")
+mem_feats = mem_layer(features)
+if mem_feats.dim() == 2:
+    mem_feats = mem_feats.mean(dim=1, keepdim=True)
+```
+
+#### 3) Classifier head
+
+```python
+import torch.nn as nn
+
+head = nn.Sequential(nn.Linear(32, 16), nn.ReLU(), nn.Linear(16, 2))
+logits = head(features)
+```
+
+See also the runnable examples:
+- `examples/ml_examples/unified_spectral_fnn_minimal.py`
+- `examples/ml_examples/stochastic_memory_sampling_minimal.py`
+
+### Advanced: Probabilistic alpha and GPU-optimized paths
+- Probabilistic orders: `examples/ml_examples/probabilistic_alpha_minimal.py`
+- GPU-optimized spectral (falls back on CPU): `examples/ml_examples/gpu_optimized_spectral_minimal.py`
+
 ### Software Tools and Libraries
 
 #### Python Ecosystem

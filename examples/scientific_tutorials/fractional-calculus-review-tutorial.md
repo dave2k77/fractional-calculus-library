@@ -21,6 +21,21 @@ Fractional calculus, the generalization of classical calculus to non-integer ord
 
 The mathematical foundation of fractional calculus dates back to the work of Leibniz, Euler, and Riemann, but its practical applications have flourished only in recent decades due to computational advances and a deeper understanding of complex systems. This document explores five key applications where fractional calculus has proven essential: anomalous diffusion processes, space-time fractional diffusion equations, fractional Fokker-Planck equations (often called fractional Lévy-Planck equations), fractional state space modeling, and stability analysis of fractional systems.
 
+### Quickstart with hpfracc
+
+This tutorial now uses the `hpfracc` library for implementations and runnable examples. Start with these minimal examples:
+
+- Unified spectral FNN: `examples/ml_examples/unified_spectral_fnn_minimal.py`
+- Model-specific spectral FNN: `examples/ml_examples/model_specific_spectral_fnn_minimal.py`
+- Stochastic memory sampling: `examples/ml_examples/stochastic_memory_sampling_minimal.py`
+- Probabilistic fractional orders: `examples/ml_examples/probabilistic_alpha_minimal.py`
+- GPU-optimized spectral (fallbacks included): `examples/ml_examples/gpu_optimized_spectral_minimal.py`
+- ODE/PDE solver APIs with aliases:
+  - `examples/ode_examples/adaptive_solver_minimal.py`
+  - `examples/pde_examples/pde_solver_minimal.py`
+
+For performance summaries, see `examples/benchmarks/summarise_fair_comparison.py` which reads `fair_comparison_results.json`.
+
 ### Mathematical Preliminaries
 
 Before delving into specific applications, let us establish the key fractional calculus definitions used throughout this document:

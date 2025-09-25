@@ -538,6 +538,10 @@ class HighOrderFractionalSolver:
             order: Order of the method
             collocation_points: Number of collocation points
         """
+        # Some call sites may accidentally pass a non-string here (e.g. a FractionalOrder).
+        # In that case, default to spectral.
+        if not isinstance(method, str):
+            method = "spectral"
         self.method = method.lower()
         self.order = order
         self.collocation_points = collocation_points
@@ -552,7 +556,7 @@ class HighOrderFractionalSolver:
         f: Callable,
         t_span: Tuple[float, float],
         y0: Union[float, np.ndarray],
-        alpha: Union[float, FractionalOrder],
+        alpha: Optional[Union[float, FractionalOrder]] = None,
         **kwargs,
     ) -> Dict[str, Any]:
         """
@@ -568,6 +572,10 @@ class HighOrderFractionalSolver:
         Returns:
             Solution dictionary
         """
+        # Default alpha if omitted by legacy call sites
+        if alpha is None:
+            alpha = 0.5
+
         if self.method == "spectral":
             return self._spectral_solve(f, t_span, y0, alpha, **kwargs)
         elif self.method == "multistep":

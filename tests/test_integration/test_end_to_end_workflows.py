@@ -143,7 +143,7 @@ class TestMLWorkflow:
         y_train = torch.randn(100, 5)
         
         # Create spectral network
-        network = SpectralFractionalNetwork(10, [20, 15], 5, 0.5)
+        network = SpectralFractionalNetwork(input_dim=10, hidden_dims=[20, 15], output_dim=5, alpha=0.5)
         
         # Forward pass
         output = network(x_train)
@@ -305,7 +305,7 @@ class TestHybridWorkflow:
         deriv_tensor = torch.tensor(fractional_deriv[:len(x_vals)], dtype=torch.float32)
         
         # Create ML network
-        network = SpectralFractionalNetwork(1, [20, 10], 1, 0.5)
+        network = SpectralFractionalNetwork(input_dim=1, hidden_dims=[20, 10], output_dim=1, alpha=0.5)
         
         # Train network to approximate fractional derivative
         optimizer = torch.optim.Adam(network.parameters(), lr=0.01)

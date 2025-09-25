@@ -6,10 +6,27 @@ which are fundamental in the Grünwald-Letnikov definition of fractional derivat
 """
 
 import numpy as np
-import jax
-import jax.numpy as jnp
-from numba import jit
 from typing import Union
+
+# Optional JAX import
+try:
+    import jax
+    import jax.numpy as jnp
+    JAX_AVAILABLE = True
+except ImportError:
+    JAX_AVAILABLE = False
+    jnp = None
+
+# Optional numba import
+try:
+    from numba import jit
+    NUMBA_AVAILABLE = True
+except ImportError:
+    NUMBA_AVAILABLE = False
+    def jit(*args, **kwargs):
+        def decorator(func):
+            return func
+        return decorator
 import scipy.special as scipy_special
 from .gamma_beta import gamma
 
@@ -49,9 +66,9 @@ class BinomialCoefficients:
 
     def compute(
         self,
-        n: Union[float, int, np.ndarray, jnp.ndarray],
-        k: Union[float, int, np.ndarray, jnp.ndarray],
-    ) -> Union[float, np.ndarray, jnp.ndarray]:
+        n: Union[float, int, np.ndarray, "jnp.ndarray"],
+        k: Union[float, int, np.ndarray, "jnp.ndarray"],
+    ) -> Union[float, np.ndarray, "jnp.ndarray"]:
         """
         Compute the binomial coefficient C(n,k).
 
@@ -71,8 +88,8 @@ class BinomialCoefficients:
         # Compute the result
         if (
             self.use_jax
-            and isinstance(n, (jnp.ndarray, float, int))
-            and isinstance(k, (jnp.ndarray, float, int))
+            and isinstance(n, ("jnp.ndarray", float, int))
+            and isinstance(k, ("jnp.ndarray", float, int))
         ):
             result = self._binomial_jax(n, k)
         elif (
@@ -138,7 +155,7 @@ class BinomialCoefficients:
         return 1.0  # Placeholder - should be replaced with proper implementation
 
     @staticmethod
-    def _binomial_jax_impl(n: jnp.ndarray, k: jnp.ndarray) -> jnp.ndarray:
+    def _binomial_jax_impl(n: "jnp.ndarray", k: "jnp.ndarray") -> "jnp.ndarray":
         """
         JAX implementation of binomial coefficient using gamma function.
 
@@ -148,9 +165,9 @@ class BinomialCoefficients:
 
     def compute_fractional(
         self,
-        alpha: Union[float, np.ndarray, jnp.ndarray],
-        k: Union[int, np.ndarray, jnp.ndarray],
-    ) -> Union[float, np.ndarray, jnp.ndarray]:
+        alpha: Union[float, np.ndarray, "jnp.ndarray"],
+        k: Union[int, np.ndarray, "jnp.ndarray"],
+    ) -> Union[float, np.ndarray, "jnp.ndarray"]:
         """
         Compute the generalized binomial coefficient C(α,k) for fractional α.
 
@@ -163,8 +180,8 @@ class BinomialCoefficients:
         """
         if (
             self.use_jax
-            and isinstance(alpha, (jnp.ndarray, float))
-            and isinstance(k, (jnp.ndarray, int))
+            and isinstance(alpha, ("jnp.ndarray", float))
+            and isinstance(k, ("jnp.ndarray", int))
         ):
             return self._binomial_fractional_jax(alpha, k)
         elif (
@@ -207,8 +224,8 @@ class BinomialCoefficients:
 
     @staticmethod
     def _binomial_fractional_jax(
-            alpha: jnp.ndarray,
-            k: jnp.ndarray) -> jnp.ndarray:
+            alpha: "jnp.ndarray",
+            k: "jnp.ndarray") -> "jnp.ndarray":
         """
         JAX implementation of fractional binomial coefficient using gamma function.
 
@@ -330,11 +347,11 @@ class GrunwaldLetnikovCoefficients:
 
 # Convenience functions
 def binomial(
-    n: Union[float, np.ndarray, jnp.ndarray],
-    k: Union[float, np.ndarray, jnp.ndarray],
+    n: Union[float, np.ndarray, "jnp.ndarray"],
+    k: Union[float, np.ndarray, "jnp.ndarray"],
     use_jax: bool = False,
     use_numba: bool = True,
-) -> Union[float, np.ndarray, jnp.ndarray]:
+) -> Union[float, np.ndarray, "jnp.ndarray"]:
     """
     Convenience function to compute binomial coefficient.
 
@@ -352,11 +369,11 @@ def binomial(
 
 
 def binomial_fractional(
-    alpha: Union[float, np.ndarray, jnp.ndarray],
-    k: Union[int, np.ndarray, jnp.ndarray],
+    alpha: Union[float, np.ndarray, "jnp.ndarray"],
+    k: Union[int, np.ndarray, "jnp.ndarray"],
     use_jax: bool = False,
     use_numba: bool = True,
-) -> Union[float, np.ndarray, jnp.ndarray]:
+) -> Union[float, np.ndarray, "jnp.ndarray"]:
     """
     Convenience function to compute fractional binomial coefficient.
 

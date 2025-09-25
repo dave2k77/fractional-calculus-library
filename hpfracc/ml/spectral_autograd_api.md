@@ -5,6 +5,19 @@
 - Drop-in `torch.autograd.Function` and `nn.Module` interfaces
 - Hooks for stochastic memory sampling and probabilistic fractional orders
 
+## Modes and Defaults
+- Default mode: unified adaptive framework (unified signatures for layers/networks)
+- Optional: model-specific (legacy/coverage-style) API for backwards compatibility
+- Selection:
+  - Unified (default): pass unified constructor args (e.g., `input_dim`, `hidden_dims`, `output_dim`) or `mode="unified"`
+  - Model-specific: pass legacy args (e.g., `input_size`, `hidden_sizes`, `output_size`) or `mode="model"`
+
+## Backends
+- Supported: `pytorch` (default), `jax`, `numba`
+- Behaviour:
+  - If a backend is unavailable, CPU-safe fallbacks are used automatically
+  - FFT paths prefer PyTorch; NumPy FFT fallbacks are isolated from `torch.fft` mocks
+
 ## Namespaces
 - `hpfracc.ml.spectral_autograd`
 
@@ -37,6 +50,11 @@
 - `class FractionalAutogradLayer(nn.Module)`
   - `__init__(alpha: float, method: str = "auto", engine: str = "fft")`
   - `forward(x)`
+
+### Network helper (unified-by-default)
+- `SpectralFractionalNetwork(..., mode: Literal["unified","model","auto"] = "unified")`
+  - Unified: `input_dim`, `hidden_dims`, `output_dim`
+  - Model-specific: `input_size`, `hidden_sizes`, `output_size`
 
 ## Stochastic Extensions (optional kwargs)
 - `stochastic_memory: bool = False`

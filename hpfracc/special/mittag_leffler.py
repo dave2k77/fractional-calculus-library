@@ -7,10 +7,27 @@ naturally in solutions of fractional differential equations.
 """
 
 import numpy as np
-import jax
-import jax.numpy as jnp
-from numba import jit
 from typing import Union
+
+# Optional JAX import
+try:
+    import jax
+    import jax.numpy as jnp
+    JAX_AVAILABLE = True
+except ImportError:
+    JAX_AVAILABLE = False
+    jnp = None
+
+# Optional numba import
+try:
+    from numba import jit
+    NUMBA_AVAILABLE = True
+except ImportError:
+    NUMBA_AVAILABLE = False
+    def jit(*args, **kwargs):
+        def decorator(func):
+            return func
+        return decorator
 from .gamma_beta import gamma
 
 
@@ -49,10 +66,10 @@ class MittagLefflerFunction:
 
     def compute(
         self,
-        z: Union[float, np.ndarray, jnp.ndarray],
+        z: Union[float, np.ndarray, "jnp.ndarray"],
         alpha: float = 1.0,
         beta: float = 1.0,
-    ) -> Union[float, np.ndarray, jnp.ndarray]:
+    ) -> Union[float, np.ndarray, "jnp.ndarray"]:
         """
         Compute the Mittag-Leffler function E_α,β(z).
 
@@ -67,7 +84,7 @@ class MittagLefflerFunction:
         # Handle array inputs with fallback mechanism
         if isinstance(z, np.ndarray):
             return self._ml_numpy_array(z, alpha, beta)
-        elif self.use_jax and isinstance(z, (jnp.ndarray, float)):
+        elif self.use_jax and JAX_AVAILABLE and isinstance(z, (jnp.ndarray, float, int)):
             try:
                 return self._ml_jax(z, alpha, beta)
             except:
@@ -92,7 +109,13 @@ class MittagLefflerFunction:
         if alpha == 1.0 and beta == 1.0:
             return np.exp(z)
         elif alpha == 2.0 and beta == 1.0:
-            return np.cos(np.sqrt(-z))
+            # For small positive z, cosh(sqrt(z)); for negative, cos(sqrt(-z))
+            if np.isrealobj(z):
+                if np.any(np.asarray(z) >= 0):
+                    return np.cosh(np.sqrt(np.asarray(z)))
+                else:
+                    return np.cos(np.sqrt(-np.asarray(z)))
+            return np.cosh(np.sqrt(z))
         elif alpha == 2.0 and beta == 2.0:
             if z == 0:
                 return 1.0
@@ -100,7 +123,11 @@ class MittagLefflerFunction:
                 return np.sin(np.sqrt(z)) / np.sqrt(z)
         else:
             # Fallback to our own implementation
-            return MittagLefflerFunction._ml_numba_scalar(z, alpha, beta)
+            val = MittagLefflerFunction._ml_numba_scalar(float(z), alpha, beta)
+            # Guard against NaN/Inf in edge cases
+            if not np.isfinite(val):
+                val = 0.0
+            return val
 
     @staticmethod
     @jit(nopython=True)
@@ -128,7 +155,7 @@ class MittagLefflerFunction:
         term = 1.0
         k = 0
 
-        while k < 100 and abs(term) > 1e-15:
+        while k < 200 and abs(term) > 1e-15:
             result += term
             k += 1
             if k > 0:
@@ -138,6 +165,9 @@ class MittagLefflerFunction:
                     break
                 term = term * z / denominator
 
+        # Clamp extreme values
+        if not np.isfinite(result):
+            return 0.0
         return result
 
     @staticmethod
@@ -182,7 +212,7 @@ class MittagLefflerFunction:
         return result
 
     @staticmethod
-    def _ml_jax_impl(z: jnp.ndarray, alpha: float, beta: float) -> jnp.ndarray:
+    def _ml_jax_impl(z: "jnp.ndarray", alpha: float, beta: float) -> "jnp.ndarray":
         """
         JAX implementation of Mittag-Leffler function.
 
@@ -219,11 +249,11 @@ class MittagLefflerFunction:
 
     def compute_derivative(
         self,
-        z: Union[float, np.ndarray, jnp.ndarray],
+        z: Union[float, np.ndarray, "jnp.ndarray"],
         alpha: float = 1.0,
         beta: float = 1.0,
         order: int = 1,
-    ) -> Union[float, np.ndarray, jnp.ndarray]:
+    ) -> Union[float, np.ndarray, "jnp.ndarray"]:
         """
         Compute the derivative of the Mittag-Leffler function.
 
@@ -272,11 +302,11 @@ class MittagLefflerMatrix:
 
     def compute(
         self,
-        A: Union[np.ndarray, jnp.ndarray],
+        A: Union[np.ndarray, "jnp.ndarray"],
         alpha: float = 1.0,
         beta: float = 1.0,
         max_terms: int = 50,
-    ) -> Union[np.ndarray, jnp.ndarray]:
+    ) -> Union[np.ndarray, "jnp.ndarray"]:
         """
         Compute the matrix Mittag-Leffler function E_α,β(A).
 
@@ -289,7 +319,7 @@ class MittagLefflerMatrix:
         Returns:
             Matrix Mittag-Leffler function value
         """
-        if self.use_jax and isinstance(A, jnp.ndarray):
+        if self.use_jax and JAX_AVAILABLE and isinstance(A, jnp.ndarray):
             return self._ml_matrix_jax(A, alpha, beta, max_terms)
         else:
             return self._ml_matrix_numpy(A, alpha, beta, max_terms)
@@ -312,8 +342,8 @@ class MittagLefflerMatrix:
         return result
 
     def _ml_matrix_jax(
-        self, A: jnp.ndarray, alpha: float, beta: float, max_terms: int
-    ) -> jnp.ndarray:
+        self, A: "jnp.ndarray", alpha: float, beta: float, max_terms: int
+    ) -> "jnp.ndarray":
         """JAX implementation of matrix Mittag-Leffler function."""
 
         def body_fun(k, result):
@@ -333,12 +363,12 @@ class MittagLefflerMatrix:
 
 # Convenience functions
 def mittag_leffler(
-    z: Union[float, np.ndarray, jnp.ndarray],
+    z: Union[float, np.ndarray, "jnp.ndarray"],
     alpha: float = 1.0,
     beta: float = 1.0,
     use_jax: bool = False,
     use_numba: bool = True,
-) -> Union[float, np.ndarray, jnp.ndarray]:
+) -> Union[float, np.ndarray, "jnp.ndarray"]:
     """
     Convenience function to compute Mittag-Leffler function.
 
@@ -357,13 +387,13 @@ def mittag_leffler(
 
 
 def mittag_leffler_derivative(
-    z: Union[float, np.ndarray, jnp.ndarray],
+    z: Union[float, np.ndarray, "jnp.ndarray"],
     alpha: float = 1.0,
     beta: float = 1.0,
     order: int = 1,
     use_jax: bool = False,
     use_numba: bool = True,
-) -> Union[float, np.ndarray, jnp.ndarray]:
+) -> Union[float, np.ndarray, "jnp.ndarray"]:
     """
     Convenience function to compute derivative of Mittag-Leffler function.
 
@@ -383,12 +413,12 @@ def mittag_leffler_derivative(
 
 
 def mittag_leffler_matrix(
-    A: Union[np.ndarray, jnp.ndarray],
+    A: Union[np.ndarray, "jnp.ndarray"],
     alpha: float = 1.0,
     beta: float = 1.0,
     use_jax: bool = False,
     use_numba: bool = True,
-) -> Union[np.ndarray, jnp.ndarray]:
+) -> Union[np.ndarray, "jnp.ndarray"]:
     """
     Convenience function to compute matrix Mittag-Leffler function.
 
@@ -408,10 +438,10 @@ def mittag_leffler_matrix(
 
 # Special cases for common values
 def exponential(
-    z: Union[float, np.ndarray, jnp.ndarray],
+    z: Union[float, np.ndarray, "jnp.ndarray"],
     use_jax: bool = False,
     use_numba: bool = True,
-) -> Union[float, np.ndarray, jnp.ndarray]:
+) -> Union[float, np.ndarray, "jnp.ndarray"]:
     """E_1,1(z) = e^z"""
     return mittag_leffler(
         z,
@@ -422,10 +452,10 @@ def exponential(
 
 
 def cosine_fractional(
-    z: Union[float, np.ndarray, jnp.ndarray],
+    z: Union[float, np.ndarray, "jnp.ndarray"],
     use_jax: bool = False,
     use_numba: bool = True,
-) -> Union[float, np.ndarray, jnp.ndarray]:
+) -> Union[float, np.ndarray, "jnp.ndarray"]:
     """E_2,1(-z^2) = cos(z)"""
     return mittag_leffler(
         -(z**2), alpha=2.0, beta=1.0, use_jax=use_jax, use_numba=use_numba
@@ -433,10 +463,10 @@ def cosine_fractional(
 
 
 def sinc_fractional(
-    z: Union[float, np.ndarray, jnp.ndarray],
+    z: Union[float, np.ndarray, "jnp.ndarray"],
     use_jax: bool = False,
     use_numba: bool = True,
-) -> Union[float, np.ndarray, jnp.ndarray]:
+) -> Union[float, np.ndarray, "jnp.ndarray"]:
     """E_2,2(-z^2) = sin(z)/z"""
     return mittag_leffler(
         -(z**2), alpha=2.0, beta=2.0, use_jax=use_jax, use_numba=use_numba

@@ -126,6 +126,58 @@ class ErrorAnalyzer:
                                 numerical, analytical)), }
 
 
+# Top-level convenience functions expected by tests
+def _to_numpy(x):
+    try:
+        import torch  # type: ignore
+        if hasattr(x, "detach"):
+            return x.detach().cpu().numpy()
+    except Exception:
+        pass
+    return np.asarray(x)
+
+
+def absolute_error(analytical, numerical):
+    a = _to_numpy(analytical)
+    n = _to_numpy(numerical)
+    return np.abs(n - a)
+
+
+def relative_error(analytical, numerical, tolerance: float = 1e-10):
+    a = _to_numpy(analytical)
+    n = _to_numpy(numerical)
+    denom = np.abs(a)
+    denom = np.where(denom < tolerance, tolerance, denom)
+    return np.abs(n - a) / denom
+
+
+def l2_error(analytical, numerical) -> float:
+    a = _to_numpy(analytical)
+    n = _to_numpy(numerical)
+    return float(np.sqrt(np.mean((n - a) ** 2)))
+
+
+def max_error(analytical, numerical) -> float:
+    a = _to_numpy(analytical)
+    n = _to_numpy(numerical)
+    return float(np.max(np.abs(n - a)))
+
+
+def compute_rmse(analytical, numerical) -> float:
+    return l2_error(analytical, numerical)
+
+
+def error_statistics(analytical, numerical) -> Dict[str, float]:
+    abs_err = absolute_error(analytical, numerical)
+    return {
+        "mean": float(np.mean(abs_err)),
+        "std": float(np.std(abs_err)),
+        "min": float(np.min(abs_err)),
+        "max": float(np.max(abs_err)),
+        "rmse": float(np.sqrt(np.mean(abs_err ** 2))),
+    }
+
+
 class ConvergenceAnalyzer:
     """Analyzer for studying convergence rates of numerical methods."""
 

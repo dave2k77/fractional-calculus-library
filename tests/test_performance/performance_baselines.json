@@ -30,10 +30,10 @@
     "gpu_throughput": 830.8579759754049
   },
   "optimized_methods": {
-    "optimized_rl_time": 0.0018880367279052734,
-    "optimized_rl_throughput": 1059301.426947847,
-    "optimized_caputo_time": 0.34222936630249023,
-    "optimized_caputo_throughput": 5844.033846681166
+    "optimized_rl_time": 0.001295493979796581,
+    "optimized_rl_throughput": 771906.3273123201,
+    "optimized_caputo_time": 0.09433159828186036,
+    "optimized_caputo_throughput": 10600.901693746628
   },
   "comprehensive": {
     "derivative_time": 0.0014483928680419922,
