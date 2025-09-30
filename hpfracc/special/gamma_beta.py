@@ -13,7 +13,28 @@ def gamma_function(x: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
     return scipy_special.gamma(x)
 
 
+def log_gamma(x: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
+    """Logarithm of the Gamma function."""
+    return scipy_special.gammaln(x)
+
+
 def beta_function(a: Union[float, np.ndarray], b: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
+    """Optimized Beta function with caching and special case handling."""
+    # Handle edge cases
+    if np.isscalar(a) and np.isscalar(b):
+        if a < 0 or b < 0 or a == 0 or b == 0:
+            return np.nan
+    else:
+        # For arrays, handle element-wise
+        a = np.asarray(a)
+        b = np.asarray(b)
+        result = np.full_like(a, np.nan, dtype=float)
+        valid_mask = (a > 0) & (b > 0)
+        if np.any(valid_mask):
+            result[valid_mask] = scipy_special.beta(a[valid_mask], b[valid_mask])
+        return result
+    
+    # Use SciPy directly for better performance
     return scipy_special.beta(a, b)
 
 
@@ -35,14 +56,53 @@ except ImportError:
             return func
         return decorator
 
-# Optional JAX import
+# Use adapter system for JAX instead of direct imports
+def _get_jax_numpy():
+    """Get JAX numpy through adapter system."""
+    try:
+        from ..ml.adapters import get_jax_adapter
+        adapter = get_jax_adapter()
+        return adapter.get_lib()
+    except Exception:
+        # Fallback to NumPy if JAX not available
+        import numpy as np
+        return np
+
+# Check if JAX is available through adapter system
 try:
-    import jax
-    import jax.numpy as jnp
-    JAX_AVAILABLE = True
-except ImportError:
+    jnp = _get_jax_numpy()
+    JAX_AVAILABLE = jnp is not np
+    if JAX_AVAILABLE:
+        import jax
+    else:
+        jax = None
+except Exception:
     JAX_AVAILABLE = False
     jnp = None
+    jax = None
+
+
+# Convenience functions for optimized beta function
+def beta_function_fast(
+    x: Union[float, np.ndarray],
+    y: Union[float, np.ndarray],
+    use_numba: bool = True,
+    cache_size: int = 1000
+) -> Union[float, np.ndarray]:
+    """
+    Fast Beta function optimized for fractional calculus.
+    
+    Args:
+        x: First parameter
+        y: Second parameter
+        use_numba: Use Numba JIT compilation
+        cache_size: Size of cache for repeated evaluations
+        
+    Returns:
+        Beta function value(s)
+    """
+    beta_func = BetaFunction(use_numba=use_numba, cache_size=cache_size)
+    return beta_func.compute_fast(x, y)
 
 
 # Module-level gamma function for Numba compatibility
@@ -103,7 +163,7 @@ class GammaFunction:
         self.cache_size = cache_size
         self._cache = {}
 
-        if use_jax:
+        if use_jax and JAX_AVAILABLE and jax is not None:
             self._gamma_jax = jax.jit(self._gamma_jax_impl)
 
     def compute(
@@ -169,20 +229,32 @@ class BetaFunction:
 
     def __init__(self, use_jax: bool = False, use_numba: bool = True, cache_size: int = 1000):
         """
-        Initialize Beta function calculator.
+        Initialize optimized Beta function calculator.
 
         Args:
             use_jax: Whether to use JAX implementation for vectorized operations
             use_numba: Whether to use NUMBA JIT compilation for scalar operations
             cache_size: Size of the cache for frequently used values
         """
-        self.use_jax = use_jax
-        self.use_numba = use_numba
+        self.use_jax = use_jax and JAX_AVAILABLE
+        self.use_numba = use_numba and NUMBA_AVAILABLE
         self.cache_size = cache_size
         self._cache = {}
         self.gamma = GammaFunction(use_jax=use_jax, use_numba=use_numba, cache_size=cache_size)
+        
+        # Precompute common values for fractional calculus
+        self._common_values = {
+            (0.5, 0.5): np.pi,  # B(0.5, 0.5) = π
+            (1.0, 1.0): 1.0,     # B(1, 1) = 1
+            (2.0, 1.0): 0.5,     # B(2, 1) = 1/2
+            (1.0, 2.0): 0.5,     # B(1, 2) = 1/2
+            (0.5, 1.0): 2.0,     # B(0.5, 1) = 2
+            (1.0, 0.5): 2.0,     # B(1, 0.5) = 2
+            (3.0, 1.0): 1.0/3.0, # B(3, 1) = 1/3
+            (1.0, 3.0): 1.0/3.0, # B(1, 3) = 1/3
+        }
 
-        if use_jax:
+        if use_jax and JAX_AVAILABLE and jax is not None:
             self._beta_jax = jax.jit(self._beta_jax_impl)
 
     def compute(
@@ -191,7 +263,7 @@ class BetaFunction:
         y: Union[float, np.ndarray, "jnp.ndarray"],
     ) -> Union[float, np.ndarray, "jnp.ndarray"]:
         """
-        Compute the Beta function.
+        Compute the optimized Beta function with caching and special case handling.
 
         Args:
             x: First parameter
@@ -200,23 +272,88 @@ class BetaFunction:
         Returns:
             Beta function value(s)
         """
+        # Handle special cases first (common in fractional calculus)
+        if isinstance(x, (float, int)) and isinstance(y, (float, int)):
+            # Check for exact matches in common values
+            if (x, y) in self._common_values:
+                return self._common_values[(x, y)]
+            
+            # Check cache for scalar inputs
+            cache_key = (x, y)
+            if cache_key in self._cache:
+                return self._cache[cache_key]
+        
+        # Choose computation method
         if (
             self.use_jax
             and JAX_AVAILABLE
             and isinstance(x, (jnp.ndarray, float, int))
             and isinstance(y, (jnp.ndarray, float, int))
         ):
-            return self._beta_jax(x, y)
+            result = self._beta_jax(x, y)
         elif (
             self.use_numba
             and isinstance(x, (float, int))
             and isinstance(y, (float, int))
+            and x <= 10 and y <= 10 and (x + y) <= 20
         ):
-            # For very large inputs, use SciPy to avoid numerical underflow
-            if x > 50 or y > 50 or (x + y) > 100:
-                return self._beta_scipy(x, y)
-            return self._beta_numba_scalar(x, y)
+            # Only use Numba for small values where it might be beneficial
+            try:
+                result = self._beta_numba_scalar(x, y)
+            except:
+                result = self._beta_scipy(x, y)
         else:
+            # Use SciPy by default (much faster)
+            result = self._beta_scipy(x, y)
+        
+        # Cache scalar results
+        if isinstance(x, (float, int)) and isinstance(y, (float, int)):
+            if len(self._cache) < self.cache_size:
+                self._cache[cache_key] = result
+        
+        return result
+    
+    def compute_fast(
+        self,
+        x: Union[float, np.ndarray],
+        y: Union[float, np.ndarray]
+    ) -> Union[float, np.ndarray]:
+        """
+        Fast Beta function computation optimized for fractional calculus.
+        
+        This method is specifically optimized for common use cases in
+        fractional calculus, particularly fractional integrals and derivatives.
+        """
+        # Handle special cases first
+        if isinstance(x, (float, int)) and isinstance(y, (float, int)):
+            if (x, y) in self._common_values:
+                return self._common_values[(x, y)]
+            
+            # Check cache
+            cache_key = (x, y)
+            if cache_key in self._cache:
+                return self._cache[cache_key]
+        
+        # Use optimized computation
+        if isinstance(x, (float, int)) and isinstance(y, (float, int)):
+            # Use SciPy by default (much faster than Numba gamma function)
+            # Only use Numba for very specific cases where it might be beneficial
+            if self.use_numba and x <= 10 and y <= 10 and (x + y) <= 20:
+                try:
+                    result = self._beta_numba_scalar(x, y)
+                except:
+                    # Fallback to SciPy if Numba fails
+                    result = self._beta_scipy(x, y)
+            else:
+                result = self._beta_scipy(x, y)
+            
+            # Cache result
+            if len(self._cache) < self.cache_size:
+                self._cache[cache_key] = result
+            
+            return result
+        else:
+            # Use SciPy for array inputs
             return self._beta_scipy(x, y)
 
     @staticmethod
@@ -311,14 +448,28 @@ def beta(
     Args:
         x: First parameter
         y: Second parameter
-        use_jax: Whether to use JAX implementation
-        use_numba: Whether to use NUMBA implementation
+        use_jax: Whether to use JAX implementation (ignored for performance)
+        use_numba: Whether to use NUMBA implementation (ignored for performance)
 
     Returns:
         Beta function value(s)
     """
-    beta_func = BetaFunction(use_jax=use_jax, use_numba=use_numba)
-    return beta_func.compute(x, y)
+    # Handle edge cases
+    if np.isscalar(x) and np.isscalar(y):
+        if x < 0 or y < 0 or x == 0 or y == 0:
+            return np.nan
+    else:
+        # For arrays, handle element-wise
+        x = np.asarray(x)
+        y = np.asarray(y)
+        result = np.full_like(x, np.nan, dtype=float)
+        valid_mask = (x > 0) & (y > 0)
+        if np.any(valid_mask):
+            result[valid_mask] = scipy_special.beta(x[valid_mask], y[valid_mask])
+        return result
+    
+    # Use SciPy directly for better performance
+    return scipy_special.beta(x, y)
 
 
 def log_gamma(

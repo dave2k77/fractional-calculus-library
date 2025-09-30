@@ -510,7 +510,7 @@ class TestLayerBasicFunctionality:
         )
         
         x = torch.randn(5, 1, 10)  # (seq_len, batch, input_size)
-        result, (hidden, cell) = layer.forward(x)
+        result = layer.forward(x)  # Default behavior returns only output tensor
         
         assert result is not None
         assert result.shape[0] == 5  # seq_len preserved

@@ -44,12 +44,19 @@ class FractionalLaplacian:
     and many physical applications.
     """
 
-    def __init__(self, alpha: Union[float, FractionalOrder], *, dimension: int = 1, boundary_conditions: Optional[str] = None):
-        """Initialize fractional Laplacian calculator."""
-        if isinstance(alpha, (int, float)):
-            self.alpha = FractionalOrder(alpha)
+    def __init__(self, order: Union[float, FractionalOrder], *, dimension: int = 1, boundary_conditions: Optional[str] = None):
+        """
+        Initialize fractional Laplacian calculator.
+        
+        Args:
+            order: Fractional order (0 < α < 2)
+            dimension: Spatial dimension
+            boundary_conditions: Boundary condition type
+        """
+        if isinstance(order, (int, float)):
+            self.alpha = FractionalOrder(order)
         else:
-            self.alpha = alpha
+            self.alpha = order
 
         self.alpha_val = self.alpha.alpha
         self.dimension = int(dimension)
@@ -272,12 +279,12 @@ class FractionalFourierTransform:
     where K_α is the fractional Fourier kernel.
     """
 
-    def __init__(self, alpha: Union[float, FractionalOrder], *, method: str = "spectral"):
+    def __init__(self, order: Union[float, FractionalOrder], *, method: str = "spectral"):
         """Initialize fractional Fourier transform calculator."""
-        if isinstance(alpha, (int, float)):
-            self.alpha = FractionalOrder(alpha)
+        if isinstance(order, (int, float)):
+            self.alpha = FractionalOrder(order)
         else:
-            self.alpha = alpha
+            self.alpha = order
 
         self.alpha_val = self.alpha.alpha
         self.method = method
@@ -628,12 +635,12 @@ class FractionalZTransform:
     Z^α[f](z) = Σ_{n=0}^∞ f[n] z^(-αn)
     """
 
-    def __init__(self, alpha: Union[float, FractionalOrder], *, method: str = "spectral"):
+    def __init__(self, order: Union[float, FractionalOrder], *, method: str = "spectral"):
         """Initialize fractional Z-transform calculator."""
-        if isinstance(alpha, (int, float)):
-            self.alpha = FractionalOrder(alpha)
+        if isinstance(order, (int, float)):
+            self.alpha = FractionalOrder(order)
         else:
-            self.alpha = alpha
+            self.alpha = order
 
         self.alpha_val = self.alpha.alpha
         self.method = method
@@ -817,12 +824,12 @@ class FractionalMellinTransform:
     - Quantum mechanics applications
     """
 
-    def __init__(self, alpha: Union[float, FractionalOrder]):
+    def __init__(self, order: Union[float, FractionalOrder]):
         """Initialize fractional Mellin transform calculator."""
-        if isinstance(alpha, (int, float)):
-            self.alpha = FractionalOrder(alpha)
+        if isinstance(order, (int, float)):
+            self.alpha = FractionalOrder(order)
         else:
-            self.alpha = alpha
+            self.alpha = order
 
         self.alpha_val = self.alpha.alpha
 
@@ -1108,18 +1115,18 @@ class SpecialOptimizedWeylDerivative:
     for large arrays and specific alpha values.
     """
 
-    def __init__(self, alpha: Union[float, FractionalOrder], config: Optional[SpecialMethodsConfig] = None):
+    def __init__(self, order: Union[float, FractionalOrder], config: Optional[SpecialMethodsConfig] = None):
         """Initialize special optimized Weyl derivative calculator."""
-        if isinstance(alpha, (int, float)):
-            self.alpha = FractionalOrder(alpha)
+        if isinstance(order, (int, float)):
+            self.alpha = FractionalOrder(order)
         else:
-            self.alpha = alpha
+            self.alpha = order
 
         self.alpha_val = self.alpha.alpha
         self.config = config or SpecialMethodsConfig()
 
         # Initialize special methods
-        self.frft = FractionalFourierTransform(alpha)
+        self.frft = FractionalFourierTransform(order)
 
         # Determine optimal method based on alpha
         self._determine_optimal_method()
@@ -1223,18 +1230,18 @@ class SpecialOptimizedMarchaudDerivative:
     with Fractional Z-Transform for better performance on discrete signals.
     """
 
-    def __init__(self, alpha: Union[float, FractionalOrder], config: Optional[SpecialMethodsConfig] = None):
+    def __init__(self, order: Union[float, FractionalOrder], config: Optional[SpecialMethodsConfig] = None):
         """Initialize special optimized Marchaud derivative calculator."""
-        if isinstance(alpha, (int, float)):
-            self.alpha = FractionalOrder(alpha)
+        if isinstance(order, (int, float)):
+            self.alpha = FractionalOrder(order)
         else:
-            self.alpha = alpha
+            self.alpha = order
 
         self.alpha_val = self.alpha.alpha
         self.config = config or SpecialMethodsConfig()
 
         # Initialize special methods
-        self.z_transform = FractionalZTransform(alpha)
+        self.z_transform = FractionalZTransform(order)
 
     def compute(
         self,
@@ -1318,18 +1325,18 @@ class SpecialOptimizedReizFellerDerivative:
     spectral methods and large-scale problems.
     """
 
-    def __init__(self, alpha: Union[float, FractionalOrder], config: Optional[SpecialMethodsConfig] = None):
+    def __init__(self, order: Union[float, FractionalOrder], config: Optional[SpecialMethodsConfig] = None):
         """Initialize special optimized Reiz-Feller derivative calculator."""
-        if isinstance(alpha, (int, float)):
-            self.alpha = FractionalOrder(alpha)
+        if isinstance(order, (int, float)):
+            self.alpha = FractionalOrder(order)
         else:
-            self.alpha = alpha
+            self.alpha = order
 
         self.alpha_val = self.alpha.alpha
         self.config = config or SpecialMethodsConfig()
 
         # Initialize special methods
-        self.laplacian = FractionalLaplacian(alpha)
+        self.laplacian = FractionalLaplacian(order)
 
     def compute(
         self,

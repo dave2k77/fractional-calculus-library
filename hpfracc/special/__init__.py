@@ -21,8 +21,10 @@ from .binomial_coeffs import (
 )
 
 from .mittag_leffler import (
-    mittag_leffler as mittag_leffler_function,
-    mittag_leffler_derivative
+    mittag_leffler_function,
+    mittag_leffler_derivative,
+    mittag_leffler_fast,
+    mittag_leffler
 )
 
 __all__ = [
@@ -31,19 +33,15 @@ __all__ = [
     'beta_function',
     'gamma',
     'beta',
-    'incomplete_gamma',
-    'incomplete_beta',
     'log_gamma',
 
     # Binomial coefficients
     'binomial_coefficient',
     'generalized_binomial',
-    'multinomial_coefficient',
-    'stirling_numbers',
 
     # Mittag-Leffler functions
     'mittag_leffler_function',
     'mittag_leffler_derivative',
-    'generalized_mittag_leffler',
-    'three_parameter_mittag_leffler'
+    'mittag_leffler_fast',
+    'mittag_leffler'
 ]

@@ -173,7 +173,7 @@ class TestParallelOptimizedRiemannLiouville:
     def test_initialization(self):
         """Test Riemann-Liouville parallel optimizer initialization."""
         config = ParallelConfig(n_jobs=2)
-        optimizer = ParallelOptimizedRiemannLiouville(alpha=0.5, parallel_config=config)
+        optimizer = ParallelOptimizedRiemannLiouville(order=0.5, parallel_config=config)
         
         assert optimizer.parallel_config == config
         assert hasattr(optimizer, 'alpha')
@@ -185,7 +185,7 @@ class TestParallelOptimizedRiemannLiouville:
         config = ParallelConfig(n_jobs=2)
         alpha = 0.5
         
-        optimizer = ParallelOptimizedRiemannLiouville(alpha=alpha, parallel_config=config)
+        optimizer = ParallelOptimizedRiemannLiouville(order=alpha, parallel_config=config)
         
         assert optimizer.alpha_val == alpha
         assert optimizer.parallel_config == config
@@ -193,7 +193,7 @@ class TestParallelOptimizedRiemannLiouville:
     def test_compute_derivative_basic(self):
         """Test basic derivative computation."""
         config = ParallelConfig(n_jobs=2, enabled=True)
-        optimizer = ParallelOptimizedRiemannLiouville(alpha=0.5, parallel_config=config)
+        optimizer = ParallelOptimizedRiemannLiouville(order=0.5, parallel_config=config)
         
         # Create test data
         t = np.linspace(0, 1, 100)
@@ -214,7 +214,7 @@ class TestParallelOptimizedRiemannLiouville:
         f = np.exp(t)
         
         for alpha in [0.25, 0.5, 0.75, 1.0]:
-            optimizer = ParallelOptimizedRiemannLiouville(alpha=alpha, parallel_config=config)
+            optimizer = ParallelOptimizedRiemannLiouville(order=alpha, parallel_config=config)
             result = optimizer.compute(f, t)
             
             assert isinstance(result, np.ndarray)
@@ -229,7 +229,7 @@ class TestParallelOptimizedCaputo:
     def test_initialization(self):
         """Test Caputo parallel optimizer initialization."""
         config = ParallelConfig(n_jobs=2)
-        optimizer = ParallelOptimizedCaputo(alpha=0.5, parallel_config=config)
+        optimizer = ParallelOptimizedCaputo(order=0.5, parallel_config=config)
         
         assert optimizer.parallel_config == config
         assert hasattr(optimizer, 'alpha')
@@ -238,7 +238,7 @@ class TestParallelOptimizedCaputo:
     def test_compute_derivative_basic(self):
         """Test basic Caputo derivative computation."""
         config = ParallelConfig(n_jobs=2, enabled=True)
-        optimizer = ParallelOptimizedCaputo(alpha=0.5, parallel_config=config)
+        optimizer = ParallelOptimizedCaputo(order=0.5, parallel_config=config)
         
         # Create test data
         t = np.linspace(0, 1, 100)
@@ -259,7 +259,7 @@ class TestParallelOptimizedCaputo:
         f = np.exp(t)
         
         for alpha in [0.25, 0.5, 0.75]:
-            optimizer = ParallelOptimizedCaputo(alpha=alpha, parallel_config=config)
+            optimizer = ParallelOptimizedCaputo(order=alpha, parallel_config=config)
             result = optimizer.compute(f, t)
             
             assert isinstance(result, np.ndarray)
@@ -274,7 +274,7 @@ class TestParallelOptimizedGrunwaldLetnikov:
     def test_initialization(self):
         """Test Grünwald-Letnikov parallel optimizer initialization."""
         config = ParallelConfig(n_jobs=2)
-        optimizer = ParallelOptimizedGrunwaldLetnikov(alpha=0.5, parallel_config=config)
+        optimizer = ParallelOptimizedGrunwaldLetnikov(order=0.5, parallel_config=config)
         
         assert optimizer.parallel_config == config
         assert hasattr(optimizer, 'alpha')
@@ -283,7 +283,7 @@ class TestParallelOptimizedGrunwaldLetnikov:
     def test_compute_derivative_basic(self):
         """Test basic Grünwald-Letnikov derivative computation."""
         config = ParallelConfig(n_jobs=2, enabled=True)
-        optimizer = ParallelOptimizedGrunwaldLetnikov(alpha=0.5, parallel_config=config)
+        optimizer = ParallelOptimizedGrunwaldLetnikov(order=0.5, parallel_config=config)
         
         # Create test data
         t = np.linspace(0, 1, 100)
@@ -304,7 +304,7 @@ class TestParallelOptimizedGrunwaldLetnikov:
         f = np.exp(t)
         
         for alpha in [0.25, 0.5, 0.75, 1.0]:
-            optimizer = ParallelOptimizedGrunwaldLetnikov(alpha=alpha, parallel_config=config)
+            optimizer = ParallelOptimizedGrunwaldLetnikov(order=alpha, parallel_config=config)
             result = optimizer.compute(f, t)
             
             assert isinstance(result, np.ndarray)
@@ -560,7 +560,7 @@ class TestEdgeCases:
     def test_empty_input(self):
         """Test handling of empty input arrays."""
         config = ParallelConfig(n_jobs=2)
-        optimizer = ParallelOptimizedRiemannLiouville(alpha=0.5, parallel_config=config)
+        optimizer = ParallelOptimizedRiemannLiouville(order=0.5, parallel_config=config)
         
         t = np.array([])
         f = np.array([])
@@ -573,7 +573,7 @@ class TestEdgeCases:
     def test_single_element_input(self):
         """Test handling of single element input."""
         config = ParallelConfig(n_jobs=2)
-        optimizer = ParallelOptimizedRiemannLiouville(alpha=0.5, parallel_config=config)
+        optimizer = ParallelOptimizedRiemannLiouville(order=0.5, parallel_config=config)
         
         t = np.array([0.0])
         f = np.array([1.0])
@@ -593,7 +593,7 @@ class TestEdgeCases:
         f = np.sin(t)
         
         for alpha in [1e-6, 1e-3, 0.01]:
-            optimizer = ParallelOptimizedRiemannLiouville(alpha=alpha, parallel_config=config)
+            optimizer = ParallelOptimizedRiemannLiouville(order=alpha, parallel_config=config)
             result = optimizer.compute(f, t)
             
             assert isinstance(result, np.ndarray)
@@ -608,7 +608,7 @@ class TestEdgeCases:
         f = np.sin(t)
         
         for alpha in [0.99, 0.999, 1.0]:
-            optimizer = ParallelOptimizedRiemannLiouville(alpha=alpha, parallel_config=config)
+            optimizer = ParallelOptimizedRiemannLiouville(order=alpha, parallel_config=config)
             result = optimizer.compute(f, t)
             
             assert isinstance(result, np.ndarray)
@@ -631,7 +631,7 @@ class TestPerformanceAndScalability:
             t = np.linspace(0, 1, size)
             f = np.sin(t)
             
-            optimizer = ParallelOptimizedRiemannLiouville(alpha=0.5, parallel_config=config)
+            optimizer = ParallelOptimizedRiemannLiouville(order=0.5, parallel_config=config)
             
             start_time = time.time()
             result = optimizer.compute(f, t)
@@ -655,7 +655,7 @@ class TestPerformanceAndScalability:
         
         # Test with parallel enabled
         config_parallel = ParallelConfig(n_jobs=2, enabled=True)
-        optimizer_parallel = ParallelOptimizedRiemannLiouville(alpha=alpha, parallel_config=config_parallel)
+        optimizer_parallel = ParallelOptimizedRiemannLiouville(order=alpha, parallel_config=config_parallel)
         
         start_time = time.time()
         result_parallel = optimizer_parallel.compute(f, t)
@@ -663,7 +663,7 @@ class TestPerformanceAndScalability:
         
         # Test with parallel disabled
         config_serial = ParallelConfig(n_jobs=1, enabled=False)
-        optimizer_serial = ParallelOptimizedRiemannLiouville(alpha=alpha, parallel_config=config_serial)
+        optimizer_serial = ParallelOptimizedRiemannLiouville(order=alpha, parallel_config=config_serial)
         
         start_time = time.time()
         result_serial = optimizer_serial.compute(f, t)

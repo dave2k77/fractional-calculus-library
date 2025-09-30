@@ -97,7 +97,7 @@ class TestSpectralAutogradCoverage:
             alpha=self.alpha
         )
         
-        assert len(network.layers) == len(hidden_sizes) + 1  # +1 for output layer
+        assert len(network.layers) == len(hidden_sizes) + 3  # hidden layers + spectral + activation + output
         assert network.input_size == self.input_size
         assert network.output_size == 5
         

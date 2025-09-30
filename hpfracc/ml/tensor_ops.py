@@ -10,9 +10,12 @@ from typing import Optional, Union, Any, List, Tuple
 from contextlib import nullcontext
 import warnings
 import importlib
-import numpy as _np  # used as a safe NumPy namespace at construction
+import os
 
 from .backends import get_backend_manager, BackendType
+from .adapters import get_optimal_adapter, HighPerformanceAdapter
+
+import numpy as _np  # used as a safe NumPy namespace at construction
 
 
 class TensorOps:
@@ -25,15 +28,35 @@ class TensorOps:
       - JAX random ops require a PRNG key; pass via kwargs (key=...).
     """
 
-    def __init__(self, backend: Optional[BackendType] = None):
-        self.backend_manager = get_backend_manager()
+    def __init__(self, backend: Optional[Union[BackendType, str]] = None):
+        # Backend manager might import lazily; fall back to NumPy-only if unavailable
+        try:
+            backend_manager = get_backend_manager()
+        except Exception:
+            backend_manager = None
+
+        # Convert string backend to enum if needed
+        if isinstance(backend, str):
+            try:
+                backend = BackendType(backend)
+            except ValueError:
+                raise ValueError(f"Unknown backend: {backend}. Available backends: {[b.value for b in BackendType]}")
         # Resolve requested (or active) backend into an installed concrete choice,
         # with sensible fallbacks.
-        self.backend, self.tensor_lib = self._resolve_backend(backend)
+        self.backend, self.tensor_lib = self._resolve_backend(backend, backend_manager)
+        # Construct optimized adapter for future delegation
+        self._adapter: HighPerformanceAdapter
+        try:
+            self._adapter = HighPerformanceAdapter(self.backend)
+            # Ensure underlying lib is loaded
+            _ = self._adapter.get_lib()
+        except Exception:
+            # Fallback: create adapter with current backend
+            self._adapter = HighPerformanceAdapter()
 
     # ------------------------ Backend resolution ------------------------
 
-    def _resolve_backend(self, backend: Optional[BackendType]):
+    def _resolve_backend(self, backend: Optional[BackendType], backend_manager):
         """
         Pick a concrete, installed backend with sensible fallbacks.
         Priority:
@@ -48,13 +71,25 @@ class TensorOps:
             candidates.append(backend)
 
         # 2) manager's active (if not AUTO)
-        ab = getattr(self.backend_manager, "active_backend", None)
+        ab = getattr(backend_manager, "active_backend", None) if backend_manager is not None else None
         if ab is not None and ab != BackendType.AUTO:
-            candidates.append(ab)
+            # Only honor manager active backend if not disabled by env
+            disable_map_ab = {
+                BackendType.TORCH: os.getenv("HPFRACC_DISABLE_TORCH", "0") == "1",
+                BackendType.JAX: os.getenv("HPFRACC_DISABLE_JAX", "0") == "1",
+                BackendType.NUMBA: os.getenv("HPFRACC_DISABLE_NUMBA", "0") == "1",
+            }
+            if not disable_map_ab.get(ab, False):
+                candidates.append(ab)
 
-        # 3) standard fallbacks
+        # 3) standard fallbacks (honor env disables)
+        disable_map = {
+            BackendType.TORCH: os.getenv("HPFRACC_DISABLE_TORCH", "0") == "1",
+            BackendType.JAX: os.getenv("HPFRACC_DISABLE_JAX", "0") == "1",
+            BackendType.NUMBA: os.getenv("HPFRACC_DISABLE_NUMBA", "0") == "1",
+        }
         for b in (BackendType.TORCH, BackendType.JAX, BackendType.NUMBA):
-            if b not in candidates:
+            if b not in candidates and not disable_map.get(b, False):
                 candidates.append(b)
 
         last_err: Optional[Exception] = None
@@ -62,14 +97,12 @@ class TensorOps:
             try:
                 lib = self._get_tensor_lib_for_backend(b)
                 return b, lib
-            except ImportError as e:
+            except Exception as e:  # torch/jax may raise RuntimeError/AttributeError on import
                 last_err = e
                 continue
 
-        raise RuntimeError(
-            "No usable backend found. Please install at least one of: "
-            "PyTorch (`torch`), JAX (`jax`), or NumPy (for the NUMBA lane)."
-        ) from last_err
+        # If nothing worked, default to NumPy lane unconditionally
+        return BackendType.NUMBA, _np
 
     def _get_tensor_lib_for_backend(self, backend: BackendType) -> Any:
         """Get tensor library for a specific backend (imports guarded)."""
@@ -90,20 +123,24 @@ class TensorOps:
     # ------------------------ Creation / conversion ------------------------
 
     def create_tensor(self, data: Any, **kwargs) -> Any:
-        """Create a tensor in the current backend via the backend manager."""
+        """Create a tensor in the current backend."""
         # Filter backend-specific args where necessary
         if self.backend == BackendType.TORCH:
-            return self.backend_manager.create_tensor(data, **kwargs)
+            # Remove requires_grad from kwargs if it's False (default behavior)
+            torch_kwargs = kwargs.copy()
+            if 'requires_grad' in torch_kwargs and not torch_kwargs['requires_grad']:
+                del torch_kwargs['requires_grad']
+            return self.tensor_lib.tensor(data, **torch_kwargs)
         elif self.backend == BackendType.JAX:
             # JAX doesn't support requires_grad
             jax_kwargs = {k: v for k, v in kwargs.items() if k != 'requires_grad'}
-            return self.backend_manager.create_tensor(data, **jax_kwargs)
+            return self.tensor_lib.array(data, **jax_kwargs)
         elif self.backend == BackendType.NUMBA:
             # NUMBA lane: remove requires_grad; arrays are NumPy
             nb_kwargs = {k: v for k, v in kwargs.items() if k != 'requires_grad'}
-            return self.backend_manager.create_tensor(data, **nb_kwargs)
+            return self.tensor_lib.array(data, **nb_kwargs)
         else:
-            raise RuntimeError("Unknown backend")
+            raise RuntimeError(f"Unknown backend: {self.backend}")
 
     def tensor(self, data: Any, **kwargs) -> Any:
         """Alias for create_tensor."""
@@ -408,16 +445,16 @@ class TensorOps:
 
     def matmul(self, a: Any, b: Any) -> Any:
         if self.backend in (BackendType.TORCH, BackendType.JAX):
-            return self.tensor_lib.matmul(a, b)
+            return self._adapter.get_lib().matmul(a, b)
         elif self.backend == BackendType.NUMBA:
-            import numpy as np
-            return np.matmul(a, b)
+            lib = self._adapter.get_lib()
+            return lib.matmul(a, b)
         else:
             raise ValueError(f"Unknown backend: {self.backend}")
 
     def einsum(self, equation: str, *operands) -> Any:
         if self.backend in (BackendType.TORCH, BackendType.JAX):
-            return self.tensor_lib.einsum(equation, *operands)
+            return self._adapter.get_lib().einsum(equation, *operands)
         elif self.backend == BackendType.NUMBA:
             warnings.warn("NUMBA lane doesn't support einsum fully; using fallback")
             return self._numba_einsum_fallback(equation, *operands)
@@ -442,10 +479,11 @@ class TensorOps:
         if self.backend == BackendType.TORCH:
             return tensor.sum(dim=dim, keepdim=keepdim)
         elif self.backend == BackendType.JAX:
-            return self.tensor_lib.sum(tensor, axis=dim, keepdims=keepdim)
+            lib = self._adapter.get_lib()
+            return lib.sum(tensor, axis=dim, keepdims=keepdim)
         elif self.backend == BackendType.NUMBA:
-            import numpy as np
-            return np.sum(tensor, axis=dim, keepdims=keepdim)
+            lib = self._adapter.get_lib()
+            return lib.sum(tensor, axis=dim, keepdims=keepdim)
         else:
             raise ValueError(f"Unknown backend: {self.backend}")
 
@@ -456,10 +494,11 @@ class TensorOps:
         if self.backend == BackendType.TORCH:
             return tensor.mean(dim=dim, keepdim=keepdim)
         elif self.backend == BackendType.JAX:
-            return self.tensor_lib.mean(tensor, axis=dim, keepdims=keepdim)
+            lib = self._adapter.get_lib()
+            return lib.mean(tensor, axis=dim, keepdims=keepdim)
         elif self.backend == BackendType.NUMBA:
-            import numpy as np
-            return np.mean(tensor, axis=dim, keepdims=keepdim)
+            lib = self._adapter.get_lib()
+            return lib.mean(tensor, axis=dim, keepdims=keepdim)
         else:
             raise ValueError(f"Unknown backend: {self.backend}")
 
@@ -468,10 +507,11 @@ class TensorOps:
         if self.backend == BackendType.TORCH:
             return tensor.std(dim=dim, keepdim=keepdims)
         elif self.backend == BackendType.JAX:
-            return self.tensor_lib.std(tensor, axis=dim, keepdims=keepdims)
+            lib = self._adapter.get_lib()
+            return lib.std(tensor, axis=dim, keepdims=keepdims)
         elif self.backend == BackendType.NUMBA:
-            import numpy as np
-            return np.std(tensor, axis=dim, keepdims=keepdims)
+            lib = self._adapter.get_lib()
+            return lib.std(tensor, axis=dim, keepdims=keepdims)
         else:
             raise ValueError(f"Unknown backend: {self.backend}")
 
@@ -509,9 +549,10 @@ class TensorOps:
                 return tensor.max()
             return tensor.max(dim=dim, keepdim=keepdims).values
         elif self.backend == BackendType.JAX:
+            lib = self._adapter.get_lib()
             if dim is None:
-                return self.tensor_lib.max(tensor)
-            return self.tensor_lib.max(tensor, axis=dim, keepdims=keepdims)
+                return lib.max(tensor)
+            return lib.max(tensor, axis=dim, keepdims=keepdims)
         elif self.backend == BackendType.NUMBA:
             import numpy as np
             if dim is None:
@@ -527,9 +568,10 @@ class TensorOps:
                 return tensor.min()
             return tensor.min(dim=dim, keepdim=keepdims).values
         elif self.backend == BackendType.JAX:
+            lib = self._adapter.get_lib()
             if dim is None:
-                return self.tensor_lib.min(tensor)
-            return self.tensor_lib.min(tensor, axis=dim, keepdims=keepdims)
+                return lib.min(tensor)
+            return lib.min(tensor, axis=dim, keepdims=keepdims)
         elif self.backend == BackendType.NUMBA:
             import numpy as np
             if dim is None:
@@ -543,7 +585,8 @@ class TensorOps:
         if self.backend == BackendType.TORCH:
             return tensor.norm(p=p, dim=dim)
         elif self.backend == BackendType.JAX:
-            return self.tensor_lib.linalg.norm(tensor, ord=p, axis=dim)
+            lib = self._adapter.get_lib()
+            return lib.linalg.norm(tensor, ord=p, axis=dim)
         elif self.backend == BackendType.NUMBA:
             import numpy as np
             return np.linalg.norm(tensor, ord=p, axis=dim)
@@ -554,7 +597,7 @@ class TensorOps:
 
     def softmax(self, tensor: Any, dim: int = -1) -> Any:
         if self.backend == BackendType.TORCH:
-            return self.tensor_lib.softmax(tensor, dim=dim)
+            return self._adapter.get_lib().softmax(tensor, dim=dim)
         elif self.backend == BackendType.JAX:
             import jax.nn as jnn
             return jnn.softmax(tensor, axis=dim)
@@ -567,9 +610,10 @@ class TensorOps:
 
     def relu(self, tensor: Any) -> Any:
         if self.backend == BackendType.TORCH:
-            return self.tensor_lib.relu(tensor)
+            return self._adapter.get_lib().relu(tensor)
         elif self.backend == BackendType.JAX:
-            return self.tensor_lib.maximum(tensor, 0)
+            lib = self._adapter.get_lib()
+            return lib.maximum(tensor, 0)
         elif self.backend == BackendType.NUMBA:
             import numpy as np
             return np.maximum(tensor, 0)
@@ -578,9 +622,10 @@ class TensorOps:
 
     def sigmoid(self, tensor: Any) -> Any:
         if self.backend == BackendType.TORCH:
-            return self.tensor_lib.sigmoid(tensor)
+            return self._adapter.get_lib().sigmoid(tensor)
         elif self.backend == BackendType.JAX:
-            return 1 / (1 + self.tensor_lib.exp(-tensor))
+            lib = self._adapter.get_lib()
+            return 1 / (1 + lib.exp(-tensor))
         elif self.backend == BackendType.NUMBA:
             import numpy as np
             return 1 / (1 + np.exp(-tensor))
@@ -589,7 +634,7 @@ class TensorOps:
 
     def tanh(self, tensor: Any) -> Any:
         if self.backend in (BackendType.TORCH, BackendType.JAX):
-            return self.tensor_lib.tanh(tensor)
+            return self._adapter.get_lib().tanh(tensor)
         elif self.backend == BackendType.NUMBA:
             import numpy as np
             return np.tanh(tensor)
@@ -598,7 +643,7 @@ class TensorOps:
 
     def log(self, tensor: Any) -> Any:
         if self.backend in (BackendType.TORCH, BackendType.JAX):
-            return self.tensor_lib.log(tensor)
+            return self._adapter.get_lib().log(tensor)
         elif self.backend == BackendType.NUMBA:
             import numpy as np
             return np.log(tensor)
@@ -656,7 +701,7 @@ class TensorOps:
 
     def sin(self, tensor: Any) -> Any:
         if self.backend in (BackendType.TORCH, BackendType.JAX):
-            return self.tensor_lib.sin(tensor)
+            return self._adapter.get_lib().sin(tensor)
         elif self.backend == BackendType.NUMBA:
             import numpy as np
             return np.sin(tensor)
@@ -665,7 +710,7 @@ class TensorOps:
 
     def cos(self, tensor: Any) -> Any:
         if self.backend in (BackendType.TORCH, BackendType.JAX):
-            return self.tensor_lib.cos(tensor)
+            return self._adapter.get_lib().cos(tensor)
         elif self.backend == BackendType.NUMBA:
             import numpy as np
             return np.cos(tensor)
@@ -674,7 +719,7 @@ class TensorOps:
 
     def exp(self, tensor: Any) -> Any:
         if self.backend in (BackendType.TORCH, BackendType.JAX):
-            return self.tensor_lib.exp(tensor)
+            return self._adapter.get_lib().exp(tensor)
         elif self.backend == BackendType.NUMBA:
             import numpy as np
             return np.exp(tensor)
@@ -683,7 +728,7 @@ class TensorOps:
 
     def abs(self, tensor: Any) -> Any:
         if self.backend in (BackendType.TORCH, BackendType.JAX):
-            return self.tensor_lib.abs(tensor)
+            return self._adapter.get_lib().abs(tensor)
         elif self.backend == BackendType.NUMBA:
             import numpy as np
             return np.abs(tensor)
@@ -702,8 +747,8 @@ class TensorOps:
                 raise ValueError("JAX randn requires a PRNG key passed as key=...")
             return random.normal(key, shape, **kwargs)
         elif self.backend == BackendType.NUMBA:
-            import numpy as np
-            return np.random.randn(*shape)
+            lib = self._adapter.get_lib()
+            return lib.random.randn(*shape)
         else:
             raise ValueError(f"Unknown backend: {self.backend}")
 
@@ -717,8 +762,8 @@ class TensorOps:
                 raise ValueError("JAX randn_like requires a PRNG key passed as key=...")
             return random.normal(key, tensor.shape, **kwargs)
         elif self.backend == BackendType.NUMBA:
-            import numpy as np
-            return np.random.randn(*tensor.shape).astype(getattr(tensor, "dtype", _np.float64))
+            lib = self._adapter.get_lib()
+            return lib.random.randn(*tensor.shape).astype(getattr(tensor, "dtype", _np.float64))
         else:
             raise RuntimeError(f"Unknown backend: {self.backend}")
 
@@ -736,9 +781,9 @@ class TensorOps:
             mask = random.bernoulli(key, keep_prob, tensor.shape)
             return tensor * mask / keep_prob
         elif self.backend == BackendType.NUMBA:
-            import numpy as np
+            lib = self._adapter.get_lib()
             keep_prob = 1.0 - p
-            mask = (np.random.random(tensor.shape) < keep_prob).astype(tensor.dtype if hasattr(tensor, "dtype") else _np.float64)
+            mask = (lib.random.random(tensor.shape) < keep_prob).astype(tensor.dtype if hasattr(tensor, "dtype") else _np.float64)
             return tensor * mask / keep_prob
         else:
             raise RuntimeError(f"Unknown backend: {self.backend}")
@@ -753,8 +798,8 @@ class TensorOps:
             from jax.numpy import fft as jfft
             return jfft.fft(tensor)
         elif self.backend == BackendType.NUMBA:
-            import numpy as np
-            return np.fft.fft(tensor)
+            lib = self._adapter.get_lib()
+            return lib.fft.fft(tensor)
         else:
             raise ValueError(f"Unknown backend: {self.backend}")
 
@@ -766,8 +811,8 @@ class TensorOps:
             from jax.numpy import fft as jfft
             return jfft.ifft(tensor)
         elif self.backend == BackendType.NUMBA:
-            import numpy as np
-            return np.fft.ifft(tensor)
+            lib = self._adapter.get_lib()
+            return lib.fft.ifft(tensor)
         else:
             raise ValueError(f"Unknown backend: {self.backend}")
 

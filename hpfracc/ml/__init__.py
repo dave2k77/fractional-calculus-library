@@ -7,7 +7,7 @@ with neural networks, including:
 - **Core Neural Networks**: FractionalNeuralNetwork, FractionalAttention
 - **Neural Network Layers**: FractionalConv1D, FractionalConv2D, FractionalLSTM, FractionalTransformer, FractionalPooling, FractionalBatchNorm1d
 - **Loss Functions**: FractionalMSELoss, FractionalCrossEntropyLoss, FractionalHuberLoss, and more
-- **Optimizers**: FractionalAdam, FractionalSGD, FractionalRMSprop, FractionalAdagrad, FractionalAdamW
+- **Optimizers**: FractionalAdam, FractionalSGD, FractionalRMSprop
 - **Fractional Graph Neural Networks (GNNs) with multi-backend support**
 - **Multi-backend support (PyTorch, JAX, NUMBA)**
 - **Backend Management System**: BackendManager, BackendType, unified tensor operations
@@ -21,14 +21,13 @@ from .backends import (
     get_backend_manager,
     set_backend_manager,
     get_active_backend,
-    switch_backend
+    switch_backend,
 )
 
-# Unified Tensor Operations
+# Tensor Operations
 from .tensor_ops import (
     TensorOps,
     get_tensor_ops,
-    create_tensor
 )
 
 # Core ML Components
@@ -37,7 +36,7 @@ from .core import (
     FractionalNeuralNetwork,
     FractionalAttention,
     FractionalLossFunction,
-    FractionalAutoML
+    FractionalAutoML,
 )
 
 # Neural Network Layers
@@ -48,7 +47,7 @@ from .layers import (
     FractionalLSTM,
     FractionalTransformer,
     FractionalPooling,
-    FractionalBatchNorm1d
+    FractionalBatchNorm1d,
 )
 
 # Loss Functions
@@ -67,23 +66,23 @@ from .losses import (
     FractionalTripletMarginLoss,
     FractionalCTCLoss,
     FractionalCustomLoss,
-    FractionalCombinedLoss
+    FractionalCombinedLoss,
 )
 
-# Optimizers
+# Optimizers (using actual class names from optimizers.py)
 from .optimizers import (
-    FractionalOptimizer,
-    FractionalAdam,
-    FractionalSGD,
-    FractionalRMSprop
+    OptimizedBaseOptimizer as FractionalOptimizer,
+    OptimizedFractionalAdam as FractionalAdam,
+    OptimizedFractionalSGD as FractionalSGD,
+    OptimizedFractionalRMSprop as FractionalRMSprop,
 )
 
-# Fractional Graph Neural Network Components
+# Fractional GNN Components
 from .gnn_layers import (
     BaseFractionalGNNLayer,
     FractionalGraphConv,
     FractionalGraphAttention,
-    FractionalGraphPooling
+    FractionalGraphPooling,
 )
 
 from .gnn_models import (
@@ -92,14 +91,17 @@ from .gnn_models import (
     FractionalGAT,
     FractionalGraphSAGE,
     FractionalGraphUNet,
-    FractionalGNNFactory
+    FractionalGNNFactory,
 )
 
-# Spectral Fractional Autograd (Hybrid Implementation)
+# Spectral Fractional Autograd
 from .spectral_autograd import (
     SpectralFractionalDerivative,
-    fractional_derivative,
-    benchmark_backends,
+    SpectralFractionalLayer,
+    SpectralFractionalNetwork,
+    BoundedAlphaParameter,
+    spectral_fractional_derivative,
+    create_fractional_layer,
 )
 
 # Stochastic Memory Sampling
@@ -130,19 +132,15 @@ __all__ = [
     'set_backend_manager',
     'get_active_backend',
     'switch_backend',
-
     # Tensor Operations
     'TensorOps',
     'get_tensor_ops',
-    'create_tensor',
-
     # Core ML Components
     'MLConfig',
     'FractionalNeuralNetwork',
     'FractionalAttention',
     'FractionalLossFunction',
     'FractionalAutoML',
-
     # Neural Network Layers
     'LayerConfig',
     'FractionalConv1D',
@@ -151,7 +149,6 @@ __all__ = [
     'FractionalTransformer',
     'FractionalPooling',
     'FractionalBatchNorm1d',
-
     # Loss Functions
     'FractionalMSELoss',
     'FractionalCrossEntropyLoss',
@@ -168,13 +165,11 @@ __all__ = [
     'FractionalCTCLoss',
     'FractionalCustomLoss',
     'FractionalCombinedLoss',
-
     # Optimizers
     'FractionalOptimizer',
     'FractionalAdam',
     'FractionalSGD',
     'FractionalRMSprop',
-
     # Fractional GNN Components
     'BaseFractionalGNNLayer',
     'FractionalGraphConv',
@@ -186,7 +181,6 @@ __all__ = [
     'FractionalGraphSAGE',
     'FractionalGraphUNet',
     'FractionalGNNFactory',
-
     # Spectral
     'SpectralFractionalDerivative',
     'SpectralFractionalLayer',
@@ -194,13 +188,11 @@ __all__ = [
     'BoundedAlphaParameter',
     'spectral_fractional_derivative',
     'create_fractional_layer',
-
     # Stochastic
     'StochasticFractionalDerivative',
     'StochasticFractionalLayer',
     'stochastic_fractional_derivative',
     'create_stochastic_fractional_layer',
-
     # Probabilistic
     'ProbabilisticFractionalOrder',
     'ProbabilisticFractionalLayer',

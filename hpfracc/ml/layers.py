@@ -383,7 +383,7 @@ class FractionalLSTM(FractionalLayerBase):
                              dropout=self.dropout if self.num_layers > 1 else 0.0,
                              batch_first=True)
     
-    def forward(self, x, return_state: bool = True):
+    def forward(self, x, return_state: bool = False):
         # Accept both (seq, batch, input) and (batch, seq, input)
         import torch
         original_seq_batch = False

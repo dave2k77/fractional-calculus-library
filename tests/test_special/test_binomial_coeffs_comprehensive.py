@@ -93,9 +93,10 @@ class TestBinomialCoefficients:
         # Test array with JAX
         n_vals = np.array([1, 2, 3, 4, 5])
         k_vals = np.array([0, 1, 2, 3, 4])
-        
+
         results = bc.compute(n_vals, k_vals)
-        assert isinstance(results, np.ndarray)
+        # JAX returns JAX arrays, not numpy arrays
+        assert hasattr(results, 'shape') and hasattr(results, 'dtype')
         assert results.shape == n_vals.shape
         assert not np.any(np.isnan(results))
     
@@ -281,7 +282,8 @@ class TestBinomialCoefficientsIntegration:
         n_vals = np.array([1, 2, 3, 4, 5])
         k_vals = np.array([0, 1, 2, 3, 4])
         result2 = bc.compute(n_vals, k_vals)
-        assert isinstance(result2, np.ndarray)
+        # JAX returns JAX arrays, not numpy arrays
+        assert hasattr(result2, 'shape') and hasattr(result2, 'dtype')
         
         # Test fractional computation
         result3 = bc.compute(0.5, 2)

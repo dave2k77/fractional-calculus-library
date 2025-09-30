@@ -50,23 +50,23 @@ class PerformanceBenchmark:
         self.warmup_runs = warmup_runs
 
     def benchmark_method(
-        self, method_func: Callable, test_params: Dict, n_runs: int = 10
-    ) -> BenchmarkResult:
+        self, method_func: Callable, method_name: str, n_runs: int = 10
+    ) -> Dict:
         """
         Benchmark a single method.
 
         Args:
             method_func: Function to benchmark
-            test_params: Parameters for the test
+            method_name: Name of the method
             n_runs: Number of runs for averaging
 
         Returns:
-            Benchmark result
+            Benchmark result as dictionary
         """
         # Warmup runs
         for _ in range(self.warmup_runs):
             try:
-                method_func(**test_params)
+                method_func()
             except Exception:
                 pass
 
@@ -76,59 +76,52 @@ class PerformanceBenchmark:
 
         # Benchmark runs
         execution_times = []
+        success = True
+        error_message = None
 
         for _ in range(n_runs):
             start_time = time.perf_counter()
             try:
-                method_func(**test_params)
+                method_func()
                 end_time = time.perf_counter()
                 execution_times.append(end_time - start_time)
             except Exception as e:
-                return BenchmarkResult(
-                    method_name=method_func.__name__,
-                    benchmark_type=BenchmarkType.PERFORMANCE,
-                    execution_time=0.0,
-                    memory_usage=0.0,
-                    accuracy_metrics={},
-                    parameters=test_params,
-                    success=False,
-                    error_message=str(e),
-                )
+                success = False
+                error_message = str(e)
+                execution_times.append(0.0)
 
         # Record memory after
         memory_after = process.memory_info().rss / (1024**3)  # GB
         memory_usage = memory_after - memory_before
 
-        return BenchmarkResult(
-            method_name=method_func.__name__,
-            benchmark_type=BenchmarkType.PERFORMANCE,
-            execution_time=np.mean(execution_times),
-            memory_usage=memory_usage,
-            accuracy_metrics={"std_time": np.std(execution_times)},
-            parameters=test_params,
-            success=True,
-        )
+        return {
+            "method_name": method_name,
+            "execution_time": np.mean(execution_times),
+            "memory_usage": memory_usage,
+            "success": success,
+            "error_message": error_message,
+            "n_runs": n_runs,
+            "std_time": np.std(execution_times),
+        }
 
     def benchmark_multiple_methods(
-        self, methods: Dict[str, Callable], test_params: Dict, n_runs: int = 10
-    ) -> List[BenchmarkResult]:
+        self, methods: Dict[str, Callable], n_runs: int = 10
+    ) -> Dict:
         """
         Benchmark multiple methods.
 
         Args:
             methods: Dictionary of {method_name: method_function}
-            test_params: Parameters for the test
             n_runs: Number of runs for averaging
 
         Returns:
-            List of benchmark results
+            Dictionary of benchmark results with method names as keys
         """
-        results = []
+        results = {}
 
         for method_name, method_func in methods.items():
-            result = self.benchmark_method(method_func, test_params, n_runs)
-            result.method_name = method_name
-            results.append(result)
+            result = self.benchmark_method(method_func, method_name, n_runs)
+            results[method_name] = result
 
         return results
 
@@ -149,17 +142,19 @@ class AccuracyBenchmark:
             self,
             method_func: Callable,
             analytical_func: Callable,
-            test_params: Dict) -> BenchmarkResult:
+            x: np.ndarray,
+            method_name: str) -> Dict:
         """
         Benchmark accuracy of a method against analytical solution.
 
         Args:
             method_func: Function to benchmark
             analytical_func: Analytical solution function
-            test_params: Parameters for the test
+            x: Input array
+            method_name: Name of the method
 
         Returns:
-            Benchmark result
+            Benchmark result as dictionary
         """
         from ..utils.error_analysis import ErrorAnalyzer
 
@@ -167,58 +162,52 @@ class AccuracyBenchmark:
 
         try:
             # Compute numerical solution
-            numerical = method_func(**test_params)
+            numerical = method_func(x)
 
             # Compute analytical solution
-            analytical = analytical_func(**test_params)
+            analytical = analytical_func(x)
 
             # Compute accuracy metrics
             accuracy_metrics = error_analyzer.compute_all_errors(
                 numerical, analytical)
 
-            return BenchmarkResult(
-                method_name=method_func.__name__,
-                benchmark_type=BenchmarkType.ACCURACY,
-                execution_time=0.0,
-                memory_usage=0.0,
-                accuracy_metrics=accuracy_metrics,
-                parameters=test_params,
-                success=True,
-            )
+            return {
+                "method_name": method_name,
+                "accuracy_metrics": accuracy_metrics,
+                "success": True,
+                "error_message": None,
+                "tolerance": self.tolerance,
+            }
 
         except Exception as e:
-            return BenchmarkResult(
-                method_name=method_func.__name__,
-                benchmark_type=BenchmarkType.ACCURACY,
-                execution_time=0.0,
-                memory_usage=0.0,
-                accuracy_metrics={},
-                parameters=test_params,
-                success=False,
-                error_message=str(e),
-            )
+            return {
+                "method_name": method_name,
+                "accuracy_metrics": {},
+                "success": False,
+                "error_message": str(e),
+                "tolerance": self.tolerance,
+            }
 
     def benchmark_multiple_methods(
-        self, methods: Dict[str, Callable], analytical_func: Callable, test_params: Dict
-    ) -> List[BenchmarkResult]:
+        self, methods: Dict[str, Callable], analytical_func: Callable, x: np.ndarray
+    ) -> Dict:
         """
         Benchmark accuracy of multiple methods.
 
         Args:
             methods: Dictionary of {method_name: method_function}
             analytical_func: Analytical solution function
-            test_params: Parameters for the test
+            x: Input array
 
         Returns:
-            List of benchmark results
+            Dictionary of benchmark results with method names as keys
         """
-        results = []
+        results = {}
 
         for method_name, method_func in methods.items():
             result = self.benchmark_method(
-                method_func, analytical_func, test_params)
-            result.method_name = method_name
-            results.append(result)
+                method_func, analytical_func, x, method_name)
+            results[method_name] = result
 
         return results
 
@@ -268,33 +257,43 @@ class BenchmarkSuite:
         # Run accuracy benchmarks
         for i, test_case in enumerate(test_cases):
             accuracy_results = self.accuracy_benchmark.benchmark_multiple_methods(
-                methods, analytical_func, test_case)
+                methods, analytical_func, test_case["x"])
 
-            for result in accuracy_results:
-                result.parameters["test_case_index"] = i
-
-            results["accuracy_results"].extend(accuracy_results)
+            # Add test case info to each result
+            for method_name, result in accuracy_results.items():
+                result["test_case"] = i
+                result["parameters"] = test_case.copy()
+                results["accuracy_results"].append(result)
 
         # Run performance benchmarks (use first test case for performance)
         if test_cases:
             performance_results = self.performance_benchmark.benchmark_multiple_methods(
-                methods, test_cases[0], n_runs)
+                methods, n_runs)
             results["performance_results"] = performance_results
 
         # Generate summary
         results["summary"] = self._generate_summary(results)
 
-        return results
+        # Convert to method-keyed format for compatibility
+        method_results = {}
+        for method_name in methods.keys():
+            method_results[method_name] = {
+                "accuracy": [r for r in results["accuracy_results"] if r["method_name"] == method_name],
+                "performance": results["performance_results"].get(method_name, {}),
+                "summary": results["summary"]["method_summaries"].get(method_name, {})
+            }
+        
+        return method_results
 
     def _generate_summary(self, results: Dict) -> Dict:
         """Generate summary statistics from benchmark results."""
         summary = {
             "total_methods": len(
-                set(r.method_name for r in results["accuracy_results"])
+                set(r["method_name"] for r in results["accuracy_results"])
             ),
             "total_test_cases": len(
                 set(
-                    r.parameters.get("test_case_index", 0)
+                    r.get("test_case", 0)
                     for r in results["accuracy_results"]
                 )
             ),
@@ -304,33 +303,32 @@ class BenchmarkSuite:
         # Group results by method
         method_results = {}
         for result in results["accuracy_results"]:
-            if result.method_name not in method_results:
-                method_results[result.method_name] = []
-            method_results[result.method_name].append(result)
+            method_name = result["method_name"]
+            if method_name not in method_results:
+                method_results[method_name] = []
+            method_results[method_name].append(result)
 
         # Generate method summaries
         for method_name, method_result_list in method_results.items():
-            successful_results = [r for r in method_result_list if r.success]
+            successful_results = [r for r in method_result_list if r.get("success", True)]
 
             if successful_results:
                 # Accuracy summary
                 l2_errors = [
-                    r.accuracy_metrics.get(
-                        "l2", np.inf) for r in successful_results]
+                    r.get("l2_error", np.inf) for r in successful_results]
                 linf_errors = [
-                    r.accuracy_metrics.get(
-                        "linf", np.inf) for r in successful_results]
+                    r.get("linf_error", np.inf) for r in successful_results]
 
                 # Performance summary
-                perf_results = [
-                    r
-                    for r in results["performance_results"]
-                    if r.method_name == method_name and r.success
-                ]
+                perf_results = []
+                if method_name in results["performance_results"]:
+                    perf_result = results["performance_results"][method_name]
+                    if isinstance(perf_result, dict) and perf_result.get("success", True):
+                        perf_results = [perf_result]
 
                 if perf_results:
-                    execution_times = [r.execution_time for r in perf_results]
-                    memory_usage = [r.memory_usage for r in perf_results]
+                    execution_times = [r.get("execution_time", 0) for r in perf_results]
+                    memory_usage = [r.get("memory_usage", 0) for r in perf_results]
                 else:
                     execution_times = []
                     memory_usage = []
@@ -394,7 +392,7 @@ def run_benchmarks(
 
 
 def compare_methods(
-    methods: Dict[str, Callable], analytical_func: Callable, test_params: Dict
+    methods: Dict[str, Callable], analytical_func: Callable, test_params
 ) -> Dict:
     """
     Compare multiple methods on a single test case.
@@ -402,40 +400,25 @@ def compare_methods(
     Args:
         methods: Dictionary of {method_name: method_function}
         analytical_func: Analytical solution function
-        test_params: Parameters for the test
+        test_params: Parameters for the test (can be dict or numpy array)
 
     Returns:
         Comparison results
     """
     suite = BenchmarkSuite()
-    test_cases = [test_params]
+    
+    # Handle both dict and numpy array test_params
+    if isinstance(test_params, dict):
+        test_cases = [test_params]
+    else:
+        # Assume it's a numpy array for x values
+        test_cases = [{'x': test_params}]
+    
     results = suite.run_comprehensive_benchmark(
         methods, analytical_func, test_cases)
 
-    # Extract comparison data
-    comparison = {
-        "methods": list(methods.keys()),
-        "accuracy_comparison": {},
-        "performance_comparison": {},
-    }
-
-    # Accuracy comparison
-    for result in results["accuracy_results"]:
-        if result.success:
-            comparison["accuracy_comparison"][result.method_name] = {
-                "l2_error": result.accuracy_metrics.get("l2", np.inf),
-                "linf_error": result.accuracy_metrics.get("linf", np.inf),
-            }
-
-    # Performance comparison
-    for result in results["performance_results"]:
-        if result.success:
-            comparison["performance_comparison"][result.method_name] = {
-                "execution_time": result.execution_time,
-                "memory_usage": result.memory_usage,
-            }
-
-    return comparison
+    # Return results in the expected format (method names as keys)
+    return results
 
 
 def generate_benchmark_report(

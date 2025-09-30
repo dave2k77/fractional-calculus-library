@@ -385,26 +385,10 @@ class AtanganaBaleanuDerivative:
         """
         Fast approximation of Mittag-Leffler function E_α(z).
 
-        Uses truncated series expansion for computational efficiency.
+        Uses optimized Mittag-Leffler function from special module.
         """
-        if abs(z) < 1e-10:
-            return 1.0
-
-        result = 0.0
-        factorial = 1.0
-
-        for k in range(max_terms):
-            if k > 0:
-                factorial *= k
-
-            term = (z ** k) / gamma(alpha * k + 1)
-            result += term
-
-            # Check convergence
-            if abs(term) < 1e-12:
-                break
-
-        return result
+        from ..special.mittag_leffler import mittag_leffler_fast
+        return mittag_leffler_fast(z, alpha, 1.0)
 
     def _compute_fft(
             self,

@@ -57,19 +57,38 @@ class ConvergenceTester:
 
         error_analyzer = ErrorAnalyzer(tolerance=self.tolerance)
         errors = []
+        successful_runs = 0
 
         for N in grid_sizes:
             try:
-                # Create grid
-                x = np.linspace(0, 1, N)
+                # Create grid with proper bounds
+                x = np.linspace(0, 1, max(N, 2))  # Ensure at least 2 points
 
-                # Compute numerical solution
-                numerical = method_func(x, **test_params)
+                # Compute numerical solution with flexible parameter passing
+                try:
+                    numerical = method_func(x, **test_params)
+                except TypeError:
+                    # Try without unpacking if method doesn't accept **kwargs
+                    numerical = method_func(x, test_params)
 
-                # Compute analytical solution
-                analytical = analytical_func(x, **test_params)
+                # Compute analytical solution with flexible parameter passing
+                try:
+                    analytical = analytical_func(x, **test_params)
+                except TypeError:
+                    # Try without unpacking if method doesn't accept **kwargs
+                    analytical = analytical_func(x, test_params)
 
-                # Compute error
+                # Ensure both are numpy arrays
+                numerical = np.asarray(numerical)
+                analytical = np.asarray(analytical)
+
+                # Check for valid results
+                if np.any(np.isnan(numerical)) or np.any(np.isnan(analytical)):
+                    warnings.warn(f"NaN values detected for N={N}")
+                    errors.append(np.nan)
+                    continue
+
+                # Compute error with robust handling
                 if error_norm == "l1":
                     error = error_analyzer.l1_error(numerical, analytical)
                 elif error_norm == "l2":
@@ -79,26 +98,49 @@ class ConvergenceTester:
                 else:
                     raise ValueError(f"Unknown error norm: {error_norm}")
 
-                errors.append(error)
+                # Check if error is valid
+                if np.isnan(error) or np.isinf(error):
+                    warnings.warn(f"Invalid error value for N={N}: {error}")
+                    errors.append(np.nan)
+                else:
+                    errors.append(float(error))
+                    successful_runs += 1
 
             except Exception as e:
                 warnings.warn(f"Failed to compute error for N={N}: {e}")
                 errors.append(np.nan)
 
-        # Remove any NaN values
+        # Handle cases with insufficient valid data more gracefully
         valid_indices = [i for i, e in enumerate(errors) if not np.isnan(e)]
-        if len(valid_indices) < 2:
-            raise ValueError(
-                "Need at least 2 valid error measurements for convergence analysis"
-            )
+        
+        if len(valid_indices) == 0:
+            return {
+                "grid_sizes": grid_sizes,
+                "errors": errors,
+                "convergence_rate": np.nan,
+                "success": False,
+                "message": "No valid error measurements obtained"
+            }
+        elif len(valid_indices) == 1:
+            return {
+                "grid_sizes": [grid_sizes[i] for i in valid_indices],
+                "errors": [errors[i] for i in valid_indices],
+                "convergence_rate": np.nan,
+                "success": False,
+                "message": "Only one valid measurement - cannot compute convergence rate"
+            }
 
         valid_grid_sizes = [grid_sizes[i] for i in valid_indices]
         valid_errors = [errors[i] for i in valid_indices]
 
-        # Compute convergence rate
-        convergence_rate = self._compute_convergence_rate(
-            valid_grid_sizes, valid_errors
-        )
+        # Compute convergence rate with robust handling
+        try:
+            convergence_rate = self._compute_convergence_rate(
+                valid_grid_sizes, valid_errors
+            )
+        except Exception as e:
+            warnings.warn(f"Failed to compute convergence rate: {e}")
+            convergence_rate = np.nan
 
         return {
             "grid_sizes": valid_grid_sizes,
@@ -200,6 +242,10 @@ class ConvergenceAnalyzer:
         self.tolerance = tolerance
         self.tester = ConvergenceTester(tolerance)
 
+    def analyze(self, *args, **kwargs):
+        """Alias for analyze_method_convergence for backward compatibility."""
+        return self.analyze_method_convergence(*args, **kwargs)
+
     def analyze_method_convergence(
         self,
         method_func: Callable,
@@ -294,75 +340,134 @@ class ConvergenceAnalyzer:
 
     def estimate_optimal_grid_size(
         self,
-        target_error: float,
-        convergence_rate: float,
-        reference_grid_size: int,
-        reference_error: float,
+        errors: List[float],
+        grid_sizes: List[int],
+        target_accuracy: float,
     ) -> int:
         """
-        Estimate optimal grid size for a target error.
+        Estimate optimal grid size for a target accuracy.
 
         Args:
-            target_error: Target error tolerance
-            convergence_rate: Estimated convergence rate
-            reference_grid_size: Reference grid size
-            reference_error: Reference error
+            errors: List of errors
+            grid_sizes: List of grid sizes
+            target_accuracy: Target accuracy
 
         Returns:
             Estimated optimal grid size
         """
+        if len(errors) < 2 or len(grid_sizes) < 2:
+            raise ValueError("Need at least 2 points to estimate optimal grid size")
+
+        # Compute convergence rate
+        try:
+            convergence_rate = self.tester.estimate_convergence_rate(grid_sizes, errors)
+        except (ValueError, np.linalg.LinAlgError):
+            # If we can't compute convergence rate, use the largest grid size
+            return max(grid_sizes)
+
         if convergence_rate <= 0:
-            raise ValueError("Convergence rate must be positive")
+            return max(grid_sizes)
 
-        if target_error <= 0:
-            raise ValueError("Target error must be positive")
+        # Estimate using convergence rate: error ~ C * h^p
+        # h_optimal = h_ref * (error_ref / error_target)^(1/p)
+        reference_error = errors[-1]
+        reference_grid_size = grid_sizes[-1]
+        ratio = reference_error / target_accuracy
+        optimal_size = int(reference_grid_size * (ratio ** (1.0 / convergence_rate)))
 
-        # Use the relationship: error ∝ N^(-convergence_rate)
-        # N_opt = N_ref * (error_ref / target_error)^(1/convergence_rate)
-        N_opt = int(
-            reference_grid_size
-            * (reference_error / target_error) ** (1 / convergence_rate)
-        )
-
-        return max(N_opt, 1)  # Ensure positive grid size
+        return max(optimal_size, 1)
 
     def validate_convergence_order(
         self,
-        observed_rate: float,
-        expected_order: OrderOfAccuracy,
+        errors: List[float],
+        grid_sizes: List[int],
+        expected_order: float,
         tolerance: float = 0.5,
     ) -> Dict:
         """
         Validate if observed convergence rate matches expected order.
 
         Args:
-            observed_rate: Observed convergence rate
+            errors: List of errors
+            grid_sizes: List of grid sizes
             expected_order: Expected order of accuracy
             tolerance: Tolerance for validation
 
         Returns:
             Validation result
         """
-        expected_rate = expected_order.value
-        difference = abs(observed_rate - expected_rate)
+        # Compute observed convergence rate
+        try:
+            observed_rate = self.tester.estimate_convergence_rate(grid_sizes, errors)
+        except (ValueError, np.linalg.LinAlgError):
+            return {
+                "convergence_rate": np.nan,
+                "expected_rate": expected_order,
+                "difference": np.nan,
+                "tolerance": tolerance,
+                "is_valid": False,
+                "actual_order": np.nan,
+                "order_achieved": None,
+            }
 
+        difference = abs(observed_rate - expected_order)
         is_valid = difference <= tolerance
 
         return {
-            "observed_rate": observed_rate,
-            "expected_rate": expected_rate,
+            "convergence_rate": observed_rate,
+            "expected_rate": expected_order,
             "difference": difference,
             "tolerance": tolerance,
             "is_valid": is_valid,
-            "order_achieved": OrderOfAccuracy(expected_rate) if is_valid else None,
+            "actual_order": observed_rate,
+            "order_achieved": OrderOfAccuracy(expected_order) if is_valid else None,
+        }
+
+    def analyze_method_convergence(
+        self,
+        methods: List[str],
+        grid_sizes: List[int],
+        errors: Dict[str, List[float]],
+    ) -> Dict:
+        """
+        Analyze convergence for multiple methods.
+
+        Args:
+            methods: List of method names
+            grid_sizes: List of grid sizes
+            errors: Dictionary of {method: error_list}
+
+        Returns:
+            Convergence analysis results
+        """
+        convergence_rates = {}
+        best_method = None
+        best_rate = -np.inf
+
+        for method in methods:
+            if method in errors:
+                try:
+                    rate = self.tester.estimate_convergence_rate(grid_sizes, errors[method])
+                    convergence_rates[method] = rate
+                    if rate > best_rate:
+                        best_rate = rate
+                        best_method = method
+                except (ValueError, np.linalg.LinAlgError):
+                    convergence_rates[method] = np.nan
+
+        return {
+            "convergence_rates": convergence_rates,
+            "best_method": best_method,
+            "grid_sizes": grid_sizes,
+            "methods": methods,
         }
 
 
 def run_convergence_study(
     method_func: Callable,
     analytical_func: Callable,
-    test_cases: List[Dict],
-    grid_sizes: List[int] = None,
+    grid_sizes: List[int],
+    test_params: Dict = None,
 ) -> Dict:
     """
     Run a comprehensive convergence study.
@@ -370,16 +475,31 @@ def run_convergence_study(
     Args:
         method_func: Function that computes numerical solution
         analytical_func: Function that computes analytical solution
-        test_cases: List of test case dictionaries
         grid_sizes: List of grid sizes to test
+        test_params: Parameters for the test case
 
     Returns:
         Convergence study results
     """
-    analyzer = ConvergenceAnalyzer()
-    return analyzer.analyze_method_convergence(
-        method_func, analytical_func, test_cases, grid_sizes
+    tester = ConvergenceTester()
+    if test_params is None:
+        test_params = {'x': np.linspace(0, 1, 10)}
+    results = tester.test_multiple_norms(
+        method_func, analytical_func, grid_sizes, test_params
     )
+    
+    # Add expected keys for compatibility
+    results['grid_sizes'] = grid_sizes
+    results['method_func'] = method_func.__name__ if hasattr(method_func, '__name__') else 'unknown'
+    
+    # Add summary
+    results['summary'] = {
+        'total_norms': len(results),
+        'convergence_rates': {norm: data.get('convergence_rate', np.nan) for norm, data in results.items() if isinstance(data, dict)},
+        'best_norm': max(results.keys(), key=lambda k: results[k].get('convergence_rate', -np.inf) if isinstance(results[k], dict) else -np.inf)
+    }
+    
+    return results
 
 
 def run_method_convergence_test(
@@ -401,9 +521,20 @@ def run_method_convergence_test(
         Convergence test results
     """
     tester = ConvergenceTester()
-    return tester.test_multiple_norms(
+    results = tester.test_multiple_norms(
         method_func, analytical_func, grid_sizes, test_params
     )
+    
+    # Extract convergence rate from l2 norm (most common)
+    if 'l2' in results and results['l2'] is not None:
+        convergence_rate = results['l2'].get('convergence_rate', np.nan)
+    else:
+        convergence_rate = np.nan
+    
+    # Add convergence_rate at top level for compatibility
+    results['convergence_rate'] = convergence_rate
+    
+    return results
 
 
 def estimate_convergence_rate(

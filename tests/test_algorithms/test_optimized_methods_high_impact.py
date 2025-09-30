@@ -62,20 +62,20 @@ class TestOptimizedMethodsHighImpact:
             
     def test_optimized_riemann_liouville_initialization(self):
         """Test OptimizedRiemannLiouville initialization - MAJOR TARGET."""
-        rl = OptimizedRiemannLiouville(alpha=self.alpha)
+        rl = OptimizedRiemannLiouville(order=self.alpha)
         assert isinstance(rl, OptimizedRiemannLiouville)
         
         # Test with different parameters
-        rl_parallel = OptimizedRiemannLiouville(alpha=self.alpha, parallel=True)
+        rl_parallel = OptimizedRiemannLiouville(order=self.alpha, parallel=True)
         assert isinstance(rl_parallel, OptimizedRiemannLiouville)
         
         # Test with optimization options
-        rl_opt = OptimizedRiemannLiouville(alpha=self.alpha, method="fft")
+        rl_opt = OptimizedRiemannLiouville(order=self.alpha, method="fft")
         assert isinstance(rl_opt, OptimizedRiemannLiouville)
         
     def test_optimized_riemann_liouville_compute(self):
         """Test OptimizedRiemannLiouville compute method - HIGH IMPACT."""
-        rl = OptimizedRiemannLiouville(alpha=self.alpha)
+        rl = OptimizedRiemannLiouville(order=self.alpha)
         
         try:
             result = rl.compute(self.f, self.x)
@@ -88,21 +88,21 @@ class TestOptimizedMethodsHighImpact:
             
     def test_optimized_caputo_initialization(self):
         """Test OptimizedCaputo initialization - MAJOR TARGET."""
-        caputo = OptimizedCaputo(alpha=self.alpha)
+        caputo = OptimizedCaputo(order=self.alpha)
         assert isinstance(caputo, OptimizedCaputo)
         
         # Test with different schemes
         schemes = ["L1", "L2", "predictor_corrector", "diethelm_ford"]
         for scheme in schemes:
             try:
-                caputo_scheme = OptimizedCaputo(alpha=self.alpha, scheme=scheme)
+                caputo_scheme = OptimizedCaputo(order=self.alpha, scheme=scheme)
                 assert isinstance(caputo_scheme, OptimizedCaputo)
             except Exception:
                 pass
                 
     def test_optimized_caputo_compute(self):
         """Test OptimizedCaputo compute method - HIGH IMPACT."""
-        caputo = OptimizedCaputo(alpha=self.alpha)
+        caputo = OptimizedCaputo(order=self.alpha)
         
         try:
             result = caputo.compute(self.f, self.x)
@@ -114,16 +114,16 @@ class TestOptimizedMethodsHighImpact:
             
     def test_optimized_grunwald_letnikov_initialization(self):
         """Test OptimizedGrunwaldLetnikov initialization - MAJOR TARGET."""
-        gl = OptimizedGrunwaldLetnikov(alpha=self.alpha)
+        gl = OptimizedGrunwaldLetnikov(order=self.alpha)
         assert isinstance(gl, OptimizedGrunwaldLetnikov)
         
         # Test with optimization parameters
-        gl_opt = OptimizedGrunwaldLetnikov(alpha=self.alpha, fast_binomial=True)
+        gl_opt = OptimizedGrunwaldLetnikov(order=self.alpha, fast_binomial=True)
         assert isinstance(gl_opt, OptimizedGrunwaldLetnikov)
         
     def test_optimized_grunwald_letnikov_compute(self):
         """Test OptimizedGrunwaldLetnikov compute method - HIGH IMPACT."""
-        gl = OptimizedGrunwaldLetnikov(alpha=self.alpha)
+        gl = OptimizedGrunwaldLetnikov(order=self.alpha)
         
         try:
             result = gl.compute(self.f, self.x)
@@ -205,7 +205,7 @@ class TestOptimizedMethodsHighImpact:
         
         for method in methods:
             try:
-                rl = OptimizedRiemannLiouville(alpha=self.alpha, method=method)
+                rl = OptimizedRiemannLiouville(order=self.alpha, method=method)
                 result = rl.compute(self.f, self.x)
                 
                 if result is not None:
@@ -219,7 +219,7 @@ class TestOptimizedMethodsHighImpact:
         """Test parallel computation features - HIGH IMPACT."""
         # Test with parallel enabled
         try:
-            rl_parallel = OptimizedRiemannLiouville(alpha=self.alpha, parallel=True, num_workers=2)
+            rl_parallel = OptimizedRiemannLiouville(order=self.alpha, parallel=True, num_workers=2)
             result = rl_parallel.compute(self.f, self.x)
             
             if result is not None:
@@ -232,7 +232,7 @@ class TestOptimizedMethodsHighImpact:
         # Test with load balancing
         try:
             config = ParallelConfig(num_workers=2, chunk_size=10)
-            rl_balanced = OptimizedRiemannLiouville(alpha=self.alpha, config=config)
+            rl_balanced = OptimizedRiemannLiouville(order=self.alpha, config=config)
             result = rl_balanced.compute(self.f, self.x)
             
             if result is not None:
@@ -250,7 +250,7 @@ class TestOptimizedMethodsHighImpact:
             f_test = x_test**2
             
             try:
-                rl = OptimizedRiemannLiouville(alpha=self.alpha)
+                rl = OptimizedRiemannLiouville(order=self.alpha)
                 result = rl.compute(f_test, x_test)
                 
                 if result is not None:
@@ -274,7 +274,7 @@ class TestOptimizedMethodsHighImpact:
             try:
                 f_test = func(self.x)
                 
-                rl = OptimizedRiemannLiouville(alpha=self.alpha)
+                rl = OptimizedRiemannLiouville(order=self.alpha)
                 result = rl.compute(f_test, self.x)
                 
                 if result is not None:
@@ -290,7 +290,7 @@ class TestOptimizedMethodsHighImpact:
         
         for scheme in schemes:
             try:
-                caputo = OptimizedCaputo(alpha=self.alpha, scheme=scheme)
+                caputo = OptimizedCaputo(order=self.alpha, scheme=scheme)
                 result = caputo.compute(self.f, self.x)
                 
                 if result is not None:
@@ -311,7 +311,7 @@ class TestOptimizedMethodsHighImpact:
         
         for opt in optimizations:
             try:
-                gl = OptimizedGrunwaldLetnikov(alpha=self.alpha, **opt)
+                gl = OptimizedGrunwaldLetnikov(order=self.alpha, **opt)
                 result = gl.compute(self.f, self.x)
                 
                 if result is not None:
@@ -327,9 +327,9 @@ class TestOptimizedMethodsHighImpact:
         
         # Test timing for different methods
         methods = [
-            OptimizedRiemannLiouville(alpha=self.alpha),
-            OptimizedCaputo(alpha=self.alpha),
-            OptimizedGrunwaldLetnikov(alpha=self.alpha)
+            OptimizedRiemannLiouville(order=self.alpha),
+            OptimizedCaputo(order=self.alpha),
+            OptimizedGrunwaldLetnikov(order=self.alpha)
         ]
         
         for method in methods:
@@ -354,7 +354,7 @@ class TestOptimizedMethodsHighImpact:
         large_f = large_x**2
         
         try:
-            rl = OptimizedRiemannLiouville(alpha=self.alpha, memory_efficient=True)
+            rl = OptimizedRiemannLiouville(order=self.alpha, memory_efficient=True)
             result = rl.compute(large_f, large_x)
             
             if result is not None:
@@ -403,7 +403,7 @@ class TestOptimizedMethodsHighImpact:
             
         # Single point
         try:
-            rl = OptimizedRiemannLiouville(alpha=self.alpha)
+            rl = OptimizedRiemannLiouville(order=self.alpha)
             result = rl.compute(np.array([1.0]), np.array([0.0]))
             if result is not None:
                 assert len(result) == 1
@@ -413,9 +413,9 @@ class TestOptimizedMethodsHighImpact:
     def test_method_comparison(self):
         """Test consistency between methods - INTEGRATION COVERAGE."""
         try:
-            rl = OptimizedRiemannLiouville(alpha=self.alpha)
-            caputo = OptimizedCaputo(alpha=self.alpha)
-            gl = OptimizedGrunwaldLetnikov(alpha=self.alpha)
+            rl = OptimizedRiemannLiouville(order=self.alpha)
+            caputo = OptimizedCaputo(order=self.alpha)
+            gl = OptimizedGrunwaldLetnikov(order=self.alpha)
             
             result_rl = rl.compute(self.f, self.x)
             result_caputo = caputo.compute(self.f, self.x)
@@ -441,7 +441,7 @@ class TestOptimizedMethodsHighImpact:
         
         for config in config_options:
             try:
-                rl = OptimizedRiemannLiouville(alpha=self.alpha, **config)
+                rl = OptimizedRiemannLiouville(order=self.alpha, **config)
                 result = rl.compute(self.f, self.x)
                 
                 if result is not None:
@@ -449,6 +449,13 @@ class TestOptimizedMethodsHighImpact:
                     
             except Exception:
                 pass
+
+
+
+
+
+
+
 
 
 

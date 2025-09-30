@@ -29,6 +29,7 @@ class MemoryManager:
         self.memory_limit_gb = memory_limit_gb
         self.memory_history = []
         self.peak_memory = 0.0
+        self.monitoring = False
 
     def get_memory_usage(self) -> Dict[str, float]:
         """
@@ -128,6 +129,41 @@ class MemoryManager:
             100,
         }
 
+    def start_monitoring(self) -> None:
+        """Start memory monitoring."""
+        self.monitoring = True
+
+    def stop_monitoring(self) -> None:
+        """Stop memory monitoring."""
+        self.monitoring = False
+
+    def optimize_memory(self) -> Dict[str, Any]:
+        """
+        Perform memory optimization.
+
+        Returns:
+            Dictionary with optimization results
+        """
+        before = self.get_memory_usage()
+        
+        # Force garbage collection
+        self.force_garbage_collection()
+        
+        # Clear numpy cache if available
+        try:
+            np.core._multiarray_umath._clear_floatstatus()
+        except AttributeError:
+            pass
+        
+        after = self.get_memory_usage()
+        
+        return {
+            "freed_memory": before["rss"] - after["rss"],
+            "optimization_applied": True,
+            "before": before,
+            "after": after,
+        }
+
 
 class CacheManager:
     """Manager for caching frequently used computations."""
@@ -173,7 +209,7 @@ class CacheManager:
 
         # Remove items until we're under the limit
         while (
-            len(self.cache) > self.max_size
+            len(self.cache) >= self.max_size
             or self._get_cache_size_gb() > self.max_memory_gb
         ):
             if not sorted_items:
@@ -231,6 +267,15 @@ class CacheManager:
         self.access_count.clear()
         self.size_estimates.clear()
 
+    def size(self) -> int:
+        """
+        Get current cache size.
+
+        Returns:
+            Number of items in cache
+        """
+        return len(self.cache)
+
     def get_cache_stats(self) -> Dict[str, Any]:
         """
         Get cache statistics.
@@ -261,42 +306,7 @@ class CacheManager:
         }
 
 
-def optimize_memory_usage(func: Callable) -> Callable:
-    """
-    Decorator to optimize memory usage of a function.
-
-    Args:
-        func: Function to optimize
-
-    Returns:
-        Wrapped function with memory optimization
-    """
-
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        memory_manager = MemoryManager()
-
-        # Record memory before
-        before = memory_manager.record_memory_usage()
-
-        try:
-            result = func(*args, **kwargs)
-
-            # Record memory after
-            after = memory_manager.record_memory_usage()
-
-            # Optimize if memory usage increased significantly
-            if after["rss"] - before["rss"] > 0.1:  # More than 100MB increase
-                memory_manager.optimize_memory_usage()
-
-            return result
-
-        except Exception as e:
-            # Clean up on exception
-            memory_manager.force_garbage_collection()
-            raise e
-
-    return wrapper
+# Original decorator function removed to avoid naming conflicts
 
 
 def clear_cache() -> None:
@@ -319,6 +329,51 @@ def get_memory_usage() -> Dict[str, float]:
     """
     manager = MemoryManager()
     return manager.get_memory_usage()
+
+
+def optimize_memory_usage_func(*args, **kwargs):
+    """
+    Optimize memory usage. Can be used as a decorator or called directly.
+
+    Returns:
+        Memory optimization results or decorated function
+    """
+    if args and callable(args[0]):
+        # Used as decorator - use the decorator function defined earlier at line 309
+        func = args[0]
+        
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            memory_manager = MemoryManager()
+
+            # Record memory before
+            before = memory_manager.record_memory_usage()
+
+            try:
+                result = func(*args, **kwargs)
+
+                # Record memory after
+                after = memory_manager.record_memory_usage()
+
+                # Optimize if memory usage increased significantly
+                if after["rss"] - before["rss"] > 0.1:  # More than 100MB increase
+                    memory_manager.optimize_memory()
+
+                return result
+
+            except Exception as e:
+                # Clean up on exception
+                memory_manager.force_garbage_collection()
+                raise e
+
+        return wrapper
+    else:
+        # Called directly
+        manager = MemoryManager()
+        return manager.optimize_memory()
+
+# Make optimize_memory_usage an alias to the dual-purpose function
+optimize_memory_usage = optimize_memory_usage_func
 
 
 # Global cache manager instance

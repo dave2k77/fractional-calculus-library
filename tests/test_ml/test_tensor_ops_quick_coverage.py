@@ -162,7 +162,7 @@ class TestTensorOpsQuickCoverage:
         # Test with unknown backend
         ops = TensorOps(backend=BackendType.TORCH)
         with patch.object(ops, 'backend', 'unknown'):
-            with pytest.raises(ValueError, match="Unknown backend"):
+            with pytest.raises(RuntimeError, match="Unknown backend"):
                 ops.create_tensor([1, 2, 3])
                 
     def test_advanced_operations(self):

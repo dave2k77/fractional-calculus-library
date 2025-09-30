@@ -172,13 +172,15 @@ class TestOptimizedMethodsEdgeCases:
     
     def test_optimized_caputo_alpha_close_to_one(self):
         """Test optimized Caputo with alpha close to 1."""
-        with pytest.raises(ValueError, match="L1 scheme requires 0 < α < 1"):
-            OptimizedCaputo(0.999999)
+        # 0.999999 is valid (< 1), so this should work without error
+        caputo = OptimizedCaputo(0.999999)
+        assert caputo.alpha_val == 0.999999
     
     def test_optimized_caputo_alpha_close_to_zero(self):
         """Test optimized Caputo with alpha close to zero."""
-        with pytest.raises(ValueError, match="Alpha must be positive for Caputo derivative"):
-            OptimizedCaputo(1e-10)
+        # 1e-10 is valid (> 0), so this should work without error
+        caputo = OptimizedCaputo(1e-10)
+        assert caputo.alpha_val == 1e-10
     
     def test_optimized_grunwald_letnikov_negative_alpha(self):
         """Test optimized Grünwald-Letnikov with negative alpha."""

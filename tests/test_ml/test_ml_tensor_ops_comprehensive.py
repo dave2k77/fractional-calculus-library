@@ -94,7 +94,7 @@ class TestTensorOps:
             mock_backend_manager.return_value = mock_manager
 
             ops = TensorOps("UNKNOWN")
-            with pytest.raises(ValueError, match="Unknown backend"):
+            with pytest.raises(RuntimeError, match="Unknown backend"):
                 ops.create_tensor([1, 2, 3])
 
     def test_matmul_tensors(self):

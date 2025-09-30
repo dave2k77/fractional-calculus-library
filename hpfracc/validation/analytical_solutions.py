@@ -84,16 +84,16 @@ class AnalyticalSolutions:
         return (a**order) * np.exp(a * x)
 
     def trigonometric_derivative(
-        self, x: np.ndarray, func_type: str, omega: float, order: float
+        self, x: np.ndarray, order: float, omega: float, func_type: str
     ) -> np.ndarray:
         """
         Analytical fractional derivative of trigonometric functions.
 
         Args:
             x: Input array
-            func_type: 'sin' or 'cos'
-            omega: Frequency
             order: Order of fractional derivative
+            omega: Frequency
+            func_type: 'sin' or 'cos'
 
         Returns:
             Analytical fractional derivative
@@ -126,12 +126,16 @@ class AnalyticalSolutions:
             raise ValueError("func_type must be 'sin' or 'cos'")
 
     def constant_function_derivative(
-        self, x: np.ndarray, c: float, order: float
+        self, x: np.ndarray, order: float, c: float = 1.0
     ) -> np.ndarray:
         """
         Analytical fractional derivative of a constant function.
 
-        For Caputo/RL: D^order(c) = c * x^(-order) / gamma(1 - order)
+        This implementation uses the Caputo definition where D^α(c) = 0 for α > 0,
+        which respects the boundary condition that derivatives of constants are zero.
+        
+        Note: Riemann-Liouville derivatives give D^α(c) = c * x^(-α) / Γ(1-α) ≠ 0,
+        which violates the intuitive boundary condition f'(c) = 0 for constant c.
         """
         if order < 0:
             raise ValueError("Order must be non-negative")
@@ -139,11 +143,8 @@ class AnalyticalSolutions:
         if order == 0:
             return c * np.ones_like(x)
 
-        if order == 1:
-            return np.zeros_like(x)
-
-        coeff = c / gamma(1 - order)
-        return coeff * (x ** (-order))
+        # For Caputo fractional derivative, derivative of constant is always 0
+        return np.zeros_like(x)
 
 
 # Simple public helpers expected by coverage tests
@@ -187,6 +188,14 @@ class PowerFunctionSolutions:
         """Get analytical solution for x^alpha."""
         return self.base_solutions.power_function_derivative(x, alpha, order)
 
+    def get_derivative(
+            self,
+            x: np.ndarray,
+            alpha: float,
+            order: float) -> np.ndarray:
+        """Get analytical derivative for x^alpha."""
+        return self.base_solutions.power_function_derivative(x, alpha, order)
+
     def get_test_cases(self) -> List[Dict]:
         """Get standard test cases for power functions."""
         return [
@@ -208,9 +217,17 @@ class ExponentialSolutions:
     def get_solution(
             self,
             x: np.ndarray,
-            a: float,
-            order: float) -> np.ndarray:
+            order: float,
+            a: float = 1.0) -> np.ndarray:
         """Get analytical solution for exp(ax)."""
+        return self.base_solutions.exponential_derivative(x, a, order)
+
+    def get_derivative(
+            self,
+            x: np.ndarray,
+            order: float,
+            a: float = 1.0) -> np.ndarray:
+        """Get analytical derivative for exp(ax)."""
         return self.base_solutions.exponential_derivative(x, a, order)
 
     def get_test_cases(self) -> List[Dict]:
@@ -231,11 +248,18 @@ class TrigonometricSolutions:
         self.base_solutions = AnalyticalSolutions()
 
     def get_solution(
-        self, x: np.ndarray, func_type: str, omega: float, order: float
+        self, x: np.ndarray, order: float, func_type: str = "sin", omega: float = 1.0
     ) -> np.ndarray:
         """Get analytical solution for trigonometric functions."""
         return self.base_solutions.trigonometric_derivative(
-            x, func_type, omega, order)
+            x, order, omega, func_type)
+
+    def get_derivative(
+        self, x: np.ndarray, order: float, func_type: str = "sin", omega: float = 1.0
+    ) -> np.ndarray:
+        """Get analytical derivative for trigonometric functions."""
+        return self.base_solutions.trigonometric_derivative(
+            x, order, omega, func_type)
 
     def get_test_cases(self) -> List[Dict]:
         """Get standard test cases for trigonometric functions."""

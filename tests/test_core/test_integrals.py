@@ -25,27 +25,27 @@ class TestFractionalIntegral:
     
     def test_fractional_integral_creation(self):
         """Test creating FractionalIntegral instances."""
-        integral = FractionalIntegral(alpha=0.5)
+        integral = FractionalIntegral(order=0.5)
         assert integral.alpha.alpha == 0.5
         assert integral.method == "RL"
     
     def test_fractional_integral_validation(self):
         """Test FractionalIntegral validation."""
         # Test valid alpha
-        integral = FractionalIntegral(alpha=0.5)
+        integral = FractionalIntegral(order=0.5)
         assert integral.alpha.alpha == 0.5
         
         # Test invalid alpha
         with pytest.raises(ValueError):
-            FractionalIntegral(alpha=-1.0)
+            FractionalIntegral(order=-1.0)
         
         # Test invalid method
         with pytest.raises(ValueError):
-            FractionalIntegral(alpha=0.5, method="invalid")
+            FractionalIntegral(order=0.5, method="invalid")
     
     def test_fractional_integral_repr(self):
         """Test FractionalIntegral string representation."""
-        integral = FractionalIntegral(alpha=0.5, method="Caputo")
+        integral = FractionalIntegral(order=0.5, method="Caputo")
         repr_str = repr(integral)
         assert "FractionalIntegral" in repr_str
         assert "0.5" in repr_str
@@ -57,14 +57,14 @@ class TestRiemannLiouvilleIntegral:
     
     def test_riemann_liouville_creation(self):
         """Test creating RiemannLiouvilleIntegral instances."""
-        integral = RiemannLiouvilleIntegral(alpha=0.5)
+        integral = RiemannLiouvilleIntegral(order=0.5)
         assert isinstance(integral, FractionalIntegral)
         assert integral.alpha.alpha == 0.5
         assert integral.method == "RL"
     
     def test_riemann_liouville_analytical_solution(self):
         """Test analytical solution for power function."""
-        integral = RiemannLiouvilleIntegral(alpha=0.5)
+        integral = RiemannLiouvilleIntegral(order=0.5)
         
         # Test with f(x) = x^2
         x = np.linspace(0, 5, 100)
@@ -80,7 +80,7 @@ class TestRiemannLiouvilleIntegral:
     
     def test_riemann_liouville_numerical_solution(self):
         """Test numerical solution using trapezoidal rule."""
-        integral = RiemannLiouvilleIntegral(alpha=0.5)
+        integral = RiemannLiouvilleIntegral(order=0.5)
         
         x = np.linspace(0, 5, 100)
         f = lambda x: x**2
@@ -95,7 +95,7 @@ class TestRiemannLiouvilleIntegral:
     
     def test_riemann_liouville_properties(self):
         """Test Riemann-Liouville integral properties."""
-        integral = RiemannLiouvilleIntegral(alpha=0.5)
+        integral = RiemannLiouvilleIntegral(order=0.5)
         
         # Test linearity
         x = np.linspace(0, 5, 50)
@@ -118,14 +118,14 @@ class TestCaputoIntegral:
     
     def test_caputo_creation(self):
         """Test creating CaputoIntegral instances."""
-        integral = CaputoIntegral(alpha=0.5)
+        integral = CaputoIntegral(order=0.5)
         assert isinstance(integral, FractionalIntegral)
         assert integral.alpha.alpha == 0.5
         assert integral.method == "Caputo"
     
     def test_caputo_analytical_solution(self):
         """Test analytical solution for constant function."""
-        integral = CaputoIntegral(alpha=0.5)
+        integral = CaputoIntegral(order=0.5)
         
         # Test with f(x) = 1 (constant)
         x = np.linspace(0, 5, 100)
@@ -138,7 +138,7 @@ class TestCaputoIntegral:
     
     def test_caputo_numerical_solution(self):
         """Test numerical solution using Simpson's rule."""
-        integral = CaputoIntegral(alpha=0.5)
+        integral = CaputoIntegral(order=0.5)
         
         x = np.linspace(0, 5, 100)
         f = lambda x: np.ones_like(x)
@@ -154,14 +154,14 @@ class TestWeylIntegral:
     
     def test_weyl_creation(self):
         """Test creating WeylIntegral instances."""
-        integral = WeylIntegral(alpha=0.5)
+        integral = WeylIntegral(order=0.5)
         assert isinstance(integral, FractionalIntegral)
         assert integral.alpha.alpha == 0.5
         assert integral.method == "Weyl"
     
     def test_weyl_analytical_solution(self):
         """Test analytical solution for exponential function."""
-        integral = WeylIntegral(alpha=0.5)
+        integral = WeylIntegral(order=0.5)
         
         # Test with f(x) = e^(-x)
         x = np.linspace(0, 5, 100)
@@ -175,7 +175,7 @@ class TestWeylIntegral:
     
     def test_weyl_numerical_solution(self):
         """Test numerical solution."""
-        integral = WeylIntegral(alpha=0.5)
+        integral = WeylIntegral(order=0.5)
         
         x = np.linspace(0, 5, 100)
         f = lambda x: np.exp(-x)
@@ -190,14 +190,14 @@ class TestHadamardIntegral:
     
     def test_hadamard_creation(self):
         """Test creating HadamardIntegral instances."""
-        integral = HadamardIntegral(alpha=0.5)
+        integral = HadamardIntegral(order=0.5)
         assert isinstance(integral, FractionalIntegral)
         assert integral.alpha.alpha == 0.5
         assert integral.method == "Hadamard"
     
     def test_hadamard_analytical_solution(self):
         """Test analytical solution for logarithmic function."""
-        integral = HadamardIntegral(alpha=0.5)
+        integral = HadamardIntegral(order=0.5)
         
         # Test with f(x) = ln(x)
         x = np.linspace(1.1, 5, 100)  # Start from 1.1 to satisfy x > 1
@@ -210,7 +210,7 @@ class TestHadamardIntegral:
     
     def test_hadamard_numerical_solution(self):
         """Test numerical solution."""
-        integral = HadamardIntegral(alpha=0.5)
+        integral = HadamardIntegral(order=0.5)
         
         x = np.linspace(1.1, 5, 100)
         f = lambda x: np.log(x)
@@ -258,7 +258,7 @@ class TestIntegralPerformance:
     
     def test_large_array_performance(self):
         """Test performance with large arrays."""
-        integral = RiemannLiouvilleIntegral(alpha=0.5)
+        integral = RiemannLiouvilleIntegral(order=0.5)
         
         # Large array
         x = np.linspace(0, 10, 10000)
@@ -275,7 +275,7 @@ class TestIntegralPerformance:
     
     def test_memory_usage(self):
         """Test memory usage with large arrays."""
-        integral = RiemannLiouvilleIntegral(alpha=0.5)
+        integral = RiemannLiouvilleIntegral(order=0.5)
         
         # Large array
         x = np.linspace(0, 10, 10000)
@@ -291,7 +291,7 @@ class TestIntegralEdgeCases:
     
     def test_zero_order(self):
         """Test behavior with zero order."""
-        integral = RiemannLiouvilleIntegral(alpha=0.0)
+        integral = RiemannLiouvilleIntegral(order=0.0)
         x = np.linspace(0, 5, 100)
         f = lambda x: x**2
         
@@ -302,7 +302,7 @@ class TestIntegralEdgeCases:
     
     def test_negative_x_values(self):
         """Test behavior with negative x values."""
-        integral = RiemannLiouvilleIntegral(alpha=0.5)
+        integral = RiemannLiouvilleIntegral(order=0.5)
         x = np.linspace(-5, 5, 100)
         f = lambda x: x**2
         
@@ -313,7 +313,7 @@ class TestIntegralEdgeCases:
     
     def test_empty_array(self):
         """Test behavior with empty array."""
-        integral = RiemannLiouvilleIntegral(alpha=0.5)
+        integral = RiemannLiouvilleIntegral(order=0.5)
         x = np.array([])
         f = lambda x: x**2
         
@@ -322,7 +322,7 @@ class TestIntegralEdgeCases:
     
     def test_single_point(self):
         """Test behavior with single point."""
-        integral = RiemannLiouvilleIntegral(alpha=0.5)
+        integral = RiemannLiouvilleIntegral(order=0.5)
         x = np.array([1.0])
         f = lambda x: x**2
         

@@ -225,9 +225,15 @@ class TestErrorHandling:
         """Test handling of empty arrays."""
         fft = FractionalFourierTransform(0.5)
         
-        # Empty arrays should be handled gracefully
-        with pytest.raises((IndexError, ValueError)):
-            fft.transform(np.array([]), np.array([]))
+        # Empty arrays should be handled gracefully (return empty array or tuple)
+        result = fft.transform(np.array([]), np.array([]))
+        if isinstance(result, tuple):
+            # If it returns a tuple, check that all elements are empty
+            for r in result:
+                assert hasattr(r, 'size') and r.size == 0
+        else:
+            # If it returns a single array, check it's empty
+            assert result.size == 0
     
     def test_mismatched_array_sizes(self):
         """Test handling of mismatched array sizes."""

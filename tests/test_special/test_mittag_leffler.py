@@ -11,28 +11,28 @@ from unittest.mock import patch, MagicMock
 import warnings
 
 from hpfracc.special.mittag_leffler import (
-    MittagLefflerFunction, MittagLefflerMatrix, mittag_leffler, 
-    mittag_leffler_derivative, mittag_leffler_matrix,
-    cosine_fractional, exponential, sinc_fractional
+    MittagLefflerFunction, mittag_leffler, 
+    mittag_leffler_derivative, mittag_leffler_fast,
+    mittag_leffler_function
 )
 
 
-class TestMittagLefflerMatrix:
-    """Test MittagLefflerMatrix class."""
+class TestMittagLefflerFunction:
+    """Test MittagLefflerFunction class."""
     
-    def test_matrix_initialization(self):
-        """Test matrix initialization."""
-        matrix = MittagLefflerMatrix()
+    def test_function_initialization(self):
+        """Test function initialization."""
+        ml_func = MittagLefflerFunction()
         
-        assert matrix is not None
-        assert hasattr(matrix, 'compute')
+        assert ml_func is not None
+        assert hasattr(ml_func, 'compute')
     
-    def test_matrix_compute(self):
-        """Test matrix computation."""
-        matrix = MittagLefflerMatrix()
+    def test_function_compute(self):
+        """Test function computation."""
+        ml_func = MittagLefflerFunction()
         
         A = np.array([[1.0, 0.0], [0.0, 1.0]])
-        result = matrix.compute(A, 1.0, 1.0)
+        result = ml_func.compute(A, 1.0, 1.0)
         
         assert isinstance(result, np.ndarray)
         assert result.shape == A.shape
@@ -48,20 +48,21 @@ class TestMittagLefflerFunction:
         ml = MittagLefflerFunction()
         
         assert ml.use_jax is False
-        assert ml.use_numba is True
-        assert ml.max_terms == 100
+        assert ml.use_numba is False  # Disabled by default due to compilation issues
+        assert hasattr(ml, '_cache_size')
+        assert hasattr(ml, 'adaptive_convergence')
     
     def test_initialization_custom(self):
         """Test custom initialization."""
         ml = MittagLefflerFunction(
             use_jax=True,
             use_numba=False,
-            max_terms=50
+            cache_size=500
         )
         
         assert ml.use_jax is True
         assert ml.use_numba is False
-        assert ml.max_terms == 50
+        assert ml._cache_size == 500
     
     def test_compute_scalar(self):
         """Test computing Mittag-Leffler function for scalar inputs."""
@@ -152,42 +153,41 @@ class TestMittagLefflerConvenienceFunctions:
         assert not np.isnan(result)
         assert not np.isinf(result)
     
-    def test_mittag_leffler_matrix(self):
-        """Test Mittag-Leffler matrix function."""
-        result = mittag_leffler_matrix(np.array([[1.0]]), 1.0, 1.0)
+    def test_mittag_leffler_function(self):
+        """Test mittag_leffler_function."""
+        result = mittag_leffler_function(1.0, 1.0, 1.0)
         
-        assert isinstance(result, np.ndarray)
-        assert not np.any(np.isnan(result))
-        assert not np.any(np.isinf(result))
+        assert isinstance(result, (float, np.ndarray))
+        assert not np.isnan(result) if isinstance(result, float) else not np.any(np.isnan(result))
+        assert not np.isinf(result) if isinstance(result, float) else not np.any(np.isinf(result))
 
 
 class TestMittagLefflerSpecialFunctions:
     """Test special function implementations."""
     
-    def test_cosine_fractional(self):
-        """Test fractional cosine function."""
-        result = cosine_fractional(1.0)
+    def test_mittag_leffler_fast(self):
+        """Test mittag_leffler_fast function."""
+        result = mittag_leffler_fast(1.0, 1.0, 1.0)
         
-        assert isinstance(result, (float, np.floating))
-        # Note: This function may return NaN due to implementation issues
-        # We just test that it returns a float
+        assert isinstance(result, (float, np.ndarray))
+        assert not np.isnan(result) if isinstance(result, float) else not np.any(np.isnan(result))
+        assert not np.isinf(result) if isinstance(result, float) else not np.any(np.isinf(result))
     
-    def test_exponential_function(self):
-        """Test exponential function."""
-        result = exponential(1.0)
+    def test_mittag_leffler_derivative(self):
+        """Test mittag_leffler_derivative function."""
+        result = mittag_leffler_derivative(1.0, 1.0, 1.0)
         
-        assert isinstance(result, (float, np.floating))
-        assert not np.isnan(result)
-        assert not np.isinf(result)
-        assert abs(result - np.exp(1.0)) < 1e-10
+        assert isinstance(result, (float, np.ndarray))
+        assert not np.isnan(result) if isinstance(result, float) else not np.any(np.isnan(result))
+        assert not np.isinf(result) if isinstance(result, float) else not np.any(np.isinf(result))
     
-    def test_sinc_fractional(self):
-        """Test fractional sinc function."""
-        result = sinc_fractional(1.0)
+    def test_mittag_leffler_convenience(self):
+        """Test mittag_leffler convenience function."""
+        result = mittag_leffler(1.0, 1.0, 1.0)
         
-        assert isinstance(result, (float, np.floating))
-        # Note: This function may return NaN due to implementation issues
-        # We just test that it returns a float
+        assert isinstance(result, (float, np.ndarray))
+        assert not np.isnan(result) if isinstance(result, float) else not np.any(np.isnan(result))
+        assert not np.isinf(result) if isinstance(result, float) else not np.any(np.isinf(result))
     
     def test_implementation_consistency(self):
         """Test consistency between different implementations."""
@@ -199,7 +199,7 @@ class TestMittagLefflerSpecialFunctions:
         result1 = ml.compute(alpha, beta, z)
         
         # Test with different max_terms
-        ml2 = MittagLefflerFunction(max_terms=200)
+        ml2 = MittagLefflerFunction(cache_size=200)
         result2 = ml2.compute(alpha, beta, z)
         
         # Results should be close
@@ -225,7 +225,7 @@ class TestMittagLefflerPerformance:
     
     def test_many_terms_convergence(self):
         """Test convergence with many terms."""
-        ml = MittagLefflerFunction(max_terms=200)
+        ml = MittagLefflerFunction(cache_size=200)
         
         # Test with moderate z
         result = ml.compute(1.5, 1.0, 1.0)

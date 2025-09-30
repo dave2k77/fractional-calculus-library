@@ -35,20 +35,23 @@ class FractionalIntegral:
     """
 
     def __init__(self,
-                 alpha: Union[float,
+                 order: Union[float,
                               FractionalOrder],
                  method: str = "RL"):
         """
         Initialize fractional integral.
 
         Args:
-            alpha: Fractional order (0 < α < 1 for most methods)
+            order: Fractional order (0 < α < 1 for most methods)
             method: Integration method ("RL", "Caputo", "Weyl", "Hadamard")
         """
-        if isinstance(alpha, (int, float)):
-            self.alpha = FractionalOrder(alpha)
+        if isinstance(order, (int, float)):
+            self.alpha = FractionalOrder(order)
         else:
-            self.alpha = alpha
+            self.alpha = order
+
+        # Add order attribute for test compatibility
+        self.order = self.alpha.alpha if hasattr(self.alpha, 'alpha') else float(self.alpha)
 
         self.method = method
         self._validate_parameters()
@@ -96,8 +99,8 @@ class RiemannLiouvilleIntegral(FractionalIntegral):
     where Γ(α) is the gamma function.
     """
 
-    def __init__(self, alpha: Union[float, FractionalOrder]):
-        super().__init__(alpha, method="RL")
+    def __init__(self, order: Union[float, FractionalOrder]):
+        super().__init__(order, method="RL")
 
     def __call__(self,
                  f: Callable,
@@ -209,8 +212,8 @@ class CaputoIntegral(FractionalIntegral):
     and is often more suitable for initial value problems.
     """
 
-    def __init__(self, alpha: Union[float, FractionalOrder]):
-        super().__init__(alpha, method="Caputo")
+    def __init__(self, order: Union[float, FractionalOrder]):
+        super().__init__(order, method="Caputo")
 
     def __call__(self,
                  f: Callable,
@@ -251,8 +254,8 @@ class WeylIntegral(FractionalIntegral):
     and is particularly useful for periodic functions.
     """
 
-    def __init__(self, alpha: Union[float, FractionalOrder]):
-        super().__init__(alpha, method="Weyl")
+    def __init__(self, order: Union[float, FractionalOrder]):
+        super().__init__(order, method="Weyl")
 
     def __call__(self,
                  f: Callable,
@@ -324,8 +327,8 @@ class HadamardIntegral(FractionalIntegral):
     I^α_H f(t) = (1/Γ(α)) ∫₁ᵗ (ln(t/τ))^(α-1) f(τ) dτ/τ
     """
 
-    def __init__(self, alpha: Union[float, FractionalOrder]):
-        super().__init__(alpha, method="Hadamard")
+    def __init__(self, order: Union[float, FractionalOrder]):
+        super().__init__(order, method="Hadamard")
 
     def __call__(self,
                  f: Callable,
@@ -392,25 +395,25 @@ class HadamardIntegral(FractionalIntegral):
 
 
 def create_fractional_integral(
-        alpha: Union[float, FractionalOrder], method: str = "RL") -> FractionalIntegral:
+        order: Union[float, FractionalOrder], method: str = "RL") -> FractionalIntegral:
     """
     Factory function to create fractional integral objects.
 
     Args:
-        alpha: Fractional order
+        order: Fractional order
         method: Integration method ("RL", "Caputo", "Weyl", "Hadamard")
 
     Returns:
         Appropriate fractional integral object
     """
     if method == "RL":
-        return RiemannLiouvilleIntegral(alpha)
+        return RiemannLiouvilleIntegral(order)
     elif method == "Caputo":
-        return CaputoIntegral(alpha)
+        return CaputoIntegral(order)
     elif method == "Weyl":
-        return WeylIntegral(alpha)
+        return WeylIntegral(order)
     elif method == "Hadamard":
-        return HadamardIntegral(alpha)
+        return HadamardIntegral(order)
     else:
         raise ValueError(f"Unknown method: {method}")
 
@@ -611,7 +614,7 @@ class MillerRossIntegral(FractionalIntegral):
     This is similar to Riemann-Liouville but with different normalization.
     """
 
-    def __init__(self, alpha: Union[float, FractionalOrder]):
+    def __init__(self, order: Union[float, FractionalOrder]):
         super().__init__(alpha, method="MillerRoss")
 
     def __call__(self,
@@ -680,7 +683,7 @@ class MarchaudIntegral(FractionalIntegral):
     This is a generalization that can handle more general kernels.
     """
 
-    def __init__(self, alpha: Union[float, FractionalOrder]):
+    def __init__(self, order: Union[float, FractionalOrder]):
         super().__init__(alpha, method="Marchaud")
 
     def __call__(self,
@@ -805,7 +808,7 @@ integral_factory.register_implementation("Marchaud", MarchaudIntegral)
 
 
 def create_fractional_integral_factory(
-        method: str, alpha: Union[float, FractionalOrder], **kwargs) -> FractionalIntegral:
+        method: str, order: Union[float, FractionalOrder], **kwargs) -> FractionalIntegral:
     """
     Create a fractional integral implementation using the factory.
 

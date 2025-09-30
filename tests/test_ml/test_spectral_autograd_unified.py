@@ -232,12 +232,12 @@ class TestSpectralFractionalNetwork:
             kernel_type="riesz"
         )
         
-        assert len(network.layers) == 5  # 1 linear + 1 linear + 1 fractional + 1 activation + 1 linear
+        assert len(network.layers) == 2  # 2 linear layers in the hidden layers
         assert isinstance(network.layers[0], nn.Linear)
         assert isinstance(network.layers[1], nn.Linear)
-        assert isinstance(network.layers[2], SpectralFractionalLayer)
-        assert isinstance(network.layers[3], nn.ReLU)
-        assert isinstance(network.layers[4], nn.Linear)
+        assert isinstance(network.spectral_layer, SpectralFractionalLayer)
+        assert isinstance(network.activation, nn.ReLU)
+        assert isinstance(network.output_layer, nn.Linear)
     
     def test_forward(self):
         """Test network forward pass."""

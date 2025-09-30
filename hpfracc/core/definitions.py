@@ -178,8 +178,8 @@ class CaputoDefinition(FractionalDefinition):
     where n = ⌈α⌉ is the smallest integer greater than or equal to α.
     """
 
-    def __init__(self, alpha: Union[float, FractionalOrder]):
-        super().__init__(alpha, DefinitionType.CAPUTO)
+    def __init__(self, order: Union[float, FractionalOrder]):
+        super().__init__(order, DefinitionType.CAPUTO)
 
     @property
     def n(self) -> int:
@@ -214,8 +214,8 @@ class RiemannLiouvilleDefinition(FractionalDefinition):
     where n = ⌈α⌉ is the smallest integer greater than or equal to α.
     """
 
-    def __init__(self, alpha: Union[float, FractionalOrder]):
-        super().__init__(alpha, DefinitionType.RIEMANN_LIOUVILLE)
+    def __init__(self, order: Union[float, FractionalOrder]):
+        super().__init__(order, DefinitionType.RIEMANN_LIOUVILLE)
 
     @property
     def n(self) -> int:
@@ -250,8 +250,8 @@ class GrunwaldLetnikovDefinition(FractionalDefinition):
     where C(α,k) are the generalized binomial coefficients.
     """
 
-    def __init__(self, alpha: Union[float, FractionalOrder]):
-        super().__init__(alpha, DefinitionType.GRUNWALD_LETNIKOV)
+    def __init__(self, order: Union[float, FractionalOrder]):
+        super().__init__(order, DefinitionType.GRUNWALD_LETNIKOV)
 
     def get_advantages(self) -> list:
         """Get advantages of the Grünwald-Letnikov definition."""
@@ -279,14 +279,14 @@ class FractionalIntegral:
     I^α f(x) = (1/Γ(α)) ∫₀^x (x-t)^(α-1) f(t) dt
     """
 
-    def __init__(self, alpha: Union[float, FractionalOrder]):
+    def __init__(self, order: Union[float, FractionalOrder]):
         """
         Initialize fractional integral.
 
         Args:
-            alpha: Fractional order (must be positive)
+            order: Fractional order (must be positive)
         """
-        self.alpha = FractionalOrder(alpha)
+        self.alpha = FractionalOrder(order)
         if self.alpha.alpha <= 0:
             raise ValueError("Fractional integral order must be positive")
 

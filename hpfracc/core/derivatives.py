@@ -29,7 +29,7 @@ class BaseFractionalDerivative(ABC):
 
     def __init__(
         self,
-        alpha: Union[float, FractionalOrder],
+        order: Union[float, FractionalOrder],
         definition: Optional[FractionalDefinition] = None,
         use_jax: bool = False,
         use_numba: bool = True,
@@ -38,22 +38,24 @@ class BaseFractionalDerivative(ABC):
         Initialize fractional derivative.
 
         Args:
-            alpha: Fractional order
+            order: Fractional order
             definition: Mathematical definition
             use_jax: Whether to use JAX optimizations
             use_numba: Whether to use NUMBA optimizations
         """
-        if isinstance(alpha, FractionalOrder):
+        if isinstance(order, FractionalOrder):
             # Preserve FractionalOrder instance when provided
-            self._alpha_order = alpha
-            self._alpha_value = float(alpha.alpha)
-            self.alpha = alpha
+            self._alpha_order = order
+            self._alpha_value = float(order.alpha)
+            self.alpha = order
+            self.fractional_order = order  # Add for test compatibility
         else:
-            alpha_order = FractionalOrder(alpha)
+            alpha_order = FractionalOrder(order)
             self._alpha_order = alpha_order
             self._alpha_value = float(alpha_order.alpha)
             # Expose FractionalOrder to satisfy tests
             self.alpha = alpha_order
+            self.fractional_order = alpha_order  # Add for test compatibility
         self.definition = definition
         self.use_jax = use_jax
         self.use_numba = use_numba

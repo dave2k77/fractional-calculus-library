@@ -9,7 +9,19 @@ import numpy as np
 from typing import Union, Optional, Tuple, Callable
 
 from ..core.definitions import FractionalOrder
-from ..special import gamma
+
+# Use adapter system for gamma function instead of direct imports
+def _get_gamma_function():
+    """Get gamma function through adapter system."""
+    try:
+        from ..special.gamma_beta import gamma_function as gamma
+        return gamma
+    except Exception:
+        # Fallback to scipy
+        from scipy.special import gamma
+        return gamma
+
+gamma = _get_gamma_function()
 
 
 class PredictorCorrectorSolver:

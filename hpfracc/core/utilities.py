@@ -10,8 +10,15 @@ This module provides common utility functions used throughout the HPFRACC librar
 """
 
 import numpy as np
-import torch
 import warnings
+
+# Optional torch import
+try:
+    import torch
+    TORCH_AVAILABLE = True
+except ImportError:
+    TORCH_AVAILABLE = False
+    torch = None
 from typing import Union, Callable, Optional, Tuple, List, Dict, Any
 
 # Module-level warning tracking

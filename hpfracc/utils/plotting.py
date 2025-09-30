@@ -39,6 +39,7 @@ class PlotManager:
         Args:
             style: Style to use ('default', 'scientific', 'presentation')
         """
+        self.style = style
         if style == "scientific":
             plt.style.use("seaborn-v0_8-whitegrid")
             rcParams.update(
@@ -85,35 +86,69 @@ class PlotManager:
                 }
             )
 
-    def create_comparison_plot(
+    def create_plot(
         self,
         x: np.ndarray,
-        data_dict: Dict[str, np.ndarray],
-        title: str = "Comparison Plot",
+        y: np.ndarray,
+        title: str = "Plot",
         xlabel: str = "x",
         ylabel: str = "y",
         save_path: Optional[str] = None,
-    ) -> plt.Figure:
+    ) -> Tuple[plt.Figure, plt.Axes]:
         """
-        Create a comparison plot of multiple datasets.
+        Create a simple plot.
 
         Args:
             x: x-axis data
-            data_dict: Dictionary of {label: y_data} pairs
+            y: y-axis data
             title: Plot title
             xlabel: x-axis label
             ylabel: y-axis label
             save_path: Path to save the plot (optional)
 
         Returns:
-            Matplotlib figure object
+            Tuple of (figure, axes) objects
+        """
+        fig, ax = plt.subplots(figsize=self.figsize)
+        
+        ax.plot(x, y, linewidth=2)
+        ax.set_title(title, fontweight="bold")
+        ax.set_xlabel(xlabel)
+        ax.set_ylabel(ylabel)
+        ax.grid(True, alpha=0.3)
+
+        if save_path:
+            self.save_plot(fig, save_path)
+
+        return fig, ax
+
+    def create_comparison_plot(
+        self,
+        data_dict: Dict[str, Tuple[np.ndarray, np.ndarray]],
+        title: str = "Comparison Plot",
+        xlabel: str = "x",
+        ylabel: str = "y",
+        save_path: Optional[str] = None,
+    ) -> Tuple[plt.Figure, plt.Axes]:
+        """
+        Create a comparison plot of multiple datasets.
+
+        Args:
+            data_dict: Dictionary of {label: (x_data, y_data)} pairs
+            title: Plot title
+            xlabel: x-axis label
+            ylabel: y-axis label
+            save_path: Path to save the plot (optional)
+
+        Returns:
+            Tuple of (figure, axes) objects
         """
         fig, ax = plt.subplots(figsize=self.figsize)
 
         colors = plt.cm.tab10(np.linspace(0, 1, len(data_dict)))
 
-        for i, (label, y_data) in enumerate(data_dict.items()):
-            ax.plot(x, y_data, color=colors[i], label=label, linewidth=2)
+        for i, (label, (x_data, y_data)) in enumerate(data_dict.items()):
+            ax.plot(x_data, y_data, color=colors[i], label=label, linewidth=2)
 
         ax.set_title(title, fontweight="bold")
         ax.set_xlabel(xlabel)
@@ -124,7 +159,7 @@ class PlotManager:
         if save_path:
             self.save_plot(fig, save_path)
 
-        return fig
+        return fig, ax
 
     def plot_convergence(
         self,
@@ -132,7 +167,7 @@ class PlotManager:
         errors: Dict[str, List[float]],
         title: str = "Convergence Analysis",
         save_path: Optional[str] = None,
-    ) -> plt.Figure:
+    ) -> Tuple[plt.Figure, plt.Axes]:
         """
         Plot convergence analysis.
 
@@ -216,7 +251,7 @@ class PlotManager:
         analytical: np.ndarray,
         title: str = "Error Analysis",
         save_path: Optional[str] = None,
-    ) -> plt.Figure:
+    ) -> Tuple[plt.Figure, plt.Axes]:
         """
         Plot error analysis between numerical and analytical solutions.
 
@@ -322,42 +357,119 @@ def setup_plotting_style(style: str = "default") -> None:
 
 
 def create_comparison_plot(
-    x: np.ndarray,
-    data_dict: Dict[str, np.ndarray],
-    title: str = "Comparison Plot",
-    xlabel: str = "x",
-    ylabel: str = "y",
-    save_path: Optional[str] = None,
-) -> plt.Figure:
-    """Create a comparison plot of multiple datasets."""
+    data_dict_or_x, data=None, title: str = "Comparison Plot",
+    xlabel: str = "x", ylabel: str = "y", save_path: Optional[str] = None,
+) -> Tuple[plt.Figure, plt.Axes]:
+    """Create a comparison plot of multiple datasets.
+    
+    Args:
+        data_dict_or_x: Either a dict of {label: (x_data, y_data)} or x-axis data
+        data: If first arg is x-axis data, this should be y-axis data
+        title: Plot title
+        xlabel: x-axis label
+        ylabel: y-axis label
+        save_path: Path to save the plot
+    """
     manager = PlotManager()
-    return manager.create_comparison_plot(
-        x, data_dict, title, xlabel, ylabel, save_path
-    )
+    
+    if isinstance(data_dict_or_x, dict):
+        # Called with data_dict
+        data_dict = data_dict_or_x
+        return manager.create_comparison_plot(
+            data_dict, title, xlabel, ylabel, save_path
+        )
+    else:
+        # Called with x, data format
+        x_data = data_dict_or_x
+        y_data = data
+        if y_data is None:
+            raise ValueError("When x data is provided, y data must be provided as second argument")
+        
+        # Handle different formats for y_data
+        if isinstance(y_data, dict):
+            # Convert dict of {label: y_values} to dict of {label: (x, y)}
+            data_dict = {label: (x_data, y_values) for label, y_values in y_data.items()}
+        else:
+            # Single y array
+            data_dict = {"data": (x_data, y_data)}
+        return manager.create_comparison_plot(
+            data_dict, title, xlabel, ylabel, save_path
+        )
 
 
 def plot_convergence(
-    grid_sizes: List[int],
-    errors: Dict[str, List[float]],
-    title: str = "Convergence Analysis",
-    save_path: Optional[str] = None,
-) -> plt.Figure:
-    """Plot convergence analysis."""
+    methods_or_grid_sizes, h_values_or_errors=None, errors=None,
+    title: str = "Convergence Analysis", save_path: Optional[str] = None,
+) -> Tuple[plt.Figure, plt.Axes]:
+    """Plot convergence analysis.
+    
+    Args:
+        methods_or_grid_sizes: Either list of method names or grid sizes
+        h_values_or_errors: Either h_values array or errors dict
+        errors: Errors dict (only if first arg is methods)
+        title: Plot title
+        save_path: Path to save the plot
+    """
     manager = PlotManager()
-    return manager.plot_convergence(grid_sizes, errors, title, save_path)
+    
+    # Handle different calling patterns
+    if h_values_or_errors is None:
+        # Called with just grid_sizes, errors
+        if isinstance(methods_or_grid_sizes, (list, tuple, np.ndarray)) and len(methods_or_grid_sizes) > 0:
+            if isinstance(methods_or_grid_sizes[0], (int, float, np.integer, np.floating)):
+                # First arg is grid sizes, second should be errors dict
+                grid_sizes = list(methods_or_grid_sizes)
+                if errors is not None:
+                    errors_dict = {method: list(errors[method]) for method in errors.keys()}
+                    fig = manager.plot_convergence(grid_sizes, errors_dict, title, save_path)
+                    ax = fig.axes[0] if fig.axes else None
+                    return fig, ax
+                else:
+                    raise ValueError("When grid_sizes is provided, errors dict must be provided as second argument")
+            else:
+                raise ValueError("Invalid grid_sizes format")
+        else:
+            raise ValueError("Invalid arguments provided")
+    else:
+        if errors is None:
+            # Called with methods, h_values, errors
+            if isinstance(methods_or_grid_sizes, (list, tuple)) and all(isinstance(x, str) for x in methods_or_grid_sizes):
+                methods = methods_or_grid_sizes
+                h_values = np.array(h_values_or_errors)
+                # errors should be the third argument but it's None, this is an error
+                raise ValueError("When methods and h_values provided, errors dict must be provided as third argument")
+            else:
+                # Called with grid_sizes, errors
+                grid_sizes = list(methods_or_grid_sizes)
+                errors_dict = h_values_or_errors
+                errors_dict = {method: list(errors_dict[method]) for method in errors_dict.keys()}
+                fig = manager.plot_convergence(grid_sizes, errors_dict, title, save_path)
+                ax = fig.axes[0] if fig.axes else None
+                return fig, ax
+        else:
+            # Called with methods, h_values, errors
+            methods = methods_or_grid_sizes
+            h_values = np.array(h_values_or_errors)
+            grid_sizes = h_values.tolist()
+            errors_dict = {method: list(errors[method]) for method in methods if method in errors}
+            fig = manager.plot_convergence(grid_sizes, errors_dict, title, save_path)
+            ax = fig.axes[0] if fig.axes else None
+            return fig, ax
 
 
 def plot_error_analysis(
-    x: np.ndarray,
     numerical: np.ndarray,
     analytical: np.ndarray,
     title: str = "Error Analysis",
     save_path: Optional[str] = None,
-) -> plt.Figure:
+) -> Tuple[plt.Figure, plt.Axes]:
     """Plot error analysis between numerical and analytical solutions."""
     manager = PlotManager()
-    return manager.plot_error_analysis(
-        x, numerical, analytical, title, save_path)
+    # Create x-axis data
+    x = np.arange(len(numerical))
+    fig = manager.plot_error_analysis(x, numerical, analytical, title, save_path)
+    ax = fig.axes[0] if fig.axes else None
+    return fig, ax
 
 
 def save_plot(

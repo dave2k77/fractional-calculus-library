@@ -8,14 +8,30 @@ which are fundamental in the Grünwald-Letnikov definition of fractional derivat
 import numpy as np
 from typing import Union
 
-# Optional JAX import
+# Use adapter system for JAX instead of direct imports
+def _get_jax_numpy():
+    """Get JAX numpy through adapter system."""
+    try:
+        from ..ml.adapters import get_jax_adapter
+        adapter = get_jax_adapter()
+        return adapter.get_lib()
+    except Exception:
+        # Fallback to NumPy if JAX not available
+        import numpy as np
+        return np
+
+# Check if JAX is available through adapter system
 try:
-    import jax
-    import jax.numpy as jnp
-    JAX_AVAILABLE = True
-except ImportError:
+    jnp = _get_jax_numpy()
+    JAX_AVAILABLE = jnp is not np
+    if JAX_AVAILABLE:
+        import jax
+    else:
+        jax = None
+except Exception:
     JAX_AVAILABLE = False
     jnp = None
+    jax = None
 
 # Optional numba import
 try:
@@ -29,6 +45,56 @@ except ImportError:
         return decorator
 import scipy.special as scipy_special
 from .gamma_beta import gamma
+
+# Convenience functions for optimized binomial coefficients
+def binomial_coefficient_fast(
+    n: Union[float, int, np.ndarray],
+    k: Union[float, int, np.ndarray],
+    use_numba: bool = True,
+    cache_size: int = 1000
+) -> Union[float, np.ndarray]:
+    """
+    Fast binomial coefficient computation optimized for fractional calculus.
+    
+    Args:
+        n: Upper parameter (can be fractional)
+        k: Lower parameter (integer)
+        use_numba: Use Numba JIT compilation
+        cache_size: Size of cache for repeated evaluations
+        
+    Returns:
+        Binomial coefficient value(s)
+    """
+    binomial_func = BinomialCoefficients(use_numba=use_numba, cache_size=cache_size)
+    return binomial_func.compute(n, k)
+
+
+def binomial_sequence_fast(
+    alpha: float,
+    max_k: int,
+    use_numba: bool = True,
+    cache_size: int = 1000,
+    sequence_cache_size: int = 100
+) -> np.ndarray:
+    """
+    Fast binomial sequence computation optimized for fractional calculus.
+    
+    Args:
+        alpha: Fractional parameter
+        max_k: Maximum value of k
+        use_numba: Use Numba JIT compilation
+        cache_size: Size of cache for individual coefficients
+        sequence_cache_size: Size of cache for sequences
+        
+    Returns:
+        Array of binomial coefficients [C(α,0), C(α,1), ..., C(α,max_k)]
+    """
+    binomial_func = BinomialCoefficients(
+        use_numba=use_numba, 
+        cache_size=cache_size,
+        sequence_cache_size=sequence_cache_size
+    )
+    return binomial_func.compute_sequence(alpha, max_k)
 
 
 class BinomialCoefficients:
@@ -47,21 +113,37 @@ class BinomialCoefficients:
             self,
             use_jax: bool = False,
             use_numba: bool = True,
-            cache_size: int = 1000):
+            cache_size: int = 1000,
+            sequence_cache_size: int = 100):
         """
-        Initialize binomial coefficients calculator.
+        Initialize optimized binomial coefficients calculator.
 
         Args:
             use_jax: Whether to use JAX implementation for vectorized operations
             use_numba: Whether to use NUMBA JIT compilation for scalar operations
             cache_size: Size of the cache for frequently used coefficients
+            sequence_cache_size: Size of the cache for sequences (common in fractional calculus)
         """
-        self.use_jax = use_jax
-        self.use_numba = use_numba
+        self.use_jax = use_jax and JAX_AVAILABLE
+        self.use_numba = use_numba and NUMBA_AVAILABLE
         self.cache_size = cache_size
+        self.sequence_cache_size = sequence_cache_size
         self._cache = {}
+        self._sequence_cache = {}  # Cache for sequences
+        
+        # Precompute common fractional values
+        self._common_fractional = {
+            (0.5, 0): 1.0,    # C(0.5, 0) = 1
+            (0.5, 1): 0.5,    # C(0.5, 1) = 0.5
+            (0.5, 2): -0.125, # C(0.5, 2) = -0.125
+            (0.5, 3): 0.0625, # C(0.5, 3) = 0.0625
+            (0.25, 0): 1.0,   # C(0.25, 0) = 1
+            (0.25, 1): 0.25,  # C(0.25, 1) = 0.25
+            (0.75, 0): 1.0,   # C(0.75, 0) = 1
+            (0.75, 1): 0.75,  # C(0.75, 1) = 0.75
+        }
 
-        if use_jax:
+        if use_jax and JAX_AVAILABLE and jax is not None:
             self._binomial_jax = jax.jit(self._binomial_jax_impl)
 
     def compute(
@@ -79,19 +161,30 @@ class BinomialCoefficients:
         Returns:
             Binomial coefficient value(s)
         """
-        # Check cache for scalar inputs
+        # Handle special cases first
         if isinstance(n, (float, int)) and isinstance(k, (float, int)):
+            # Check for exact matches in common fractional values
+            if (n, k) in self._common_fractional:
+                return self._common_fractional[(n, k)]
+            
+            # Check cache for scalar inputs
             cache_key = (n, k)
             if cache_key in self._cache:
                 return self._cache[cache_key]
         
         # Compute the result
-        if (
-            self.use_jax
-            and isinstance(n, ("jnp.ndarray", float, int))
-            and isinstance(k, ("jnp.ndarray", float, int))
-        ):
-            result = self._binomial_jax(n, k)
+        if self.use_jax:
+            try:
+                import jax.numpy as jnp
+                if (
+                    isinstance(n, (jnp.ndarray, float, int))
+                    and isinstance(k, (jnp.ndarray, float, int))
+                ):
+                    result = self._binomial_jax(n, k)
+                else:
+                    result = self._binomial_jax(n, k)
+            except ImportError:
+                result = self._binomial_scipy(n, k)
         elif (
             self.use_numba
             and isinstance(n, (float, int))
@@ -236,6 +329,8 @@ class BinomialCoefficients:
     def compute_sequence(self, alpha: float, max_k: int) -> np.ndarray:
         """
         Compute the sequence of binomial coefficients C(α,k) for k = 0, 1, ..., max_k.
+        
+        Optimized with caching and recursive computation for efficiency.
 
         Args:
             alpha: Fractional parameter
@@ -244,12 +339,40 @@ class BinomialCoefficients:
         Returns:
             Array of binomial coefficients [C(α,0), C(α,1), ..., C(α,max_k)]
         """
-        if self.use_jax:
+        # Check sequence cache first
+        sequence_key = (alpha, max_k)
+        if sequence_key in self._sequence_cache:
+            return self._sequence_cache[sequence_key]
+        
+        # Use optimized recursive computation
+        result = self._compute_sequence_optimized(alpha, max_k)
+        
+        # Cache the result
+        if len(self._sequence_cache) < self.sequence_cache_size:
+            self._sequence_cache[sequence_key] = result
+        
+        return result
+    
+    def _compute_sequence_optimized(self, alpha: float, max_k: int) -> np.ndarray:
+        """
+        Optimized sequence computation using recursive formula.
+        
+        Uses the recursive relationship: C(α,k+1) = C(α,k) * (α-k)/(k+1)
+        This is much more efficient than computing each coefficient individually.
+        """
+        if self.use_jax and JAX_AVAILABLE:
             k = jnp.arange(max_k + 1)
             return jax.scipy.special.binom(alpha, k)
         else:
-            k = np.arange(max_k + 1)
-            return scipy_special.binom(alpha, k)
+            # Use recursive formula for efficiency
+            result = np.zeros(max_k + 1)
+            result[0] = 1.0  # C(α,0) = 1
+            
+            # Use recursive formula: C(α,k+1) = C(α,k) * (α-k)/(k+1)
+            for k in range(max_k):
+                result[k + 1] = result[k] * (alpha - k) / (k + 1)
+            
+            return result
 
     def compute_alternating_sequence(
             self, alpha: float, max_k: int) -> np.ndarray:

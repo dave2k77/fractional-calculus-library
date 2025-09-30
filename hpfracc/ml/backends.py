@@ -9,26 +9,20 @@ based on data type, hardware availability, and performance requirements.
 from typing import Optional, Any, Dict, List, Callable
 from enum import Enum
 import warnings
+import importlib
 
-# Backend availability checking
-try:
-    import torch
-    TORCH_AVAILABLE = True
-except ImportError:
-    TORCH_AVAILABLE = False
+# Backend availability checking (lazy; do not import heavy libs at module import)
+def _spec_available(module_name: str) -> bool:
+    try:
+        return importlib.util.find_spec(module_name) is not None
+    except Exception:
+        return False
 
-try:
-    import jax
-    import jax.numpy as jnp
-    JAX_AVAILABLE = True
-except ImportError:
-    JAX_AVAILABLE = False
-
-try:
-    import numba
-    NUMBA_AVAILABLE = True
-except ImportError:
-    NUMBA_AVAILABLE = False
+TORCH_AVAILABLE = _spec_available("torch")
+JAX_AVAILABLE = _spec_available("jax") and _spec_available("jax.numpy")
+NUMPY_AVAILABLE = _spec_available("numpy")
+# NUMBA lane uses NumPy arrays; consider lane available if NumPy exists
+NUMBA_AVAILABLE = _spec_available("numba") or NUMPY_AVAILABLE
 
 
 class BackendType(Enum):
@@ -82,12 +76,17 @@ class BackendManager:
 
         if TORCH_AVAILABLE:
             available.append(BackendType.TORCH)
-            if torch.cuda.is_available() and not self.force_cpu:
-                print("🚀 PyTorch CUDA support detected")
+            try:
+                torch = importlib.import_module("torch")
+                if hasattr(torch, "cuda") and torch.cuda.is_available() and not self.force_cpu:
+                    print("🚀 PyTorch CUDA support detected")
+            except Exception:
+                pass
 
         if JAX_AVAILABLE:
             available.append(BackendType.JAX)
             try:
+                jax = importlib.import_module("jax")
                 devices = jax.devices()
                 if any('gpu' in str(d).lower()
                        for d in devices) and not self.force_cpu:
@@ -98,9 +97,8 @@ class BackendManager:
         if NUMBA_AVAILABLE:
             available.append(BackendType.NUMBA)
             try:
-                if hasattr(
-                        numba,
-                        'cuda') and numba.cuda.is_available() and not self.force_cpu:
+                numba = importlib.import_module("numba")
+                if hasattr(numba, 'cuda') and numba.cuda.is_available() and not self.force_cpu:
                     print("🚀 NUMBA CUDA support detected")
             except BaseException:
                 pass
@@ -135,40 +133,65 @@ class BackendManager:
         """Initialize backend-specific configurations"""
         configs = {}
 
-        # PyTorch configuration
+        # PyTorch configuration (lazy import)
         if BackendType.TORCH in self.available_backends:
-            configs[BackendType.TORCH] = {
-                'device': 'cuda' if torch.cuda.is_available() and not self.force_cpu else 'cpu',
-                'dtype': torch.float32,
-                'enable_amp': True,  # Automatic Mixed Precision
-                # PyTorch 2.0+ compilation
-                'enable_compile': hasattr(torch, 'compile'),
-            }
-
-        # JAX configuration
-        if BackendType.JAX in self.available_backends:
-            configs[BackendType.JAX] = {
-                'device': 'gpu' if self.enable_gpu and not self.force_cpu else 'cpu',
-                'dtype': jnp.float32,
-                'enable_jit': self.enable_jit,
-                'enable_x64': False,  # Use float32 for better performance
-                'enable_amp': True,
-            }
-
-        # NUMBA configuration
-        if BackendType.NUMBA in self.available_backends:
             try:
-                gpu_available = hasattr(
-                    numba, 'cuda') and numba.cuda.is_available()
-            except BaseException:
-                gpu_available = False
+                torch = importlib.import_module("torch")
+                configs[BackendType.TORCH] = {
+                    'device': 'cuda' if hasattr(torch, 'cuda') and torch.cuda.is_available() and not self.force_cpu else 'cpu',
+                    'dtype': getattr(torch, 'float32', None),
+                    'enable_amp': True,
+                    'enable_compile': hasattr(torch, 'compile'),
+                }
+            except Exception:
+                configs[BackendType.TORCH] = {
+                    'device': 'cpu',
+                    'dtype': None,
+                    'enable_amp': False,
+                    'enable_compile': False,
+                }
+
+        # JAX configuration (lazy import)
+        if BackendType.JAX in self.available_backends:
+            try:
+                jnp = importlib.import_module("jax.numpy")
+                configs[BackendType.JAX] = {
+                    'device': 'gpu' if self.enable_gpu and not self.force_cpu else 'cpu',
+                    'dtype': getattr(jnp, 'float32', None),
+                    'enable_jit': self.enable_jit,
+                    'enable_x64': False,
+                    'enable_amp': True,
+                }
+            except Exception:
+                configs[BackendType.JAX] = {
+                    'device': 'cpu',
+                    'dtype': None,
+                    'enable_jit': False,
+                    'enable_x64': False,
+                    'enable_amp': False,
+                }
+
+        # NUMBA configuration (lazy import)
+        if BackendType.NUMBA in self.available_backends:
+            # Prefer numpy-backed lane if numba not available
+            np = importlib.import_module("numpy") if NUMPY_AVAILABLE else None
+            gpu_available = False
+            try:
+                numba = importlib.import_module("numba")
+                try:
+                    gpu_available = hasattr(numba, 'cuda') and numba.cuda.is_available()
+                except BaseException:
+                    gpu_available = False
+                dtype_val = getattr(numba, 'float32', None) or (getattr(np, 'float32', None) if np else None)
+            except Exception:
+                dtype_val = getattr(np, 'float32', None) if np else None
 
             configs[BackendType.NUMBA] = {
                 'device': 'gpu' if gpu_available and not self.force_cpu else 'cpu',
-                'dtype': numba.float32,
-                'enable_jit': self.enable_jit,
-                'enable_parallel': True,
-                'enable_fastmath': True,
+                'dtype': dtype_val,
+                'enable_jit': self.enable_jit and _spec_available("numba"),
+                'enable_parallel': _spec_available("numba"),
+                'enable_fastmath': _spec_available("numba"),
             }
 
         return configs
@@ -192,11 +215,12 @@ class BackendManager:
     def get_tensor_lib(self) -> Any:
         """Get the active tensor library"""
         if self.active_backend == BackendType.TORCH:
-            return torch
+            return importlib.import_module("torch")
         elif self.active_backend == BackendType.JAX:
-            return jnp
+            return importlib.import_module("jax.numpy")
         elif self.active_backend == BackendType.NUMBA:
-            return numba
+            # NUMBA lane arrays are NumPy
+            return importlib.import_module("numpy")
         else:
             raise RuntimeError(f"Unknown backend: {self.active_backend}")
 
@@ -207,19 +231,19 @@ class BackendManager:
             if 'dtype' not in kwargs:
                 # Preserve integer types for classification targets
                 if hasattr(data, 'dtype') and 'int' in str(data.dtype):
-                    kwargs['dtype'] = torch.long
+                    kwargs['dtype'] = importlib.import_module("torch").long
                 else:
-                    kwargs['dtype'] = torch.float32
-            return torch.tensor(data, **kwargs)
+                    kwargs['dtype'] = importlib.import_module("torch").float32
+            return importlib.import_module("torch").tensor(data, **kwargs)
         elif self.active_backend == BackendType.JAX:
             # Ensure consistent dtype for JAX
             if 'dtype' not in kwargs:
                 # Preserve integer types for classification targets
                 if hasattr(data, 'dtype') and 'int' in str(data.dtype):
-                    kwargs['dtype'] = jnp.int32
+                    kwargs['dtype'] = importlib.import_module("jax.numpy").int32
                 else:
-                    kwargs['dtype'] = jnp.float32
-            return jnp.array(data, **kwargs)
+                    kwargs['dtype'] = importlib.import_module("jax.numpy").float32
+            return importlib.import_module("jax.numpy").array(data, **kwargs)
         elif self.active_backend == BackendType.NUMBA:
             # NUMBA works with numpy arrays
             import numpy as np
@@ -250,17 +274,20 @@ class BackendManager:
     def compile_function(self, func: Callable) -> Callable:
         """Compile a function using the active backend's compilation system"""
         if self.active_backend == BackendType.TORCH:
+            torch = importlib.import_module("torch")
             if hasattr(torch, 'compile'):
                 return torch.compile(func)
             else:
                 return func
         elif self.active_backend == BackendType.JAX:
             if self.enable_jit:
+                jax = importlib.import_module("jax")
                 return jax.jit(func)
             else:
                 return func
         elif self.active_backend == BackendType.NUMBA:
-            if self.enable_jit:
+            if self.enable_jit and _spec_available("numba"):
+                numba = importlib.import_module("numba")
                 return numba.jit(func)
             else:
                 return func

@@ -284,10 +284,10 @@ class TestFractionalPooling:
         
         output = layer.forward(x)
         
-        # Note: The actual implementation is minimal and doesn't perform pooling
+        # Note: The actual implementation performs real pooling with stride=2
         # Adjust expectations based on actual behavior
         assert output.shape[0] == 2  # batch size preserved
-        assert output.shape[2] == 10  # length unchanged in minimal implementation
+        assert output.shape[2] == 5  # length reduced by stride=2 (10/2=5)
         assert torch.isfinite(output).all()
     
     def test_fractional_pooling_forward_2d(self):
@@ -300,9 +300,9 @@ class TestFractionalPooling:
         
         output = layer.forward(x)
         
-        # Note: The actual implementation is minimal and doesn't perform pooling
-        # Output dimensions remain unchanged in minimal implementation
-        assert output.shape == (2, 3, 10, 10)
+        # Note: The actual implementation performs real pooling with stride=2
+        # Output dimensions reduced by stride=2 (10/2=5)
+        assert output.shape == (2, 3, 5, 5)
         assert torch.isfinite(output).all()
 
 

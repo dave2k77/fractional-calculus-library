@@ -71,7 +71,8 @@ class TestGammaBetaCoverage:
         # Gamma(n+1) = n! for integers
         for n in [1, 2, 3, 4]:
             gamma_result = gamma_function(n + 1)
-            factorial = np.math.factorial(n)
+            import math
+            factorial = math.factorial(n)
             assert np.isclose(gamma_result, factorial, rtol=1e-10)
             
     def test_beta_symmetry(self):
@@ -94,6 +95,7 @@ class TestGammaBetaCoverage:
             except (ValueError, OverflowError, RuntimeError):
                 # Expected for invalid inputs
                 pass
+
 
 
 

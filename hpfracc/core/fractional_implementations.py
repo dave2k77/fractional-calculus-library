@@ -50,11 +50,11 @@ class RiemannLiouvilleDerivative(BaseFractionalDerivative):
     Uses the optimized implementation from algorithms.
     """
 
-    def __init__(self, alpha: Union[float, FractionalOrder], **kwargs):
-        super().__init__(alpha, **kwargs)
+    def __init__(self, order: Union[float, FractionalOrder], **kwargs):
+        super().__init__(order, **kwargs)
         # Lazy import to avoid circular dependencies
         from ..algorithms.optimized_methods import OptimizedRiemannLiouville
-        self._optimized_impl = OptimizedRiemannLiouville(alpha)
+        self._optimized_impl = OptimizedRiemannLiouville(order)
         # For backward compatibility, expose alpha as a special wrapper
         # that behaves like both a float and FractionalOrder
         self.alpha = _AlphaCompatibilityWrapper(self._alpha_order)
@@ -89,11 +89,11 @@ class CaputoDerivative(BaseFractionalDerivative):
     Uses the optimized implementation from algorithms.
     """
 
-    def __init__(self, alpha: Union[float, FractionalOrder], **kwargs):
-        super().__init__(alpha, **kwargs)
+    def __init__(self, order: Union[float, FractionalOrder], **kwargs):
+        super().__init__(order, **kwargs)
         # Lazy import to avoid circular dependencies
         from ..algorithms.optimized_methods import OptimizedCaputo
-        self._optimized_impl = OptimizedCaputo(alpha)
+        self._optimized_impl = OptimizedCaputo(order)
         # For backward compatibility, expose alpha as a special wrapper
         # that behaves like both a float and FractionalOrder
         self.alpha = _AlphaCompatibilityWrapper(self._alpha_order)
@@ -128,11 +128,11 @@ class GrunwaldLetnikovDerivative(BaseFractionalDerivative):
     Uses the optimized implementation from algorithms.
     """
 
-    def __init__(self, alpha: Union[float, FractionalOrder], **kwargs):
-        super().__init__(alpha, **kwargs)
+    def __init__(self, order: Union[float, FractionalOrder], **kwargs):
+        super().__init__(order, **kwargs)
         # Lazy import to avoid circular dependencies
         from ..algorithms.optimized_methods import OptimizedGrunwaldLetnikov
-        self._optimized_impl = OptimizedGrunwaldLetnikov(alpha)
+        self._optimized_impl = OptimizedGrunwaldLetnikov(order)
         # For backward compatibility, expose alpha as a special wrapper
         # that behaves like both a float and FractionalOrder
         self.alpha = _AlphaCompatibilityWrapper(self._alpha_order)
@@ -167,8 +167,8 @@ class CaputoFabrizioDerivative(BaseFractionalDerivative):
     Uses the novel implementation from algorithms.
     """
 
-    def __init__(self, alpha: Union[float, FractionalOrder], **kwargs):
-        super().__init__(alpha, **kwargs)
+    def __init__(self, order: Union[float, FractionalOrder], **kwargs):
+        super().__init__(order, **kwargs)
         # Lazy import to avoid circular dependencies
         from ..algorithms.novel_derivatives import CaputoFabrizioDerivative as CFDerivative
         # Filter out factory-specific arguments
@@ -217,8 +217,8 @@ class AtanganaBaleanuDerivative(BaseFractionalDerivative):
     Uses the novel implementation from algorithms.
     """
 
-    def __init__(self, alpha: Union[float, FractionalOrder], **kwargs):
-        super().__init__(alpha, **kwargs)
+    def __init__(self, order: Union[float, FractionalOrder], **kwargs):
+        super().__init__(order, **kwargs)
         # Lazy import to avoid circular dependencies
         from ..algorithms.novel_derivatives import AtanganaBaleanuDerivative as ABDerivative
         # Filter out factory-specific arguments
@@ -267,8 +267,8 @@ class FractionalLaplacian(BaseFractionalDerivative):
     Uses the special implementation from algorithms.
     """
 
-    def __init__(self, alpha: Union[float, FractionalOrder], **kwargs):
-        super().__init__(alpha, **kwargs)
+    def __init__(self, order: Union[float, FractionalOrder], **kwargs):
+        super().__init__(order, **kwargs)
         # Lazy import to avoid circular dependencies
         from ..algorithms.special_methods import FractionalLaplacian as FracLaplacian
         # Filter out factory-specific arguments
@@ -305,8 +305,8 @@ class FractionalFourierTransform(BaseFractionalDerivative):
     Uses the special implementation from algorithms.
     """
 
-    def __init__(self, alpha: Union[float, FractionalOrder], **kwargs):
-        super().__init__(alpha, **kwargs)
+    def __init__(self, order: Union[float, FractionalOrder], **kwargs):
+        super().__init__(order, **kwargs)
         # Lazy import to avoid circular dependencies
         from ..algorithms.special_methods import FractionalFourierTransform as FracFT
         # Filter out factory-specific arguments
@@ -348,8 +348,8 @@ class MillerRossDerivative(BaseFractionalDerivative):
     This is a generalization of the Riemann-Liouville derivative.
     """
 
-    def __init__(self, alpha: Union[float, FractionalOrder], **kwargs):
-        super().__init__(alpha, **kwargs)
+    def __init__(self, order: Union[float, FractionalOrder], **kwargs):
+        super().__init__(order, **kwargs)
         # For backward compatibility, expose alpha as a special wrapper
         # that behaves like both a float and FractionalOrder
         self.alpha = _AlphaCompatibilityWrapper(self._alpha_order)
@@ -367,9 +367,11 @@ class MillerRossDerivative(BaseFractionalDerivative):
         
         # For now, use Riemann-Liouville as approximation
         # This can be enhanced with specific Miller-Ross implementation
-        from .fractional_implementations import RiemannLiouvilleDerivative
-        rl_derivative = RiemannLiouvilleDerivative(self.alpha)
-        return rl_derivative.compute(f, x, **kwargs)
+        # Avoid circular import by creating RL derivative directly
+        from ..algorithms.optimized_methods import OptimizedRiemannLiouville
+        rl_impl = OptimizedRiemannLiouville(self.order)
+        # Compute directly using the algorithm implementation
+        return rl_impl.compute(f, x, **kwargs)
 
     def compute_numerical(
             self,
@@ -377,9 +379,9 @@ class MillerRossDerivative(BaseFractionalDerivative):
             x_values: np.ndarray,
             **kwargs) -> np.ndarray:
         """Compute the Miller-Ross fractional derivative numerically."""
-        from .fractional_implementations import RiemannLiouvilleDerivative
-        rl_derivative = RiemannLiouvilleDerivative(self.alpha)
-        return rl_derivative.compute_numerical(f_values, x_values, **kwargs)
+        from ..algorithms.optimized_methods import OptimizedRiemannLiouville
+        rl_impl = OptimizedRiemannLiouville(self.order)
+        return rl_impl.compute(f_values, x_values, **kwargs)
 
 
 class WeylDerivative(BaseFractionalDerivative):
@@ -390,8 +392,8 @@ class WeylDerivative(BaseFractionalDerivative):
     and parallel processing optimizations.
     """
 
-    def __init__(self, alpha: Union[float, FractionalOrder], **kwargs):
-        super().__init__(alpha, **kwargs)
+    def __init__(self, order: Union[float, FractionalOrder], **kwargs):
+        super().__init__(order, **kwargs)
         # Lazy import to avoid circular dependencies
         from ..algorithms.advanced_methods import WeylDerivative as AdvancedWeyl
         # Filter out factory-specific arguments
@@ -428,8 +430,8 @@ class MarchaudDerivative(BaseFractionalDerivative):
     convolution and memory optimization.
     """
 
-    def __init__(self, alpha: Union[float, FractionalOrder], **kwargs):
-        super().__init__(alpha, **kwargs)
+    def __init__(self, order: Union[float, FractionalOrder], **kwargs):
+        super().__init__(order, **kwargs)
         # Lazy import to avoid circular dependencies
         from ..algorithms.advanced_methods import MarchaudDerivative as AdvancedMarchaud
         # Filter out factory-specific arguments
@@ -465,8 +467,8 @@ class HadamardDerivative(BaseFractionalDerivative):
     Uses the advanced implementation from algorithms with logarithmic kernels.
     """
 
-    def __init__(self, alpha: Union[float, FractionalOrder], **kwargs):
-        super().__init__(alpha, **kwargs)
+    def __init__(self, order: Union[float, FractionalOrder], **kwargs):
+        super().__init__(order, **kwargs)
         # Lazy import to avoid circular dependencies
         from ..algorithms.advanced_methods import HadamardDerivative as AdvancedHadamard
         # Filter out factory-specific arguments
@@ -502,8 +504,8 @@ class ReizFellerDerivative(BaseFractionalDerivative):
     Uses the advanced implementation from algorithms with spectral methods.
     """
 
-    def __init__(self, alpha: Union[float, FractionalOrder], **kwargs):
-        super().__init__(alpha, **kwargs)
+    def __init__(self, order: Union[float, FractionalOrder], **kwargs):
+        super().__init__(order, **kwargs)
         # Lazy import to avoid circular dependencies
         from ..algorithms.advanced_methods import ReizFellerDerivative as AdvancedReizFeller
         # Filter out factory-specific arguments
@@ -539,8 +541,8 @@ class ParallelOptimizedRiemannLiouville(BaseFractionalDerivative):
     Uses parallel processing and load balancing for high-performance computation.
     """
 
-    def __init__(self, alpha: Union[float, FractionalOrder], **kwargs):
-        super().__init__(alpha, **kwargs)
+    def __init__(self, order: Union[float, FractionalOrder], **kwargs):
+        super().__init__(order, **kwargs)
         # Lazy import to avoid circular dependencies
         from ..algorithms.optimized_methods import ParallelOptimizedRiemannLiouville as ParallelRL
         # Filter out factory-specific arguments
@@ -576,8 +578,8 @@ class ParallelOptimizedCaputo(BaseFractionalDerivative):
     Uses parallel processing and load balancing for high-performance computation.
     """
 
-    def __init__(self, alpha: Union[float, FractionalOrder], **kwargs):
-        super().__init__(alpha, **kwargs)
+    def __init__(self, order: Union[float, FractionalOrder], **kwargs):
+        super().__init__(order, **kwargs)
         # Lazy import to avoid circular dependencies
         from ..algorithms.optimized_methods import ParallelOptimizedCaputo as ParallelCaputo
         # Filter out factory-specific arguments

@@ -199,11 +199,9 @@ class TestFractionalLayers:
         )
         
         x = torch.randn(5, 1, 10, requires_grad=True)  # (seq_len, batch, input_size)
-        output, (h, c) = lstm(x)
+        output = lstm(x)  # Default behavior returns only output tensor
         
         assert output.shape == (5, 1, 32)
-        assert h.shape == (1, 1, 32)
-        assert c.shape == (1, 1, 32)
         assert output.requires_grad
         
         # Test gradient flow

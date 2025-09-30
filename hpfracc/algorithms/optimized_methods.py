@@ -46,11 +46,23 @@ except ImportError:
 # Import from relative paths for package structure
 try:
     from ..core.definitions import FractionalOrder
-    from ..special import gamma
+    from ..ml.adapters import HighPerformanceAdapter, get_jax_adapter
+    from ..special.gamma_beta import gamma_function as gamma
 except ImportError:
     # Fallback for direct import
     from hpfracc.core.definitions import FractionalOrder
-    from hpfracc.special import gamma
+    from hpfracc.ml.adapters import HighPerformanceAdapter, get_jax_adapter
+    from hpfracc.special.gamma_beta import gamma_function as gamma
+
+# Use adapter system for JAX functionality instead of direct imports
+def _get_jax_numpy():
+    """Get JAX numpy through adapter system."""
+    try:
+        adapter = get_jax_adapter()
+        return adapter.get_lib()
+    except Exception:
+        # Fallback to NumPy if JAX not available
+        return np
 
 
 # =============================================================================
@@ -195,22 +207,30 @@ class OptimizedRiemannLiouville:
     The integral part is computed efficiently using FFT convolution.
     """
 
-    def __init__(self, alpha: Union[float, FractionalOrder], parallel_config: Optional[ParallelConfig] = None, *, parallel: Optional[bool] = None, method: Optional[str] = None):
-        """Initialize optimized RL derivative calculator."""
-        if isinstance(alpha, (int, float)):
-            self.alpha = FractionalOrder(alpha)
+    def __init__(self, order: Union[float, FractionalOrder], parallel_config: Optional[ParallelConfig] = None, *, parallel: Optional[bool] = None, method: Optional[str] = None):
+        """
+        Initialize optimized RL derivative calculator.
+        
+        Args:
+            order: Fractional order (α ≥ 0)
+            parallel_config: Parallel processing configuration
+            parallel: Whether to use parallel processing
+            method: Computation method
+        """
+        if isinstance(order, (int, float)):
+            self.alpha = FractionalOrder(order)
         else:
-            self.alpha = alpha
+            self.alpha = order
 
         self.alpha_val = self.alpha.alpha
         self.parallel_config = parallel_config or ParallelConfig()
         # expose test-facing attribute
         self.fractional_order = self.alpha
 
-        # Validate alpha
+        # Validate order
         if self.alpha_val < 0:
             raise ValueError(
-                "Alpha must be non-negative for Riemann-Liouville derivative"
+                "Order must be non-negative for Riemann-Liouville derivative"
             )
 
         self.n = int(np.ceil(self.alpha_val))
@@ -249,6 +269,8 @@ class OptimizedRiemannLiouville:
                 t_max = t
                 if h is None:
                     h = t_max / 1000
+                if h == 0:
+                    raise ValueError("Step size cannot be zero")
                 t_array = np.arange(0, t_max + h, h)
                 f_array = np.array([f(ti) for ti in t_array])
         else:
@@ -265,19 +287,56 @@ class OptimizedRiemannLiouville:
 
         if h is not None and h <= 0:
             raise ValueError("Step size must be positive")
+        
+        # Handle division by zero case
+        if h is not None and h == 0:
+            raise ValueError("Step size cannot be zero")
+            
         step_size = h or 1.0
 
-        # Use the highly optimized numpy version for all sizes
-        # It's already achieving excellent performance
-        return self._fft_convolution_rl_numpy(f_array, t_array, step_size)
+        # Handle special cases at the top level
+        if self.alpha_val == 0.0:
+            # For alpha=0, the RL derivative is the function itself
+            result = f_array.copy()
+        elif self.alpha_val == 1.0:
+            # For alpha=1, compute first derivative
+            if len(f_array) == 1:
+                result = np.array([0.0])
+            else:
+                # Use numerical gradient for now
+                # TODO: Implement analytical derivative computation
+                result = np.gradient(f_array, t_array)
+        elif self.alpha_val == 2.0:
+            # For alpha=2, compute second derivative numerically
+            if len(f_array) <= 2:
+                result = np.zeros_like(f_array)
+            else:
+                result = np.gradient(np.gradient(f_array, t_array), t_array)
+        else:
+            # Use the highly optimized numpy version for all sizes
+            # It's already achieving excellent performance
+            result = self._fft_convolution_rl_numpy(f_array, t_array, step_size)
+        
+        # Always return array for consistency with test expectations
+        return result
 
     def _fft_convolution_rl_jax(
         self, f: np.ndarray, t: np.ndarray, h: float
     ) -> np.ndarray:
         """JAX-optimized FFT convolution for large arrays."""
-        # For now, use numpy version to avoid JAX dynamic slicing issues
-        # The numpy version is already highly optimized and performs well
-        return self._fft_convolution_rl_numpy(f, t, h)
+        try:
+            jnp = _get_jax_numpy()
+            if jnp is not np:  # JAX is available
+                # Use JAX for large arrays
+                f_jax = jnp.array(f)
+                t_jax = jnp.array(t)
+                # JAX implementation would go here
+                # For now, fall back to numpy version
+                return self._fft_convolution_rl_numpy(f, t, h)
+            else:
+                return self._fft_convolution_rl_numpy(f, t, h)
+        except Exception:
+            return self._fft_convolution_rl_numpy(f, t, h)
 
     def _fft_convolution_rl_numpy(
         self, f: np.ndarray, t: np.ndarray, h: float
@@ -291,6 +350,25 @@ class OptimizedRiemannLiouville:
             
         n = self.n
         alpha = self.alpha_val
+
+        # Handle special cases
+        if alpha == 0.0:
+            # For alpha=0, the RL derivative is the function itself
+            return f.copy()
+        elif alpha == 1.0:
+            # For alpha=1, compute first derivative numerically
+            if N == 1:
+                return np.array([0.0])
+            # Use finite difference for first derivative
+            df = np.gradient(f, t)
+            return df
+        elif alpha == 2.0:
+            # For alpha=2, compute second derivative numerically
+            if N <= 2:
+                return np.zeros_like(f)
+            # Use finite difference for second derivative
+            d2f = np.gradient(np.gradient(f, t), t)
+            return d2f
 
         # Precompute gamma value once
         gamma_val = gamma(n - alpha)
@@ -483,25 +561,30 @@ class OptimizedCaputo:
     Optimized Caputo derivative using L1 scheme and Diethelm-Ford-Freed predictor-corrector.
     """
 
-    def __init__(self, alpha: Union[float, FractionalOrder], *, parallel: Optional[bool] = None):
-        """Initialize optimized Caputo derivative calculator."""
-        if isinstance(alpha, (int, float)):
-            self.alpha = FractionalOrder(alpha)
+    def __init__(self, order: Union[float, FractionalOrder], *, parallel: Optional[bool] = None):
+        """
+        Initialize optimized Caputo derivative calculator using L1 scheme.
+
+        Args:
+            order: Fractional order (0 < α < 1) for L1 scheme
+            parallel: Whether to use parallel processing
+        """
+        if isinstance(order, (int, float)):
+            self.alpha = FractionalOrder(order)
         else:
-            self.alpha = alpha
+            self.alpha = order
 
         self.alpha_val = self.alpha.alpha
         # expose test-facing attribute
         self.fractional_order = self.alpha
+        
+        # Add n attribute for consistency
+        self.n = int(np.ceil(self.alpha_val))
 
-        # Validate alpha
+        # Validate order - L1 scheme requires 0 < α < 1
         if self.alpha_val <= 0:
             raise ValueError("Alpha must be positive for Caputo derivative")
-        if self.alpha_val < 1e-6:
-            raise ValueError("Alpha must be positive for Caputo derivative")
         if self.alpha_val >= 1:
-            raise ValueError("L1 scheme requires 0 < α < 1")
-        if self.alpha_val > 0.999:
             raise ValueError("L1 scheme requires 0 < α < 1")
 
     def compute(
@@ -542,14 +625,34 @@ class OptimizedCaputo:
 
         if h is not None and h <= 0:
             raise ValueError("Step size must be positive")
+        
+        # Handle division by zero case
+        if h is not None and h == 0:
+            raise ValueError("Step size cannot be zero")
+            
         step_size = h or 1.0
 
-        if method == "l1":
-            return self._l1_scheme_numpy(f_array, step_size)
-        elif method == "diethelm_ford_freed":
-            return self._diethelm_ford_freed_numpy(f_array, step_size)
+        # Handle special cases first
+        if self.alpha_val == 0.0:
+            # For alpha=0, Caputo derivative is the function itself
+            result = f_array.copy()
+        elif self.alpha_val == 1.0:
+            # For alpha=1, Caputo derivative is the first derivative
+            if len(f_array) == 1:
+                result = np.array([0.0])
+            else:
+                result = np.gradient(f_array, t_array)
         else:
-            raise ValueError("Method must be 'l1' or 'diethelm_ford_freed'")
+            # Use the specified method for fractional cases
+            if method == "l1":
+                result = self._l1_scheme_numpy(f_array, step_size)
+            elif method == "diethelm_ford_freed":
+                result = self._diethelm_ford_freed_numpy(f_array, step_size)
+            else:
+                raise ValueError("Method must be 'l1' or 'diethelm_ford_freed'")
+        
+        # Always return array for consistency with test expectations
+        return result
 
     def _l1_scheme_numpy(self, f: np.ndarray, h: float) -> np.ndarray:
         """Optimized L1 scheme using numpy."""
@@ -606,21 +709,30 @@ class OptimizedGrunwaldLetnikov:
     Optimized Grünwald-Letnikov derivative using fast binomial coefficient generation.
     """
 
-    def __init__(self, alpha: Union[float, FractionalOrder], *, fast_binomial: Optional[bool] = None):
-        """Initialize optimized GL derivative calculator."""
-        if isinstance(alpha, (int, float)):
-            self.alpha = FractionalOrder(alpha)
+    def __init__(self, order: Union[float, FractionalOrder], *, fast_binomial: Optional[bool] = None):
+        """
+        Initialize optimized GL derivative calculator.
+        
+        Args:
+            order: Fractional order (α ≥ 0)
+            fast_binomial: Whether to use fast binomial coefficient generation
+        """
+        if isinstance(order, (int, float)):
+            self.alpha = FractionalOrder(order)
         else:
-            self.alpha = alpha
+            self.alpha = order
 
         self.alpha_val = self.alpha.alpha
         # expose test-facing attribute
         self.fractional_order = self.alpha
+        
+        # Add n attribute for consistency
+        self.n = int(np.ceil(self.alpha_val))
 
-        # Validate alpha
+        # Validate order
         if self.alpha_val < 0:
             raise ValueError(
-                "Alpha must be non-negative for Grünwald-Letnikov derivative"
+                "Order must be non-negative for Grünwald-Letnikov derivative"
             )
 
         self._coefficient_cache = {}
@@ -658,9 +770,29 @@ class OptimizedGrunwaldLetnikov:
 
         if h is not None and h <= 0:
             raise ValueError("Step size must be positive")
+        
+        # Handle division by zero case
+        if h is not None and h == 0:
+            raise ValueError("Step size cannot be zero")
+            
         step_size = h or 1.0
 
-        return self._grunwald_letnikov_numpy(f_array, step_size)
+        # Handle special cases first
+        if self.alpha_val == 0.0:
+            # For alpha=0, GL derivative is the function itself
+            result = f_array.copy()
+        elif self.alpha_val == 1.0:
+            # For alpha=1, GL derivative is the first derivative
+            if len(f_array) == 1:
+                result = np.array([0.0])
+            else:
+                result = np.gradient(f_array, t_array)
+        else:
+            # Use the GL method for fractional cases
+            result = self._grunwald_letnikov_numpy(f_array, step_size)
+        
+        # Always return array for consistency with test expectations
+        return result
 
     def _grunwald_letnikov_numpy(self, f: np.ndarray, h: float) -> np.ndarray:
         """Optimized GL derivative using numpy with JAX-accelerated binomial coefficients."""
@@ -700,19 +832,44 @@ class OptimizedGrunwaldLetnikov:
         if cache_key in self._coefficient_cache:
             return self._coefficient_cache[cache_key]
 
-        # Use robust recursive formula to avoid gamma function poles
-        coeffs = np.zeros(max_k + 1)
-        coeffs[0] = 1.0
-
-        # Recursive formula: C(α,k+1) = C(α,k) * (α-k)/(k+1)
-        # This is numerically stable and avoids gamma function issues
-        for k in range(max_k):
-            coeffs[k + 1] = coeffs[k] * (alpha - k) / (k + 1)
+        try:
+            # Try to use JAX if available through adapter system
+            jnp = _get_jax_numpy()
+            if jnp is not np:  # JAX is available
+                # Use JAX for potentially better performance
+                alpha_jax = jnp.array(alpha)
+                coeffs = jnp.zeros(max_k + 1)
+                coeffs = coeffs.at[0].set(1.0)
+                
+                # Recursive formula: C(α,k+1) = C(α,k) * (α-k)/(k+1)
+                for k in range(max_k):
+                    coeffs = coeffs.at[k + 1].set(coeffs[k] * (alpha_jax - k) / (k + 1))
+                
+                result = np.array(coeffs)
+            else:
+                # Fallback to NumPy
+                coeffs = np.zeros(max_k + 1)
+                coeffs[0] = 1.0
+                
+                # Recursive formula: C(α,k+1) = C(α,k) * (α-k)/(k+1)
+                for k in range(max_k):
+                    coeffs[k + 1] = coeffs[k] * (alpha - k) / (k + 1)
+                
+                result = coeffs
+        except Exception:
+            # Fallback to NumPy if JAX fails
+            coeffs = np.zeros(max_k + 1)
+            coeffs[0] = 1.0
+            
+            # Recursive formula: C(α,k+1) = C(α,k) * (α-k)/(k+1)
+            for k in range(max_k):
+                coeffs[k + 1] = coeffs[k] * (alpha - k) / (k + 1)
+            
+            result = coeffs
 
         # Cache the result
-        self._coefficient_cache[cache_key] = coeffs
-
-        return coeffs
+        self._coefficient_cache[cache_key] = result
+        return result
 
     def _fast_binomial_coefficients(
             self,
@@ -1185,9 +1342,9 @@ class L1L2Schemes:
 class ParallelOptimizedRiemannLiouville(OptimizedRiemannLiouville):
     """Alias for backward compatibility with parallel RL derivative."""
     
-    def __init__(self, alpha: Union[float, FractionalOrder], parallel_config: Optional[ParallelConfig] = None):
+    def __init__(self, order: Union[float, FractionalOrder], parallel_config: Optional[ParallelConfig] = None):
         """Initialize parallel-optimized RL derivative calculator."""
-        super().__init__(alpha, parallel_config)
+        super().__init__(order, parallel_config)
         # Ensure parallel processing is enabled
         if self.parallel_config.n_jobs == 1:
             self.parallel_config.n_jobs = psutil.cpu_count()
@@ -1206,9 +1363,9 @@ class ParallelOptimizedRiemannLiouville(OptimizedRiemannLiouville):
 class ParallelOptimizedCaputo(OptimizedCaputo):
     """Alias for backward compatibility with parallel Caputo derivative."""
     
-    def __init__(self, alpha: Union[float, FractionalOrder], parallel_config: Optional[ParallelConfig] = None):
+    def __init__(self, order: Union[float, FractionalOrder], parallel_config: Optional[ParallelConfig] = None):
         """Initialize parallel-optimized Caputo derivative calculator."""
-        super().__init__(alpha)
+        super().__init__(order)
         self.parallel_config = parallel_config or ParallelConfig()
         # Ensure parallel processing is enabled
         if self.parallel_config.n_jobs == 1:
@@ -1224,9 +1381,9 @@ class ParallelOptimizedCaputo(OptimizedCaputo):
 class ParallelOptimizedGrunwaldLetnikov(OptimizedGrunwaldLetnikov):
     """Alias for backward compatibility with parallel GL derivative."""
     
-    def __init__(self, alpha: Union[float, FractionalOrder], parallel_config: Optional[ParallelConfig] = None):
+    def __init__(self, order: Union[float, FractionalOrder], parallel_config: Optional[ParallelConfig] = None):
         """Initialize parallel-optimized GL derivative calculator."""
-        super().__init__(alpha)
+        super().__init__(order)
         self.parallel_config = parallel_config or ParallelConfig()
         # Ensure parallel processing is enabled
         if self.parallel_config.n_jobs == 1:

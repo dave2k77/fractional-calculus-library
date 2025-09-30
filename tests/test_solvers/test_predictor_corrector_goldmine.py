@@ -29,7 +29,8 @@ class TestPredictorCorrectorGoldmine:
     def test_predictor_corrector_solver_init(self):
         """Test PredictorCorrectorSolver initialization."""
         try:
-            solver = PredictorCorrectorSolver(self.order)
+            # Pass a string derivative type instead of FractionalOrder object
+            solver = PredictorCorrectorSolver("caputo", self.order)
             assert isinstance(solver, PredictorCorrectorSolver)
         except NameError:
             # Class might have different name
@@ -239,6 +240,7 @@ class TestPredictorCorrectorGoldmine:
                 
         except (NameError, Exception):
             pass
+
 
 
 
