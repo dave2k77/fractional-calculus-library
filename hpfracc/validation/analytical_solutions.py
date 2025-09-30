@@ -55,7 +55,7 @@ class AnalyticalSolutions:
         return coeff * x ** (alpha - order)
 
     def exponential_derivative(
-        self, x: np.ndarray, a: float, order: float
+        self, x: np.ndarray, order: float, a: float = 1.0
     ) -> np.ndarray:
         """
         Analytical fractional derivative of exp(ax).
@@ -98,6 +98,13 @@ class AnalyticalSolutions:
         Returns:
             Analytical fractional derivative
         """
+        # Convert order to float if it's a string
+        if isinstance(order, str):
+            try:
+                order = float(order)
+            except ValueError:
+                raise ValueError(f"Invalid order value: {order}")
+        
         if order < 0:
             raise ValueError("Order must be non-negative")
 
@@ -423,9 +430,22 @@ def validate_against_analytical(
             "min_error_overall": np.inf,
         }
 
+    # Extract error metrics from successful tests
+    error_metrics = {}
+    if successful_tests:
+        all_errors = [r["errors"] for r in successful_tests if r["errors"] is not None]
+        if all_errors:
+            error_metrics = {
+                "l1": np.mean([e.get("l1", 0) for e in all_errors]),
+                "l2": np.mean([e.get("l2", 0) for e in all_errors]),
+                "linf": np.mean([e.get("linf", 0) for e in all_errors]),
+                "relative": np.mean([e.get("relative", 0) for e in all_errors]),
+            }
+
     return {
         "results": results,
         "summary": summary,
+        "error_metrics": error_metrics,
         "x_range": x_range,
         "n_points": n_points,
     }

@@ -6,7 +6,7 @@ import torch.nn as nn
 import numpy as np
 
 from hpfracc.ml import (
-    FractionalAutogradLayer,
+    SpectralFractionalLayer,
     StochasticFractionalLayer,
     create_normal_alpha_layer,
 )
@@ -14,7 +14,7 @@ from hpfracc.ml import (
 class TinyNet(nn.Module):
     def __init__(self):
         super().__init__()
-        self.frac_spec = FractionalAutogradLayer(alpha=0.6, engine="fft")
+        self.frac_spec = SpectralFractionalLayer(input_size=128, alpha_init=0.6)
         self.frac_stoch = StochasticFractionalLayer(alpha=0.6, k=32, method="importance")
         self.frac_prob = create_normal_alpha_layer(mean=0.5, std=0.1, learnable=False)
         # Three fractional features -> linear expects 3 inputs

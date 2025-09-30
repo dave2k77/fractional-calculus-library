@@ -339,12 +339,25 @@ class HadamardDerivative:
     This implementation uses logarithmic transformation and efficient quadrature.
     """
 
-    def __init__(self, order: Union[float, FractionalOrder], **kwargs):
-        """Initialize Hadamard derivative calculator."""
-        if isinstance(order, (int, float)):
-            self.alpha = FractionalOrder(order)
+    def __init__(
+        self,
+        alpha: Union[float, FractionalOrder, None] = None,
+        order: Union[float, FractionalOrder, None] = None,
+        **kwargs,
+    ):
+        """Initialize Hadamard derivative calculator.
+
+        Accepts both `alpha` and `order` for backward compatibility.
+        """
+        # Prefer explicit alpha if provided; otherwise fall back to order
+        provided = alpha if alpha is not None else order
+        if provided is None:
+            raise TypeError("HadamardDerivative requires `alpha` or `order` parameter")
+
+        if isinstance(provided, (int, float)):
+            self.alpha = FractionalOrder(provided)
         else:
-            self.alpha = order
+            self.alpha = provided
 
         self.n = int(np.ceil(self.alpha.alpha))
         self.alpha_val = self.alpha.alpha

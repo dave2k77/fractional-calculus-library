@@ -16,6 +16,9 @@ import os
 
 from .backends import BackendType
 
+# Module-level import function that can be mocked in tests
+_import_module = importlib.import_module
+
 
 # Global cache for imported libraries and capabilities
 _LIB_CACHE: Dict[BackendType, Any] = {}
@@ -112,11 +115,11 @@ class HighPerformanceAdapter:
     def _import_lib(self) -> Any:
         """Import the appropriate library."""
         if self.backend == BackendType.TORCH:
-            return importlib.import_module("torch")
+            return _import_module("torch")
         elif self.backend == BackendType.JAX:
-            return importlib.import_module("jax.numpy")
+            return _import_module("jax.numpy")
         elif self.backend == BackendType.NUMBA:
-            return importlib.import_module("numpy")
+            return _import_module("numpy")
         else:
             raise ValueError(f"Unknown backend: {self.backend}")
 
@@ -213,6 +216,11 @@ class HighPerformanceAdapter:
 
     def get_capabilities(self) -> Capabilities:
         """Get backend capabilities."""
+        return self._capabilities
+    
+    @property
+    def capabilities(self) -> Capabilities:
+        """Get backend capabilities as property."""
         return self._capabilities
 
     def get_performance_profile(self) -> PerformanceProfile:
@@ -369,3 +377,58 @@ def get_jax_adapter() -> HighPerformanceAdapter:
 def get_numpy_adapter() -> HighPerformanceAdapter:
     """Get NumPy adapter."""
     return HighPerformanceAdapter(BackendType.NUMBA)
+
+
+def _spec_available(name: str) -> bool:
+    """Check if a module is available for import."""
+    try:
+        importlib.import_module(name)
+        return True
+    except ImportError:
+        return False
+
+
+def get_adapter(backend: BackendType) -> HighPerformanceAdapter:
+    """Get adapter for specific backend type."""
+    # Check if backend is available before creating adapter
+    if not _spec_available(_get_backend_module_name(backend)):
+        raise ImportError(f"Backend {backend} is not available")
+    
+    if backend == BackendType.TORCH:
+        return get_torch_adapter()
+    elif backend == BackendType.JAX:
+        return get_jax_adapter()
+    elif backend == BackendType.NUMBA:
+        return get_numpy_adapter()
+    else:
+        raise ValueError(f"Unsupported backend: {backend}")
+
+
+def _get_backend_module_name(backend: BackendType) -> str:
+    """Get the module name for a backend type."""
+    if backend == BackendType.TORCH:
+        return "torch"
+    elif backend == BackendType.JAX:
+        return "jax"
+    elif backend == BackendType.NUMBA:
+        return "numpy"  # NUMBA backend uses numpy
+    else:
+        return "unknown"
+
+
+def detect_capabilities(backend: BackendType) -> Capabilities:
+    """Detect capabilities for a specific backend."""
+    try:
+        adapter = get_adapter(backend)
+        return adapter.get_capabilities()
+    except ImportError:
+        # Return fallback capabilities when backend is not available
+        return Capabilities(
+            device_kind="cpu",
+            has_fft=False,
+            has_autograd=False,
+            supports_amp=False,
+            supports_jit=False,
+            memory_limit_gb=0.0,
+            preferred_operations=frozenset()
+        )

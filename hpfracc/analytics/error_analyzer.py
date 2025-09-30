@@ -14,6 +14,8 @@ import sqlite3
 from collections import defaultdict, Counter
 import logging
 import hashlib
+import os
+import tempfile
 
 logger = logging.getLogger(__name__)
 
@@ -58,6 +60,8 @@ class ErrorAnalyzer:
             enable_analysis: bool = True):
         self.db_path = db_path
         self.enable_analysis = enable_analysis
+        # Internal active path used for sqlite connections; may fall back to temp dir
+        self._active_db_path = db_path
         self._setup_database()
 
     def _setup_database(self):
@@ -65,8 +69,17 @@ class ErrorAnalyzer:
         if not self.enable_analysis:
             return
 
+        # Ensure parent directory exists if provided
         try:
-            conn = sqlite3.connect(self.db_path)
+            parent_dir = os.path.dirname(self._active_db_path)
+            if parent_dir:
+                os.makedirs(parent_dir, exist_ok=True)
+        except Exception:
+            # Directory creation best-effort; continue to attempt sqlite open
+            pass
+
+        try:
+            conn = sqlite3.connect(self._active_db_path)
             cursor = conn.cursor()
 
             # Create error events table
@@ -103,11 +116,47 @@ class ErrorAnalyzer:
             conn.commit()
             conn.close()
             logger.info(
-                f"Error analysis database initialized at {self.db_path}")
+                f"Error analysis database initialized at {self._active_db_path}")
 
         except Exception as e:
             logger.error(f"Failed to initialize error analysis database: {e}")
-            self.enable_analysis = False
+            # Attempt fallback to a writable temp directory without changing public db_path
+            try:
+                fallback_dir = tempfile.gettempdir()
+                fallback_path = os.path.join(fallback_dir, os.path.basename(self.db_path))
+                os.makedirs(os.path.dirname(fallback_path), exist_ok=True)
+                conn = sqlite3.connect(fallback_path)
+                cursor = conn.cursor()
+                cursor.execute('''
+                    CREATE TABLE IF NOT EXISTS error_events (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        timestamp REAL NOT NULL,
+                        method_name TEXT NOT NULL,
+                        estimator_type TEXT NOT NULL,
+                        error_type TEXT NOT NULL,
+                        error_message TEXT NOT NULL,
+                        error_traceback TEXT NOT NULL,
+                        error_hash TEXT NOT NULL,
+                        parameters TEXT NOT NULL,
+                        array_size INTEGER NOT NULL,
+                        fractional_order REAL NOT NULL,
+                        execution_time REAL,
+                        memory_usage REAL,
+                        user_session_id TEXT,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    )
+                ''')
+                cursor.execute('CREATE INDEX IF NOT EXISTS idx_method_name ON error_events(method_name)')
+                cursor.execute('CREATE INDEX IF NOT EXISTS idx_error_type ON error_events(error_type)')
+                cursor.execute('CREATE INDEX IF NOT EXISTS idx_timestamp ON error_events(timestamp)')
+                cursor.execute('CREATE INDEX IF NOT EXISTS idx_error_hash ON error_events(error_hash)')
+                conn.commit()
+                conn.close()
+                self._active_db_path = fallback_path
+                logger.info(f"Error analysis database initialized at fallback path {self._active_db_path}")
+            except Exception as e2:
+                logger.error(f"Fallback database initialization failed: {e2}")
+                self.enable_analysis = False
 
     def track_error(self,
                     method_name: str,
@@ -162,7 +211,7 @@ class ErrorAnalyzer:
     def _store_error_event(self, event: ErrorEvent):
         """Store an error event in the database."""
         try:
-            conn = sqlite3.connect(self.db_path)
+            conn = sqlite3.connect(self._active_db_path)
             cursor = conn.cursor()
 
             cursor.execute('''
@@ -197,7 +246,7 @@ class ErrorAnalyzer:
             self, time_window_hours: Optional[int] = None) -> Dict[str, ErrorStats]:
         """Get aggregated error statistics."""
         try:
-            conn = sqlite3.connect(self.db_path)
+            conn = sqlite3.connect(self._active_db_path)
             cursor = conn.cursor()
 
             # Build time filter
@@ -296,7 +345,7 @@ class ErrorAnalyzer:
                          days: int = 7) -> List[Tuple[str, int]]:
         """Get error trends for a specific method over time."""
         try:
-            conn = sqlite3.connect(self.db_path)
+            conn = sqlite3.connect(self._active_db_path)
             cursor = conn.cursor()
 
             cutoff_time = time.time() - (days * 24 * 3600)

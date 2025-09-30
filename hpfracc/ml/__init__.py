@@ -28,6 +28,7 @@ from .backends import (
 from .tensor_ops import (
     TensorOps,
     get_tensor_ops,
+    create_tensor,
 )
 
 # Core ML Components
@@ -135,6 +136,7 @@ __all__ = [
     # Tensor Operations
     'TensorOps',
     'get_tensor_ops',
+    'create_tensor',
     # Core ML Components
     'MLConfig',
     'FractionalNeuralNetwork',

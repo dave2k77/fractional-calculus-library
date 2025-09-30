@@ -49,6 +49,19 @@ class PerformanceBenchmark:
         """
         self.warmup_runs = warmup_runs
 
+    def benchmark_function(self, method_func: Callable, method_name: str) -> Dict:
+        """
+        Benchmark a single function (alias for benchmark_method for compatibility).
+        
+        Args:
+            method_func: Function to benchmark
+            method_name: Name of the method
+            
+        Returns:
+            Benchmark result dictionary
+        """
+        return self.benchmark_method(method_func, method_name, 10)
+
     def benchmark_method(
         self, method_func: Callable, method_name: str, n_runs: int = 10
     ) -> Dict:
@@ -137,6 +150,21 @@ class AccuracyBenchmark:
             tolerance: Numerical tolerance for accuracy calculations
         """
         self.tolerance = tolerance
+
+    def benchmark_accuracy(self, method_func: Callable, analytical_func: Callable, x: np.ndarray, method_name: str) -> Dict:
+        """
+        Benchmark accuracy of a method (alias for benchmark_method for compatibility).
+        
+        Args:
+            method_func: Function to benchmark
+            analytical_func: Analytical solution function
+            x: Input array
+            method_name: Name of the method
+            
+        Returns:
+            Accuracy benchmark result dictionary
+        """
+        return self.benchmark_method(method_func, analytical_func, x, method_name)
 
     def benchmark_method(
             self,
@@ -227,6 +255,41 @@ class BenchmarkSuite:
         self.warmup_runs = warmup_runs
         self.performance_benchmark = PerformanceBenchmark(warmup_runs)
         self.accuracy_benchmark = AccuracyBenchmark(tolerance)
+        self.benchmarks = {}  # Store registered benchmarks
+
+    def add_benchmark(self, name: str, benchmark_func: Callable):
+        """
+        Add a benchmark function to the suite.
+        
+        Args:
+            name: Name of the benchmark
+            benchmark_func: Function to benchmark
+        """
+        self.benchmarks[name] = benchmark_func
+
+    def run_benchmarks(self, analytical_func: Callable = None, test_cases: List[Dict] = None) -> Dict:
+        """
+        Run all registered benchmarks.
+        
+        Args:
+            analytical_func: Analytical solution function
+            test_cases: List of test case dictionaries
+            
+        Returns:
+            Benchmark results
+        """
+        if not self.benchmarks:
+            return {}
+        
+        # Handle default values
+        if analytical_func is None:
+            analytical_func = lambda x: x  # Default identity function
+        if test_cases is None:
+            test_cases = [{'x': np.linspace(0, 1, 10)}]
+        
+        return self.run_comprehensive_benchmark(
+            self.benchmarks, analytical_func, test_cases
+        )
 
     def run_comprehensive_benchmark(
         self,
@@ -274,16 +337,21 @@ class BenchmarkSuite:
         # Generate summary
         results["summary"] = self._generate_summary(results)
 
-        # Convert to method-keyed format for compatibility
-        method_results = {}
+        # Also provide a methods view for convenience while keeping top-level aggregates
+        methods_view = {}
         for method_name in methods.keys():
-            method_results[method_name] = {
-                "accuracy": [r for r in results["accuracy_results"] if r["method_name"] == method_name],
+            methods_view[method_name] = {
+                "accuracy": [
+                    r for r in results["accuracy_results"] if r.get("method_name") == method_name
+                ],
                 "performance": results["performance_results"].get(method_name, {}),
-                "summary": results["summary"]["method_summaries"].get(method_name, {})
+                "summary": results["summary"].get("method_summaries", {}).get(method_name, {}),
             }
-        
-        return method_results
+
+        # Backward-compat shape: include both aggregates and per-method mapping
+        results["methods"] = methods_view
+
+        return results
 
     def _generate_summary(self, results: Dict) -> Dict:
         """Generate summary statistics from benchmark results."""
@@ -369,8 +437,8 @@ class BenchmarkSuite:
 
 def run_benchmarks(
     methods: Dict[str, Callable],
-    analytical_func: Callable,
-    test_cases: List[Dict],
+    analytical_func: Callable = None,
+    test_cases: List[Dict] = None,
     n_runs: int = 10,
 ) -> Dict:
     """
@@ -385,6 +453,12 @@ def run_benchmarks(
     Returns:
         Benchmark results
     """
+    # Handle default values
+    if analytical_func is None:
+        analytical_func = lambda x: x  # Default identity function
+    if test_cases is None:
+        test_cases = [{'x': np.linspace(0, 1, 10)}]
+    
     suite = BenchmarkSuite()
     return suite.run_comprehensive_benchmark(
         methods, analytical_func, test_cases, n_runs

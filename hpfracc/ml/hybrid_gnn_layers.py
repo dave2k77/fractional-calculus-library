@@ -60,6 +60,7 @@ class GraphConfig:
     
     # Backend selection
     backend: str = 'auto'  # 'auto', 'jax', 'pytorch', 'hybrid'
+    use_jax: bool = True    # Use JAX backend (for compatibility)
     
     # Performance optimization
     enable_jit: bool = True
@@ -74,6 +75,7 @@ class GraphConfig:
     # Fractional calculus
     fractional_order: float = 0.5
     fractional_method: str = 'spectral'  # 'spectral', 'laplacian', 'diffusion'
+    method: str = 'spectral'  # Alias for fractional_method (for compatibility)
     use_advanced_fractional: bool = True
     
     # Research-specific features
@@ -180,17 +182,38 @@ class HybridFractionalGraphConv:
     
     def __init__(
         self,
-        in_channels: int,
-        out_channels: int,
+        in_channels: int = None,
+        out_channels: int = None,
+        fractional_order: float = 0.5,
         config: Optional[GraphConfig] = None,
         activation: str = 'relu',
         dropout: float = 0.1,
         bias: bool = True,
+        input_dim: int = None,
+        output_dim: int = None,
         **kwargs
     ):
+        # Handle different parameter names for compatibility
+        if input_dim is not None:
+            in_channels = input_dim
+        if output_dim is not None:
+            out_channels = output_dim
+            
+        # Handle kwargs for backward compatibility
+        if 'input_dim' in kwargs:
+            in_channels = kwargs.pop('input_dim')
+        if 'output_dim' in kwargs:
+            out_channels = kwargs.pop('output_dim')
+            
+        if in_channels is None or out_channels is None:
+            raise ValueError("in_channels and out_channels (or input_dim and output_dim) must be provided")
+            
         self.config = config or GraphConfig()
         self.in_channels = in_channels
         self.out_channels = out_channels
+        self.input_dim = in_channels  # Alias for compatibility
+        self.output_dim = out_channels  # Alias for compatibility
+        self.fractional_order = fractional_order
         self.activation = activation
         self.dropout = dropout
         self.bias_flag = bias
@@ -360,6 +383,18 @@ class HybridFractionalGraphConv:
     def forward(self, x: Any, adj_matrix: Any) -> Any:
         """Optimized forward pass with intelligent dispatch"""
         
+        # Handle empty graph
+        if x.shape[0] == 0:
+            if TORCH_AVAILABLE and isinstance(x, torch.Tensor):
+                return torch.empty(0, self.out_channels, device=x.device)
+            else:
+                return np.empty((0, self.out_channels))
+        
+        # Convert edge_index to adj_matrix if needed
+        if adj_matrix is not None and len(adj_matrix.shape) == 2 and adj_matrix.shape[0] == 2:
+            # This is edge_index format, convert to adj_matrix
+            adj_matrix = self._edge_index_to_adj_matrix(adj_matrix, x.shape[0])
+        
         # Apply fractional preprocessing if enabled
         if self.config.use_advanced_fractional:
             x = self._apply_fractional_derivative_optimized(x, adj_matrix)
@@ -371,6 +406,35 @@ class HybridFractionalGraphConv:
             return self._pytorch_forward_optimized(x, adj_matrix)
         else:
             return self._numpy_forward_optimized(x, adj_matrix)
+    
+    def _forward_torch(self, x: Any, adj_matrix: Any) -> Any:
+        """PyTorch-specific forward pass for testing compatibility"""
+        if TORCH_AVAILABLE:
+            return self._pytorch_forward_optimized(x, adj_matrix)
+        else:
+            # Fallback to numpy implementation
+            return self._numpy_forward_optimized(x, adj_matrix)
+    
+    def _edge_index_to_adj_matrix(self, edge_index: Any, num_nodes: int) -> Any:
+        """Convert edge_index to adjacency matrix"""
+        if TORCH_AVAILABLE and isinstance(edge_index, torch.Tensor):
+            # PyTorch implementation
+            adj_matrix = torch.zeros(num_nodes, num_nodes, device=edge_index.device)
+            adj_matrix[edge_index[0], edge_index[1]] = 1.0
+            adj_matrix[edge_index[1], edge_index[0]] = 1.0  # Make symmetric
+            return adj_matrix
+        elif JAX_AVAILABLE and hasattr(edge_index, 'shape'):
+            # JAX implementation
+            adj_matrix = jnp.zeros((num_nodes, num_nodes))
+            adj_matrix = adj_matrix.at[edge_index[0], edge_index[1]].set(1.0)
+            adj_matrix = adj_matrix.at[edge_index[1], edge_index[0]].set(1.0)  # Make symmetric
+            return adj_matrix
+        else:
+            # NumPy implementation
+            adj_matrix = np.zeros((num_nodes, num_nodes))
+            adj_matrix[edge_index[0], edge_index[1]] = 1.0
+            adj_matrix[edge_index[1], edge_index[0]] = 1.0  # Make symmetric
+            return adj_matrix
     
     def _jax_forward_impl(self, x: jnp.ndarray, adj_matrix: jnp.ndarray) -> jnp.ndarray:
         """JIT-compiled JAX forward implementation"""
@@ -514,21 +578,49 @@ class HybridFractionalGraphAttention:
     
     def __init__(
         self,
-        in_channels: int,
-        out_channels: int,
+        in_channels: int = None,
+        out_channels: int = None,
         num_heads: int = 8,
+        fractional_order: float = 0.5,
         config: Optional[GraphConfig] = None,
         activation: str = 'relu',
         dropout: float = 0.1,
+        input_dim: int = None,
+        output_dim: int = None,
         **kwargs
     ):
+        # Handle different parameter names for compatibility
+        if input_dim is not None:
+            in_channels = input_dim
+        if output_dim is not None:
+            out_channels = output_dim
+            
+        # Handle kwargs for backward compatibility
+        if 'input_dim' in kwargs:
+            in_channels = kwargs.pop('input_dim')
+        if 'output_dim' in kwargs:
+            out_channels = kwargs.pop('output_dim')
+            
+        if in_channels is None or out_channels is None:
+            raise ValueError("in_channels and out_channels (or input_dim and output_dim) must be provided")
+            
         self.config = config or GraphConfig()
         self.in_channels = in_channels
         self.out_channels = out_channels
+        self.input_dim = in_channels  # Alias for compatibility
+        self.output_dim = out_channels  # Alias for compatibility (preserve original value)
+        self.fractional_order = fractional_order
         self.num_heads = num_heads
         self.activation = activation
         self.dropout = dropout
-        self.head_dim = out_channels // num_heads
+        
+        # Calculate effective out_channels for internal use (must be divisible by num_heads)
+        self._effective_out_channels = out_channels
+        if out_channels % num_heads != 0:
+            # Adjust effective out_channels to be divisible by num_heads
+            self._effective_out_channels = ((out_channels + num_heads - 1) // num_heads) * num_heads
+            
+        self.head_dim = self._effective_out_channels // num_heads
         
         # Determine optimal backend
         self.backend = GRAPH_OPTIMIZER.get_optimal_backend(1000, in_channels)
@@ -546,15 +638,15 @@ class HybridFractionalGraphAttention:
             
             scale = math.sqrt(2.0 / self.in_channels)
             
-            self.w_q = random.normal(keys[0], (self.in_channels, self.out_channels)) * scale
-            self.w_k = random.normal(keys[1], (self.in_channels, self.out_channels)) * scale
-            self.w_v = random.normal(keys[2], (self.in_channels, self.out_channels)) * scale
+            self.w_q = random.normal(keys[0], (self.in_channels, self._effective_out_channels)) * scale
+            self.w_k = random.normal(keys[1], (self.in_channels, self._effective_out_channels)) * scale
+            self.w_v = random.normal(keys[2], (self.in_channels, self._effective_out_channels)) * scale
             self.w_o = random.normal(keys[3], (self.out_channels, self.out_channels)) * scale
             
         elif self.backend == 'pytorch' and TORCH_AVAILABLE:
-            self.w_q = torch.randn(self.in_channels, self.out_channels, requires_grad=True)
-            self.w_k = torch.randn(self.in_channels, self.out_channels, requires_grad=True)
-            self.w_v = torch.randn(self.in_channels, self.out_channels, requires_grad=True)
+            self.w_q = torch.randn(self.in_channels, self._effective_out_channels, requires_grad=True)
+            self.w_k = torch.randn(self.in_channels, self._effective_out_channels, requires_grad=True)
+            self.w_v = torch.randn(self.in_channels, self._effective_out_channels, requires_grad=True)
             self.w_o = torch.randn(self.out_channels, self.out_channels, requires_grad=True)
             
             # Initialize weights
@@ -564,9 +656,9 @@ class HybridFractionalGraphAttention:
         
         else:
             scale = math.sqrt(2.0 / self.in_channels)
-            self.w_q = np.random.normal(0, scale, (self.in_channels, self.out_channels))
-            self.w_k = np.random.normal(0, scale, (self.in_channels, self.out_channels))
-            self.w_v = np.random.normal(0, scale, (self.in_channels, self.out_channels))
+            self.w_q = np.random.normal(0, scale, (self.in_channels, self._effective_out_channels))
+            self.w_k = np.random.normal(0, scale, (self.in_channels, self._effective_out_channels))
+            self.w_v = np.random.normal(0, scale, (self.in_channels, self._effective_out_channels))
             self.w_o = np.random.normal(0, scale, (self.out_channels, self.out_channels))
     
     def _setup_optimizations(self):
@@ -580,6 +672,11 @@ class HybridFractionalGraphAttention:
     def forward(self, x: Any, adj_matrix: Any, edge_index: Optional[Any] = None) -> Any:
         """Forward pass with fractional attention"""
         
+        # Convert edge_index to adj_matrix if needed
+        if adj_matrix is not None and len(adj_matrix.shape) == 2 and adj_matrix.shape[0] == 2:
+            # This is edge_index format, convert to adj_matrix
+            adj_matrix = self._edge_index_to_adj_matrix(adj_matrix, x.shape[0])
+        
         # Apply fractional preprocessing
         if self.config.use_advanced_fractional:
             x = self._apply_fractional_preprocessing(x, adj_matrix)
@@ -588,9 +685,38 @@ class HybridFractionalGraphAttention:
         if self.backend == 'jax' and JAX_AVAILABLE:
             return self._jax_attention_optimized(x, adj_matrix, edge_index)
         elif self.backend == 'pytorch' and TORCH_AVAILABLE:
-            return self._pytorch_attention_optimized(x, adj_matrix, edge_index)
+            return self._forward_torch(x, adj_matrix, edge_index)
         else:
             return self._numpy_attention_optimized(x, adj_matrix, edge_index)
+    
+    def _forward_torch(self, x: Any, adj_matrix: Any, edge_index: Optional[Any] = None) -> Any:
+        """PyTorch-specific forward pass for testing compatibility"""
+        if TORCH_AVAILABLE:
+            return self._pytorch_attention_optimized(x, adj_matrix, edge_index)
+        else:
+            # Fallback to numpy implementation
+            return self._numpy_attention_optimized(x, adj_matrix, edge_index)
+    
+    def _edge_index_to_adj_matrix(self, edge_index: Any, num_nodes: int) -> Any:
+        """Convert edge_index to adjacency matrix"""
+        if TORCH_AVAILABLE and isinstance(edge_index, torch.Tensor):
+            # PyTorch implementation
+            adj_matrix = torch.zeros(num_nodes, num_nodes, device=edge_index.device)
+            adj_matrix[edge_index[0], edge_index[1]] = 1.0
+            adj_matrix[edge_index[1], edge_index[0]] = 1.0  # Make symmetric
+            return adj_matrix
+        elif JAX_AVAILABLE and hasattr(edge_index, 'shape'):
+            # JAX implementation
+            adj_matrix = jnp.zeros((num_nodes, num_nodes))
+            adj_matrix = adj_matrix.at[edge_index[0], edge_index[1]].set(1.0)
+            adj_matrix = adj_matrix.at[edge_index[1], edge_index[0]].set(1.0)  # Make symmetric
+            return adj_matrix
+        else:
+            # NumPy implementation
+            adj_matrix = np.zeros((num_nodes, num_nodes))
+            adj_matrix[edge_index[0], edge_index[1]] = 1.0
+            adj_matrix[edge_index[1], edge_index[0]] = 1.0  # Make symmetric
+            return adj_matrix
     
     def _apply_fractional_preprocessing(self, x: Any, adj_matrix: Any) -> Any:
         """Apply fractional preprocessing to node features"""
@@ -773,15 +899,31 @@ class HybridFractionalGraphPooling:
     
     def __init__(
         self,
-        in_channels: int,
+        in_channels: int = None,
+        fractional_order: float = 0.5,
         pooling_ratio: float = 0.5,
         config: Optional[GraphConfig] = None,
         pooling_strategy: str = 'topk',  # 'topk', 'attention', 'diffpool'
+        input_dim: int = None,
         **kwargs
     ):
+        # Handle different parameter names for compatibility
+        if input_dim is not None:
+            in_channels = input_dim
+            
+        # Handle kwargs for backward compatibility
+        if 'input_dim' in kwargs:
+            in_channels = kwargs.pop('input_dim')
+            
+        if in_channels is None:
+            raise ValueError("in_channels (or input_dim) must be provided")
+            
         self.config = config or GraphConfig()
         self.in_channels = in_channels
+        self.input_dim = in_channels  # Alias for compatibility
+        self.fractional_order = fractional_order
         self.pooling_ratio = pooling_ratio
+        self.pool_ratio = pooling_ratio  # Alias for compatibility
         self.pooling_strategy = pooling_strategy
         
         # Determine optimal backend
@@ -836,17 +978,47 @@ class HybridFractionalGraphPooling:
     def forward(self, x: Any, adj_matrix: Any, batch: Optional[Any] = None) -> Tuple[Any, Any, Any]:
         """Forward pass with advanced graph pooling"""
         
-        # Apply fractional preprocessing for node importance
-        if self.config.use_advanced_fractional:
-            x = self._apply_fractional_node_analysis(x, adj_matrix)
+        # Convert edge_index to adj_matrix if needed
+        if adj_matrix is not None and len(adj_matrix.shape) == 2 and adj_matrix.shape[0] == 2:
+            # This is edge_index format, convert to adj_matrix
+            adj_matrix = self._edge_index_to_adj_matrix(adj_matrix, x.shape[0])
         
         # Dispatch to optimal backend
         if self.backend == 'jax' and JAX_AVAILABLE:
             return self._jax_pool_optimized(x, adj_matrix, batch)
         elif self.backend == 'pytorch' and TORCH_AVAILABLE:
-            return self._pytorch_pool_optimized(x, adj_matrix, batch)
+            return self._forward_torch(x, adj_matrix, batch)
         else:
             return self._numpy_pool_optimized(x, adj_matrix, batch)
+    
+    def _forward_torch(self, x: Any, adj_matrix: Any, batch: Optional[Any] = None) -> Tuple[Any, Any, Any]:
+        """PyTorch-specific forward pass for testing compatibility"""
+        if TORCH_AVAILABLE:
+            return self._pytorch_pool_optimized(x, adj_matrix, batch)
+        else:
+            # Fallback to numpy implementation
+            return self._numpy_pool_optimized(x, adj_matrix, batch)
+    
+    def _edge_index_to_adj_matrix(self, edge_index: Any, num_nodes: int) -> Any:
+        """Convert edge_index to adjacency matrix"""
+        if TORCH_AVAILABLE and isinstance(edge_index, torch.Tensor):
+            # PyTorch implementation
+            adj_matrix = torch.zeros(num_nodes, num_nodes, device=edge_index.device)
+            adj_matrix[edge_index[0], edge_index[1]] = 1.0
+            adj_matrix[edge_index[1], edge_index[0]] = 1.0  # Make symmetric
+            return adj_matrix
+        elif JAX_AVAILABLE and hasattr(edge_index, 'shape'):
+            # JAX implementation
+            adj_matrix = jnp.zeros((num_nodes, num_nodes))
+            adj_matrix = adj_matrix.at[edge_index[0], edge_index[1]].set(1.0)
+            adj_matrix = adj_matrix.at[edge_index[1], edge_index[0]].set(1.0)  # Make symmetric
+            return adj_matrix
+        else:
+            # NumPy implementation
+            adj_matrix = np.zeros((num_nodes, num_nodes))
+            adj_matrix[edge_index[0], edge_index[1]] = 1.0
+            adj_matrix[edge_index[1], edge_index[0]] = 1.0  # Make symmetric
+            return adj_matrix
     
     def _apply_fractional_node_analysis(self, x: Any, adj_matrix: Any) -> Any:
         """Apply fractional analysis to determine node importance"""
@@ -969,7 +1141,8 @@ class HybridFractionalGraphPooling:
         
         # Pool features and adjacency matrix
         pooled_x = x[top_indices]
-        pooled_adj = adj_matrix[torch.ix_(top_indices, top_indices)]
+        # Use advanced indexing for adjacency matrix
+        pooled_adj = adj_matrix[top_indices][:, top_indices]
         pooled_batch = batch[top_indices] if batch is not None else None
         
         return pooled_x, pooled_adj, pooled_batch
@@ -996,13 +1169,25 @@ class HybridFractionalGraphPooling:
 
 # Factory functions for easy model creation
 def create_graph_conv(
-    in_channels: int,
-    out_channels: int,
+    in_channels: int = None,
+    out_channels: int = None,
+    fractional_order: float = 0.5,
     backend: str = 'auto',
     performance_profile: str = 'balanced',
+    input_dim: int = None,
+    output_dim: int = None,
     **kwargs
 ) -> HybridFractionalGraphConv:
     """Create optimized fractional graph convolution layer"""
+    
+    # Handle different parameter names for compatibility
+    if input_dim is not None:
+        in_channels = input_dim
+    if output_dim is not None:
+        out_channels = output_dim
+        
+    if in_channels is None or out_channels is None:
+        raise ValueError("Must provide either (in_channels, out_channels) or (input_dim, output_dim)")
     
     config = _create_graph_config_for_profile(performance_profile)
     config.backend = backend
@@ -1010,19 +1195,32 @@ def create_graph_conv(
     return HybridFractionalGraphConv(
         in_channels=in_channels,
         out_channels=out_channels,
+        fractional_order=fractional_order,
         config=config,
         **kwargs
     )
 
 def create_graph_attention(
-    in_channels: int,
-    out_channels: int,
+    in_channels: int = None,
+    out_channels: int = None,
+    fractional_order: float = 0.5,
     num_heads: int = 8,
     backend: str = 'auto',
     performance_profile: str = 'balanced',
+    input_dim: int = None,
+    output_dim: int = None,
     **kwargs
 ) -> HybridFractionalGraphAttention:
     """Create optimized fractional graph attention layer"""
+    
+    # Handle different parameter names for compatibility
+    if input_dim is not None:
+        in_channels = input_dim
+    if output_dim is not None:
+        out_channels = output_dim
+        
+    if in_channels is None or out_channels is None:
+        raise ValueError("Must provide either (in_channels, out_channels) or (input_dim, output_dim)")
     
     config = _create_graph_config_for_profile(performance_profile)
     config.backend = backend
@@ -1030,26 +1228,40 @@ def create_graph_attention(
     return HybridFractionalGraphAttention(
         in_channels=in_channels,
         out_channels=out_channels,
+        fractional_order=fractional_order,
         num_heads=num_heads,
         config=config,
         **kwargs
     )
 
 def create_graph_pooling(
-    in_channels: int,
+    in_channels: int = None,
+    fractional_order: float = 0.5,
     pooling_ratio: float = 0.5,
     backend: str = 'auto',
     performance_profile: str = 'balanced',
     pooling_strategy: str = 'topk',
+    input_dim: int = None,
+    pool_ratio: float = None,
     **kwargs
 ) -> HybridFractionalGraphPooling:
     """Create optimized fractional graph pooling layer"""
+    
+    # Handle different parameter names for compatibility
+    if input_dim is not None:
+        in_channels = input_dim
+    if pool_ratio is not None:
+        pooling_ratio = pool_ratio
+        
+    if in_channels is None:
+        raise ValueError("Must provide either in_channels or input_dim")
     
     config = _create_graph_config_for_profile(performance_profile)
     config.backend = backend
     
     return HybridFractionalGraphPooling(
         in_channels=in_channels,
+        fractional_order=fractional_order,
         pooling_ratio=pooling_ratio,
         config=config,
         pooling_strategy=pooling_strategy,

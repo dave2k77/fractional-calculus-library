@@ -174,7 +174,7 @@ class CaputoFabrizioDerivative(BaseFractionalDerivative):
         # Filter out factory-specific arguments
         filtered_kwargs = {k: v for k, v in kwargs.items()
                            if k not in ['use_jax', 'use_numba']}
-        self._novel_impl = CFDerivative(alpha, **filtered_kwargs)
+        self._novel_impl = CFDerivative(self._alpha_order, **filtered_kwargs)
         # For backward compatibility, expose alpha as a special wrapper
         # that behaves like both a float and FractionalOrder
         self.alpha = _AlphaCompatibilityWrapper(self._alpha_order)
@@ -224,7 +224,7 @@ class AtanganaBaleanuDerivative(BaseFractionalDerivative):
         # Filter out factory-specific arguments
         filtered_kwargs = {k: v for k, v in kwargs.items()
                            if k not in ['use_jax', 'use_numba']}
-        self._novel_impl = ABDerivative(alpha, **filtered_kwargs)
+        self._novel_impl = ABDerivative(self._alpha_order, **filtered_kwargs)
         # For backward compatibility, expose alpha as a special wrapper
         # that behaves like both a float and FractionalOrder
         self.alpha = _AlphaCompatibilityWrapper(self._alpha_order)
@@ -369,7 +369,8 @@ class MillerRossDerivative(BaseFractionalDerivative):
         # This can be enhanced with specific Miller-Ross implementation
         # Avoid circular import by creating RL derivative directly
         from ..algorithms.optimized_methods import OptimizedRiemannLiouville
-        rl_impl = OptimizedRiemannLiouville(self.order)
+        # Use the stored fractional order value
+        rl_impl = OptimizedRiemannLiouville(self._alpha_order)
         # Compute directly using the algorithm implementation
         return rl_impl.compute(f, x, **kwargs)
 
@@ -380,7 +381,7 @@ class MillerRossDerivative(BaseFractionalDerivative):
             **kwargs) -> np.ndarray:
         """Compute the Miller-Ross fractional derivative numerically."""
         from ..algorithms.optimized_methods import OptimizedRiemannLiouville
-        rl_impl = OptimizedRiemannLiouville(self.order)
+        rl_impl = OptimizedRiemannLiouville(self._alpha_order)
         return rl_impl.compute(f_values, x_values, **kwargs)
 
 

@@ -11,8 +11,16 @@ from hpfracc.ml.backends import BackendType
 @pytest.fixture(autouse=True)
 def reset_backend_manager():
     backends._backend_manager = None
+    # Clear adapter caches
+    adapters._LIB_CACHE.clear()
+    adapters._CAPABILITIES_CACHE.clear()
+    adapters._PERFORMANCE_PROFILES.clear()
     yield
     backends._backend_manager = None
+    # Clear adapter caches
+    adapters._LIB_CACHE.clear()
+    adapters._CAPABILITIES_CACHE.clear()
+    adapters._PERFORMANCE_PROFILES.clear()
 
 
 def _set_availability(monkeypatch, torch=True, jax=True, numba=True, numpy=True):
@@ -24,7 +32,7 @@ def _set_availability(monkeypatch, torch=True, jax=True, numba=True, numpy=True)
 
 def _mock_imports(monkeypatch, mapping):
     original_backend_import = backends.importlib.import_module
-    original_adapter_import = adapters.importlib.import_module
+    original_adapter_import = adapters._import_module
 
     def fake_import(name, *args, **kwargs):
         if name in mapping:
@@ -37,7 +45,7 @@ def _mock_imports(monkeypatch, mapping):
         return original_adapter_import(name, *args, **kwargs)
 
     monkeypatch.setattr(backends.importlib, "import_module", fake_import)
-    monkeypatch.setattr(adapters.importlib, "import_module", fake_import_adapters)
+    monkeypatch.setattr(adapters, "_import_module", fake_import_adapters)
 
 
 def _mock_spec(monkeypatch, available_names):

@@ -499,6 +499,10 @@ def run_convergence_study(
         'best_norm': max(results.keys(), key=lambda k: results[k].get('convergence_rate', -np.inf) if isinstance(results[k], dict) else -np.inf)
     }
     
+    # Add top-level convergence_rate for compatibility
+    convergence_rates = [data.get('convergence_rate', np.nan) for data in results.values() if isinstance(data, dict)]
+    results['convergence_rate'] = np.nanmean(convergence_rates) if convergence_rates else np.nan
+    
     return results
 
 
@@ -506,7 +510,7 @@ def run_method_convergence_test(
     method_func: Callable,
     analytical_func: Callable,
     grid_sizes: List[int],
-    test_params: Dict,
+    test_params: Dict = None,
 ) -> Dict:
     """
     Test convergence of a numerical method.
@@ -521,6 +525,8 @@ def run_method_convergence_test(
         Convergence test results
     """
     tester = ConvergenceTester()
+    if test_params is None:
+        test_params = {'x': np.linspace(0, 1, 10)}
     results = tester.test_multiple_norms(
         method_func, analytical_func, grid_sizes, test_params
     )
