@@ -1,0 +1,41 @@
+WARNING:2025-10-01 10:57:24,789:jax._src.xla_bridge:864: An NVIDIA GPU may be present on this machine, but a CUDA-enabled jaxlib is not installed. Falling back to cpu.
+/home/davianc/fractional-calculus-library/hpfracc/special/mittag_leffler.py:115: RuntimeWarning: invalid value encountered in sqrt
+  return np.cos(np.sqrt(-z))
+Fractional derivative implementations registered successfully!
+Fractional derivative implementations registered successfully!
+[BENCHMARK] ======================================================================
+[BENCHMARK] STARTING COMPREHENSIVE PERFORMANCE BENCHMARKING
+[BENCHMARK] ======================================================================
+[BENCHMARK] Starting derivative methods benchmarking...
+[BENCHMARK]   Benchmarking riemann_liouville...
+[BENCHMARK]   Benchmarking caputo...
+[BENCHMARK]   Benchmarking grunwald_letnikov...
+[BENCHMARK]   Derivative methods benchmarking completed.
+[BENCHMARK] Starting special functions benchmarking...
+[BENCHMARK]   Benchmarking Mittag-Leffler function...
+[BENCHMARK]   Benchmarking binomial coefficients...
+[BENCHMARK]   Special functions benchmarking completed.
+[BENCHMARK] Starting ML layers benchmarking...
+[BENCHMARK]   Benchmarking SpectralFractionalLayer...
+[BENCHMARK]   ML layers benchmarking completed.
+[BENCHMARK] Starting scalability benchmarking...
+[BENCHMARK]   Testing derivative methods scalability...
+[BENCHMARK]   Testing special functions scalability...
+[BENCHMARK]   Scalability benchmarking completed.
+[BENCHMARK] ======================================================================
+[BENCHMARK] COMPREHENSIVE BENCHMARKING SUMMARY
+[BENCHMARK] ======================================================================
+[BENCHMARK] Total Benchmarks: 151
+[BENCHMARK] Successful: 151
+[BENCHMARK] Failed: 0
+[BENCHMARK] Success Rate: 100.0%
+[BENCHMARK] Execution Time: 6.99 seconds
+[BENCHMARK] 
+Best Performers:
+[BENCHMARK]   best_derivative_method: {'method': 'riemann_liouville', 'throughput': np.float64(4932475.479112163)}
+[BENCHMARK] 
+======================================================================
+[BENCHMARK] 🎉 BENCHMARKING: SUCCESS
+[BENCHMARK] Performance benchmarks completed successfully!
+[BENCHMARK] ======================================================================
+[BENCHMARK] Benchmark results saved to: /home/davianc/fractional-calculus-library/comprehensive_benchmark_results.json
