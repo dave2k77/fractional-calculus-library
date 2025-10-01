@@ -12,6 +12,43 @@ import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 
+@pytest.fixture(scope="function")
+def reset_backend_state():
+    """
+    Reset backend manager state before a test to ensure test isolation.
+    
+    This fixture is available for tests that need it, but is NOT autouse.
+    Tests must explicitly request it by including it as a parameter.
+    
+    Usage:
+        def test_something(reset_backend_state):
+            # Your test code here
+    
+    Note: Autouse was tried but caused issues with the full test suite.
+    The ordering issues with tensor_ops/losses are likely due to other
+    state pollution, not backend manager state.
+    """
+    # Reset the global backend manager before the test
+    try:
+        import hpfracc.ml.backends as backends_module
+        backends_module._backend_manager = None
+    except ImportError:
+        pass  # Module not available yet, that's fine
+    except Exception:
+        pass  # Other import errors are also fine (test may not need ML)
+    
+    yield
+    
+    # Clean up after test
+    try:
+        import hpfracc.ml.backends as backends_module
+        backends_module._backend_manager = None
+    except ImportError:
+        pass
+    except Exception:
+        pass
+
+
 @pytest.fixture
 def sample_time_array():
     """Provide a sample time array for testing."""

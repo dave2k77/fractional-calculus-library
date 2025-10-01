@@ -274,7 +274,7 @@ class FractionalLaplacian(BaseFractionalDerivative):
         # Filter out factory-specific arguments
         filtered_kwargs = {k: v for k, v in kwargs.items()
                            if k not in ['use_jax', 'use_numba']}
-        self._special_impl = FracLaplacian(alpha, **filtered_kwargs)
+        self._special_impl = FracLaplacian(self._alpha_order, **filtered_kwargs)
         # For backward compatibility, expose alpha as a special wrapper
         # that behaves like both a float and FractionalOrder
         self.alpha = _AlphaCompatibilityWrapper(self._alpha_order)
@@ -312,7 +312,7 @@ class FractionalFourierTransform(BaseFractionalDerivative):
         # Filter out factory-specific arguments
         filtered_kwargs = {k: v for k, v in kwargs.items()
                            if k not in ['use_jax', 'use_numba']}
-        self._special_impl = FracFT(alpha, **filtered_kwargs)
+        self._special_impl = FracFT(self._alpha_order, **filtered_kwargs)
         # For backward compatibility, expose alpha as a special wrapper
         # that behaves like both a float and FractionalOrder
         self.alpha = _AlphaCompatibilityWrapper(self._alpha_order)
@@ -400,7 +400,7 @@ class WeylDerivative(BaseFractionalDerivative):
         # Filter out factory-specific arguments
         filtered_kwargs = {k: v for k, v in kwargs.items()
                            if k not in ['use_jax', 'use_numba']}
-        self._advanced_impl = AdvancedWeyl(alpha, **filtered_kwargs)
+        self._advanced_impl = AdvancedWeyl(self._alpha_order, **filtered_kwargs)
         # For backward compatibility, expose alpha as a special wrapper
         # that behaves like both a float and FractionalOrder
         self.alpha = _AlphaCompatibilityWrapper(self._alpha_order)
@@ -438,7 +438,7 @@ class MarchaudDerivative(BaseFractionalDerivative):
         # Filter out factory-specific arguments
         filtered_kwargs = {k: v for k, v in kwargs.items()
                            if k not in ['use_jax', 'use_numba']}
-        self._advanced_impl = AdvancedMarchaud(alpha, **filtered_kwargs)
+        self._advanced_impl = AdvancedMarchaud(self._alpha_order, **filtered_kwargs)
         # For backward compatibility, expose alpha as a special wrapper
         # that behaves like both a float and FractionalOrder
         self.alpha = _AlphaCompatibilityWrapper(self._alpha_order)
@@ -475,7 +475,7 @@ class HadamardDerivative(BaseFractionalDerivative):
         # Filter out factory-specific arguments
         filtered_kwargs = {k: v for k, v in kwargs.items()
                            if k not in ['use_jax', 'use_numba']}
-        self._advanced_impl = AdvancedHadamard(alpha, **filtered_kwargs)
+        self._advanced_impl = AdvancedHadamard(self._alpha_order, **filtered_kwargs)
         # For backward compatibility, expose alpha as a special wrapper
         # that behaves like both a float and FractionalOrder
         self.alpha = _AlphaCompatibilityWrapper(self._alpha_order)
@@ -512,7 +512,7 @@ class ReizFellerDerivative(BaseFractionalDerivative):
         # Filter out factory-specific arguments
         filtered_kwargs = {k: v for k, v in kwargs.items()
                            if k not in ['use_jax', 'use_numba']}
-        self._advanced_impl = AdvancedReizFeller(alpha, **filtered_kwargs)
+        self._advanced_impl = AdvancedReizFeller(self._alpha_order, **filtered_kwargs)
         # For backward compatibility, expose alpha as a special wrapper
         # that behaves like both a float and FractionalOrder
         self.alpha = _AlphaCompatibilityWrapper(self._alpha_order)
@@ -549,7 +549,7 @@ class ParallelOptimizedRiemannLiouville(BaseFractionalDerivative):
         # Filter out factory-specific arguments
         filtered_kwargs = {k: v for k, v in kwargs.items()
                            if k not in ['use_jax', 'use_numba']}
-        self._parallel_impl = ParallelRL(alpha, **filtered_kwargs)
+        self._parallel_impl = ParallelRL(self._alpha_order, **filtered_kwargs)
         # For backward compatibility, expose alpha as a special wrapper
         # that behaves like both a float and FractionalOrder
         self.alpha = _AlphaCompatibilityWrapper(self._alpha_order)
@@ -586,7 +586,7 @@ class ParallelOptimizedCaputo(BaseFractionalDerivative):
         # Filter out factory-specific arguments
         filtered_kwargs = {k: v for k, v in kwargs.items()
                            if k not in ['use_jax', 'use_numba']}
-        self._parallel_impl = ParallelCaputo(alpha, **filtered_kwargs)
+        self._parallel_impl = ParallelCaputo(self._alpha_order, **filtered_kwargs)
         # For backward compatibility, expose alpha as a special wrapper
         # that behaves like both a float and FractionalOrder
         self.alpha = _AlphaCompatibilityWrapper(self._alpha_order)

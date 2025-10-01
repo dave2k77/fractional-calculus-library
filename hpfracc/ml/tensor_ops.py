@@ -253,6 +253,18 @@ class TensorOps:
         else:
             raise ValueError(f"Unknown backend: {self.backend}")
 
+    def ones_like(self, tensor: Any, **kwargs) -> Any:
+        """Create a tensor of ones with the same shape as input tensor."""
+        if self.backend in (BackendType.TORCH, BackendType.JAX):
+            return self.tensor_lib.ones_like(tensor, **kwargs)
+        elif self.backend == BackendType.NUMBA:
+            import numpy as np
+            if hasattr(tensor, 'shape'):
+                return np.ones_like(tensor, **kwargs)
+            return np.ones(1, **kwargs)
+        else:
+            raise ValueError(f"Unknown backend: {self.backend}")
+
     # ------------------------ Basic transforms ------------------------
 
     def sqrt(self, tensor: Any) -> Any:
@@ -402,12 +414,19 @@ class TensorOps:
         """
         Transpose a tensor. Supports signatures:
           - transpose(tensor) for 2D: matrix transpose; otherwise reverse axes
-          - transpose(tensor, dim0=..., dim1=...) : swap two axes
+          - transpose(tensor, dim0, dim1) : swap two axes (positional)
+          - transpose(tensor, dim0=..., dim1=...) : swap two axes (keyword)
           - transpose(tensor, dims=(...)) : permute by dims
         """
         dims = kwargs.get('dims', None)
         dim0 = kwargs.get('dim0', None)
         dim1 = kwargs.get('dim1', None)
+        
+        # Handle positional args (dim0, dim1)
+        if len(args) == 2:
+            dim0, dim1 = args[0], args[1]
+        elif len(args) > 0:
+            raise ValueError(f"transpose expects 0 or 2 positional args, got {len(args)}")
 
         if self.backend == BackendType.TORCH:
             if dims is not None:

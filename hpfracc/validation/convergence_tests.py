@@ -423,14 +423,14 @@ class ConvergenceAnalyzer:
             "order_achieved": OrderOfAccuracy(expected_order) if is_valid else None,
         }
 
-    def analyze_method_convergence(
+    def compare_methods_convergence(
         self,
         methods: List[str],
         grid_sizes: List[int],
         errors: Dict[str, List[float]],
     ) -> Dict:
         """
-        Analyze convergence for multiple methods.
+        Compare convergence for multiple methods.
 
         Args:
             methods: List of method names
