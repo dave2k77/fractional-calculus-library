@@ -365,7 +365,7 @@ class FractionalLSTM(FractionalLayerBase):
     def __init__(self, input_size: int, hidden_size: int, num_layers: int = 1,
                  bidirectional: bool = False, dropout: float = 0.0,
                  bias: bool = True, config: LayerConfig = None,
-                 backend: Optional[BackendType] = None):
+                 backend: Optional[BackendType] = None, fractional_order: float = 0.5):
         if config is None:
             config = LayerConfig()
         super().__init__(config, backend=backend)
@@ -376,6 +376,8 @@ class FractionalLSTM(FractionalLayerBase):
         self.dropout = float(dropout)
         # Expose a simple boolean flag for tests; internal LSTM still manages its own biases
         self.bias = bool(bias)
+        # Store fractional order for compatibility
+        self.fractional_order = fractional_order
         self._lstm = nn.LSTM(input_size=self.input_size,
                              hidden_size=self.hidden_size,
                              num_layers=self.num_layers,
@@ -478,12 +480,14 @@ class FractionalPooling(FractionalLayerBase):
     """Minimal pooling wrapper satisfying tests."""
     def __init__(self, kernel_size: Union[int, Tuple[int,int]], stride: Union[int,Tuple[int,int]] = 1,
                  padding: Union[int,Tuple[int,int]] = 0, pool_type: str = "max", dim: int = 1,
-                 config: LayerConfig = None, backend: Optional[BackendType] = None):
+                 config: LayerConfig = None, backend: Optional[BackendType] = None, fractional_order: float = 0.5):
         if config is None:
             config = LayerConfig()
         super().__init__(config, backend=backend)
         self.dim = dim
         self.pool_type = pool_type
+        # Store fractional order for compatibility
+        self.fractional_order = fractional_order
         if dim == 1:
             self.kernel_size = int(kernel_size)
             self.stride = int(stride)

@@ -332,10 +332,10 @@ def get_analytical_solution(
         return solutions.exponential_derivative(x, a, order)
 
     elif func_type == "trigonometric":
-        trig_type = params.get("func_type", "sin")
+        trig_type = params.get("trig_type", "sin")
         omega = params.get("omega", 1.0)
         order = params.get("order", 0.5)
-        return solutions.trigonometric_derivative(x, trig_type, omega, order)
+        return solutions.trigonometric_derivative(x, order, omega, trig_type)
 
     elif func_type == "constant":
         c = params.get("c", 1.0)

@@ -5,7 +5,7 @@ This document explains how JAX GPU support is configured in the HPFRACC library.
 ## Current Status
 
 - **PyTorch GPU**: ✅ **Fully supported** - RTX 5070 detected and working
-- **JAX GPU**: ⚠️ **CPU fallback** - RTX 5070 not yet supported by JAX
+- **JAX GPU**: ✅ **Fully supported** - RTX 5070 detected and working with CUDA 13
 - **Automatic detection**: ✅ **Configured** - Will use GPU when available
 
 ## How It Works
@@ -32,8 +32,8 @@ print(f"JAX GPU available: {JAX_GPU_AVAILABLE}")
 
 ### RTX 5070 (Current GPU)
 - **PyTorch**: ✅ Fully supported
-- **JAX**: ⚠️ Not yet supported (very new architecture)
-- **Expected**: JAX support likely in future releases
+- **JAX**: ✅ Fully supported with CUDA 13
+- **Status**: Complete GPU acceleration available
 
 ### Future GPU Support
 When JAX adds support for RTX 5070, the library will automatically detect and use it without any code changes.
@@ -41,8 +41,8 @@ When JAX adds support for RTX 5070, the library will automatically detect and us
 ## Performance Impact
 
 - **PyTorch operations**: Full GPU acceleration (8GB VRAM)
-- **JAX operations**: CPU fallback (still fast for most use cases)
-- **Mixed workloads**: Optimal performance through PyTorch GPU + JAX CPU
+- **JAX operations**: Full GPU acceleration (8GB VRAM)
+- **Mixed workloads**: Optimal performance through PyTorch GPU + JAX GPU
 
 ## Troubleshooting
 
@@ -54,7 +54,7 @@ If you encounter issues:
 
 ## Technical Details
 
-- **JAX version**: 0.4.21 (compatible with NumPy 1.26.4)
-- **CUDA support**: Configured for CUDA 12.x
+- **JAX version**: 0.7.2 (compatible with NumPy 2.3.3)
+- **CUDA support**: Configured for CUDA 13.x with RTX 5070
 - **Environment variables**: `JAX_PLATFORM_NAME=gpu` set automatically
-- **Fallback mechanism**: Silent CPU fallback when GPU unavailable
+- **GPU acceleration**: Full RTX 5070 support with 8GB VRAM
