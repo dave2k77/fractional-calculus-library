@@ -162,7 +162,7 @@ class ErrorAnalyzer:
         """
         abs_error = self.absolute_error(numerical, analytical)
         rel_error = self.relative_error(numerical, analytical)
-        
+
         return {
             "l1": self.l1_error(numerical, analytical),
             "l2": self.l2_error(numerical, analytical),
@@ -195,7 +195,6 @@ class ErrorAnalyzer:
 # Top-level convenience functions expected by tests
 def _to_numpy(x):
     try:
-        import torch  # type: ignore
         if hasattr(x, "detach"):
             return x.detach().cpu().numpy()
     except Exception:
@@ -250,7 +249,7 @@ class ConvergenceAnalyzer:
     def __init__(self, tolerance: float = 1e-10):
         """
         Initialize the convergence analyzer.
-        
+
         Args:
             tolerance: Numerical tolerance for convergence analysis
         """
@@ -300,11 +299,12 @@ class ConvergenceAnalyzer:
         """
         convergence_rates = {}
         convergence_orders = {}
-        
+
         for method in methods:
             if method in errors:
                 try:
-                    rate = self.compute_convergence_rate(errors[method], h_values)
+                    rate = self.compute_convergence_rate(
+                        errors[method], h_values)
                     convergence_rates[method] = rate
                     convergence_orders[method] = rate
                 except (ValueError, np.linalg.LinAlgError) as e:
@@ -317,8 +317,10 @@ class ConvergenceAnalyzer:
                 convergence_orders[method] = np.nan
 
         # Find best method (highest convergence rate)
-        valid_rates = {k: v for k, v in convergence_rates.items() if not np.isnan(v)}
-        best_method = max(valid_rates.items(), key=lambda x: x[1])[0] if valid_rates else None
+        valid_rates = {k: v for k, v in convergence_rates.items()
+                       if not np.isnan(v)}
+        best_method = max(valid_rates.items(), key=lambda x: x[1])[
+            0] if valid_rates else None
 
         return {
             "convergence_rates": convergence_rates,
@@ -528,19 +530,19 @@ class ValidationFramework:
         """
         if not isinstance(solution, np.ndarray):
             return False
-        
+
         # Check for NaN values
         if np.any(np.isnan(solution)):
             return False
-        
+
         # Check for infinite values
         if np.any(np.isinf(solution)):
             return False
-        
+
         # Check for reasonable values
         if np.any(np.abs(solution) > 1e10):
             return False
-        
+
         return True
 
 
@@ -557,17 +559,17 @@ def analyze_convergence(
     methods_or_grid_sizes, h_values_or_errors=None, errors=None
 ) -> Dict[str, Any]:
     """Analyze convergence rates for given data.
-    
+
     Args:
         methods_or_grid_sizes: Either list of method names or grid sizes
         h_values_or_errors: Either h_values array or errors dict (depending on first arg)
         errors: Errors dict (only if first arg is methods)
-    
+
     Returns:
         Dictionary containing convergence analysis results
     """
     analyzer = ConvergenceAnalyzer()
-    
+
     # Handle different calling patterns
     if h_values_or_errors is None:
         # Called with just grid_sizes, errors
@@ -581,11 +583,13 @@ def analyze_convergence(
                     h_values = grid_sizes
                     return analyzer.analyze_convergence(methods, h_values, errors)
                 else:
-                    raise ValueError("When grid_sizes is provided, errors dict must be provided as second argument")
+                    raise ValueError(
+                        "When grid_sizes is provided, errors dict must be provided as second argument")
             else:
                 # First arg is methods list
                 methods = methods_or_grid_sizes
-                raise ValueError("Methods list provided but h_values and errors not provided")
+                raise ValueError(
+                    "Methods list provided but h_values and errors not provided")
         else:
             raise ValueError("Invalid arguments provided")
     else:
@@ -595,7 +599,8 @@ def analyze_convergence(
                 methods = methods_or_grid_sizes
                 h_values = np.array(h_values_or_errors)
                 # errors should be the third argument but it's None, this is an error
-                raise ValueError("When methods and h_values provided, errors dict must be provided as third argument")
+                raise ValueError(
+                    "When methods and h_values provided, errors dict must be provided as third argument")
             else:
                 # Called with grid_sizes, errors
                 grid_sizes = np.array(methods_or_grid_sizes)
@@ -612,16 +617,16 @@ def analyze_convergence(
 
 def validate_solution(*args) -> bool:
     """Validate a solution array or method validation.
-    
+
     Args:
         If one argument: solution array to validate
         If three arguments: method_func, analytical_func, test_cases for method validation
-    
+
     Returns:
         Boolean validation result or method validation results
     """
     framework = ValidationFramework()
-    
+
     if len(args) == 1:
         # Single argument: validate solution array
         solution = args[0]
@@ -631,4 +636,5 @@ def validate_solution(*args) -> bool:
         method_func, analytical_func, test_cases = args
         return framework.validate_method(method_func, analytical_func, test_cases)
     else:
-        raise ValueError("validate_solution expects either 1 argument (solution array) or 3 arguments (method_func, analytical_func, test_cases)")
+        raise ValueError(
+            "validate_solution expects either 1 argument (solution array) or 3 arguments (method_func, analytical_func, test_cases)")

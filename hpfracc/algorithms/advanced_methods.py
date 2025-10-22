@@ -359,7 +359,8 @@ class HadamardDerivative:
         # Prefer explicit alpha if provided; otherwise fall back to order
         provided = alpha if alpha is not None else order
         if provided is None:
-            raise TypeError("HadamardDerivative requires `alpha` or `order` parameter")
+            raise TypeError(
+                "HadamardDerivative requires `alpha` or `order` parameter")
 
         if isinstance(provided, (int, float)):
             self.alpha = FractionalOrder(provided)
@@ -747,7 +748,7 @@ def reiz_feller_derivative(
 
 class OptimizedWeylDerivative(WeylDerivative):
     """Alias for backward compatibility with optimized Weyl derivative."""
-    
+
     def __init__(self, order: Union[float, FractionalOrder], **kwargs):
         """Initialize optimized Weyl derivative calculator."""
         super().__init__(order, optimized=True, **kwargs)
@@ -755,7 +756,7 @@ class OptimizedWeylDerivative(WeylDerivative):
 
 class OptimizedMarchaudDerivative(MarchaudDerivative):
     """Alias for backward compatibility with optimized Marchaud derivative."""
-    
+
     def __init__(self, order: Union[float, FractionalOrder], **kwargs):
         """Initialize optimized Marchaud derivative calculator."""
         super().__init__(order, **kwargs)
@@ -763,7 +764,7 @@ class OptimizedMarchaudDerivative(MarchaudDerivative):
 
 class OptimizedHadamardDerivative(HadamardDerivative):
     """Alias for backward compatibility with optimized Hadamard derivative."""
-    
+
     def __init__(self, order: Union[float, FractionalOrder], **kwargs):
         """Initialize optimized Hadamard derivative calculator."""
         super().__init__(order, **kwargs)
@@ -771,7 +772,7 @@ class OptimizedHadamardDerivative(HadamardDerivative):
 
 class OptimizedReizFellerDerivative(ReizFellerDerivative):
     """Alias for backward compatibility with optimized Reiz-Feller derivative."""
-    
+
     def __init__(self, order: Union[float, FractionalOrder], **kwargs):
         """Initialize optimized Reiz-Feller derivative calculator."""
         super().__init__(order, **kwargs)
@@ -779,7 +780,7 @@ class OptimizedReizFellerDerivative(ReizFellerDerivative):
 
 class OptimizedAdomianDecomposition(AdomianDecomposition):
     """Alias for backward compatibility with optimized Adomian decomposition."""
-    
+
     def __init__(self, order: Union[float, FractionalOrder], **kwargs):
         """Initialize optimized Adomian decomposition calculator."""
         super().__init__(order, **kwargs)

@@ -33,7 +33,8 @@ class FractionalOrder:
         if isinstance(alpha, FractionalOrder):
             self.alpha = alpha.alpha
             # preserve method on copy if not explicitly provided
-            self.method = method if method is not None else getattr(alpha, "method", None)
+            self.method = method if method is not None else getattr(
+                alpha, "method", None)
         else:
             self.alpha = float(alpha)
             self.method = method
@@ -53,7 +54,7 @@ class FractionalOrder:
     def value(self) -> float:
         """Get the fractional order value."""
         return self.alpha
-    
+
     @property
     def is_integer(self) -> bool:
         """Check if the order is an integer."""
@@ -120,7 +121,8 @@ class FractionalDefinition:
             order: Fractional order
             definition_type: Type of fractional definition
         """
-        self.order = FractionalOrder(order) if not isinstance(order, FractionalOrder) else order
+        self.order = FractionalOrder(order) if not isinstance(
+            order, FractionalOrder) else order
         self.definition_type = definition_type
         # Keep alpha for backward compatibility
         self.alpha = self.order

@@ -145,18 +145,18 @@ class MemoryManager:
             Dictionary with optimization results
         """
         before = self.get_memory_usage()
-        
+
         # Force garbage collection
         self.force_garbage_collection()
-        
+
         # Clear numpy cache if available
         try:
             np.core._multiarray_umath._clear_floatstatus()
         except AttributeError:
             pass
-        
+
         after = self.get_memory_usage()
-        
+
         return {
             "freed_memory": before["rss"] - after["rss"],
             "optimization_applied": True,
@@ -341,7 +341,7 @@ def optimize_memory_usage_func(*args, **kwargs):
     if args and callable(args[0]):
         # Used as decorator - use the decorator function defined earlier at line 309
         func = args[0]
-        
+
         @wraps(func)
         def wrapper(*args, **kwargs):
             memory_manager = MemoryManager()
@@ -371,6 +371,7 @@ def optimize_memory_usage_func(*args, **kwargs):
         # Called directly
         manager = MemoryManager()
         return manager.optimize_memory()
+
 
 # Make optimize_memory_usage an alias to the dual-purpose function
 optimize_memory_usage = optimize_memory_usage_func

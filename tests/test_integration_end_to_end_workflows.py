@@ -7,13 +7,17 @@ focusing on real-world research scenarios with fractional calculus and ML.
 """
 
 import numpy as np
-import torch
+import pytest
 import time
 from typing import Dict, List, Tuple, Any
 from unittest.mock import MagicMock
+import torch
 
 # Import core fractional calculus components
-from hpfracc.core.derivatives import CaputoDerivative, RiemannLiouvilleDerivative
+from hpfracc.algorithms.optimized_methods import (
+    OptimizedCaputo as CaputoDerivative,
+    OptimizedRiemannLiouville as RiemannLiouvilleDerivative,
+)
 from hpfracc.core.integrals import FractionalIntegral, RiemannLiouvilleIntegral
 from hpfracc.special.mittag_leffler import mittag_leffler
 from hpfracc.special.gamma_beta import gamma, beta
@@ -371,7 +375,7 @@ class TestCompleteResearchPipeline:
             
             # Train ML model on fractional features
             features = np.array([[results['mean'], results['std']] 
-                               for results in analysis_results.values()])
+                                   for results in analysis_results.values()])
             targets = np.array([results['alpha'] for results in analysis_results.values()])
             
             # Simulate ML training

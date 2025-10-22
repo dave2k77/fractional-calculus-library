@@ -11,6 +11,8 @@ from typing import Union, Optional, Tuple, Callable
 from ..core.definitions import FractionalOrder
 
 # Use adapter system for gamma function instead of direct imports
+
+
 def _get_gamma_function():
     """Get gamma function through adapter system."""
     try:
@@ -20,6 +22,7 @@ def _get_gamma_function():
         # Fallback to scipy
         from scipy.special import gamma
         return gamma
+
 
 gamma = _get_gamma_function()
 
@@ -676,7 +679,8 @@ class AdaptiveFractionalODESolver(FractionalODESolver):
         safety = 0.9          # safety factor on step adaptation
         max_growth = 5.0      # limit how fast h can grow
         min_shrink = 0.2      # limit how fast h can shrink
-        p_acc = 0.5           # exponent when accepting (typical for embedded order diff)
+        # exponent when accepting (typical for embedded order diff)
+        p_acc = 0.5
         p_rej = 0.25          # exponent when rejecting
         tiny = 10*np.finfo(float).eps
 
@@ -687,11 +691,12 @@ class AdaptiveFractionalODESolver(FractionalODESolver):
         while t < tf - tiny:
             total_iters += 1
             if total_iters > max_total_iters:
-                raise RuntimeError("Adaptive solver exceeded maximum total iterations; likely stalled.")
+                raise RuntimeError(
+                    "Adaptive solver exceeded maximum total iterations; likely stalled.")
 
             # Enforce a floor on the step that depends on current magnitude of t
             h_floor = max(getattr(self, "min_h", 1e-12),
-                        10*np.finfo(float).eps * max(1.0, abs(t)))
+                          10*np.finfo(float).eps * max(1.0, abs(t)))
 
             # avoid negative or zero step
             h = max(h, h_floor)
@@ -702,7 +707,8 @@ class AdaptiveFractionalODESolver(FractionalODESolver):
 
             # If FP says no progress, force a slightly bigger step
             if t + h <= t:
-                h = max(h_floor, (tf - t))  # snap to remaining interval if needed
+                # snap to remaining interval if needed
+                h = max(h_floor, (tf - t))
 
             # Inner retry loop for the same target (PI controller pattern)
             retries = 0
@@ -720,7 +726,8 @@ class AdaptiveFractionalODESolver(FractionalODESolver):
                 y_trial = self._adaptive_step(f, t, t_next, y, alpha, h)
 
                 # Compute a scalar error norm robustly
-                err_val = self._estimate_error(f, t, t_next, y, y_trial, alpha, h)
+                err_val = self._estimate_error(
+                    f, t, t_next, y, y_trial, alpha, h)
 
                 # Convert to finite scalar
                 if isinstance(err_val, np.ndarray):
@@ -743,7 +750,8 @@ class AdaptiveFractionalODESolver(FractionalODESolver):
                 if err == 0.0:
                     factor = max_growth
                 else:
-                    factor = safety * (self.tol / err) ** (p_acc if err <= self.tol else p_rej)
+                    factor = safety * \
+                        (self.tol / err) ** (p_acc if err <= self.tol else p_rej)
                     # clamp
                     factor = float(np.clip(factor, min_shrink, max_growth))
 
@@ -754,7 +762,8 @@ class AdaptiveFractionalODESolver(FractionalODESolver):
                     t_values.append(t)
                     y_values.append(y.copy())
                     # Propose next h
-                    h = max(h_floor, min(getattr(self, "max_h", np.inf), h * factor))
+                    h = max(h_floor, min(
+                        getattr(self, "max_h", np.inf), h * factor))
                     break
                 else:
                     # Reject: shrink and retry (do not advance t)
@@ -766,13 +775,13 @@ class AdaptiveFractionalODESolver(FractionalODESolver):
                         y = y_trial
                         t_values.append(t)
                         y_values.append(y.copy())
-                        h = max(h_floor, min(getattr(self, "max_h", np.inf), h * 1.25))
+                        h = max(h_floor, min(
+                            getattr(self, "max_h", np.inf), h * 1.25))
                         break
                     h = h_new
                     retries += 1
 
         return np.array(t_values, dtype=float), np.vstack(y_values)
-
 
     def _adaptive_step(
         self,

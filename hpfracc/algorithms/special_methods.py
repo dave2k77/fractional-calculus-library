@@ -47,7 +47,7 @@ class FractionalLaplacian:
     def __init__(self, alpha: Union[float, FractionalOrder], *, dimension: int = 1, boundary_conditions: Optional[str] = None):
         """
         Initialize fractional Laplacian calculator.
-        
+
         Args:
             order: Fractional order (0 < α < 2)
             dimension: Spatial dimension
@@ -147,7 +147,7 @@ class FractionalLaplacian:
 
         # Store original length
         original_len = len(f)
-        
+
         # Ensure N is even for FFT
         if N % 2 == 1:
             N += 1
@@ -337,7 +337,8 @@ class FractionalFourierTransform:
         x_array = x_array[:min_len]
 
         if len(f_array) == 0 or len(x_array) == 0:
-            raise ValueError("Empty function or domain arrays are not supported")
+            raise ValueError(
+                "Empty function or domain arrays are not supported")
 
         # Auto-select method based on problem size
         if method == "auto":
@@ -1093,11 +1094,11 @@ def fractional_mellin_transform(
 
 class SpecialMethodsConfig:
     """Configuration for special methods optimization."""
-    
+
     def __init__(self, optimized: bool = True, parallel: bool = False):
         """
         Initialize special methods configuration.
-        
+
         Args:
             optimized: Enable optimized implementations
             parallel: Enable parallel processing (if available)
@@ -1188,26 +1189,26 @@ class SpecialOptimizedWeylDerivative:
         # Standard FFT-based Weyl derivative computation
         N = len(f)
         u = np.fft.fftfreq(N, h)
-        
+
         # Compute kernel
         kernel = self._compute_weyl_kernel(u, h)
-        
+
         # FFT convolution
         f_fft = np.fft.fft(f)
         result_fft = f_fft * kernel
         result = np.fft.ifft(result_fft)
-        
+
         return np.real(result)
 
     def _compute_hybrid(self, f: np.ndarray, x: np.ndarray, h: float) -> np.ndarray:
         """Compute using hybrid approach combining FRFT and standard FFT."""
         # Use a combination of FRFT for low frequencies and standard FFT for high frequencies
         N = len(f)
-        
+
         # For small arrays, use standard FFT
         if N < 64:
             return self._compute_standard_fft(f, x, h)
-        
+
         # For larger arrays, use a hybrid approach
         # Use FRFT for the main computation
         try:
@@ -1286,7 +1287,8 @@ class SpecialOptimizedMarchaudDerivative:
             h: float) -> np.ndarray:
         """Compute using Fractional Z-Transform."""
         # Use Z-transform for computation
-        z_values = np.exp(1j * np.linspace(0, 2 * np.pi, len(f), endpoint=False))
+        z_values = np.exp(
+            1j * np.linspace(0, 2 * np.pi, len(f), endpoint=False))
         result = self.z_transform.transform(f, z_values, method="fft")
         return np.real(np.fft.ifft(result))
 
@@ -1295,7 +1297,7 @@ class SpecialOptimizedMarchaudDerivative:
         # Standard Marchaud derivative computation
         N = len(f)
         result = np.zeros_like(f)
-        
+
         for n in range(N):
             for k in range(n + 1):
                 # Use gamma function for fractional alpha
@@ -1312,7 +1314,7 @@ class SpecialOptimizedMarchaudDerivative:
                     )
                 if n - k < len(f):
                     result[n] += weight * f[n - k]
-        
+
         return result / (h ** self.alpha_val)
 
 
@@ -1386,15 +1388,15 @@ class SpecialOptimizedReizFellerDerivative:
         """Compute using spectral method."""
         N = len(f)
         u = np.fft.fftfreq(N, h)
-        
+
         # Compute spectral kernel
         kernel = np.abs(u) ** self.alpha_val
-        
+
         # FFT convolution
         f_fft = np.fft.fft(f)
         result_fft = f_fft * kernel
         result = np.fft.ifft(result_fft)
-        
+
         return np.real(result)
 
 

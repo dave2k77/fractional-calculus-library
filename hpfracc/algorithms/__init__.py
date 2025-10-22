@@ -75,16 +75,16 @@ from .advanced_methods import (
 )
 
 # Special optimized methods (now consolidated in special_methods)
-from .special_methods import (
-    SpecialOptimizedWeylDerivative,
-    SpecialOptimizedMarchaudDerivative,
-    SpecialOptimizedReizFellerDerivative,
-    UnifiedSpecialMethods,
-    special_optimized_weyl_derivative,
-    special_optimized_marchaud_derivative,
-    special_optimized_reiz_feller_derivative,
-    unified_special_derivative,
-)
+# from .special_methods import (
+#     SpecialOptimizedWeylDerivative,
+#     SpecialOptimizedMarchaudDerivative,
+#     SpecialOptimizedReizFellerDerivative,
+#     UnifiedSpecialMethods,
+#     special_optimized_weyl_derivative,
+#     special_optimized_marchaud_derivative,
+#     special_optimized_reiz_feller_derivative,
+#     unified_special_derivative,
+# )
 
 # FFT methods (consolidated into optimized_methods.py)
 # from .fft_methods import FFTFractionalMethods  # REMOVED - use

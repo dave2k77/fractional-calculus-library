@@ -123,7 +123,8 @@ class ErrorAnalyzer:
             # Attempt fallback to a writable temp directory without changing public db_path
             try:
                 fallback_dir = tempfile.gettempdir()
-                fallback_path = os.path.join(fallback_dir, os.path.basename(self.db_path))
+                fallback_path = os.path.join(
+                    fallback_dir, os.path.basename(self.db_path))
                 os.makedirs(os.path.dirname(fallback_path), exist_ok=True)
                 conn = sqlite3.connect(fallback_path)
                 cursor = conn.cursor()
@@ -146,14 +147,19 @@ class ErrorAnalyzer:
                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                     )
                 ''')
-                cursor.execute('CREATE INDEX IF NOT EXISTS idx_method_name ON error_events(method_name)')
-                cursor.execute('CREATE INDEX IF NOT EXISTS idx_error_type ON error_events(error_type)')
-                cursor.execute('CREATE INDEX IF NOT EXISTS idx_timestamp ON error_events(timestamp)')
-                cursor.execute('CREATE INDEX IF NOT EXISTS idx_error_hash ON error_events(error_hash)')
+                cursor.execute(
+                    'CREATE INDEX IF NOT EXISTS idx_method_name ON error_events(method_name)')
+                cursor.execute(
+                    'CREATE INDEX IF NOT EXISTS idx_error_type ON error_events(error_type)')
+                cursor.execute(
+                    'CREATE INDEX IF NOT EXISTS idx_timestamp ON error_events(timestamp)')
+                cursor.execute(
+                    'CREATE INDEX IF NOT EXISTS idx_error_hash ON error_events(error_hash)')
                 conn.commit()
                 conn.close()
                 self._active_db_path = fallback_path
-                logger.info(f"Error analysis database initialized at fallback path {self._active_db_path}")
+                logger.info(
+                    f"Error analysis database initialized at fallback path {self._active_db_path}")
             except Exception as e2:
                 logger.error(f"Fallback database initialization failed: {e2}")
                 self.enable_analysis = False

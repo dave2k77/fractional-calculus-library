@@ -9,6 +9,11 @@ This module provides common utility functions used throughout the HPFRACC librar
 - Common mathematical operations
 """
 
+from .definitions import FractionalOrder
+from scipy.special import gamma, factorial
+import logging
+import time
+from functools import wraps
 import numpy as np
 import warnings
 
@@ -23,13 +28,6 @@ from typing import Union, Callable, Optional, Tuple, List, Dict, Any
 
 # Module-level warning tracking
 _warning_tracker = set()
-from functools import wraps
-import time
-import logging
-from scipy.special import gamma, factorial
-
-
-from .definitions import FractionalOrder
 
 
 # Mathematical utilities

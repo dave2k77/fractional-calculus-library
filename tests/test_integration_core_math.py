@@ -8,12 +8,14 @@ of the hpfracc library, focusing on consistency and correctness.
 
 import numpy as np
 import pytest
-import torch
 import math
 from typing import Callable
 
 # Import core mathematical components
-from hpfracc.core.derivatives import CaputoDerivative, RiemannLiouvilleDerivative
+from hpfracc.algorithms.optimized_methods import (
+    OptimizedCaputo as CaputoDerivative,
+    OptimizedRiemannLiouville as RiemannLiouvilleDerivative,
+)
 from hpfracc.core.integrals import FractionalIntegral, RiemannLiouvilleIntegral
 from hpfracc.special.mittag_leffler import mittag_leffler
 from hpfracc.special.gamma_beta import gamma, beta

@@ -110,7 +110,7 @@ class PlotManager:
             Tuple of (figure, axes) objects
         """
         fig, ax = plt.subplots(figsize=self.figsize)
-        
+
         ax.plot(x, y, linewidth=2)
         ax.set_title(title, fontweight="bold")
         ax.set_xlabel(xlabel)
@@ -361,7 +361,7 @@ def create_comparison_plot(
     xlabel: str = "x", ylabel: str = "y", save_path: Optional[str] = None,
 ) -> Tuple[plt.Figure, plt.Axes]:
     """Create a comparison plot of multiple datasets.
-    
+
     Args:
         data_dict_or_x: Either a dict of {label: (x_data, y_data)} or x-axis data
         data: If first arg is x-axis data, this should be y-axis data
@@ -371,7 +371,7 @@ def create_comparison_plot(
         save_path: Path to save the plot
     """
     manager = PlotManager()
-    
+
     if isinstance(data_dict_or_x, dict):
         # Called with data_dict
         data_dict = data_dict_or_x
@@ -383,12 +383,14 @@ def create_comparison_plot(
         x_data = data_dict_or_x
         y_data = data
         if y_data is None:
-            raise ValueError("When x data is provided, y data must be provided as second argument")
-        
+            raise ValueError(
+                "When x data is provided, y data must be provided as second argument")
+
         # Handle different formats for y_data
         if isinstance(y_data, dict):
             # Convert dict of {label: y_values} to dict of {label: (x, y)}
-            data_dict = {label: (x_data, y_values) for label, y_values in y_data.items()}
+            data_dict = {label: (x_data, y_values)
+                         for label, y_values in y_data.items()}
         else:
             # Single y array
             data_dict = {"data": (x_data, y_data)}
@@ -402,7 +404,7 @@ def plot_convergence(
     title: str = "Convergence Analysis", save_path: Optional[str] = None,
 ) -> Tuple[plt.Figure, plt.Axes]:
     """Plot convergence analysis.
-    
+
     Args:
         methods_or_grid_sizes: Either list of method names or grid sizes
         h_values_or_errors: Either h_values array or errors dict
@@ -411,7 +413,7 @@ def plot_convergence(
         save_path: Path to save the plot
     """
     manager = PlotManager()
-    
+
     # Handle different calling patterns
     if h_values_or_errors is None:
         # Called with just grid_sizes, errors
@@ -420,11 +422,14 @@ def plot_convergence(
                 # First arg is grid sizes, second should be errors dict
                 grid_sizes = list(methods_or_grid_sizes)
                 if errors is not None:
-                    errors_dict = {method: list(errors[method]) for method in errors.keys()}
-                    fig = manager.plot_convergence(grid_sizes, errors_dict, title, save_path)
+                    errors_dict = {method: list(
+                        errors[method]) for method in errors.keys()}
+                    fig = manager.plot_convergence(
+                        grid_sizes, errors_dict, title, save_path)
                     return fig, fig.axes if fig.axes else None
                 else:
-                    raise ValueError("When grid_sizes is provided, errors dict must be provided as second argument")
+                    raise ValueError(
+                        "When grid_sizes is provided, errors dict must be provided as second argument")
             else:
                 raise ValueError("Invalid grid_sizes format")
         else:
@@ -436,21 +441,26 @@ def plot_convergence(
                 methods = methods_or_grid_sizes
                 h_values = np.array(h_values_or_errors)
                 # errors should be the third argument but it's None, this is an error
-                raise ValueError("When methods and h_values provided, errors dict must be provided as third argument")
+                raise ValueError(
+                    "When methods and h_values provided, errors dict must be provided as third argument")
             else:
                 # Called with grid_sizes, errors
                 grid_sizes = list(methods_or_grid_sizes)
                 errors_dict = h_values_or_errors
-                errors_dict = {method: list(errors_dict[method]) for method in errors_dict.keys()}
-                fig = manager.plot_convergence(grid_sizes, errors_dict, title, save_path)
+                errors_dict = {method: list(
+                    errors_dict[method]) for method in errors_dict.keys()}
+                fig = manager.plot_convergence(
+                    grid_sizes, errors_dict, title, save_path)
                 return fig, fig.axes if fig.axes else None
         else:
             # Called with methods, h_values, errors
             methods = methods_or_grid_sizes
             h_values = np.array(h_values_or_errors)
             grid_sizes = h_values.tolist()
-            errors_dict = {method: list(errors[method]) for method in methods if method in errors}
-            fig = manager.plot_convergence(grid_sizes, errors_dict, title, save_path)
+            errors_dict = {method: list(errors[method])
+                           for method in methods if method in errors}
+            fig = manager.plot_convergence(
+                grid_sizes, errors_dict, title, save_path)
             return fig, fig.axes if fig.axes else None
 
 
@@ -464,7 +474,8 @@ def plot_error_analysis(
     manager = PlotManager()
     # Create x-axis data
     x = np.arange(len(numerical))
-    fig = manager.plot_error_analysis(x, numerical, analytical, title, save_path)
+    fig = manager.plot_error_analysis(
+        x, numerical, analytical, title, save_path)
     return fig, fig.axes if fig.axes else None
 
 

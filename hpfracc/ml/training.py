@@ -112,14 +112,15 @@ class FractionalStepLR(FractionalScheduler):
     def step(self, metrics: Optional[float] = None) -> None:
         """Update learning rate"""
         self.last_epoch += 1
-        
+
         if self.last_epoch % self.step_size == 0:
             # Calculate new learning rate
-            new_lr = self.base_lr * (self.gamma ** (self.last_epoch // self.step_size))
-            
+            new_lr = self.base_lr * \
+                (self.gamma ** (self.last_epoch // self.step_size))
+
             # Apply fractional adjustment
             adjusted_lr = self.fractional_adjustment(new_lr)
-            
+
             # Update optimizer learning rate
             if hasattr(self.optimizer, 'param_groups'):
                 for group in self.optimizer.param_groups:
@@ -145,13 +146,13 @@ class FractionalExponentialLR(FractionalScheduler):
     def step(self, metrics: Optional[float] = None) -> None:
         """Update learning rate"""
         self.last_epoch += 1
-        
+
         # Calculate new learning rate
         new_lr = self.base_lr * (self.gamma ** self.last_epoch)
-        
+
         # Apply fractional adjustment
         adjusted_lr = self.fractional_adjustment(new_lr)
-        
+
         # Update optimizer learning rate
         if hasattr(self.optimizer, 'param_groups'):
             for group in self.optimizer.param_groups:
@@ -179,14 +180,14 @@ class FractionalCosineAnnealingLR(FractionalScheduler):
     def step(self, metrics: Optional[float] = None) -> None:
         """Update learning rate"""
         self.last_epoch += 1
-        
+
         # Calculate new learning rate using cosine annealing
         new_lr = self.eta_min + (self.base_lr - self.eta_min) * \
-                 (1 + np.cos(np.pi * self.last_epoch / self.T_max)) / 2
-        
+            (1 + np.cos(np.pi * self.last_epoch / self.T_max)) / 2
+
         # Apply fractional adjustment
         adjusted_lr = self.fractional_adjustment(new_lr)
-        
+
         # Update optimizer learning rate
         if hasattr(self.optimizer, 'param_groups'):
             for group in self.optimizer.param_groups:
@@ -214,7 +215,8 @@ class FractionalCyclicLR(FractionalScheduler):
         self.base_lr_user = base_lr
         self.max_lr = max_lr
         self.step_size_up = max(1, int(step_size_up))
-        self.step_size_down = int(step_size_down) if step_size_down is not None else self.step_size_up
+        self.step_size_down = int(
+            step_size_down) if step_size_down is not None else self.step_size_up
         self.cycle_len = self.step_size_up + self.step_size_down
         self.mode = mode
         self.iteration = 0
@@ -232,11 +234,13 @@ class FractionalCyclicLR(FractionalScheduler):
         if cycle_progress < self.step_size_up:
             scale = cycle_progress / float(self.step_size_up)
         else:
-            scale = 1.0 - (cycle_progress - self.step_size_up) / float(self.step_size_down)
+            scale = 1.0 - (cycle_progress - self.step_size_up) / \
+                float(self.step_size_down)
 
         # Base lr may come from user or optimizer
         base_lr = self.base_lr_user if self.base_lr_user is not None else self.base_lr
-        new_lr = base_lr + (self.max_lr - base_lr) * max(0.0, min(1.0, scale)) * self._scale_fn(self.iteration // self.cycle_len)
+        new_lr = base_lr + (self.max_lr - base_lr) * max(0.0, min(1.0, scale)
+                                                         ) * self._scale_fn(self.iteration // self.cycle_len)
 
         adjusted_lr = self.fractional_adjustment(new_lr)
 
@@ -245,6 +249,7 @@ class FractionalCyclicLR(FractionalScheduler):
                 group['lr'] = adjusted_lr
         elif hasattr(self.optimizer, 'lr'):
             self.optimizer.lr = adjusted_lr
+
 
 class FractionalReduceLROnPlateau(FractionalScheduler):
     """Reduce learning rate on plateau scheduler with fractional calculus integration"""
@@ -272,7 +277,7 @@ class FractionalReduceLROnPlateau(FractionalScheduler):
         self.threshold_mode = threshold_mode
         self.cooldown = cooldown
         self.min_lr = min_lr
-        
+
         self.best = None
         self.num_bad_epochs = 0
         self.cooldown_counter = 0
@@ -282,9 +287,9 @@ class FractionalReduceLROnPlateau(FractionalScheduler):
         """Update learning rate based on metrics"""
         if metrics is None:
             return
-        
+
         self.last_epoch += 1
-        
+
         # Check if we should reduce learning rate
         if self._should_reduce_lr(metrics):
             self._reduce_lr()
@@ -292,7 +297,7 @@ class FractionalReduceLROnPlateau(FractionalScheduler):
             self.cooldown_counter = self.cooldown
         else:
             self.num_bad_epochs += 1
-        
+
         if self.cooldown_counter > 0:
             self.cooldown_counter -= 1
 
@@ -301,34 +306,35 @@ class FractionalReduceLROnPlateau(FractionalScheduler):
         if self.best is None:
             self.best = metrics
             return False
-        
+
         if self.mode == 'min':
             is_better = metrics < self.best - self.threshold
         else:
             is_better = metrics > self.best + self.threshold
-        
+
         if is_better:
             self.best = metrics
-        
+
         return self.num_bad_epochs >= self.patience
 
     def _reduce_lr(self) -> None:
         """Reduce learning rate"""
         old_lr = self._get_base_lr()
         new_lr = max(old_lr * self.factor, self.min_lr)
-        
+
         # Apply fractional adjustment
         adjusted_lr = self.fractional_adjustment(new_lr)
-        
+
         # Update optimizer learning rate
         if hasattr(self.optimizer, 'param_groups'):
             for group in self.optimizer.param_groups:
                 group['lr'] = adjusted_lr
         elif hasattr(self.optimizer, 'lr'):
             self.optimizer.lr = adjusted_lr
-        
+
         if self.verbose:
-            print(f'Reducing learning rate from {old_lr:.6f} to {adjusted_lr:.6f}')
+            print(
+                f'Reducing learning rate from {old_lr:.6f} to {adjusted_lr:.6f}')
 
 
 class TrainingCallback(ABC):
@@ -374,9 +380,10 @@ class EarlyStoppingCallback(TrainingCallback):
         """Check if training should stop early"""
         if self.trainer is None:
             return
-        
-        current_score = self.trainer.validation_losses[-1] if self.trainer.validation_losses else float('inf')
-        
+
+        current_score = self.trainer.validation_losses[-1] if self.trainer.validation_losses else float(
+            'inf')
+
         if self.best_score is None:
             self.best_score = current_score
         elif self.mode == 'min':
@@ -391,7 +398,7 @@ class EarlyStoppingCallback(TrainingCallback):
                 self.counter = 0
             else:
                 self.counter += 1
-        
+
         if self.counter >= self.patience:
             self.early_stop = True
             if self.trainer:
@@ -422,15 +429,17 @@ class ModelCheckpointCallback(TrainingCallback):
         """Save model checkpoint if needed"""
         if self.trainer is None:
             return
-        
+
         # Get the metric to monitor
         if self.monitor == 'val_loss':
-            current_score = self.trainer.validation_losses[-1] if self.trainer.validation_losses else float('inf')
+            current_score = self.trainer.validation_losses[-1] if self.trainer.validation_losses else float(
+                'inf')
         elif self.monitor == 'train_loss':
-            current_score = self.trainer.training_losses[-1] if self.trainer.training_losses else float('inf')
+            current_score = self.trainer.training_losses[-1] if self.trainer.training_losses else float(
+                'inf')
         else:
             return
-        
+
         # Check if we should save
         should_save = False
         if self.best_score is None:
@@ -441,7 +450,7 @@ class ModelCheckpointCallback(TrainingCallback):
         else:
             if current_score > self.best_score:
                 should_save = True
-        
+
         if should_save:
             self.best_score = current_score
             if self.trainer.model:
@@ -480,13 +489,13 @@ class FractionalTrainer:
         self.method = method
         self.backend = backend or get_backend_manager().active_backend
         self.tensor_ops = get_tensor_ops(self.backend)
-        
+
         # Training state
         self.training_losses = []
         self.validation_losses = []
         self.current_epoch = 0
         self.should_stop = False
-        
+
         # Set trainer reference in callbacks
         for callback in self.callbacks:
             callback.set_trainer(self)
@@ -496,28 +505,28 @@ class FractionalTrainer:
         self.model.train()
         total_loss = 0.0
         num_batches = 0
-        
+
         for batch_idx, (data, target) in enumerate(dataloader):
             # Call batch begin callback
             for callback in self.callbacks:
                 callback.on_batch_begin(batch_idx)
-            
+
             # Forward pass
             output = self.model(data)
             loss = self.loss_fn(output, target)
-            
+
             # Backward pass
             self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()
-            
+
             total_loss += loss.item()
             num_batches += 1
-            
+
             # Call batch end callback
             for callback in self.callbacks:
                 callback.on_batch_end(batch_idx)
-        
+
         return total_loss / num_batches if num_batches > 0 else 0.0
 
     def validate_epoch(self, dataloader: Any) -> None:
@@ -525,57 +534,57 @@ class FractionalTrainer:
         self.model.eval()
         total_loss = 0.0
         num_batches = 0
-        
+
         with self.tensor_ops.no_grad():
             for data, target in dataloader:
                 output = self.model(data)
                 loss = self.loss_fn(output, target)
                 total_loss += loss.item()
                 num_batches += 1
-        
+
         return total_loss / num_batches if num_batches > 0 else 0.0
 
     def train(self, train_dataloader: Any, val_dataloader: Any, num_epochs: int) -> Dict[str, List[float]]:
         """Train the model"""
         print(f"Starting training for {num_epochs} epochs...")
-        
+
         for epoch in range(num_epochs):
             self.current_epoch = epoch
-            
+
             # Call epoch begin callback
             for callback in self.callbacks:
                 callback.on_epoch_begin(epoch)
-            
+
             # Training phase
             train_loss = self.train_epoch(train_dataloader)
             self.training_losses.append(train_loss)
-            
+
             # Validation phase
             val_loss = self.validate_epoch(val_dataloader)
             self.validation_losses.append(val_loss)
-            
+
             # Update scheduler
             if self.scheduler:
                 if isinstance(self.scheduler, FractionalReduceLROnPlateau):
                     self.scheduler.step(val_loss)
                 else:
                     self.scheduler.step()
-            
+
             # Print progress
             print(f"Epoch {epoch+1}/{num_epochs}: "
                   f"Train Loss: {train_loss:.6f}, "
                   f"Val Loss: {val_loss:.6f}, "
                   f"LR: {self.scheduler.get_last_lr()[0] if self.scheduler else 'N/A':.6f}")
-            
+
             # Call epoch end callback
             for callback in self.callbacks:
                 callback.on_epoch_end(epoch)
-            
+
             # Check if we should stop early
             if self.should_stop:
                 print("Early stopping triggered")
                 break
-        
+
         print("Training completed!")
         return {
             'training_losses': self.training_losses,
@@ -604,14 +613,14 @@ def create_fractional_scheduler(
         **kwargs) -> FractionalScheduler:
     """
     Create a fractional scheduler of the specified type
-    
+
     Args:
         scheduler_type: Type of scheduler ('step', 'exponential', 'cosine', 'plateau')
         optimizer: Optimizer to schedule
         fractional_order: Fractional order for derivative
         method: Method for fractional derivative
         **kwargs: Additional scheduler-specific parameters
-        
+
     Returns:
         Configured fractional scheduler
     """
@@ -622,10 +631,10 @@ def create_fractional_scheduler(
         'cyclic': FractionalCyclicLR,
         'plateau': FractionalReduceLROnPlateau,
     }
-    
+
     if scheduler_type.lower() not in scheduler_map:
         raise ValueError(f"Unknown scheduler type: {scheduler_type}")
-    
+
     scheduler_class = scheduler_map[scheduler_type.lower()]
     return scheduler_class(optimizer, fractional_order=fractional_order, method=method, **kwargs)
 
@@ -640,7 +649,7 @@ def create_fractional_trainer(
         method: str = "RL") -> FractionalTrainer:
     """
     Create a fractional trainer
-    
+
     Args:
         model: Model to train
         optimizer: Optimizer for training
@@ -649,7 +658,7 @@ def create_fractional_trainer(
         callbacks: Training callbacks (optional)
         fractional_order: Fractional order for derivative
         method: Method for fractional derivative
-        
+
     Returns:
         Configured fractional trainer
     """

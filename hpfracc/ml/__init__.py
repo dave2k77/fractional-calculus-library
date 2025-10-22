@@ -113,7 +113,7 @@ from .stochastic_memory_sampling import (
     create_stochastic_fractional_layer,
 )
 
-# Probabilistic Fractional Orders
+# Import probabilistic fractional orders
 from .probabilistic_fractional_orders import (
     ProbabilisticFractionalOrder,
     ProbabilisticFractionalLayer,
@@ -121,7 +121,6 @@ from .probabilistic_fractional_orders import (
     create_normal_alpha_layer,
     create_uniform_alpha_layer,
     create_beta_alpha_layer,
-    BayesianFractionalOptimizer,
 )
 
 # Export all components
@@ -202,10 +201,8 @@ __all__ = [
     'create_normal_alpha_layer',
     'create_uniform_alpha_layer',
     'create_beta_alpha_layer',
-    'BayesianFractionalOptimizer',
 ]
 __version__ = "0.1.0"
 __author__ = "Davian R. Chin"
 __email__ = "d.r.chin@pgr.reading.ac.uk"
 __institution__ = "Department of Biomedical Engineering, University of Reading"
-

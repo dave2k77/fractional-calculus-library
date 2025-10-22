@@ -11,6 +11,8 @@ from typing import Union, Optional, Tuple, Callable
 from ..core.definitions import FractionalOrder
 
 # Use adapter system for gamma function instead of direct imports
+
+
 def _get_gamma_function():
     """Get gamma function through adapter system."""
     try:
@@ -20,6 +22,7 @@ def _get_gamma_function():
         # Fallback to scipy
         from scipy.special import gamma
         return gamma
+
 
 gamma = _get_gamma_function()
 
@@ -56,7 +59,8 @@ class PredictorCorrectorSolver:
         """
         # Accept both string types and objects (e.g., FractionalOrder) gracefully
         try:
-            self.derivative_type = derivative_type.lower()  # type: ignore[attr-defined]
+            # type: ignore[attr-defined]
+            self.derivative_type = derivative_type.lower()
         except Exception:
             self.derivative_type = str(derivative_type).lower()
         self.order = order

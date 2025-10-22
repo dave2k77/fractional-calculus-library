@@ -306,7 +306,8 @@ class AnalyticsManager:
 
             # Handle both numpy array and list indexing for axes
             if hasattr(axes, 'shape'):  # numpy array case
-                ax1, ax2, ax3, ax4 = axes[0, 0], axes[0, 1], axes[1, 0], axes[1, 1]
+                ax1, ax2, ax3, ax4 = axes[0,
+                                          0], axes[0, 1], axes[1, 0], axes[1, 1]
             else:  # list case (for testing)
                 ax1, ax2, ax3, ax4 = axes[0][0], axes[0][1], axes[1][0], axes[1][1]
 

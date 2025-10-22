@@ -10,7 +10,6 @@ from typing import Union, Optional, Callable
 import warnings
 
 from ..core.definitions import FractionalOrder
-from ..special import gamma
 
 
 class CaputoFabrizioDerivative:
@@ -96,11 +95,12 @@ class CaputoFabrizioDerivative:
         # Handle empty arrays
         if len(t) == 0:
             return np.array([])
-        
+
         # Handle single element arrays
         if len(t) == 1:
-            return np.array([0.0])  # Derivative at a single point is typically 0
-        
+            # Derivative at a single point is typically 0
+            return np.array([0.0])
+
         # Validate inputs
         if len(t) < 2:
             raise ValueError("Time array must have at least 2 points")
@@ -335,11 +335,12 @@ class AtanganaBaleanuDerivative:
         # Handle empty arrays
         if len(t) == 0:
             return np.array([])
-        
+
         # Handle single element arrays
         if len(t) == 1:
-            return np.array([0.0])  # Derivative at a single point is typically 0
-        
+            # Derivative at a single point is typically 0
+            return np.array([0.0])
+
         # Validate inputs
         if len(t) < 2:
             raise ValueError("Time array must have at least 2 points")

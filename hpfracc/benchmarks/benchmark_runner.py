@@ -128,7 +128,8 @@ class BenchmarkRunner:
                 # Test with known analytical solutions
                 from scipy.special import gamma
                 test_cases = [
-                    ("power", lambda t: t**2, lambda t, a: 2 * t**(2 - a) / gamma(3 - a)),
+                    ("power", lambda t: t**2, lambda t,
+                     a: 2 * t**(2 - a) / gamma(3 - a)),
                     ("exponential", lambda t: np.exp(t), lambda t,
                      a: np.exp(t) * t**(-a) / gamma(1 - a))
                 ]

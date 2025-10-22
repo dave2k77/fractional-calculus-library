@@ -41,12 +41,14 @@ class BaseFractionalGNNLayer(ABC):
         # For backward compatibility, expose fractional_order as a special wrapper
         # that behaves like both a float and FractionalOrder
         if isinstance(fractional_order, float):
-            self.fractional_order = _AlphaCompatibilityWrapper(FractionalOrder(fractional_order))
+            self.fractional_order = _AlphaCompatibilityWrapper(
+                FractionalOrder(fractional_order))
         elif isinstance(fractional_order, FractionalOrder):
             # Preserve the original object for tests that check identity
             self.fractional_order = fractional_order
         else:
-            self.fractional_order = _AlphaCompatibilityWrapper(fractional_order)
+            self.fractional_order = _AlphaCompatibilityWrapper(
+                fractional_order)
         self.method = method
         self.use_fractional = use_fractional
         self.activation = activation
@@ -279,7 +281,7 @@ class FractionalGraphConv(BaseFractionalGNNLayer):
 
         # Ensure weight matrix matches input dtype
         weight = self.weight.to(x.dtype)
-        
+
         # Linear transformation
         out = torch.matmul(x, weight)
 
@@ -895,11 +897,11 @@ class FractionalGraphPooling(BaseFractionalGNNLayer):
         if 'ratio' in kwargs:
             pooling_ratio = kwargs['ratio']
         self.pooling_ratio = pooling_ratio
-        
+
         # Use in_channels as out_channels if not specified
         if out_channels is None:
             out_channels = in_channels
-            
+
         super().__init__(
             in_channels, out_channels, fractional_order, method,
             use_fractional, activation, dropout, bias, backend
@@ -915,7 +917,7 @@ class FractionalGraphPooling(BaseFractionalGNNLayer):
             self.score_network = torch.randn(
                 self.in_channels, 1, requires_grad=True)
             init.xavier_uniform_(self.score_network)
-            
+
             # Linear layer for channel reduction
             self.linear = torch.nn.Linear(self.in_channels, self.out_channels)
             init.xavier_uniform_(self.linear.weight)
@@ -931,10 +933,11 @@ class FractionalGraphPooling(BaseFractionalGNNLayer):
             # Scale for Xavier-like initialization
             scale = jnp.sqrt(2.0 / (self.in_channels + 1))
             self.score_network = self.score_network * scale
-            
+
             # Linear layer for channel reduction
             key, subkey = random.split(key)
-            self.linear_weight = random.normal(subkey, (self.out_channels, self.in_channels))
+            self.linear_weight = random.normal(
+                subkey, (self.out_channels, self.in_channels))
             self.linear_bias = random.normal(subkey, (self.out_channels,))
             # Xavier initialization
             scale = jnp.sqrt(2.0 / (self.in_channels + self.out_channels))
@@ -948,9 +951,10 @@ class FractionalGraphPooling(BaseFractionalGNNLayer):
             # Scale for Xavier-like initialization
             scale = np.sqrt(2.0 / (self.in_channels + 1))
             self.score_network = self.score_network * scale
-            
+
             # Linear layer for channel reduction
-            self.linear_weight = np.random.randn(self.out_channels, self.in_channels)
+            self.linear_weight = np.random.randn(
+                self.out_channels, self.in_channels)
             self.linear_bias = np.random.randn(self.out_channels)
             # Xavier initialization
             scale = np.sqrt(2.0 / (self.in_channels + self.out_channels))
@@ -1011,16 +1015,18 @@ class FractionalGraphPooling(BaseFractionalGNNLayer):
 
         # Pool features
         pooled_features = x[indices]
-        
+
         # Apply linear transformation to reduce channels
         if self.backend == BackendType.TORCH:
             pooled_features = self.linear(pooled_features)
         elif self.backend == BackendType.JAX:
             import jax.numpy as jnp
-            pooled_features = jnp.dot(pooled_features, self.linear_weight.T) + self.linear_bias
+            pooled_features = jnp.dot(
+                pooled_features, self.linear_weight.T) + self.linear_bias
         elif self.backend == BackendType.NUMBA:
             import numpy as np
-            pooled_features = np.dot(pooled_features, self.linear_weight.T) + self.linear_bias
+            pooled_features = np.dot(
+                pooled_features, self.linear_weight.T) + self.linear_bias
 
         # Pool edge index and batch (simplified)
         # In practice, you'd want to filter edges to only include connections

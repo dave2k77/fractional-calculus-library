@@ -112,7 +112,7 @@ class ConvergenceTester:
 
         # Handle cases with insufficient valid data more gracefully
         valid_indices = [i for i, e in enumerate(errors) if not np.isnan(e)]
-        
+
         if len(valid_indices) == 0:
             return {
                 "grid_sizes": grid_sizes,
@@ -356,11 +356,13 @@ class ConvergenceAnalyzer:
             Estimated optimal grid size
         """
         if len(errors) < 2 or len(grid_sizes) < 2:
-            raise ValueError("Need at least 2 points to estimate optimal grid size")
+            raise ValueError(
+                "Need at least 2 points to estimate optimal grid size")
 
         # Compute convergence rate
         try:
-            convergence_rate = self.tester.estimate_convergence_rate(grid_sizes, errors)
+            convergence_rate = self.tester.estimate_convergence_rate(
+                grid_sizes, errors)
         except (ValueError, np.linalg.LinAlgError):
             # If we can't compute convergence rate, use the largest grid size
             return max(grid_sizes)
@@ -373,7 +375,8 @@ class ConvergenceAnalyzer:
         reference_error = errors[-1]
         reference_grid_size = grid_sizes[-1]
         ratio = reference_error / target_accuracy
-        optimal_size = int(reference_grid_size * (ratio ** (1.0 / convergence_rate)))
+        optimal_size = int(reference_grid_size *
+                           (ratio ** (1.0 / convergence_rate)))
 
         return max(optimal_size, 1)
 
@@ -398,7 +401,8 @@ class ConvergenceAnalyzer:
         """
         # Compute observed convergence rate
         try:
-            observed_rate = self.tester.estimate_convergence_rate(grid_sizes, errors)
+            observed_rate = self.tester.estimate_convergence_rate(
+                grid_sizes, errors)
         except (ValueError, np.linalg.LinAlgError):
             return {
                 "convergence_rate": np.nan,
@@ -447,7 +451,8 @@ class ConvergenceAnalyzer:
         for method in methods:
             if method in errors:
                 try:
-                    rate = self.tester.estimate_convergence_rate(grid_sizes, errors[method])
+                    rate = self.tester.estimate_convergence_rate(
+                        grid_sizes, errors[method])
                     convergence_rates[method] = rate
                     if rate > best_rate:
                         best_rate = rate
@@ -487,22 +492,25 @@ def run_convergence_study(
     results = tester.test_multiple_norms(
         method_func, analytical_func, grid_sizes, test_params
     )
-    
+
     # Add expected keys for compatibility
     results['grid_sizes'] = grid_sizes
-    results['method_func'] = method_func.__name__ if hasattr(method_func, '__name__') else 'unknown'
-    
+    results['method_func'] = method_func.__name__ if hasattr(
+        method_func, '__name__') else 'unknown'
+
     # Add summary
     results['summary'] = {
         'total_norms': len(results),
         'convergence_rates': {norm: data.get('convergence_rate', np.nan) for norm, data in results.items() if isinstance(data, dict)},
         'best_norm': max(results.keys(), key=lambda k: results[k].get('convergence_rate', -np.inf) if isinstance(results[k], dict) else -np.inf)
     }
-    
+
     # Add top-level convergence_rate for compatibility
-    convergence_rates = [data.get('convergence_rate', np.nan) for data in results.values() if isinstance(data, dict)]
-    results['convergence_rate'] = np.nanmean(convergence_rates) if convergence_rates else np.nan
-    
+    convergence_rates = [data.get('convergence_rate', np.nan)
+                         for data in results.values() if isinstance(data, dict)]
+    results['convergence_rate'] = np.nanmean(
+        convergence_rates) if convergence_rates else np.nan
+
     return results
 
 
@@ -530,16 +538,16 @@ def run_method_convergence_test(
     results = tester.test_multiple_norms(
         method_func, analytical_func, grid_sizes, test_params
     )
-    
+
     # Extract convergence rate from l2 norm (most common)
     if 'l2' in results and results['l2'] is not None:
         convergence_rate = results['l2'].get('convergence_rate', np.nan)
     else:
         convergence_rate = np.nan
-    
+
     # Add convergence_rate at top level for compatibility
     results['convergence_rate'] = convergence_rate
-    
+
     return results
 
 

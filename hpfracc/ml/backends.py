@@ -12,11 +12,14 @@ import warnings
 import importlib
 
 # Backend availability checking (lazy; do not import heavy libs at module import)
+
+
 def _spec_available(module_name: str) -> bool:
     try:
         return importlib.util.find_spec(module_name) is not None
     except Exception:
         return False
+
 
 TORCH_AVAILABLE = _spec_available("torch")
 JAX_AVAILABLE = _spec_available("jax") and _spec_available("jax.numpy")
@@ -179,10 +182,12 @@ class BackendManager:
             try:
                 numba = importlib.import_module("numba")
                 try:
-                    gpu_available = hasattr(numba, 'cuda') and numba.cuda.is_available()
+                    gpu_available = hasattr(
+                        numba, 'cuda') and numba.cuda.is_available()
                 except BaseException:
                     gpu_available = False
-                dtype_val = getattr(numba, 'float32', None) or (getattr(np, 'float32', None) if np else None)
+                dtype_val = getattr(numba, 'float32', None) or (
+                    getattr(np, 'float32', None) if np else None)
             except Exception:
                 dtype_val = getattr(np, 'float32', None) if np else None
 
@@ -240,9 +245,11 @@ class BackendManager:
             if 'dtype' not in kwargs:
                 # Preserve integer types for classification targets
                 if hasattr(data, 'dtype') and 'int' in str(data.dtype):
-                    kwargs['dtype'] = importlib.import_module("jax.numpy").int32
+                    kwargs['dtype'] = importlib.import_module(
+                        "jax.numpy").int32
                 else:
-                    kwargs['dtype'] = importlib.import_module("jax.numpy").float32
+                    kwargs['dtype'] = importlib.import_module(
+                        "jax.numpy").float32
             return importlib.import_module("jax.numpy").array(data, **kwargs)
         elif self.active_backend == BackendType.NUMBA:
             # NUMBA works with numpy arrays

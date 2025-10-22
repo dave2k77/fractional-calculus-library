@@ -31,10 +31,11 @@ import torch
 import torch.nn as nn
 from torch import Tensor
 
+from .fractional_ops import spectral_derivative_torch, spectral_derivative_jax, JAX_AVAILABLE
+
 try:  # pragma: no cover - optional dependency
     import jax  # type: ignore
 
-    JAX_AVAILABLE = True
 except Exception:  # pragma: no cover - JAX not available in CI
     JAX_AVAILABLE = False
 
@@ -47,6 +48,7 @@ def _is_complex_dtype(dtype: torch.dtype) -> bool:
 # ---------------------------------------------------------------------------
 # Backend management
 # ---------------------------------------------------------------------------
+
 
 _Backend = Optional[str]
 _ALLOWED_BACKENDS = {
@@ -189,7 +191,8 @@ def robust_fft(x: Tensor, dim: int = -1, norm: str = "ortho") -> Tensor:
     try:
         return torch.fft.fft(x, dim=dim, norm=norm)
     except Exception as exc:  # pragma: no cover - exercised via tests
-        warnings.warn(f"PyTorch FFT failed ({exc}); falling back to NumPy backend.")
+        warnings.warn(
+            f"PyTorch FFT failed ({exc}); falling back to NumPy backend.")
         return _numpy_fft(x, dim=dim, norm=norm)
 
 
@@ -197,7 +200,8 @@ def robust_ifft(x: Tensor, dim: int = -1, norm: str = "ortho") -> Tensor:
     try:
         return torch.fft.ifft(x, dim=dim, norm=norm)
     except Exception as exc:  # pragma: no cover - exercised via tests
-        warnings.warn(f"PyTorch IFFT failed ({exc}); falling back to NumPy backend.")
+        warnings.warn(
+            f"PyTorch IFFT failed ({exc}); falling back to NumPy backend.")
         return _numpy_ifft(x, dim=dim, norm=norm)
 
 
@@ -265,7 +269,8 @@ def _normalize_dims(x: Tensor, dim: _DimType) -> Tuple[int, ...]:
         if axis < 0:
             axis += x.ndim
         if axis < 0 or axis >= x.ndim:
-            raise ValueError(f"Invalid dimension {axis} for tensor with {x.ndim} dims")
+            raise ValueError(
+                f"Invalid dimension {axis} for tensor with {x.ndim} dims")
         resolved.append(axis)
     return tuple(resolved)
 
@@ -334,101 +339,28 @@ def _reshape_kernel(kernel: Tensor, ndim: int, axis: int) -> Tensor:
     return kernel.view(shape)
 
 
-def _get_fractional_kernel(
-    alpha: _Alpha,
-    n: int,
-    kernel_type: str = "riesz",
-    epsilon: float = 1e-6,
-    dtype: Optional[torch.dtype] = None,
-    device: Optional[torch.device] = None,
-) -> Tensor:
-    """Return the 1D spectral kernel for the requested configuration."""
-
-    if n < 0:
-        raise ValueError("Kernel size must be non-negative")
-    dtype = dtype or torch.float32
-    device = device or torch.device("cpu")
-    reference = torch.empty(1, device=device, dtype=dtype)
-    alpha_tensor = _ensure_alpha_tensor(alpha, reference)
-    _validate_alpha(alpha_tensor)
-
-    freq_dtype = dtype if dtype in (torch.float32, torch.float64) else _real_dtype_for(dtype)
-    freqs = _frequency_grid(n, device=device, dtype=freq_dtype)
-    kernel = _build_kernel_from_freqs(freqs, alpha_tensor, kernel_type, epsilon)
-    if torch.is_complex(kernel):
-        target_dtype = torch.complex128 if dtype == torch.float64 else torch.complex64
-        return kernel.to(target_dtype)
-    return kernel.to(dtype)
-
-
 # ---------------------------------------------------------------------------
 # Spectral fractional derivative implementation
 # ---------------------------------------------------------------------------
 
 
-def _apply_fractional_along_dim(
-    x: Tensor,
-    alpha: Tensor,
-    kernel_type: str,
-    dim: int,
-    norm: str,
-    backend: str,
-    epsilon: float,
-) -> Tensor:
-    if x.shape[dim] == 0:
-        return x
-
-    fft = safe_fft(x, dim=dim, norm=norm, backend=backend)
-    kernel = _get_fractional_kernel(
-        alpha,
-        x.shape[dim],
-        kernel_type=kernel_type,
-        epsilon=epsilon,
-        dtype=_real_dtype_for(fft.dtype),
-        device=fft.device,
-    )
-    kernel = _to_complex(kernel, fft.dtype)
-    kernel = _reshape_kernel(kernel, x.ndim, dim)
-
-    transformed = fft * kernel
-    ifft = safe_ifft(transformed, dim=dim, norm=norm, backend=backend)
-
-    if torch.is_complex(x):
-        return ifft.to(x.dtype)
-    return ifft.real.to(x.dtype)
-
-
-def _spectral_fractional_impl(
-    x: Tensor,
+def spectral_fractional_derivative(
+    x: Union[Tensor, "jax.Array"],
     alpha: _Alpha,
     kernel_type: str = "riesz",
     dim: _DimType = -1,
-    norm: str = "ortho",
-    backend: _Backend = None,
-    epsilon: float = 1e-6,
-) -> Tensor:
-    if not isinstance(x, Tensor):
-        raise TypeError("Input to spectral fractional derivative must be a torch.Tensor")
-    if x.ndim == 0:
-        return x.clone()
-
-    backend_key = _resolve_backend(backend)
-    dims = _normalize_dims(x, dim)
-    alpha_tensor = _ensure_alpha_tensor(alpha, x.real if torch.is_complex(x) else x)
-    _validate_alpha(alpha_tensor)
-
-    result = x
-    for axis in dims:
-        result = _apply_fractional_along_dim(
-            result,
-            alpha_tensor,
-            kernel_type=kernel_type,
-            dim=axis,
-            norm=norm,
-            backend=backend_key,
-            epsilon=epsilon,
-        )
-    return result
+    **kwargs,
+) -> Union[Tensor, "jax.Array"]:
+    """
+    Dispatcher for spectral fractional derivative.
+    Selects backend based on input tensor type.
+    """
+    if isinstance(x, Tensor):
+        return spectral_derivative_torch(x, alpha, dim=dim, kernel_type=kernel_type)
+    elif JAX_AVAILABLE and isinstance(x, jax.Array):
+        return spectral_derivative_jax(x, alpha, dim=dim, kernel_type=kernel_type)
+    else:
+        raise TypeError(f"Unsupported input type: {type(x)}")
 
 
 class SpectralFractionalDerivative:
@@ -444,14 +376,11 @@ class SpectralFractionalDerivative:
         backend: _Backend = None,
         epsilon: float = 1e-6,
     ) -> Tensor:
-        return _spectral_fractional_impl(
+        return spectral_fractional_derivative(
             x,
             alpha,
             kernel_type=kernel_type,
             dim=dim,
-            norm=norm,
-            backend=backend,
-            epsilon=epsilon,
         )
 
 
@@ -465,26 +394,6 @@ class SpectralFractionalFunction:
     @staticmethod
     def backward(grad_output: Tensor, alpha: _Alpha, **kwargs) -> Tensor:
         return SpectralFractionalDerivative.apply(grad_output, alpha, **kwargs)
-
-
-def spectral_fractional_derivative(
-    x: Tensor,
-    alpha: _Alpha,
-    kernel_type: str = "riesz",
-    dim: _DimType = -1,
-    norm: str = "ortho",
-    backend: _Backend = None,
-    epsilon: float = 1e-6,
-) -> Tensor:
-    return SpectralFractionalDerivative.apply(
-        x,
-        alpha,
-        kernel_type=kernel_type,
-        dim=dim,
-        norm=norm,
-        backend=backend,
-        epsilon=epsilon,
-    )
 
 
 def fractional_derivative(
@@ -503,9 +412,6 @@ def fractional_derivative(
         alpha,
         kernel_type=kernel_type,
         dim=dim,
-        norm=norm,
-        backend=backend,
-        epsilon=epsilon,
     )
 
 
@@ -547,14 +453,17 @@ class SpectralFractionalLayer(nn.Module):
         super().__init__()
         if input_size is not None:
             if not isinstance(input_size, int) or input_size <= 0:
-                raise ValueError("input_size must be a positive integer when provided")
+                raise ValueError(
+                    "input_size must be a positive integer when provided")
         self.input_size = input_size
         self.output_size = output_size
         # Validate dims when provided
         if self.input_size is not None and (not isinstance(self.input_size, int) or self.input_size <= 0):
-            raise ValueError("input_size must be a positive integer when provided")
+            raise ValueError(
+                "input_size must be a positive integer when provided")
         if self.output_size is not None and (not isinstance(self.output_size, int) or self.output_size <= 0):
-            raise ValueError("output_size must be a positive integer when provided")
+            raise ValueError(
+                "output_size must be a positive integer when provided")
 
         self.kernel_type = kernel_type
         self.dim = dim
@@ -596,7 +505,8 @@ class SpectralFractionalLayer(nn.Module):
     def forward(self, x: Tensor) -> Tensor:
         alpha_tensor = self.alpha_param
         if alpha_tensor.device != x.device or alpha_tensor.dtype != _real_dtype_for(x.dtype):
-            alpha_tensor = alpha_tensor.to(device=x.device, dtype=_real_dtype_for(x.dtype))
+            alpha_tensor = alpha_tensor.to(
+                device=x.device, dtype=_real_dtype_for(x.dtype))
 
         result = spectral_fractional_derivative(
             x,
@@ -704,10 +614,12 @@ class SpectralFractionalNetwork(nn.Module):
             prev_dim = self.input_size
             if prev_dim <= 0:
                 # Allow zero input with safe placeholder, emit warning via print for tests context
-                print("Warning: input_size is 0; using placeholder dimension 1 for initialization")
+                print(
+                    "Warning: input_size is 0; using placeholder dimension 1 for initialization")
                 prev_dim = 1
             if len(self.hidden_sizes) == 0:
-                raise IndexError("hidden_sizes must be non-empty for coverage mode")
+                raise IndexError(
+                    "hidden_sizes must be non-empty for coverage mode")
             for hidden in self.hidden_sizes:
                 layer = nn.Linear(prev_dim, hidden)
                 self.layers.append(layer)
@@ -767,7 +679,8 @@ class BoundedAlphaParameter(nn.Module):
     ) -> None:
         super().__init__()
         if not (alpha_min < alpha_init < alpha_max):
-            raise ValueError("alpha_init must lie strictly between alpha_min and alpha_max")
+            raise ValueError(
+                "alpha_init must lie strictly between alpha_min and alpha_max")
         self.alpha_min = float(alpha_min)
         self.alpha_max = float(alpha_max)
         rho_init = self._alpha_to_rho(float(alpha_init))
@@ -960,7 +873,6 @@ __all__ = [
     "safe_ifft",
     "robust_fft",
     "robust_ifft",
-    "_get_fractional_kernel",
     "spectral_fractional_derivative",
     "fractional_derivative",
     "SpectralFractionalDerivative",

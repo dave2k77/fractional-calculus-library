@@ -104,7 +104,7 @@ class AnalyticalSolutions:
                 order = float(order)
             except ValueError:
                 raise ValueError(f"Invalid order value: {order}")
-        
+
         if order < 0:
             raise ValueError("Order must be non-negative")
 
@@ -140,7 +140,7 @@ class AnalyticalSolutions:
 
         This implementation uses the Caputo definition where D^α(c) = 0 for α > 0,
         which respects the boundary condition that derivatives of constants are zero.
-        
+
         Note: Riemann-Liouville derivatives give D^α(c) = c * x^(-α) / Γ(1-α) ≠ 0,
         which violates the intuitive boundary condition f'(c) = 0 for constant c.
         """
@@ -435,7 +435,8 @@ def validate_against_analytical(
     # Extract error metrics from successful tests
     error_metrics = {}
     if successful_tests:
-        all_errors = [r["errors"] for r in successful_tests if r["errors"] is not None]
+        all_errors = [r["errors"]
+                      for r in successful_tests if r["errors"] is not None]
         if all_errors:
             error_metrics = {
                 "l1": np.mean([e.get("l1", 0) for e in all_errors]),

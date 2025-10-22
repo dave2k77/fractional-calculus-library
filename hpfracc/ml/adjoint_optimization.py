@@ -354,7 +354,8 @@ class MemoryEfficientFractionalNetwork(nn.Module):
         self.output_size = output_size
         # For backward compatibility, expose fractional_order as a special wrapper
         # that behaves like both a float and FractionalOrder
-        self.fractional_order = _AlphaCompatibilityWrapper(FractionalOrder(fractional_order))
+        self.fractional_order = _AlphaCompatibilityWrapper(
+            FractionalOrder(fractional_order))
         self.activation = activation
         self.dropout = dropout
         self.adjoint_config = adjoint_config or AdjointConfig()

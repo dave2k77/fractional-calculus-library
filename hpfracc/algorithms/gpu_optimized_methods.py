@@ -74,7 +74,8 @@ class GPUConfig:
                 if not hasattr(warnings, '_cupy_warning_tracker'):
                     warnings._cupy_warning_tracker = set()
                 if "cupy_not_available" not in warnings._cupy_warning_tracker:
-                    warnings.warn("CuPy not available. CUDA acceleration will be limited.")
+                    warnings.warn(
+                        "CuPy not available. CUDA acceleration will be limited.")
                     warnings._cupy_warning_tracker.add("cupy_not_available")
 
         # Performance tracking
@@ -114,7 +115,8 @@ class GPUOptimizedRiemannLiouville:
             if alpha.size == 1:
                 self.alpha = FractionalOrder(float(alpha.reshape(-1)[0]))
             else:
-                raise RuntimeError("GPU input error: alpha must be scalar for GPU RL; received array")
+                raise RuntimeError(
+                    "GPU input error: alpha must be scalar for GPU RL; received array")
         else:
             self.alpha = alpha
 
@@ -225,18 +227,11 @@ class GPUOptimizedRiemannLiouville:
             "fft_convolution_kernel",
         )
 
-    def compute(
-        self,
-        f: Union[Callable, np.ndarray],
-        t: Union[float, np.ndarray],
-        h: Optional[float] = None,
-    ) -> Union[float, np.ndarray]:
-        """Compute GPU-optimized RL derivative."""
-        start_time = time.time()
-
-        # Prepare data
+    def _prepare_inputs(self, f, t, h):
+        """Prepare and validate input data."""
         if f is None or t is None:
-            raise RuntimeError("GPU device/input error: f and t must be provided")
+            raise RuntimeError(
+                "GPU device/input error: f and t must be provided")
         if hasattr(f, "__len__") and len(f) == 0:
             raise RuntimeError("GPU device/input error: empty input arrays")
         if hasattr(t, "__len__") and len(t) == 0:
@@ -246,7 +241,8 @@ class GPUOptimizedRiemannLiouville:
             if h is None:
                 h = t_max / 1000
             elif h <= 0:
-                raise RuntimeError("GPU device/input error: invalid step size h; must be > 0")
+                raise RuntimeError(
+                    "GPU device/input error: invalid step size h; must be > 0")
             t_array = np.arange(0, t_max + h, h)
             f_array = np.array([f(ti) for ti in t_array])
         else:
@@ -254,19 +250,34 @@ class GPUOptimizedRiemannLiouville:
             if h is None:
                 h = 1.0
             elif h <= 0:
-                raise RuntimeError("GPU device/input error: invalid step size h; must be > 0")
+                raise RuntimeError(
+                    "GPU device/input error: invalid step size h; must be > 0")
             t_array = np.arange(len(f)) * h
 
-        h_val = h
+        return f_array, t_array, h
+
+    def _execute_gpu_computation(self, f_array, t_array, h_val):
+        """Select and execute the appropriate GPU backend."""
+        if self.gpu_config.backend == "jax" and JAX_AVAILABLE:
+            return self._compute_jax(f_array, t_array, h_val)
+        elif self.gpu_config.backend == "cupy" and CUPY_AVAILABLE:
+            return self._compute_cupy(f_array, t_array, h_val)
+        else:
+            raise RuntimeError("GPU backend not available")
+
+    def compute(
+        self,
+        f: Union[Callable, np.ndarray],
+        t: Union[float, np.ndarray],
+        h: Optional[float] = None,
+    ) -> Union[float, np.ndarray]:
+        """Compute GPU-optimized RL derivative."""
+        start_time = time.time()
+
+        f_array, t_array, h_val = self._prepare_inputs(f, t, h)
 
         try:
-            # Try GPU computation
-            if self.gpu_config.backend == "jax" and JAX_AVAILABLE:
-                result = self._compute_jax(f_array, t_array, h_val)
-            elif self.gpu_config.backend == "cupy" and CUPY_AVAILABLE:
-                result = self._compute_cupy(f_array, t_array, h_val)
-            else:
-                raise RuntimeError("GPU backend not available")
+            result = self._execute_gpu_computation(f_array, t_array, h_val)
 
             # Update performance stats
             gpu_time = time.time() - start_time
@@ -448,7 +459,8 @@ class GPUOptimizedCaputo:
             if alpha.size == 1:
                 self.alpha = FractionalOrder(float(alpha.reshape(-1)[0]))
             else:
-                raise RuntimeError("GPU input error: alpha must be scalar for GPU Caputo; received array")
+                raise RuntimeError(
+                    "GPU input error: alpha must be scalar for GPU Caputo; received array")
         else:
             self.alpha = alpha
 
@@ -539,7 +551,8 @@ class GPUOptimizedCaputo:
 
         h_val = h or 1.0
         if h_val <= 0:
-            raise RuntimeError("GPU device/input error: invalid step size h; must be > 0")
+            raise RuntimeError(
+                "GPU device/input error: invalid step size h; must be > 0")
 
         try:
             if method == "l1":
@@ -609,7 +622,8 @@ class GPUOptimizedGrunwaldLetnikov:
             if alpha.size == 1:
                 self.alpha = FractionalOrder(float(alpha.reshape(-1)[0]))
             else:
-                raise RuntimeError("GPU input error: alpha must be scalar for GPU GL; received array")
+                raise RuntimeError(
+                    "GPU input error: alpha must be scalar for GPU GL; received array")
         else:
             self.alpha = alpha
 

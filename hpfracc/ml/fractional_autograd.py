@@ -183,7 +183,8 @@ def fractional_derivative_autograd(x: torch.Tensor, alpha: float, method: str = 
     """
     alpha_f = float(alpha)
     if not (0.0 < alpha_f < 2.0):
-        raise ValueError("alpha must satisfy 0 < alpha < 2 for fractional_derivative_autograd")
+        raise ValueError(
+            "alpha must satisfy 0 < alpha < 2 for fractional_derivative_autograd")
     return fractional_derivative(x, alpha_f, method)
 
 
@@ -222,7 +223,8 @@ class SpectralFractionalDerivative:
         else:
             alpha_value = float(fractional_order)
         if not (0.0 < alpha_value < 2.0):
-            raise ValueError("alpha must satisfy 0 < alpha < 2 for SpectralFractionalDerivative")
+            raise ValueError(
+                "alpha must satisfy 0 < alpha < 2 for SpectralFractionalDerivative")
         self.fractional_order = FractionalOrder(alpha_value)
 
     def compute(
@@ -269,9 +271,11 @@ try:  # pragma: no cover - defensive fallback for legacy-style tests
     import builtins as _builtins  # type: ignore
 
     if not hasattr(_builtins, "fractional_derivative_autograd"):
-        _builtins.fractional_derivative_autograd = fractional_derivative_autograd  # type: ignore[attr-defined]
+        # type: ignore[attr-defined]
+        _builtins.fractional_derivative_autograd = fractional_derivative_autograd
     if not hasattr(_builtins, "SpectralFractionalDerivative"):
-        _builtins.SpectralFractionalDerivative = SpectralFractionalDerivative  # type: ignore[attr-defined]
+        # type: ignore[attr-defined]
+        _builtins.SpectralFractionalDerivative = SpectralFractionalDerivative
 except Exception:
     pass
 

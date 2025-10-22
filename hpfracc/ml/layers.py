@@ -21,7 +21,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.nn.init as init
 import math
-from typing import Optional, Tuple, Union, Any, Dict, Literal
+from typing import Optional, Tuple, Union, Any, Dict, Literal, Callable
 from dataclasses import dataclass
 from abc import ABC, abstractmethod
 import warnings
@@ -45,13 +45,14 @@ except ImportError:
 
 # Import from relative paths
 from ..core.definitions import FractionalOrder
-from .fractional_autograd import fractional_derivative
 from .backends import get_backend_manager, BackendType
 from .tensor_ops import get_tensor_ops
+from .fractional_ops import spectral_derivative_torch, spectral_derivative_jax, JAX_AVAILABLE
 
 # ============================================================================
 # OPTIMAL CONFIGURATION
 # ============================================================================
+
 
 @dataclass
 class LayerConfig:
@@ -67,20 +68,21 @@ class LayerConfig:
     enable_caching: bool = True
     enable_benchmarking: bool = False
     performance_mode: str = "balanced"
-    
+
     def __post_init__(self):
         if self.fractional_order is None:
             self.fractional_order = FractionalOrder(0.5)
 
+
 class BackendManager:
     """Optimal backend management based on benchmark results"""
-    
+
     def __init__(self):
         self.available_backends = self._detect_available_backends()
         self.performance_cache = {}
         self.benchmark_results = {}
         self.backend_priority = ['pytorch', 'jax', 'numba', 'robust']
-    
+
     def _detect_available_backends(self) -> Dict[str, bool]:
         """Detect available backends and their capabilities"""
         backends = {
@@ -90,16 +92,16 @@ class BackendManager:
             'robust': True
         }
         return backends
-    
+
     def select_optimal_backend(self, config: LayerConfig, input_shape: Tuple[int, ...]) -> str:
         """Select optimal backend based on benchmark results"""
         if config.backend != BackendType.AUTO:
             backend_name = config.backend.value.lower()
             if self.available_backends.get(backend_name, False):
                 return backend_name
-        
+
         input_size = np.prod(input_shape)
-        
+
         if config.performance_mode == "speed":
             return 'pytorch'
         elif config.performance_mode == "memory":
@@ -113,75 +115,57 @@ class BackendManager:
             else:
                 return 'pytorch'
 
+
 class FractionalOps:
     """Optimal fractional operations with performance optimization"""
-    
+
     def __init__(self, config: LayerConfig):
         self.config = config
         self.cache = {} if config.enable_caching else None
-    
-    def apply_fractional_derivative(self, x: torch.Tensor, alpha: float, 
-                                  method: str = "RL", backend: str = "pytorch") -> torch.Tensor:
+
+    def apply_fractional_derivative(self, x: torch.Tensor, alpha: float,
+                                    method: str = "RL", backend: str = "pytorch") -> torch.Tensor:
         """Apply fractional derivative with optimal backend selection"""
         if x.dtype != self.config.dtype:
             x = x.to(self.config.dtype)
-        
+
         if self.cache is not None:
             cache_key = (x.shape, alpha, method, backend)
             if cache_key in self.cache:
                 return self.cache[cache_key]
-        
+
         try:
             if backend == 'jax' and JAX_AVAILABLE:
-                result = self._jax_fractional_derivative(x, alpha, method)
-            elif backend == 'numba' and NUMBA_AVAILABLE:
-                result = self._numba_fractional_derivative(x, alpha, method)
+                x_jax = jnp.array(x.detach().cpu().numpy())
+                result_jax = spectral_derivative_jax(x_jax, alpha)
+                result = torch.from_numpy(
+                    np.array(result_jax)).to(x.device).to(x.dtype)
             else:
-                result = self._pytorch_fractional_derivative(x, alpha, method)
-            
+                result = spectral_derivative_torch(x, alpha)
+
             if self.cache is not None:
                 self.cache[cache_key] = result
-            
+
             return result
-            
+
         except Exception as e:
-            warnings.warn(f"Fractional derivative failed with {backend}, falling back to PyTorch: {e}")
-            result = self._pytorch_fractional_derivative(x, alpha, method)
-            
+            warnings.warn(
+                f"Fractional derivative failed with {backend}, falling back to PyTorch: {e}")
+            result = spectral_derivative_torch(x, alpha)
+
             if self.cache is not None:
                 self.cache[cache_key] = result
-            
+
             return result
-    
-    def _pytorch_fractional_derivative(self, x: torch.Tensor, alpha: float, method: str) -> torch.Tensor:
-        """PyTorch implementation (best performance from benchmark)"""
-        return fractional_derivative(x, alpha, method)
-    
-    def _jax_fractional_derivative(self, x: torch.Tensor, alpha: float, method: str) -> torch.Tensor:
-        """JAX implementation"""
-        x_jax = jnp.array(x.detach().cpu().numpy())
-        result_jax = fractional_derivative(x_jax, alpha, method)
-        return torch.from_numpy(np.array(result_jax)).to(x.device).to(x.dtype)
-    
-    def _numba_fractional_derivative(self, x: torch.Tensor, alpha: float, method: str) -> torch.Tensor:
-        """NUMBA implementation"""
-        x_np = x.detach().cpu().numpy()
-        result_np = self._numba_frac_derivative_impl(x_np, alpha)
-        return torch.from_numpy(result_np).to(x.device).to(x.dtype)
-    
-    @staticmethod
-    @jit(nopython=True)
-    def _numba_frac_derivative_impl(x: np.ndarray, alpha: float) -> np.ndarray:
-        """NUMBA-compiled fractional derivative implementation"""
-        return x
 
 # ============================================================================
 # OPTIMAL BASE CLASS
 # ============================================================================
 
+
 class FractionalLayerBase(nn.Module, ABC):
     """Optimal base class for all fractional layers"""
-    
+
     def __init__(self, config: LayerConfig, *, backend: Optional[BackendType] = None):
         super().__init__()
         self.config = config
@@ -191,7 +175,7 @@ class FractionalLayerBase(nn.Module, ABC):
         self.tensor_ops = get_tensor_ops(self.backend)
         self.fractional_ops = FractionalOps(config)
         self._setup_layer()
-    
+
     def _setup_layer(self):
         """Setup layer-specific components"""
         self.use_fractional = self.config.use_fractional
@@ -199,7 +183,7 @@ class FractionalLayerBase(nn.Module, ABC):
         self.method = self.config.method
         self.activation = self.config.activation
         self.dropout = self.config.dropout
-        
+
         if self.activation == "relu":
             self.activation_fn = F.relu
         elif self.activation == "tanh":
@@ -208,27 +192,29 @@ class FractionalLayerBase(nn.Module, ABC):
             self.activation_fn = torch.sigmoid
         else:
             self.activation_fn = F.relu
-    
+
     def apply_fractional_derivative(self, x: torch.Tensor) -> torch.Tensor:
         """Apply fractional derivative with optimal backend selection"""
         if not self.use_fractional:
             return x
-        
-        backend = (self.backend.value if isinstance(self.backend, BackendType) else self.backend)
+
+        backend = (self.backend.value if isinstance(
+            self.backend, BackendType) else self.backend)
         if backend in (None, "auto"):
-            backend = self.backend_manager.select_optimal_backend(self.config, x.shape)
+            backend = self.backend_manager.select_optimal_backend(
+                self.config, x.shape)
         return self.fractional_ops.apply_fractional_derivative(x, self.alpha, self.method, backend)
-    
+
     def apply_activation(self, x: torch.Tensor) -> torch.Tensor:
         """Apply activation function"""
         return self.activation_fn(x)
-    
+
     def apply_dropout(self, x: torch.Tensor) -> torch.Tensor:
         """Apply dropout if training"""
         if self.training and self.dropout > 0:
             return F.dropout(x, p=self.dropout, training=True)
         return x
-    
+
     @abstractmethod
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Forward pass - must be implemented by subclasses"""
@@ -238,9 +224,10 @@ class FractionalLayerBase(nn.Module, ABC):
 # COMPREHENSIVE LAYER IMPLEMENTATIONS
 # ============================================================================
 
+
 class FractionalConv1D(FractionalLayerBase):
     """Optimal 1D Convolutional layer with fractional calculus integration"""
-    
+
     def __init__(self, in_channels: int, out_channels: int, kernel_size: int,
                  stride: int = 1, padding: int = 0, dilation: int = 1,
                  groups: int = 1, bias: bool = True,
@@ -248,7 +235,7 @@ class FractionalConv1D(FractionalLayerBase):
         if config is None:
             config = LayerConfig()
         super().__init__(config, backend=backend)
-        
+
         self.in_channels = in_channels
         self.out_channels = out_channels
         self.kernel_size = kernel_size
@@ -257,7 +244,7 @@ class FractionalConv1D(FractionalLayerBase):
         self.dilation = dilation
         self.groups = groups
         self.bias_flag = bool(bias)
-        
+
         # Validations
         if self.kernel_size <= 0:
             raise ValueError("kernel_size must be positive")
@@ -265,31 +252,33 @@ class FractionalConv1D(FractionalLayerBase):
             raise ValueError("stride must be positive")
         if self.groups <= 0:
             raise ValueError("groups must be positive")
-        
-        self.weight = nn.Parameter(torch.randn(out_channels, in_channels // self.groups, kernel_size, dtype=self.config.dtype))
-        self.bias = None if not self.bias_flag else nn.Parameter(torch.randn(out_channels, dtype=self.config.dtype))
+
+        self.weight = nn.Parameter(torch.randn(
+            out_channels, in_channels // self.groups, kernel_size, dtype=self.config.dtype))
+        self.bias = None if not self.bias_flag else nn.Parameter(
+            torch.randn(out_channels, dtype=self.config.dtype))
         self._initialize_weights()
-    
+
     def _initialize_weights(self):
         """Initialize weights using optimal methods"""
         fan_in = self.in_channels * self.kernel_size
         scale = math.sqrt(2.0 / fan_in)
-        
+
         with torch.no_grad():
             self.weight.normal_(0, scale)
             if self.bias is not None:
                 self.bias.normal_(0, 0.01)
-    
+
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Forward pass with optimal fractional derivative integration"""
         if x.dtype != self.config.dtype:
             x = x.to(self.config.dtype)
-        
+
         x_frac = self._apply_fractional_derivative(x)
         x_conv = self._apply_convolution(x_frac)
         x_act = self.apply_activation(x_conv)
         x_out = self.apply_dropout(x_act)
-        
+
         return x_out
 
     # Methods to facilitate test patching
@@ -299,9 +288,10 @@ class FractionalConv1D(FractionalLayerBase):
     def _apply_convolution(self, x: torch.Tensor) -> torch.Tensor:
         return F.conv1d(x, self.weight, self.bias, self.stride, self.padding, self.dilation, self.groups)
 
+
 class FractionalConv2D(FractionalLayerBase):
     """Optimal 2D Convolutional layer with fractional calculus integration"""
-    
+
     def __init__(self, in_channels: int, out_channels: int, kernel_size: Union[int, Tuple[int, int]],
                  stride: Union[int, Tuple[int, int]] = 1, padding: Union[int, Tuple[int, int]] = 0,
                  dilation: Union[int, Tuple[int, int]] = 1, groups: int = 1, bias: bool = True,
@@ -309,13 +299,16 @@ class FractionalConv2D(FractionalLayerBase):
         if config is None:
             config = LayerConfig()
         super().__init__(config, backend=backend)
-        
+
         self.in_channels = in_channels
         self.out_channels = out_channels
-        self.kernel_size = kernel_size if isinstance(kernel_size, tuple) else (kernel_size, kernel_size)
+        self.kernel_size = kernel_size if isinstance(
+            kernel_size, tuple) else (kernel_size, kernel_size)
         self.stride = stride if isinstance(stride, tuple) else (stride, stride)
-        self.padding = padding if isinstance(padding, tuple) else (padding, padding)
-        self.dilation = dilation if isinstance(dilation, tuple) else (dilation, dilation)
+        self.padding = padding if isinstance(
+            padding, tuple) else (padding, padding)
+        self.dilation = dilation if isinstance(
+            dilation, tuple) else (dilation, dilation)
         self.groups = groups
         self.bias_flag = bool(bias)
         if self.kernel_size[0] <= 0 or self.kernel_size[1] <= 0:
@@ -324,31 +317,33 @@ class FractionalConv2D(FractionalLayerBase):
             raise ValueError("stride must be positive")
         if self.groups <= 0:
             raise ValueError("groups must be positive")
-        
-        self.weight = nn.Parameter(torch.randn(out_channels, in_channels // self.groups, *self.kernel_size, dtype=self.config.dtype))
-        self.bias = None if not self.bias_flag else nn.Parameter(torch.randn(out_channels, dtype=self.config.dtype))
+
+        self.weight = nn.Parameter(torch.randn(
+            out_channels, in_channels // self.groups, *self.kernel_size, dtype=self.config.dtype))
+        self.bias = None if not self.bias_flag else nn.Parameter(
+            torch.randn(out_channels, dtype=self.config.dtype))
         self._initialize_weights()
-    
+
     def _initialize_weights(self):
         """Initialize weights using optimal methods"""
         fan_in = self.in_channels * self.kernel_size[0] * self.kernel_size[1]
         scale = math.sqrt(2.0 / fan_in)
-        
+
         with torch.no_grad():
             self.weight.normal_(0, scale)
             if self.bias is not None:
                 self.bias.normal_(0, 0.01)
-    
+
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Forward pass with optimal fractional derivative integration"""
         if x.dtype != self.config.dtype:
             x = x.to(self.config.dtype)
-        
+
         x_frac = self._apply_fractional_derivative(x)
         x_conv = self._apply_convolution(x_frac)
         x_act = self.apply_activation(x_conv)
         x_out = self.apply_dropout(x_act)
-        
+
         return x_out
 
     def _apply_fractional_derivative(self, x: torch.Tensor) -> torch.Tensor:
@@ -356,6 +351,7 @@ class FractionalConv2D(FractionalLayerBase):
 
     def _apply_convolution(self, x: torch.Tensor) -> torch.Tensor:
         return F.conv2d(x, self.weight, self.bias, self.stride, self.padding, self.dilation, self.groups)
+
 
 class FractionalLinear(FractionalLayerBase):
     """Optimal Linear layer with fractional calculus integration"""
@@ -370,15 +366,17 @@ class FractionalLinear(FractionalLayerBase):
         self.out_features = out_features
         self.bias_flag = bool(bias)
 
-        self.weight = nn.Parameter(torch.randn(out_features, in_features, dtype=self.config.dtype))
-        self.bias = None if not self.bias_flag else nn.Parameter(torch.randn(out_features, dtype=self.config.dtype))
+        self.weight = nn.Parameter(torch.randn(
+            out_features, in_features, dtype=self.config.dtype))
+        self.bias = None if not self.bias_flag else nn.Parameter(
+            torch.randn(out_features, dtype=self.config.dtype))
         self._initialize_weights()
 
     def _initialize_weights(self):
         """Initialize weights using optimal methods"""
         fan_in, _ = init._calculate_fan_in_and_fan_out(self.weight)
         scale = math.sqrt(2.0 / fan_in)
-        
+
         with torch.no_grad():
             self.weight.normal_(0, scale)
             if self.bias is not None:
@@ -388,19 +386,21 @@ class FractionalLinear(FractionalLayerBase):
         """Forward pass with optimal fractional derivative integration"""
         if x.dtype != self.config.dtype:
             x = x.to(self.config.dtype)
-        
+
         x_frac = self.apply_fractional_derivative(x)
         x_linear = F.linear(x_frac, self.weight, self.bias)
         x_act = self.apply_activation(x_linear)
         x_out = self.apply_dropout(x_act)
-        
+
         return x_out
 
 # Placeholder implementations for other layer types
 # These would be fully implemented in a complete version
 
+
 class FractionalLSTM(FractionalLayerBase):
     """Minimal LSTM layer wrapper satisfying tests."""
+
     def __init__(self, input_size: int, hidden_size: int, num_layers: int = 1,
                  bidirectional: bool = False, dropout: float = 0.0,
                  bias: bool = True, config: LayerConfig = None,
@@ -423,7 +423,7 @@ class FractionalLSTM(FractionalLayerBase):
                              bidirectional=self.bidirectional,
                              dropout=self.dropout if self.num_layers > 1 else 0.0,
                              batch_first=True)
-    
+
     def forward(self, x, return_state: bool = False):
         # Accept both (seq, batch, input) and (batch, seq, input)
         import torch
@@ -455,8 +455,10 @@ class FractionalLSTM(FractionalLayerBase):
             y = y.permute(1, 0, 2).contiguous()
         return y, state
 
+
 class FractionalTransformer(FractionalLayerBase):
     """Minimal Transformer wrapper satisfying tests."""
+
     def __init__(
         self,
         d_model: int,
@@ -480,7 +482,8 @@ class FractionalTransformer(FractionalLayerBase):
         nhead_final = n_heads if n_heads is not None else nhead
         if nhead_final is None:
             raise ValueError("nhead (or n_heads) must be provided")
-        dff_final = d_ff if d_ff is not None else (dim_feedforward if dim_feedforward is not None else 2048)
+        dff_final = d_ff if d_ff is not None else (
+            dim_feedforward if dim_feedforward is not None else 2048)
 
         # Store attributes with names expected by tests
         self.d_model = d_model
@@ -515,10 +518,12 @@ class FractionalTransformer(FractionalLayerBase):
             return tgt + (src.sum() * 0.0)
         return src
 
+
 class FractionalPooling(FractionalLayerBase):
     """Minimal pooling wrapper satisfying tests."""
-    def __init__(self, kernel_size: Union[int, Tuple[int,int]], stride: Union[int,Tuple[int,int]] = 1,
-                 padding: Union[int,Tuple[int,int]] = 0, pool_type: str = "max", dim: int = 1,
+
+    def __init__(self, kernel_size: Union[int, Tuple[int, int]], stride: Union[int, Tuple[int, int]] = 1,
+                 padding: Union[int, Tuple[int, int]] = 0, pool_type: str = "max", dim: int = 1,
                  config: LayerConfig = None, backend: Optional[BackendType] = None, fractional_order: float = 0.5):
         if config is None:
             config = LayerConfig()
@@ -532,24 +537,31 @@ class FractionalPooling(FractionalLayerBase):
             self.stride = int(stride)
             self.padding = int(padding)
         else:
-            self.kernel_size = kernel_size if isinstance(kernel_size, tuple) else (kernel_size, kernel_size)
-            self.stride = stride if isinstance(stride, tuple) else (stride, stride)
-            self.padding = padding if isinstance(padding, tuple) else (padding, padding)
-    
+            self.kernel_size = kernel_size if isinstance(
+                kernel_size, tuple) else (kernel_size, kernel_size)
+            self.stride = stride if isinstance(
+                stride, tuple) else (stride, stride)
+            self.padding = padding if isinstance(
+                padding, tuple) else (padding, padding)
+
     def forward(self, x):
         import torch.nn.functional as F
         # Infer pooling dimensionality from input shape if needed
         if (hasattr(x, 'dim') and x.dim() == 4) or self.dim == 2:
             if self.pool_type == "avg":
-                k2 = self.kernel_size if isinstance(self.kernel_size, tuple) else (self.kernel_size, self.kernel_size)
-                s2 = self.stride if isinstance(self.stride, tuple) else (self.stride, self.stride)
+                k2 = self.kernel_size if isinstance(self.kernel_size, tuple) else (
+                    self.kernel_size, self.kernel_size)
+                s2 = self.stride if isinstance(
+                    self.stride, tuple) else (self.stride, self.stride)
                 if s2 == (1, 1):
                     s2 = k2
                 return F.avg_pool2d(x, kernel_size=k2,
                                     stride=s2,
                                     padding=self.padding if isinstance(self.padding, tuple) else (self.padding, self.padding))
-            k2 = self.kernel_size if isinstance(self.kernel_size, tuple) else (self.kernel_size, self.kernel_size)
-            s2 = self.stride if isinstance(self.stride, tuple) else (self.stride, self.stride)
+            k2 = self.kernel_size if isinstance(self.kernel_size, tuple) else (
+                self.kernel_size, self.kernel_size)
+            s2 = self.stride if isinstance(
+                self.stride, tuple) else (self.stride, self.stride)
             if s2 == (1, 1):
                 s2 = k2
             return F.max_pool2d(x, kernel_size=k2,
@@ -564,8 +576,10 @@ class FractionalPooling(FractionalLayerBase):
                 return F.avg_pool2d(x, kernel_size=self.kernel_size, stride=self.stride, padding=self.padding)
             return F.max_pool2d(x, kernel_size=self.kernel_size, stride=self.stride, padding=self.padding)
 
+
 class FractionalBatchNorm1d(FractionalLayerBase):
     """Minimal BatchNorm1d wrapper satisfying tests."""
+
     def __init__(self, num_features: int, eps: float = 1e-5, momentum: float = 0.1,
                  affine: bool = True, track_running_stats: bool = True,
                  config: LayerConfig = None, backend: Optional[BackendType] = None):
@@ -580,13 +594,15 @@ class FractionalBatchNorm1d(FractionalLayerBase):
         self.affine = affine
         self.track_running_stats = track_running_stats
         self._bn = nn.BatchNorm1d(num_features, eps=eps, momentum=momentum,
-                                   affine=affine, track_running_stats=track_running_stats)
-    
+                                  affine=affine, track_running_stats=track_running_stats)
+
     def forward(self, x):
         return self._bn(x)
 
+
 class FractionalDropout(FractionalLayerBase):
     """Minimal Dropout wrapper satisfying tests."""
+
     def __init__(self, p: float = 0.5, inplace: bool = False,
                  config: LayerConfig = None, backend: Optional[BackendType] = None):
         if config is None:
@@ -597,15 +613,17 @@ class FractionalDropout(FractionalLayerBase):
         self.p = p
         self.inplace = inplace
         self._dropout = nn.Dropout(p=p, inplace=inplace)
-    
+
     def forward(self, x, training=None):
         if training is False:
             # In eval mode, dropout should not modify the input
             return x
         return self._dropout(x)
 
+
 class FractionalLayerNorm(FractionalLayerBase):
     """Minimal LayerNorm wrapper satisfying tests."""
+
     def __init__(self, normalized_shape: Union[int, Tuple[int, ...]], eps: float = 1e-5,
                  elementwise_affine: bool = True, config: LayerConfig = None,
                  backend: Optional[BackendType] = None):
@@ -622,21 +640,234 @@ class FractionalLayerNorm(FractionalLayerBase):
             self.normalized_shape = normalized_shape
         self.eps = eps
         self.elementwise_affine = elementwise_affine
-        self._ln = nn.LayerNorm(normalized_shape, eps=eps, elementwise_affine=elementwise_affine)
-    
+        self._ln = nn.LayerNorm(normalized_shape, eps=eps,
+                                elementwise_affine=elementwise_affine)
+
     def forward(self, x):
         return self._ln(x)
+
+# Fractional Unpooling Layers
+
+
+class FractionalMaxUnpool1d(FractionalLayerBase):
+    def __init__(self, kernel_size: int, stride: int = 1, padding: int = 0,
+                 output_size: Optional[Tuple[int, ...]] = None,
+                 config: LayerConfig = None, backend: Optional[BackendType] = None):
+        if config is None:
+            config = LayerConfig()
+        super().__init__(config, backend=backend)
+        self.kernel_size = kernel_size
+        self.stride = stride
+        self.padding = padding
+        self.output_size = output_size
+
+    def forward(self, x: torch.Tensor, indices: torch.Tensor) -> torch.Tensor:
+        return F.max_unpool1d(
+            x, indices, self.kernel_size, self.stride, self.padding, self.output_size
+        )
+
+
+class FractionalMaxUnpool2d(FractionalLayerBase):
+    def __init__(self, kernel_size: Union[int, Tuple[int, int]], stride: Union[int, Tuple[int, int]] = 1,
+                 padding: Union[int, Tuple[int, int]] = 0,
+                 output_size: Optional[Tuple[int, ...]] = None,
+                 config: LayerConfig = None, backend: Optional[BackendType] = None):
+        if config is None:
+            config = LayerConfig()
+        super().__init__(config, backend=backend)
+        self.kernel_size = kernel_size if isinstance(
+            kernel_size, tuple) else (kernel_size, kernel_size)
+        self.stride = stride if isinstance(stride, tuple) else (stride, stride)
+        self.padding = padding if isinstance(
+            padding, tuple) else (padding, padding)
+        self.output_size = output_size
+
+    def forward(self, x: torch.Tensor, indices: torch.Tensor) -> torch.Tensor:
+        return F.max_unpool2d(
+            x, indices, self.kernel_size, self.stride, self.padding, self.output_size
+        )
+
+
+class FractionalMaxUnpool3d(FractionalLayerBase):
+    def __init__(self, kernel_size: Union[int, Tuple[int, int, int]], stride: Union[int, Tuple[int, int, int]] = 1,
+                 padding: Union[int, Tuple[int, int, int]] = 0,
+                 output_size: Optional[Tuple[int, ...]] = None,
+                 config: LayerConfig = None, backend: Optional[BackendType] = None):
+        if config is None:
+            config = LayerConfig()
+        super().__init__(config, backend=backend)
+        self.kernel_size = kernel_size if isinstance(
+            kernel_size, tuple) else (kernel_size, kernel_size, kernel_size)
+        self.stride = stride if isinstance(
+            stride, tuple) else (stride, stride, stride)
+        self.padding = padding if isinstance(
+            padding, tuple) else (padding, padding, padding)
+        self.output_size = output_size
+
+    def forward(self, x: torch.Tensor, indices: torch.Tensor) -> torch.Tensor:
+        return F.max_unpool3d(
+            x, indices, self.kernel_size, self.stride, self.padding, self.output_size
+        )
+
+# Attention Layers
+
+
+class FractionalSelfAttention(nn.Module):
+    def __init__(
+        self,
+        embed_dim: int,
+        num_heads: int,
+        dropout: float = 0.0,
+        bias: bool = True,
+        add_bias_kv: bool = False,
+        add_zero_attn: bool = False,
+        kdim: Optional[int] = None,
+        vdim: Optional[int] = None,
+        batch_first: bool = True,
+        device: Optional[torch.device] = None,
+        dtype: Optional[torch.dtype] = None,
+    ):
+        super().__init__()
+        self.embed_dim = embed_dim
+        self.num_heads = num_heads
+        self.dropout = dropout
+        self.bias = bias
+        self.add_bias_kv = add_bias_kv
+        self.add_zero_attn = add_zero_attn
+        self.kdim = kdim
+        self.vdim = vdim
+        self.batch_first = batch_first
+        self.device = device
+        self.dtype = dtype
+
+        self.head_dim = embed_dim // num_heads
+        if self.head_dim * num_heads != embed_dim:
+            raise ValueError(
+                f"embed_dim must be divisible by num_heads (got {embed_dim} and {num_heads})")
+
+        self.scaling = self.head_dim ** -0.5
+
+        self.in_proj_weight = nn.Parameter(torch.empty((3 * embed_dim, embed_dim),
+                                                       dtype=self.dtype,
+                                                       device=self.device))
+        self.in_proj_bias = nn.Parameter(torch.empty(3 * embed_dim,
+                                                     dtype=self.dtype,
+                                                     device=self.device))
+        self.out_proj = nn.Linear(embed_dim, embed_dim, bias=bias)
+
+        if bias:
+            nn.init.constant_(self.in_proj_bias, 0.)
+            nn.init.constant_(self.out_proj.bias, 0.)
+        if add_bias_kv:
+            self.bias_k = nn.Parameter(torch.empty((num_heads, self.head_dim),
+                                                   dtype=self.dtype,
+                                                   device=self.device))
+            self.bias_v = nn.Parameter(torch.empty((num_heads, self.head_dim),
+                                                   dtype=self.dtype,
+                                                   device=self.device))
+        else:
+            self.bias_k = self.bias_v = None
+
+        self.add_zero_attn = add_zero_attn
+        if self.add_zero_attn:
+            self.in_proj_bias = nn.Parameter(torch.empty(3 * embed_dim,
+                                                         dtype=self.dtype,
+                                                         device=self.device))
+            nn.init.constant_(self.in_proj_bias, 0.)
+
+    def forward(self, query: torch.Tensor, key: torch.Tensor, value: torch.Tensor):
+        # type: (Tensor, Tensor, Tensor) -> Tensor
+        """
+        Args:
+            query: (batch, seq_len, embed_dim)
+            key: (batch, seq_len, embed_dim)
+            value: (batch, seq_len, embed_dim)
+        """
+        if self.batch_first:
+            q = query
+            k = key
+            v = value
+        else:
+            q = query.transpose(0, 1)
+            k = key.transpose(0, 1)
+            v = value.transpose(0, 1)
+
+        q = q * self.scaling
+
+        # (batch, seq_len, embed_dim) -> (batch_head, seq_len, head_dim)
+        q_head = q.reshape(q.shape[0], q.shape[1],
+                           self.num_heads, self.head_dim)
+        k_head = k.reshape(k.shape[0], k.shape[1],
+                           self.num_heads, self.head_dim)
+        v_head = v.reshape(v.shape[0], v.shape[1],
+                           self.num_heads, self.head_dim)
+
+        # (batch_head, seq_len, head_dim) -> (batch_head, head_dim, seq_len)
+        q_head = q_head.transpose(1, 2)
+        k_head = k_head.transpose(1, 2)
+        v_head = v_head.transpose(1, 2)
+
+        # (batch_head, head_dim, seq_len) @ (batch_head, head_dim, seq_len) -> (batch_head, seq_len, seq_len)
+        attn_weights = torch.matmul(q_head, k_head)
+
+        if self.bias_k is not None:
+            if self.add_bias_kv:
+                # (batch_head, seq_len, head_dim) -> (batch_head, seq_len, 1, head_dim)
+                bias_k = self.bias_k.unsqueeze(2)
+                # (batch_head, seq_len, 1, head_dim) @ (batch_head, head_dim, seq_len) -> (batch_head, seq_len, seq_len)
+                attn_weights = attn_weights + torch.matmul(bias_k, k_head)
+            else:
+                # (batch_head, seq_len, head_dim) -> (batch_head, seq_len, 1, head_dim)
+                bias_k = self.bias_k.unsqueeze(2)
+                # (batch_head, seq_len, 1, head_dim) @ (batch_head, head_dim, seq_len) -> (batch_head, seq_len, seq_len)
+                attn_weights = attn_weights + torch.matmul(bias_k, k_head)
+
+        if self.bias_v is not None:
+            if self.add_bias_kv:
+                # (batch_head, seq_len, head_dim) -> (batch_head, seq_len, 1, head_dim)
+                bias_v = self.bias_v.unsqueeze(2)
+                # (batch_head, seq_len, 1, head_dim) @ (batch_head, head_dim, seq_len) -> (batch_head, seq_len, seq_len)
+                attn_weights = attn_weights + torch.matmul(bias_v, v_head)
+            else:
+                # (batch_head, seq_len, head_dim) -> (batch_head, seq_len, 1, head_dim)
+                bias_v = self.bias_v.unsqueeze(2)
+                # (batch_head, seq_len, 1, head_dim) @ (batch_head, head_dim, seq_len) -> (batch_head, seq_len, seq_len)
+                attn_weights = attn_weights + torch.matmul(bias_v, v_head)
+
+        # (batch_head, seq_len, seq_len) -> (batch, seq_len, seq_len)
+        attn_weights = attn_weights.transpose(0, 1)
+
+        if not self.training:
+            attn_weights = F.softmax(attn_weights, dim=-1)
+        else:
+            attn_weights = F.dropout(
+                attn_weights, p=self.dropout, training=True)
+
+        # (batch_head, seq_len, seq_len) @ (batch_head, seq_len, head_dim) -> (batch_head, seq_len, head_dim)
+        attn_output = torch.matmul(attn_weights, v_head)
+
+        # (batch_head, seq_len, head_dim) -> (batch, seq_len, embed_dim)
+        attn_output = attn_output.transpose(1, 2).reshape(
+            q.shape[0], q.shape[1], self.embed_dim)
+
+        attn_output = self.out_proj(attn_output)
+
+        if not self.batch_first:
+            attn_output = attn_output.transpose(0, 1)
+
+        return attn_output
+
 
 if __name__ == "__main__":
     print("COMPREHENSIVE OPTIMAL LAYERS IMPLEMENTATION")
     print("Complete layer coverage with optimal performance")
     print("=" * 60)
-    
+
     # Test basic functionality
     x = torch.randn(32, 64, 128)
     config = LayerConfig()
-    
+
     conv1d = FractionalConv1D(64, 32, 3, config=config)
     result1d = conv1d(x)
-    print(f"✅ FractionalConv1D: SUCCESS - Input: {x.shape}, Output: {result1d.shape}")
-    
+    print(
+        f"✅ FractionalConv1D: SUCCESS - Input: {x.shape}, Output: {result1d.shape}")

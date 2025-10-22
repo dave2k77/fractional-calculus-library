@@ -40,10 +40,12 @@ class TensorOps:
             try:
                 backend = BackendType(backend)
             except ValueError:
-                raise ValueError(f"Unknown backend: {backend}. Available backends: {[b.value for b in BackendType]}")
+                raise ValueError(
+                    f"Unknown backend: {backend}. Available backends: {[b.value for b in BackendType]}")
         # Resolve requested (or active) backend into an installed concrete choice,
         # with sensible fallbacks.
-        self.backend, self.tensor_lib = self._resolve_backend(backend, backend_manager)
+        self.backend, self.tensor_lib = self._resolve_backend(
+            backend, backend_manager)
         # Construct optimized adapter for future delegation
         self._adapter: HighPerformanceAdapter
         try:
@@ -71,7 +73,8 @@ class TensorOps:
             candidates.append(backend)
 
         # 2) manager's active (if not AUTO)
-        ab = getattr(backend_manager, "active_backend", None) if backend_manager is not None else None
+        ab = getattr(backend_manager, "active_backend",
+                     None) if backend_manager is not None else None
         if ab is not None and ab != BackendType.AUTO:
             # Only honor manager active backend if not disabled by env
             disable_map_ab = {
@@ -133,11 +136,13 @@ class TensorOps:
             return self.tensor_lib.tensor(data, **torch_kwargs)
         elif self.backend == BackendType.JAX:
             # JAX doesn't support requires_grad
-            jax_kwargs = {k: v for k, v in kwargs.items() if k != 'requires_grad'}
+            jax_kwargs = {k: v for k, v in kwargs.items() if k !=
+                          'requires_grad'}
             return self.tensor_lib.array(data, **jax_kwargs)
         elif self.backend == BackendType.NUMBA:
             # NUMBA lane: remove requires_grad; arrays are NumPy
-            nb_kwargs = {k: v for k, v in kwargs.items() if k != 'requires_grad'}
+            nb_kwargs = {k: v for k, v in kwargs.items() if k !=
+                         'requires_grad'}
             return self.tensor_lib.array(data, **nb_kwargs)
         else:
             raise RuntimeError(f"Unknown backend: {self.backend}")
@@ -421,12 +426,13 @@ class TensorOps:
         dims = kwargs.get('dims', None)
         dim0 = kwargs.get('dim0', None)
         dim1 = kwargs.get('dim1', None)
-        
+
         # Handle positional args (dim0, dim1)
         if len(args) == 2:
             dim0, dim1 = args[0], args[1]
         elif len(args) > 0:
-            raise ValueError(f"transpose expects 0 or 2 positional args, got {len(args)}")
+            raise ValueError(
+                f"transpose expects 0 or 2 positional args, got {len(args)}")
 
         if self.backend == BackendType.TORCH:
             if dims is not None:
@@ -475,7 +481,8 @@ class TensorOps:
         if self.backend in (BackendType.TORCH, BackendType.JAX):
             return self._adapter.get_lib().einsum(equation, *operands)
         elif self.backend == BackendType.NUMBA:
-            warnings.warn("NUMBA lane doesn't support einsum fully; using fallback")
+            warnings.warn(
+                "NUMBA lane doesn't support einsum fully; using fallback")
             return self._numba_einsum_fallback(equation, *operands)
         else:
             raise ValueError(f"Unknown backend: {self.backend}")
@@ -763,7 +770,8 @@ class TensorOps:
             import jax.random as random
             key = kwargs.pop("key", None)
             if key is None:
-                raise ValueError("JAX randn requires a PRNG key passed as key=...")
+                raise ValueError(
+                    "JAX randn requires a PRNG key passed as key=...")
             return random.normal(key, shape, **kwargs)
         elif self.backend == BackendType.NUMBA:
             lib = self._adapter.get_lib()
@@ -778,7 +786,8 @@ class TensorOps:
             import jax.random as random
             key = kwargs.pop("key", None)
             if key is None:
-                raise ValueError("JAX randn_like requires a PRNG key passed as key=...")
+                raise ValueError(
+                    "JAX randn_like requires a PRNG key passed as key=...")
             return random.normal(key, tensor.shape, **kwargs)
         elif self.backend == BackendType.NUMBA:
             lib = self._adapter.get_lib()
@@ -795,14 +804,16 @@ class TensorOps:
             import jax.random as random
             key = kwargs.pop("key", None)
             if key is None:
-                raise ValueError("JAX dropout requires a PRNG key passed as key=...")
+                raise ValueError(
+                    "JAX dropout requires a PRNG key passed as key=...")
             keep_prob = 1.0 - p
             mask = random.bernoulli(key, keep_prob, tensor.shape)
             return tensor * mask / keep_prob
         elif self.backend == BackendType.NUMBA:
             lib = self._adapter.get_lib()
             keep_prob = 1.0 - p
-            mask = (lib.random.random(tensor.shape) < keep_prob).astype(tensor.dtype if hasattr(tensor, "dtype") else _np.float64)
+            mask = (lib.random.random(tensor.shape) < keep_prob).astype(
+                tensor.dtype if hasattr(tensor, "dtype") else _np.float64)
             return tensor * mask / keep_prob
         else:
             raise RuntimeError(f"Unknown backend: {self.backend}")

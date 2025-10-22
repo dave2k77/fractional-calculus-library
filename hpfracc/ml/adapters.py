@@ -53,7 +53,7 @@ class PerformanceProfile:
 class HighPerformanceAdapter:
     """
     High-performance adapter with intelligent backend selection.
-    
+
     This adapter:
     1. Caches imports and capabilities
     2. Selects optimal backend based on operation and data
@@ -98,8 +98,8 @@ class HighPerformanceAdapter:
             if backend == BackendType.TORCH:
                 return importlib.util.find_spec("torch") is not None
             elif backend == BackendType.JAX:
-                return (importlib.util.find_spec("jax") is not None and 
-                       importlib.util.find_spec("jax.numpy") is not None)
+                return (importlib.util.find_spec("jax") is not None and
+                        importlib.util.find_spec("jax.numpy") is not None)
             elif backend == BackendType.NUMBA:
                 return importlib.util.find_spec("numpy") is not None
         except Exception:
@@ -132,7 +132,7 @@ class HighPerformanceAdapter:
     def _detect_capabilities(self) -> Capabilities:
         """Detect backend capabilities with performance characteristics."""
         lib = self._get_cached_lib()
-        
+
         if self.backend == BackendType.TORCH:
             has_cuda = hasattr(lib, "cuda") and lib.cuda.is_available()
             return Capabilities(
@@ -142,7 +142,8 @@ class HighPerformanceAdapter:
                 supports_amp=True,
                 supports_jit=hasattr(lib, "compile") or hasattr(lib, "jit"),
                 memory_limit_gb=8.0 if has_cuda else 0.0,
-                preferred_operations=frozenset(["neural_networks", "autograd", "gpu_ops"])
+                preferred_operations=frozenset(
+                    ["neural_networks", "autograd", "gpu_ops"])
             )
         elif self.backend == BackendType.JAX:
             try:
@@ -158,7 +159,8 @@ class HighPerformanceAdapter:
                 supports_amp=False,
                 supports_jit=True,
                 memory_limit_gb=16.0 if has_gpu else 0.0,
-                preferred_operations=frozenset(["mathematical", "jit", "functional"])
+                preferred_operations=frozenset(
+                    ["mathematical", "jit", "functional"])
             )
         else:  # NUMBA
             return Capabilities(
@@ -174,7 +176,8 @@ class HighPerformanceAdapter:
     def _get_performance_profile(self) -> PerformanceProfile:
         """Get performance profile for this backend."""
         if self.backend not in _PERFORMANCE_PROFILES:
-            _PERFORMANCE_PROFILES[self.backend] = self._create_performance_profile()
+            _PERFORMANCE_PROFILES[self.backend] = self._create_performance_profile(
+            )
         return _PERFORMANCE_PROFILES[self.backend]
 
     def _create_performance_profile(self) -> PerformanceProfile:
@@ -217,7 +220,7 @@ class HighPerformanceAdapter:
     def get_capabilities(self) -> Capabilities:
         """Get backend capabilities."""
         return self._capabilities
-    
+
     @property
     def capabilities(self) -> Capabilities:
         """Get backend capabilities as property."""
@@ -278,24 +281,24 @@ class HighPerformanceAdapter:
         # Warmup
         for _ in range(3):
             operation(*args, **kwargs)
-        
+
         # Benchmark
         start_time = time.time()
         for _ in range(10):
             operation(*args, **kwargs)
         end_time = time.time()
-        
+
         return (end_time - start_time) / 10
 
 
 def get_optimal_adapter(operation_type: str = "general", data_size: int = 1000) -> HighPerformanceAdapter:
     """
     Get the optimal adapter for the given operation and data size.
-    
+
     Args:
         operation_type: Type of operation ("mathematical", "neural_networks", "arrays")
         data_size: Size of data to process
-    
+
     Returns:
         Optimal adapter for the task
     """
@@ -319,22 +322,22 @@ def get_optimal_adapter(operation_type: str = "general", data_size: int = 1000) 
 
     for adapter in available_backends:
         score = 0
-        
+
         # Score based on operation type preference
         if operation_type in adapter.get_capabilities().preferred_operations:
             score += 100
-        
+
         # Score based on data size optimization
         if adapter.is_optimal_for(operation_type, data_size):
             score += 50
-        
+
         # Score based on capabilities
         caps = adapter.get_capabilities()
         if caps.device_kind == "gpu" and data_size > 100000:
             score += 30
         if caps.supports_jit and operation_type == "mathematical":
             score += 20
-        
+
         if score > best_score:
             best_score = score
             optimal_adapter = adapter
@@ -345,21 +348,22 @@ def get_optimal_adapter(operation_type: str = "general", data_size: int = 1000) 
 def benchmark_backends(operation: Callable, *args, **kwargs) -> Dict[BackendType, float]:
     """
     Benchmark operation across all available backends.
-    
+
     Returns:
         Dictionary mapping backend to execution time
     """
     results = {}
-    
+
     for backend in [BackendType.TORCH, BackendType.JAX, BackendType.NUMBA]:
         if not os.getenv(f"HPFRACC_DISABLE_{backend.value.upper()}", "0") == "1":
             try:
                 adapter = HighPerformanceAdapter(backend)
-                time_taken = adapter.benchmark_operation(operation, *args, **kwargs)
+                time_taken = adapter.benchmark_operation(
+                    operation, *args, **kwargs)
                 results[backend] = time_taken
             except Exception:
                 continue
-    
+
     return results
 
 
@@ -393,7 +397,7 @@ def get_adapter(backend: BackendType) -> HighPerformanceAdapter:
     # Check if backend is available before creating adapter
     if not _spec_available(_get_backend_module_name(backend)):
         raise ImportError(f"Backend {backend} is not available")
-    
+
     if backend == BackendType.TORCH:
         return get_torch_adapter()
     elif backend == BackendType.JAX:

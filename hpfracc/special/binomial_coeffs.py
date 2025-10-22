@@ -26,14 +26,16 @@ try:
     NUMBA_AVAILABLE = True
 except ImportError:
     NUMBA_AVAILABLE = False
+
     def jit(*args, **kwargs):
         def decorator(func):
             return func
         return decorator
 import scipy.special as scipy_special
-from .gamma_beta import gamma
 
 # Convenience functions for optimized binomial coefficients
+
+
 def binomial_coefficient_fast(
     n: Union[float, int, np.ndarray],
     k: Union[float, int, np.ndarray],
@@ -42,17 +44,18 @@ def binomial_coefficient_fast(
 ) -> Union[float, np.ndarray]:
     """
     Fast binomial coefficient computation optimized for fractional calculus.
-    
+
     Args:
         n: Upper parameter (can be fractional)
         k: Lower parameter (integer)
         use_numba: Use Numba JIT compilation
         cache_size: Size of cache for repeated evaluations
-        
+
     Returns:
         Binomial coefficient value(s)
     """
-    binomial_func = BinomialCoefficients(use_numba=use_numba, cache_size=cache_size)
+    binomial_func = BinomialCoefficients(
+        use_numba=use_numba, cache_size=cache_size)
     return binomial_func.compute(n, k)
 
 
@@ -65,19 +68,19 @@ def binomial_sequence_fast(
 ) -> np.ndarray:
     """
     Fast binomial sequence computation optimized for fractional calculus.
-    
+
     Args:
         alpha: Fractional parameter
         max_k: Maximum value of k
         use_numba: Use Numba JIT compilation
         cache_size: Size of cache for individual coefficients
         sequence_cache_size: Size of cache for sequences
-        
+
     Returns:
         Array of binomial coefficients [C(α,0), C(α,1), ..., C(α,max_k)]
     """
     binomial_func = BinomialCoefficients(
-        use_numba=use_numba, 
+        use_numba=use_numba,
         cache_size=cache_size,
         sequence_cache_size=sequence_cache_size
     )
@@ -117,13 +120,13 @@ class BinomialCoefficients:
         self.sequence_cache_size = sequence_cache_size
         self._cache = {}
         self._sequence_cache = {}  # Cache for sequences
-        
+
         # Precompute common fractional values
         self._common_fractional = {
             (0.5, 0): 1.0,    # C(0.5, 0) = 1
             (0.5, 1): 0.5,    # C(0.5, 1) = 0.5
-            (0.5, 2): -0.125, # C(0.5, 2) = -0.125
-            (0.5, 3): 0.0625, # C(0.5, 3) = 0.0625
+            (0.5, 2): -0.125,  # C(0.5, 2) = -0.125
+            (0.5, 3): 0.0625,  # C(0.5, 3) = 0.0625
             (0.25, 0): 1.0,   # C(0.25, 0) = 1
             (0.25, 1): 0.25,  # C(0.25, 1) = 0.25
             (0.75, 0): 1.0,   # C(0.75, 0) = 1
@@ -153,12 +156,12 @@ class BinomialCoefficients:
             # Check for exact matches in common fractional values
             if (n, k) in self._common_fractional:
                 return self._common_fractional[(n, k)]
-            
+
             # Check cache for scalar inputs
             cache_key = (n, k)
             if cache_key in self._cache:
                 return self._cache[cache_key]
-        
+
         # Compute the result
         if self.use_jax:
             try:
@@ -180,12 +183,12 @@ class BinomialCoefficients:
             result = self._binomial_numba_scalar(n, k)
         else:
             result = self._binomial_scipy(n, k)
-        
+
         # Cache scalar results
         if isinstance(n, (float, int)) and isinstance(k, (float, int)):
             if len(self._cache) < self.cache_size:
                 self._cache[(n, k)] = result
-        
+
         return result
 
     @staticmethod
@@ -208,19 +211,19 @@ class BinomialCoefficients:
             return 0.0
         if k == 0 or k == n:
             return 1.0
-        
+
         # For integer n and k, use the standard formula
         if n == int(n) and k == int(k):
             n_int = int(n)
             k_int = int(k)
             if k_int > n_int // 2:
                 k_int = n_int - k_int  # Use symmetry
-            
+
             result = 1.0
             for i in range(k_int):
                 result = result * (n_int - i) / (i + 1)
             return result
-        
+
         # For fractional cases, use approximation
         # This is a simplified approximation for fractional binomial coefficients
         if k == 0:
@@ -229,7 +232,7 @@ class BinomialCoefficients:
             return n
         if k == 2:
             return n * (n - 1) / 2.0
-        
+
         # For other fractional cases, use a simple approximation
         # This is not mathematically rigorous but avoids Numba typing issues
         return 1.0  # Placeholder - should be replaced with proper implementation
@@ -297,7 +300,7 @@ class BinomialCoefficients:
             return alpha
         if k == 2:
             return alpha * (alpha - 1) / 2.0
-        
+
         # For other cases, use a simple approximation
         # This avoids Numba typing issues with gamma function
         return 1.0  # Placeholder - should be replaced with proper implementation
@@ -316,7 +319,7 @@ class BinomialCoefficients:
     def compute_sequence(self, alpha: float, max_k: int) -> np.ndarray:
         """
         Compute the sequence of binomial coefficients C(α,k) for k = 0, 1, ..., max_k.
-        
+
         Optimized with caching and recursive computation for efficiency.
 
         Args:
@@ -330,20 +333,20 @@ class BinomialCoefficients:
         sequence_key = (alpha, max_k)
         if sequence_key in self._sequence_cache:
             return self._sequence_cache[sequence_key]
-        
+
         # Use optimized recursive computation
         result = self._compute_sequence_optimized(alpha, max_k)
-        
+
         # Cache the result
         if len(self._sequence_cache) < self.sequence_cache_size:
             self._sequence_cache[sequence_key] = result
-        
+
         return result
-    
+
     def _compute_sequence_optimized(self, alpha: float, max_k: int) -> np.ndarray:
         """
         Optimized sequence computation using recursive formula.
-        
+
         Uses the recursive relationship: C(α,k+1) = C(α,k) * (α-k)/(k+1)
         This is much more efficient than computing each coefficient individually.
         """
@@ -354,11 +357,11 @@ class BinomialCoefficients:
             # Use recursive formula for efficiency
             result = np.zeros(max_k + 1)
             result[0] = 1.0  # C(α,0) = 1
-            
+
             # Use recursive formula: C(α,k+1) = C(α,k) * (α-k)/(k+1)
             for k in range(max_k):
                 result[k + 1] = result[k] * (alpha - k) / (k + 1)
-            
+
             return result
 
     def compute_alternating_sequence(

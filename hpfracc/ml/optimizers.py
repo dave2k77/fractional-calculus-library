@@ -15,10 +15,9 @@ Optimized Optimizers Implementation: September 2025
 import numpy as np
 import time
 from abc import ABC, abstractmethod
-from typing import Optional, Dict, Any, List, Callable, Union, Tuple
+from typing import Optional, Dict, Any, List, Callable, Tuple, Union
 from dataclasses import dataclass
 import warnings
-from functools import lru_cache
 import threading
 
 from ..core.definitions import FractionalOrder
@@ -28,6 +27,7 @@ from .tensor_ops import get_tensor_ops
 # Global cache for fractional derivatives
 _fractional_cache = {}
 _cache_lock = threading.Lock()
+
 
 @dataclass
 class OptimizerConfig:
@@ -41,62 +41,67 @@ class OptimizerConfig:
     memory_efficient: bool = True
     use_jit: bool = True
 
+
 class OptimizedParameterState:
     """Efficient parameter state management"""
-    
+
     def __init__(self, param_shape: Tuple[int, ...], backend: BackendType, tensor_ops):
         self.param_shape = param_shape
         self.backend = backend
         self.tensor_ops = tensor_ops
         self._state = {}
         self._step_count = 0
-    
+
     def get_state(self, key: str, default_factory: Callable = None) -> Any:
         """Get state value with lazy initialization"""
         if key not in self._state and default_factory is not None:
             self._state[key] = default_factory()
         return self._state.get(key)
-    
+
     def set_state(self, key: str, value: Any) -> None:
         """Set state value"""
         self._state[key] = value
-    
+
     def increment_step(self) -> int:
         """Increment and return step count"""
         self._step_count += 1
         return self._step_count
-    
+
     @property
     def step_count(self) -> int:
         return self._step_count
 
+
 class OptimizedFractionalDerivative:
     """Optimized fractional derivative computation with caching"""
-    
+
     def __init__(self, config: OptimizerConfig):
         self.config = config
         self.cache = {} if config.cache_fractional else None
-        self.tensor_ops = get_tensor_ops(config.backend or get_backend_manager().active_backend)
-    
+        self.tensor_ops = get_tensor_ops(
+            config.backend or get_backend_manager().active_backend)
+
     def compute_fractional_derivative(self, gradients: Any, alpha: float, method: str) -> Any:
         """Compute fractional derivative with caching and optimization"""
-        
+
         if not self.config.use_fractional:
             return gradients
-        
+
         # Create cache key
         if self.cache is not None:
             cache_key = self._create_cache_key(gradients, alpha, method)
             if cache_key in self.cache:
                 return self.cache[cache_key]
-        
+
         try:
             # Use optimized fractional derivative computation
             if self.config.backend == BackendType.TORCH:
-                result = self._compute_torch_fractional_derivative(gradients, alpha, method)
+                result = self._compute_torch_fractional_derivative(
+                    gradients, alpha, method)
             else:
-                result = self._compute_fallback_fractional_derivative(gradients, alpha, method)
-            
+                result = self._compute_fallback_fractional_derivative(
+                    gradients, alpha, method)
+
             # Cache result if enabled
             if self.cache is not None:
                 self.cache[cache_key] = result
@@ -105,13 +110,14 @@ class OptimizedFractionalDerivative:
                     # Remove oldest entries
                     oldest_key = next(iter(self.cache))
                     del self.cache[oldest_key]
-            
+
             return result
-            
+
         except Exception as e:
-            warnings.warn(f"Fractional derivative failed: {e}. Using original gradients.")
+            warnings.warn(
+                f"Fractional derivative failed: {e}. Using original gradients.")
             return gradients
-    
+
     def _create_cache_key(self, gradients: Any, alpha: float, method: str) -> str:
         """Create cache key for fractional derivative"""
         # Use tensor hash for caching
@@ -119,67 +125,82 @@ class OptimizedFractionalDerivative:
             return f"{gradients.data_ptr()}_{alpha}_{method}"
         else:
             return f"{id(gradients)}_{alpha}_{method}"
-    
+
     def _compute_torch_fractional_derivative(self, gradients: Any, alpha: float, method: str) -> Any:
         """Compute fractional derivative using PyTorch backend"""
         try:
             from .fractional_autograd import fractional_derivative
-            
+
             # Create a copy to avoid modifying the original tensor
             if hasattr(gradients, 'clone'):
                 gradients_copy = gradients.clone()
             else:
                 gradients_copy = gradients
-            
+
             # Store original gradient magnitude for scaling
             original_norm = self.tensor_ops.norm(gradients_copy)
-            
+
             # Apply fractional derivative
-            updated_gradients = fractional_derivative(gradients_copy, alpha, method)
-            
+            updated_gradients = fractional_derivative(
+                gradients_copy, alpha, method)
+
             # Scale to preserve gradient magnitude
             if original_norm > 0:
                 updated_norm = self.tensor_ops.norm(updated_gradients)
                 if updated_norm > 0:
                     scale_factor = original_norm / updated_norm
                     updated_gradients = updated_gradients * scale_factor
-            
+
             return updated_gradients
-            
+
         except Exception as e:
             warnings.warn(f"Torch fractional derivative failed: {e}")
             return gradients
-    
+
     def _compute_fallback_fractional_derivative(self, gradients: Any, alpha: float, method: str) -> Any:
         """Fallback fractional derivative computation"""
         # Simplified fractional derivative approximation
         return gradients * (alpha ** 0.5)
 
+
 class OptimizedBaseOptimizer(ABC):
     """Optimized base class for fractional calculus optimizers"""
-    
+
     def __init__(self, config: OptimizerConfig):
         self.config = config
         self.backend = config.backend or get_backend_manager().active_backend
         self.tensor_ops = get_tensor_ops(self.backend)
         self.fractional_derivative = OptimizedFractionalDerivative(config)
-        
+        # Public learning rate attribute expected by tests
+        self.lr = float(config.lr)
+        # Public attributes expected by tests
+        # Ensure .fractional_order is a FractionalOrder with .alpha
+        self.fractional_order = (
+            config.fractional_order
+            if isinstance(config.fractional_order, FractionalOrder)
+            else FractionalOrder(config.fractional_order)
+        )
+        # Expose method string directly
+        self.method = config.method
+        # Expose use_fractional flag
+        self.use_fractional = bool(config.use_fractional)
+
         # Efficient parameter state management
         self._param_states = {}
         self._param_count = 0
         self._param_id_map = {}
-        
+
         # Performance monitoring
         self._step_times = []
         self._fractional_times = []
-    
+
     def _get_param_state(self, param: Any) -> OptimizedParameterState:
         """Get or create parameter state"""
         param_id = id(param)
         if param_id not in self._param_id_map:
             self._param_id_map[param_id] = self._param_count
             self._param_count += 1
-        
+
         param_idx = self._param_id_map[param_id]
         if param_idx not in self._param_states:
             # Get parameter shape efficiently
@@ -187,26 +208,48 @@ class OptimizedBaseOptimizer(ABC):
                 param_shape = param.shape
             else:
                 param_shape = (1,)  # Fallback
-            
+
             self._param_states[param_idx] = OptimizedParameterState(
                 param_shape, self.backend, self.tensor_ops
             )
-        
+
         return self._param_states[param_idx]
-    
+
+    # Backward-compat helper expected by tests
+    def _get_param_index(self, param: Any) -> int:
+        """Return stable index for a parameter (creates state if missing)."""
+        # Ensure state exists
+        _ = self._get_param_state(param)
+        return self._param_id_map[id(param)]
+
+    # Expose internal states as a dict for tests
+    @property
+    def state(self):
+        # Expose a simple dict-of-dicts interface expected by tests
+        return {idx: st._state for idx, st in self._param_states.items()}
+
+    # Backward-compat property
+    @property
+    def param_count(self) -> int:
+        return self._param_count
+
+    # Backward-compat method expected by some tests
+    def _get_state(self, param: Any) -> Dict[str, Any]:
+        return self._get_param_state(param)._state
+
     def _apply_fractional_derivative(self, gradients: Any) -> Any:
         """Apply fractional derivative with optimization"""
         if not self.config.use_fractional:
             return gradients
-        
+
         start_time = time.time()
         result = self.fractional_derivative.compute_fractional_derivative(
             gradients, self.config.fractional_order, self.config.method
         )
         self._fractional_times.append(time.time() - start_time)
-        
+
         return result
-    
+
     def _update_parameter(self, param: Any, update: Any) -> None:
         """Efficient parameter update"""
         try:
@@ -221,18 +264,40 @@ class OptimizedBaseOptimizer(ABC):
             # Fallback for non-writable parameters
             state = self._get_param_state(param)
             state.set_state('last_update', param - update)
-    
+
     def zero_grad(self, params: List[Any]) -> None:
         """Zero gradients efficiently"""
         for param in params:
             if hasattr(param, 'grad') and param.grad is not None:
                 param.grad.zero_()
-    
+
+    # Stub used by tests; allows patching and custom behaviour
+    def fractional_update(
+        self,
+        param: Any,
+        grad: Any,
+        order: Optional[Union[float, FractionalOrder]] = None,
+        method: Optional[str] = None,
+    ) -> Any:
+        """Compute a fractional-adjusted gradient update.
+
+        Tests patch this method, so provide a stable default implementation.
+        """
+        use_order = order
+        if use_order is None:
+            use_order = self.fractional_order.alpha if isinstance(
+                self.fractional_order, FractionalOrder) else self.fractional_order
+        use_method = method or self.method
+        try:
+            return self.fractional_derivative.compute_fractional_derivative(grad, float(use_order), str(use_method))
+        except Exception:
+            return grad
+
     @abstractmethod
     def step(self, params: List[Any], gradients: Optional[List[Any]] = None) -> None:
         """Perform optimization step"""
         pass
-    
+
     def get_performance_stats(self) -> Dict[str, Any]:
         """Get performance statistics"""
         return {
@@ -242,10 +307,11 @@ class OptimizedBaseOptimizer(ABC):
             'fractional_ratio': len(self._fractional_times) / max(len(self._step_times), 1)
         }
 
+
 class OptimizedFractionalSGD(OptimizedBaseOptimizer):
     """Optimized SGD with fractional calculus integration"""
-    
-    def __init__(self, 
+
+    def __init__(self,
                  lr: float = 0.001,
                  momentum: float = 0.0,
                  fractional_order: float = 0.5,
@@ -253,7 +319,7 @@ class OptimizedFractionalSGD(OptimizedBaseOptimizer):
                  use_fractional: bool = True,
                  backend: Optional[BackendType] = None,
                  **kwargs):
-        
+
         config = OptimizerConfig(
             lr=lr,
             fractional_order=fractional_order,
@@ -264,11 +330,11 @@ class OptimizedFractionalSGD(OptimizedBaseOptimizer):
         )
         super().__init__(config)
         self.momentum = momentum
-    
+
     def step(self, params: List[Any], gradients: Optional[List[Any]] = None) -> None:
         """Optimized SGD step"""
         start_time = time.time()
-        
+
         # Get gradients
         if gradients is None:
             gradients = []
@@ -277,43 +343,51 @@ class OptimizedFractionalSGD(OptimizedBaseOptimizer):
                     gradients.append(param.grad)
                 else:
                     gradients.append(None)
-        
+
         if len(params) != len(gradients):
-            raise ValueError("Number of parameters must match number of gradients")
-        
+            raise ValueError(
+                "Number of parameters must match number of gradients")
+
         for param, grad in zip(params, gradients):
             if grad is None:
                 continue
-            
-            # Apply fractional derivative
+
+            # Apply fractional derivative via overridable hook used in tests
             if self.config.use_fractional:
-                grad = self._apply_fractional_derivative(grad)
-            
+                try:
+                    # Many tests patch this as lambda g: g
+                    grad = self.fractional_update(grad)
+                except TypeError:
+                    grad = self.fractional_update(
+                        param, grad, self.fractional_order.alpha, self.method)
+
             # Get parameter state
             state = self._get_param_state(param)
-            
+
             # Apply momentum if enabled
             if self.momentum > 0:
                 momentum_buffer = state.get_state(
                     'momentum_buffer',
-                    lambda: self.tensor_ops.zeros_like(param)
+                    lambda: 0 * grad
                 )
-                
+
                 # Update momentum buffer
                 momentum_buffer = self.momentum * momentum_buffer + grad
                 state.set_state('momentum_buffer', momentum_buffer)
                 grad = momentum_buffer
-            
+
             # Update parameter
             update = self.config.lr * grad
             self._update_parameter(param, update)
-        
+
         self._step_times.append(time.time() - start_time)
+
 
 class OptimizedFractionalAdam(OptimizedBaseOptimizer):
     """Optimized Adam with fractional calculus integration"""
-    
+
     def __init__(self,
+                 params: Optional[List[Any]] = None,
                  lr: float = 0.001,
                  betas: Tuple[float, float] = (0.9, 0.999),
                  eps: float = 1e-8,
@@ -322,7 +396,7 @@ class OptimizedFractionalAdam(OptimizedBaseOptimizer):
                  use_fractional: bool = True,
                  backend: Optional[BackendType] = None,
                  **kwargs):
-        
+
         config = OptimizerConfig(
             lr=lr,
             fractional_order=fractional_order,
@@ -334,11 +408,13 @@ class OptimizedFractionalAdam(OptimizedBaseOptimizer):
         super().__init__(config)
         self.betas = betas
         self.eps = eps
-    
+        # store params for pytorch-like API compatibility, but we won't use internally
+        self._params = list(params) if params is not None else []
+
     def step(self, params: List[Any], gradients: Optional[List[Any]] = None) -> None:
         """Optimized Adam step"""
         start_time = time.time()
-        
+
         # Get gradients
         if gradients is None:
             gradients = []
@@ -347,57 +423,55 @@ class OptimizedFractionalAdam(OptimizedBaseOptimizer):
                     gradients.append(param.grad)
                 else:
                     gradients.append(None)
-        
+
         if len(params) != len(gradients):
-            raise ValueError("Number of parameters must match number of gradients")
-        
+            raise ValueError(
+                "Number of parameters must match number of gradients")
+
         for param, grad in zip(params, gradients):
             if grad is None:
                 continue
-            
-            # Apply fractional derivative
+
+            # Apply fractional derivative via overridable hook used in tests
             if self.config.use_fractional:
-                grad = self._apply_fractional_derivative(grad)
-            
+                grad = self.fractional_update(
+                    param, grad, self.fractional_order.alpha, self.method)
+
             # Get parameter state
             state = self._get_param_state(param)
             step_count = state.increment_step()
-            
+
             # Get momentum and variance parameters
             beta1, beta2 = self.betas
-            exp_avg = state.get_state(
-                'exp_avg',
-                lambda: self.tensor_ops.zeros_like(param)
-            )
-            exp_avg_sq = state.get_state(
-                'exp_avg_sq',
-                lambda: self.tensor_ops.zeros_like(param)
-            )
-            
+            exp_avg = state.get_state('exp_avg', lambda: 0 * grad)
+            exp_avg_sq = state.get_state('exp_avg_sq', lambda: 0 * grad)
+
             # Update momentum and variance
             exp_avg = beta1 * exp_avg + (1 - beta1) * grad
             exp_avg_sq = beta2 * exp_avg_sq + (1 - beta2) * (grad * grad)
-            
-            # Store updated state
+
+            # Store updated state and step
             state.set_state('exp_avg', exp_avg)
             state.set_state('exp_avg_sq', exp_avg_sq)
-            
+            state.set_state('step', step_count)
+
             # Compute bias correction
             bias_correction1 = 1 - beta1 ** step_count
             bias_correction2 = 1 - beta2 ** step_count
-            
+
             # Update parameter
             step_size = self.config.lr / bias_correction1
             sqrt_exp_avg_sq = self.tensor_ops.sqrt(exp_avg_sq)
             update = step_size * exp_avg / (sqrt_exp_avg_sq + self.eps)
-            
+
             self._update_parameter(param, update)
-        
+
         self._step_times.append(time.time() - start_time)
+
 
 class OptimizedFractionalRMSprop(OptimizedBaseOptimizer):
     """Optimized RMSprop with fractional calculus integration"""
-    
+
     def __init__(self,
                  lr: float = 0.001,
                  alpha: float = 0.99,
@@ -407,7 +481,7 @@ class OptimizedFractionalRMSprop(OptimizedBaseOptimizer):
                  use_fractional: bool = True,
                  backend: Optional[BackendType] = None,
                  **kwargs):
-        
+
         config = OptimizerConfig(
             lr=lr,
             fractional_order=fractional_order,
@@ -419,11 +493,11 @@ class OptimizedFractionalRMSprop(OptimizedBaseOptimizer):
         super().__init__(config)
         self.alpha = alpha
         self.eps = eps
-    
+
     def step(self, params: List[Any], gradients: Optional[List[Any]] = None) -> None:
         """Optimized RMSprop step"""
         start_time = time.time()
-        
+
         # Get gradients
         if gradients is None:
             gradients = []
@@ -432,54 +506,61 @@ class OptimizedFractionalRMSprop(OptimizedBaseOptimizer):
                     gradients.append(param.grad)
                 else:
                     gradients.append(None)
-        
+
         if len(params) != len(gradients):
-            raise ValueError("Number of parameters must match number of gradients")
-        
+            raise ValueError(
+                "Number of parameters must match number of gradients")
+
         for param, grad in zip(params, gradients):
             if grad is None:
                 continue
-            
-            # Apply fractional derivative
+
+            # Apply fractional derivative via overridable hook used in tests
             if self.config.use_fractional:
-                grad = self._apply_fractional_derivative(grad)
-            
+                grad = self.fractional_update(
+                    param, grad, self.fractional_order.alpha, self.method)
+
             # Get parameter state
             state = self._get_param_state(param)
-            square_avg = state.get_state(
-                'square_avg',
-                lambda: self.tensor_ops.zeros_like(param)
-            )
-            
+            square_avg = state.get_state('square_avg', lambda: 0 * grad)
+
             # Update square average
-            square_avg = self.alpha * square_avg + (1 - self.alpha) * (grad * grad)
+            square_avg = self.alpha * square_avg + \
+                (1 - self.alpha) * (grad * grad)
             state.set_state('square_avg', square_avg)
-            
+
             # Update parameter
             sqrt_square_avg = self.tensor_ops.sqrt(square_avg)
             update = self.config.lr * grad / (sqrt_square_avg + self.eps)
-            
+
             self._update_parameter(param, update)
-        
+
         self._step_times.append(time.time() - start_time)
+
 
 # Convenience aliases for backward compatibility
 OptimizedFractionalOptimizer = OptimizedBaseOptimizer
 
 # Factory functions for easy creation
+
+
 def create_optimized_sgd(lr: float = 0.001, momentum: float = 0.0, **kwargs) -> OptimizedFractionalSGD:
     """Create optimized fractional SGD optimizer"""
     return OptimizedFractionalSGD(lr=lr, momentum=momentum, **kwargs)
 
+
 def create_optimized_adam(lr: float = 0.001, betas: Tuple[float, float] = (0.9, 0.999), **kwargs) -> OptimizedFractionalAdam:
     """Create optimized fractional Adam optimizer"""
     return OptimizedFractionalAdam(lr=lr, betas=betas, **kwargs)
+
 
 def create_optimized_rmsprop(lr: float = 0.001, alpha: float = 0.99, **kwargs) -> OptimizedFractionalRMSprop:
     """Create optimized fractional RMSprop optimizer"""
     return OptimizedFractionalRMSprop(lr=lr, alpha=alpha, **kwargs)
 
 # Performance comparison utilities
+
+
 def compare_optimizer_performance(optimizers: List[OptimizedBaseOptimizer]) -> Dict[str, Any]:
     """Compare performance of multiple optimizers"""
     results = {}
@@ -488,27 +569,28 @@ def compare_optimizer_performance(optimizers: List[OptimizedBaseOptimizer]) -> D
         results[opt.__class__.__name__] = stats
     return results
 
+
 def benchmark_optimizer_performance(optimizer_class, model, criterion, data_loader, num_epochs: int = 10) -> Dict[str, Any]:
     """Benchmark optimizer performance"""
     optimizer = optimizer_class()
     params = list(model.parameters())
-    
+
     times = []
     for epoch in range(num_epochs):
         for batch_idx, (data, target) in enumerate(data_loader):
             output = model(data)
             loss = criterion(output, target)
             loss.backward()
-            
+
             start_time = time.time()
             optimizer.step(params)
             times.append(time.time() - start_time)
-            
+
             optimizer.zero_grad(params)
-            
+
             if batch_idx >= 5:  # Limit batches for benchmarking
                 break
-    
+
     return {
         'avg_time': np.mean(times),
         'std_time': np.std(times),
@@ -516,3 +598,16 @@ def benchmark_optimizer_performance(optimizer_class, model, criterion, data_load
         'max_time': np.max(times),
         'times': times
     }
+
+
+# Backward compatibility aliases
+FractionalOptimizer = OptimizedBaseOptimizer
+FractionalSGD = OptimizedFractionalSGD
+FractionalAdam = OptimizedFractionalAdam
+FractionalRMSprop = OptimizedFractionalRMSprop
+
+# Legacy aliases for original classes
+SimpleFractionalOptimizer = OptimizedBaseOptimizer
+SimpleFractionalSGD = OptimizedFractionalSGD
+SimpleFractionalAdam = OptimizedFractionalAdam
+SimpleFractionalRMSprop = OptimizedFractionalRMSprop

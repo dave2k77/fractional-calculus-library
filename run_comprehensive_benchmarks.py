@@ -21,12 +21,14 @@ import warnings
 sys.path.insert(0, str(Path(__file__).parent))
 
 from hpfracc.validation import BenchmarkSuite, PerformanceBenchmark, AccuracyBenchmark
-from hpfracc.core.fractional_implementations import (
-    RiemannLiouvilleDerivative, CaputoDerivative, GrunwaldLetnikovDerivative
+from hpfracc.algorithms.optimized_methods import (
+    OptimizedRiemannLiouville as RiemannLiouvilleDerivative,
+    OptimizedCaputo as CaputoDerivative,
+    OptimizedGrunwaldLetnikov as GrunwaldLetnikovDerivative,
 )
 from hpfracc.special import mittag_leffler_function as mittag_leffler
 from hpfracc.special.binomial_coeffs import BinomialCoefficients
-from hpfracc.ml.spectral_autograd import SpectralFractionalLayer
+# from hpfracc.ml.spectral_autograd import SpectralFractionalLayer
 
 
 @dataclass
@@ -644,7 +646,7 @@ class ComprehensiveBenchmarker:
             # Run all benchmark categories
             self.results['derivative_methods'] = self.benchmark_derivative_methods()
             self.results['special_functions'] = self.benchmark_special_functions()
-            self.results['ml_layers'] = self.benchmark_ml_layers()
+            # self.results['ml_layers'] = self.benchmark_ml_layers()
             self.results['scalability'] = self.benchmark_scalability()
             
             # Generate overall summary

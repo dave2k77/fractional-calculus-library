@@ -51,7 +51,8 @@ class FractionalIntegral:
             self.alpha = order
 
         # Add order attribute for test compatibility
-        self.order = self.alpha.alpha if hasattr(self.alpha, 'alpha') else float(self.alpha)
+        self.order = self.alpha.alpha if hasattr(
+            self.alpha, 'alpha') else float(self.alpha)
 
         self.method = method
         self._validate_parameters()
@@ -70,8 +71,8 @@ class FractionalIntegral:
                  x: Union[float,
                           np.ndarray,
                           "torch.Tensor"]) -> Union[float,
-                                                  np.ndarray,
-                                                  "torch.Tensor"]:
+                                                    np.ndarray,
+                                                    "torch.Tensor"]:
         """Compute fractional integral of function f at point(s) x."""
         raise NotImplementedError("Subclasses must implement __call__")
 
@@ -107,8 +108,8 @@ class RiemannLiouvilleIntegral(FractionalIntegral):
                  x: Union[float,
                           np.ndarray,
                           "torch.Tensor"]) -> Union[float,
-                                                  np.ndarray,
-                                                  "torch.Tensor"]:
+                                                    np.ndarray,
+                                                    "torch.Tensor"]:
         """
         Compute Riemann-Liouville fractional integral.
 
@@ -133,11 +134,11 @@ class RiemannLiouvilleIntegral(FractionalIntegral):
     def compute(self, f: Callable, x: Union[float, np.ndarray, "torch.Tensor"], h: float = None) -> Union[float, np.ndarray, "torch.Tensor"]:
         """
         Compute Riemann-Liouville fractional integral (alias for __call__).
-        
+
         Args:
             f: Function to integrate
             x: Point(s) at which to evaluate the integral
-            
+
         Returns:
             Fractional integral value(s)
         """
@@ -153,6 +154,7 @@ class RiemannLiouvilleIntegral(FractionalIntegral):
             else:
                 # For scalar x, build a linspace grid matching f length
                 grid = np.linspace(0.0, float(x_arg), num=len(f))
+
             def interp_fn(tau):
                 return np.interp(tau, grid, f)
             return interp_fn
@@ -172,7 +174,8 @@ class RiemannLiouvilleIntegral(FractionalIntegral):
             return (x - tau) ** (self.alpha.alpha - 1) * f(tau)
 
         try:
-            result, _ = quad(integrand, 0, x, limit=100, epsabs=1e-8, epsrel=1e-8)
+            result, _ = quad(integrand, 0, x, limit=100,
+                             epsabs=1e-8, epsrel=1e-8)
             return result / gamma(self.alpha.alpha)
         except Exception:
             # Fallback for problematic integrals
@@ -220,8 +223,8 @@ class CaputoIntegral(FractionalIntegral):
                  x: Union[float,
                           np.ndarray,
                           "torch.Tensor"]) -> Union[float,
-                                                  np.ndarray,
-                                                  "torch.Tensor"]:
+                                                    np.ndarray,
+                                                    "torch.Tensor"]:
         """
         Compute Caputo fractional integral.
 
@@ -262,8 +265,8 @@ class WeylIntegral(FractionalIntegral):
                  x: Union[float,
                           np.ndarray,
                           "torch.Tensor"]) -> Union[float,
-                                                  np.ndarray,
-                                                  "torch.Tensor"]:
+                                                    np.ndarray,
+                                                    "torch.Tensor"]:
         """
         Compute Weyl fractional integral.
 
@@ -335,8 +338,8 @@ class HadamardIntegral(FractionalIntegral):
                  x: Union[float,
                           np.ndarray,
                           "torch.Tensor"]) -> Union[float,
-                                                  np.ndarray,
-                                                  "torch.Tensor"]:
+                                                    np.ndarray,
+                                                    "torch.Tensor"]:
         """
         Compute Hadamard fractional integral.
 
@@ -615,15 +618,15 @@ class MillerRossIntegral(FractionalIntegral):
     """
 
     def __init__(self, order: Union[float, FractionalOrder]):
-        super().__init__(alpha, method="MillerRoss")
+        super().__init__(order, method="MillerRoss")
 
     def __call__(self,
                  f: Callable,
                  x: Union[float,
                           np.ndarray,
                           "torch.Tensor"]) -> Union[float,
-                                                  np.ndarray,
-                                                  "torch.Tensor"]:
+                                                    np.ndarray,
+                                                    "torch.Tensor"]:
         """Compute Miller-Ross fractional integral."""
         if isinstance(x, (int, float)):
             return self._compute_scalar(f, x)
@@ -643,7 +646,8 @@ class MillerRossIntegral(FractionalIntegral):
             return (x - tau) ** (self.alpha.alpha - 1) * f(tau)
 
         try:
-            result, _ = quad(integrand, 0, x, limit=100, epsabs=1e-8, epsrel=1e-8)
+            result, _ = quad(integrand, 0, x, limit=100,
+                             epsabs=1e-8, epsrel=1e-8)
             return result / gamma(self.alpha.alpha)
         except Exception:
             # Fallback for problematic integrals
@@ -684,15 +688,15 @@ class MarchaudIntegral(FractionalIntegral):
     """
 
     def __init__(self, order: Union[float, FractionalOrder]):
-        super().__init__(alpha, method="Marchaud")
+        super().__init__(order, method="Marchaud")
 
     def __call__(self,
                  f: Callable,
                  x: Union[float,
                           np.ndarray,
                           "torch.Tensor"]) -> Union[float,
-                                                  np.ndarray,
-                                                  "torch.Tensor"]:
+                                                    np.ndarray,
+                                                    "torch.Tensor"]:
         """Compute Marchaud fractional integral."""
         if isinstance(x, (int, float)):
             return self._compute_scalar(f, x)
@@ -712,7 +716,8 @@ class MarchaudIntegral(FractionalIntegral):
             return (x - tau) ** (self.alpha.alpha - 1) * f(tau)
 
         try:
-            result, _ = quad(integrand, 0, x, limit=100, epsabs=1e-8, epsrel=1e-8)
+            result, _ = quad(integrand, 0, x, limit=100,
+                             epsabs=1e-8, epsrel=1e-8)
             return result / gamma(self.alpha.alpha)
         except Exception:
             # Fallback for problematic integrals
@@ -820,4 +825,4 @@ def create_fractional_integral_factory(
     Returns:
         Fractional integral implementation
     """
-    return integral_factory.create(method, alpha, **kwargs)
+    return integral_factory.create(method, order, **kwargs)

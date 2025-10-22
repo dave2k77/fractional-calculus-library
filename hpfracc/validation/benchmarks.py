@@ -52,11 +52,11 @@ class PerformanceBenchmark:
     def benchmark_function(self, method_func: Callable, method_name: str) -> Dict:
         """
         Benchmark a single function (alias for benchmark_method for compatibility).
-        
+
         Args:
             method_func: Function to benchmark
             method_name: Name of the method
-            
+
         Returns:
             Benchmark result dictionary
         """
@@ -154,13 +154,13 @@ class AccuracyBenchmark:
     def benchmark_accuracy(self, method_func: Callable, analytical_func: Callable, x: np.ndarray, method_name: str) -> Dict:
         """
         Benchmark accuracy of a method (alias for benchmark_method for compatibility).
-        
+
         Args:
             method_func: Function to benchmark
             analytical_func: Analytical solution function
             x: Input array
             method_name: Name of the method
-            
+
         Returns:
             Accuracy benchmark result dictionary
         """
@@ -261,7 +261,7 @@ class BenchmarkSuite:
     def add_benchmark(self, name: str, benchmark_func: Callable):
         """
         Add a benchmark function to the suite.
-        
+
         Args:
             name: Name of the benchmark
             benchmark_func: Function to benchmark
@@ -271,23 +271,24 @@ class BenchmarkSuite:
     def run_benchmarks(self, analytical_func: Callable = None, test_cases: List[Dict] = None) -> Dict:
         """
         Run all registered benchmarks.
-        
+
         Args:
             analytical_func: Analytical solution function
             test_cases: List of test case dictionaries
-            
+
         Returns:
             Benchmark results
         """
         if not self.benchmarks:
             return {}
-        
+
         # Handle default values
         if analytical_func is None:
-            analytical_func = lambda x: x  # Default identity function
+            def analytical_func(x):
+                return x
         if test_cases is None:
             test_cases = [{'x': np.linspace(0, 1, 10)}]
-        
+
         return self.run_comprehensive_benchmark(
             self.benchmarks, analytical_func, test_cases
         )
@@ -379,7 +380,8 @@ class BenchmarkSuite:
 
         # Generate method summaries
         for method_name, method_result_list in method_results.items():
-            successful_results = [r for r in method_result_list if r.get("success", True)]
+            successful_results = [
+                r for r in method_result_list if r.get("success", True)]
 
             if successful_results:
                 # Accuracy summary
@@ -396,8 +398,10 @@ class BenchmarkSuite:
                         perf_results = [perf_result]
 
                 if perf_results:
-                    execution_times = [r.get("execution_time", 0) for r in perf_results]
-                    memory_usage = [r.get("memory_usage", 0) for r in perf_results]
+                    execution_times = [r.get("execution_time", 0)
+                                       for r in perf_results]
+                    memory_usage = [r.get("memory_usage", 0)
+                                    for r in perf_results]
                 else:
                     execution_times = []
                     memory_usage = []
@@ -456,10 +460,11 @@ def run_benchmarks(
     """
     # Handle default values
     if analytical_func is None:
-        analytical_func = lambda x: x  # Default identity function
+        def analytical_func(x):
+            return x
     if test_cases is None:
         test_cases = [{'x': np.linspace(0, 1, 10)}]
-    
+
     suite = BenchmarkSuite()
     return suite.run_comprehensive_benchmark(
         methods, analytical_func, test_cases, n_runs
@@ -481,14 +486,14 @@ def compare_methods(
         Comparison results
     """
     suite = BenchmarkSuite()
-    
+
     # Handle both dict and numpy array test_params
     if isinstance(test_params, dict):
         test_cases = [test_params]
     else:
         # Assume it's a numpy array for x values
         test_cases = [{'x': test_params}]
-    
+
     results = suite.run_comprehensive_benchmark(
         methods, analytical_func, test_cases)
 
