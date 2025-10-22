@@ -548,3 +548,18 @@ def create_derivative_operator(
     """
     return FractionalDerivativeOperator(
         alpha, definition_type, use_jax, use_numba)
+
+def caputo(f, alpha, **kwargs):
+    """Convenience function for Caputo derivative."""
+    from hpfracc.algorithms.optimized_methods import OptimizedCaputo
+    return OptimizedCaputo(alpha).compute(f, **kwargs)
+
+def riemann_liouville(f, alpha, **kwargs):
+    """Convenience function for Riemann-Liouville derivative."""
+    from hpfracc.algorithms.optimized_methods import OptimizedRiemannLiouville
+    return OptimizedRiemannLiouville(alpha).compute(f, **kwargs)
+
+def grunwald_letnikov(f, alpha, **kwargs):
+    """Convenience function for Grünwald-Letnikov derivative."""
+    from hpfracc.algorithms.optimized_methods import OptimizedGrunwaldLetnikov
+    return OptimizedGrunwaldLetnikov(alpha).compute(f, **kwargs)

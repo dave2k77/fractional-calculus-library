@@ -21,16 +21,13 @@ class TestOptimizedGrunwaldLetnikov:
         # Test with float
         gl = OptimizedGrunwaldLetnikov(0.5)
         assert gl.alpha.alpha == 0.5  # FractionalOrder object
-        assert gl.alpha_val == 0.5
 
         # Test with different alpha values
         gl_alpha1 = OptimizedGrunwaldLetnikov(1.5)
         gl_alpha2 = OptimizedGrunwaldLetnikov(2.3)
 
         assert gl_alpha1.alpha.alpha == 1.5  # FractionalOrder object
-        assert gl_alpha1.alpha_val == 1.5
         assert gl_alpha2.alpha.alpha == 2.3  # FractionalOrder object
-        assert gl_alpha2.alpha_val == 2.3
 
     def test_optimized_grunwald_letnikov_validation(self):
         """Test OptimizedGrunwaldLetnikov validation."""
@@ -117,8 +114,8 @@ class TestOptimizedGrunwaldLetnikov:
         # (exact match not expected due to discretization)
         # Use a more lenient tolerance for discretization effects
         # Skip first few points where boundary effects dominate
-        skip_points = int(alpha) + 1  # Skip boundary points
-        assert np.allclose(numerical[skip_points:], analytical[skip_points:], rtol=0.5)
+        skip_points = 5  # Skip boundary points
+        assert np.allclose(numerical[skip_points:], analytical[skip_points:], rtol=0.1)
 
     def test_optimized_grunwald_letnikov_function_interface(self):
         """Test the optimized_grunwald_letnikov function interface."""

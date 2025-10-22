@@ -251,7 +251,7 @@ class PlotManager:
         analytical: np.ndarray,
         title: str = "Error Analysis",
         save_path: Optional[str] = None,
-    ) -> Tuple[plt.Figure, plt.Axes]:
+    ) -> plt.Figure:
         """
         Plot error analysis between numerical and analytical solutions.
 
@@ -422,8 +422,7 @@ def plot_convergence(
                 if errors is not None:
                     errors_dict = {method: list(errors[method]) for method in errors.keys()}
                     fig = manager.plot_convergence(grid_sizes, errors_dict, title, save_path)
-                    ax = fig.axes[0] if fig.axes else None
-                    return fig, ax
+                    return fig, fig.axes if fig.axes else None
                 else:
                     raise ValueError("When grid_sizes is provided, errors dict must be provided as second argument")
             else:
@@ -444,8 +443,7 @@ def plot_convergence(
                 errors_dict = h_values_or_errors
                 errors_dict = {method: list(errors_dict[method]) for method in errors_dict.keys()}
                 fig = manager.plot_convergence(grid_sizes, errors_dict, title, save_path)
-                ax = fig.axes[0] if fig.axes else None
-                return fig, ax
+                return fig, fig.axes if fig.axes else None
         else:
             # Called with methods, h_values, errors
             methods = methods_or_grid_sizes
@@ -453,8 +451,7 @@ def plot_convergence(
             grid_sizes = h_values.tolist()
             errors_dict = {method: list(errors[method]) for method in methods if method in errors}
             fig = manager.plot_convergence(grid_sizes, errors_dict, title, save_path)
-            ax = fig.axes[0] if fig.axes else None
-            return fig, ax
+            return fig, fig.axes if fig.axes else None
 
 
 def plot_error_analysis(
@@ -462,14 +459,13 @@ def plot_error_analysis(
     analytical: np.ndarray,
     title: str = "Error Analysis",
     save_path: Optional[str] = None,
-) -> Tuple[plt.Figure, plt.Axes]:
+) -> plt.Figure:
     """Plot error analysis between numerical and analytical solutions."""
     manager = PlotManager()
     # Create x-axis data
     x = np.arange(len(numerical))
     fig = manager.plot_error_analysis(x, numerical, analytical, title, save_path)
-    ax = fig.axes[0] if fig.axes else None
-    return fig, ax
+    return fig, fig.axes if fig.axes else None
 
 
 def save_plot(

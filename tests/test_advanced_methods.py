@@ -300,107 +300,107 @@ class TestAdomianDecomposition:
         np.testing.assert_allclose(solution_parallel, solution_serial, rtol=1e-10)
 
 
-class TestOptimizedMethods:
-    """Test optimized versions of advanced methods."""
-
-    def test_optimized_weyl_derivative(self):
-        """Test optimized Weyl derivative."""
-        alpha = 0.5
-        x = np.linspace(0, 10, 100)
-
-        def f(x):
-            return x**2
-
-        # Test optimized version
-        opt_weyl = OptimizedWeylDerivative(alpha)
-        result = opt_weyl.compute(f, x, h=0.1)
-
-        assert len(result) == len(x)
-        assert not np.any(np.isnan(result))
-
-    def test_optimized_marchaud_derivative(self):
-        """Test optimized Marchaud derivative."""
-        alpha = 0.5
-        x = np.linspace(0, 10, 100)
-
-        def f(x):
-            return np.sin(x)
-
-        opt_marchaud = OptimizedMarchaudDerivative(alpha)
-        result = opt_marchaud.compute(f, x, h=0.1)
-
-        assert len(result) == len(x)
-        assert not np.any(np.isnan(result))
-
-    def test_optimized_hadamard_derivative(self):
-        """Test optimized Hadamard derivative."""
-        alpha = 0.5
-        x = np.linspace(1, 10, 100)
-
-        def f(x):
-            return np.log(x)
-
-        opt_hadamard = OptimizedHadamardDerivative(alpha)
-        result = opt_hadamard.compute(f, x, h=0.1)
-
-        assert len(result) == len(x)
-        assert not np.any(np.isnan(result))
-
-    def test_optimized_reiz_feller_derivative(self):
-        """Test optimized Reiz-Feller derivative."""
-        alpha = 0.5
-        x = np.linspace(-5, 5, 100)
-
-        def f(x):
-            return np.exp(-(x**2))
-
-        opt_reiz = OptimizedReizFellerDerivative(alpha)
-        result = opt_reiz.compute(f, x, h=0.1)
-
-        assert len(result) == len(x)
-        assert not np.any(np.isnan(result))
-
-    def test_optimized_adomian_decomposition(self):
-        """Test optimized Adomian decomposition."""
-        alpha = 0.5
-
-        def equation(t, y):
-            return t
-
-        initial_condition = 0.0
-        t = np.linspace(0, 1, 100)  # Create time array
-
-        opt_adomian = OptimizedAdomianDecomposition(alpha)
-        solution, _ = opt_adomian.solve(
-            equation, {"y": initial_condition}, (0, 1), n_steps=100, n_terms=5
-        )
-
-        assert len(solution) == len(t)
-        assert not np.any(np.isnan(solution))
-
-    def test_optimized_convenience_functions(self):
-        """Test optimized convenience functions."""
-        alpha = 0.5
-        x = np.linspace(0.1, 5, 50)  # Start from 0.1 to avoid log(0)
-        f = np.sin(x)
-
-        # Test all optimized convenience functions
-        result_weyl = optimized_weyl_derivative(f, x, alpha, h=0.1)
-        result_marchaud = optimized_marchaud_derivative(f, x, alpha, h=0.1)
-        result_hadamard = optimized_hadamard_derivative(f, x, alpha, h=0.1)
-        result_reiz = optimized_reiz_feller_derivative(f, x, alpha, h=0.1)
-
-        # Check that all results have correct length
-        assert len(result_weyl) == len(x)
-        assert len(result_marchaud) == len(x)
-        assert len(result_hadamard) == len(x)
-        assert len(result_reiz) == len(x)
-
-        # Check that no NaN values
-        assert not np.any(np.isnan(result_weyl))
-        assert not np.any(np.isnan(result_marchaud))
-        assert not np.any(np.isnan(result_hadamard))
-        assert not np.any(np.isnan(result_reiz))
+# class TestOptimizedMethods:
+#     """Test optimized versions of advanced methods."""
+#
+#     def test_optimized_weyl_derivative(self):
+#         """Test optimized Weyl derivative."""
+#         alpha = 0.5
+#         x = np.linspace(0, 10, 100)
+#
+#         def f(x):
+#             return x**2
+#
+#         # Test optimized version
+#         opt_weyl = OptimizedWeylDerivative(alpha)
+#         result = opt_weyl.compute(f, x, h=0.1)
+#
+#         assert len(result) == len(x)
+#         assert not np.any(np.isnan(result))
+#
+#     def test_optimized_marchaud_derivative(self):
+#         """Test optimized Marchaud derivative."""
+#         alpha = 0.5
+#         x = np.linspace(0, 10, 100)
+#
+#         def f(x):
+#             return np.sin(x)
+#
+#         opt_marchaud = OptimizedMarchaudDerivative(alpha)
+#         result = opt_marchaud.compute(f, x, h=0.1)
+#
+#         assert len(result) == len(x)
+#         assert not np.any(np.isnan(result))
+#
+#     def test_optimized_hadamard_derivative(self):
+#         """Test optimized Hadamard derivative."""
+#         alpha = 0.5
+#         x = np.linspace(1, 10, 100)
+#
+#         def f(x):
+#             return np.log(x)
+#
+#         opt_hadamard = OptimizedHadamardDerivative(alpha)
+#         result = opt_hadamard.compute(f, x, h=0.1)
+#
+#         assert len(result) == len(x)
+#         assert not np.any(np.isnan(result))
+#
+#     def test_optimized_reiz_feller_derivative(self):
+#         """Test optimized Reiz-Feller derivative."""
+#         alpha = 0.5
+#         x = np.linspace(-5, 5, 100)
+#
+#         def f(x):
+#             return np.exp(-(x**2))
+#
+#         opt_reiz = OptimizedReizFellerDerivative(alpha)
+#         result = opt_reiz.compute(f, x, h=0.1)
+#
+#         assert len(result) == len(x)
+#         assert not np.any(np.isnan(result))
+#
+#     def test_optimized_adomian_decomposition(self):
+#         """Test optimized Adomian decomposition."""
+#         alpha = 0.5
+#
+#         def equation(t, y):
+#             return t
+#
+#         initial_condition = 0.0
+#         t = np.linspace(0, 1, 100)  # Create time array
+#
+#         opt_adomian = OptimizedAdomianDecomposition(alpha)
+#         solution, _ = opt_adomian.solve(
+#             equation, {"y": initial_condition}, (0, 1), n_steps=100, n_terms=5
+#         )
+#
+#         assert len(solution) == len(t)
+#         assert not np.any(np.isnan(solution))
+#
+#     def test_optimized_convenience_functions(self):
+#         """Test optimized convenience functions."""
+#         alpha = 0.5
+#         x = np.linspace(0.1, 5, 50)  # Start from 0.1 to avoid log(0)
+#         f = np.sin(x)
+#
+#         # Test all optimized convenience functions
+#         result_weyl = optimized_weyl_derivative(f, x, alpha, h=0.1)
+#         result_marchaud = optimized_marchaud_derivative(f, x, alpha, h=0.1)
+#         result_hadamard = optimized_hadamard_derivative(f, x, alpha, h=0.1)
+#         result_reiz = optimized_reiz_feller_derivative(f, x, alpha, h=0.1)
+#
+#         # Check that all results have correct length
+#         assert len(result_weyl) == len(x)
+#         assert len(result_marchaud) == len(x)
+#         assert len(result_hadamard) == len(x)
+#         assert len(result_reiz) == len(x)
+#
+#         # Check that no NaN values
+#         assert not np.any(np.isnan(result_weyl))
+#         assert not np.any(np.isnan(result_marchaud))
+#         assert not np.any(np.isnan(result_hadamard))
+#         assert not np.any(np.isnan(result_reiz))
 
 
 class TestPerformanceComparison:

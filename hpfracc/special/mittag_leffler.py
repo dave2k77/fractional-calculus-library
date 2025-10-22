@@ -11,25 +11,17 @@ from typing import Union, Optional, Tuple
 import warnings
 from functools import lru_cache
 
-# Use adapter system for JAX instead of direct imports
-def _get_jax_numpy():
-    """Get JAX numpy through adapter system."""
-    try:
-        from ..ml.adapters import get_jax_adapter
-        adapter = get_jax_adapter()
-        return adapter.get_lib()
-    except Exception:
-        # Fallback to NumPy if JAX not available
-        import numpy as np
-        return np
-
-# Check if JAX is available through adapter system
+# Simplified JAX import
 try:
-    jnp = _get_jax_numpy()
-    JAX_AVAILABLE = jnp is not np
-except Exception:
-    JAX_AVAILABLE = False
+    import jax
+    import jax.numpy as jnp
+    from jax.config import config
+    config.update("jax_enable_x64", True)
+    JAX_AVAILABLE = True
+except ImportError:
+    jax = None
     jnp = None
+    JAX_AVAILABLE = False
 
 # Optional numba import
 try:
@@ -45,6 +37,8 @@ except ImportError:
         return range(*args, **kwargs)
 
 from .gamma_beta import gamma
+
+from scipy.special import gamma as gamma_scipy, gammaln
 
 
 class MittagLefflerFunction:
@@ -219,30 +213,31 @@ class MittagLefflerFunction:
         tolerance: float
     ) -> float:
         """Python implementation with optimizations for fractional calculus."""
+        if alpha <= 0 or beta <= 0:
+            return np.nan
+            
+        # Handle large z where exp(z) would overflow
+        if not np.iscomplexobj(z) and z > 700:
+            return np.inf
+
         if abs(z) < 1e-15:
-            return 1.0
-        
-        result = 0.0
-        term = 1.0
-        k = 0
-        
-        # Optimized series expansion
-        while k < max_terms and abs(term) > tolerance:
+            return 1.0 / gamma(beta)
+
+        term = 1.0 / gamma(beta)
+        result = term
+        k = 1
+
+        while k < max_terms:
+            log_gamma_ratio = gammaln(alpha * (k - 1) + beta) - gammaln(alpha * k + beta)
+            term = term * z * np.exp(log_gamma_ratio)
+            
+            if abs(term) < tolerance:
+                break
+                
             result += term
             k += 1
-            
-            if k > 0:
-                # Compute next term efficiently
-                denominator = alpha * k + beta - alpha
-                if abs(denominator) < 1e-15:
-                    break
-                term = term * z / denominator
-                
-                # Early termination for negative arguments (common in Atangana-Baleanu)
-                if z < 0 and k > 10 and abs(term) < tolerance * 10:
-                    break
-        
-        return result if np.isfinite(result) else 0.0
+
+        return result
     
     def _compute_numba_scalar(
         self,
@@ -331,7 +326,7 @@ class MittagLefflerFunction:
                 denominator = alpha * k + beta - alpha
                 if abs(denominator) < 1e-15:
                     break
-                term = term * z / denominator
+                term = term * z / (denominator + 1e-99)
                 
                 # Early termination for negative arguments
                 if z < 0 and k > 10 and abs(term) < tolerance * 10:
@@ -492,4 +487,6 @@ def mittag_leffler(
     Returns:
         Mittag-Leffler function value(s)
     """
+    if alpha <= 0 or beta <= 0:
+        return np.nan
     return mittag_leffler_function(alpha, beta, z, use_jax=use_jax, use_numba=use_numba)

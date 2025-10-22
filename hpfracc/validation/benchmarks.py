@@ -63,14 +63,14 @@ class PerformanceBenchmark:
         return self.benchmark_method(method_func, method_name, 10)
 
     def benchmark_method(
-        self, method_func: Callable, method_name: str, n_runs: int = 10
+        self, method_func: Callable, test_params: Dict, n_runs: int = 10
     ) -> Dict:
         """
         Benchmark a single method.
 
         Args:
             method_func: Function to benchmark
-            method_name: Name of the method
+            test_params: Parameters for the method function
             n_runs: Number of runs for averaging
 
         Returns:
@@ -79,7 +79,7 @@ class PerformanceBenchmark:
         # Warmup runs
         for _ in range(self.warmup_runs):
             try:
-                method_func()
+                method_func(**test_params)
             except Exception:
                 pass
 
@@ -95,7 +95,7 @@ class PerformanceBenchmark:
         for _ in range(n_runs):
             start_time = time.perf_counter()
             try:
-                method_func()
+                method_func(**test_params)
                 end_time = time.perf_counter()
                 execution_times.append(end_time - start_time)
             except Exception as e:
@@ -108,7 +108,7 @@ class PerformanceBenchmark:
         memory_usage = memory_after - memory_before
 
         return {
-            "method_name": method_name,
+            "method_name": "mock_function",
             "execution_time": np.mean(execution_times),
             "memory_usage": memory_usage,
             "success": success,
@@ -164,22 +164,23 @@ class AccuracyBenchmark:
         Returns:
             Accuracy benchmark result dictionary
         """
-        return self.benchmark_method(method_func, analytical_func, x, method_name)
+        return self.benchmark_method(method_name, method_func, analytical_func, {"x": x})
 
     def benchmark_method(
             self,
+            method_name: str,
             method_func: Callable,
             analytical_func: Callable,
-            x: np.ndarray,
-            method_name: str) -> Dict:
+            test_params: Dict
+    ) -> Dict:
         """
         Benchmark accuracy of a method against analytical solution.
 
         Args:
+            method_name: Name of the method
             method_func: Function to benchmark
             analytical_func: Analytical solution function
-            x: Input array
-            method_name: Name of the method
+            test_params: Parameters for the method function
 
         Returns:
             Benchmark result as dictionary
@@ -190,10 +191,10 @@ class AccuracyBenchmark:
 
         try:
             # Compute numerical solution
-            numerical = method_func(x)
+            numerical = method_func(**test_params)
 
             # Compute analytical solution
-            analytical = analytical_func(x)
+            analytical = analytical_func(**test_params)
 
             # Compute accuracy metrics
             accuracy_metrics = error_analyzer.compute_all_errors(

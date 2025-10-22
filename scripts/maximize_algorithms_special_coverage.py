@@ -20,8 +20,8 @@ def main():
         
         # Test optimized methods
         from hpfracc.algorithms.optimized_methods import OptimizedRiemannLiouville, OptimizedCaputo
-        rl = OptimizedRiemannLiouville(alpha=0.5)
-        caputo = OptimizedCaputo(alpha=0.5)
+        rl = OptimizedRiemannLiouville(order=0.5)
+        caputo = OptimizedCaputo(order=0.5)
         
         print("ALL TARGET MODULES SUCCESSFULLY EXERCISED!")
         return 0

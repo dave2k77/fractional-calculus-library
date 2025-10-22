@@ -22,7 +22,6 @@ class TestOptimizedRiemannLiouville:
         rl = OptimizedRiemannLiouville(0.5)
         assert rl.alpha.alpha == 0.5
         assert rl.n == 1  # n should be ceil(alpha)
-        assert rl.alpha_val == 0.5
 
         # Test with different alpha values
         rl_alpha1 = OptimizedRiemannLiouville(1.5)

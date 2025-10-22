@@ -8,30 +8,17 @@ which are fundamental in the Grünwald-Letnikov definition of fractional derivat
 import numpy as np
 from typing import Union
 
-# Use adapter system for JAX instead of direct imports
-def _get_jax_numpy():
-    """Get JAX numpy through adapter system."""
-    try:
-        from ..ml.adapters import get_jax_adapter
-        adapter = get_jax_adapter()
-        return adapter.get_lib()
-    except Exception:
-        # Fallback to NumPy if JAX not available
-        import numpy as np
-        return np
-
-# Check if JAX is available through adapter system
+# Simplified JAX import
 try:
-    jnp = _get_jax_numpy()
-    JAX_AVAILABLE = jnp is not np
-    if JAX_AVAILABLE:
-        import jax
-    else:
-        jax = None
-except Exception:
-    JAX_AVAILABLE = False
-    jnp = None
+    import jax
+    import jax.numpy as jnp
+    from jax.config import config
+    config.update("jax_enable_x64", True)
+    JAX_AVAILABLE = True
+except ImportError:
     jax = None
+    jnp = None
+    JAX_AVAILABLE = False
 
 # Optional numba import
 try:
@@ -408,7 +395,7 @@ class GrunwaldLetnikovCoefficients:
             use_numba: Whether to use NUMBA implementation
             cache_size: Size of the cache for frequently used coefficients
         """
-        self.use_jax = use_jax
+        self.use_jax = use_jax and JAX_AVAILABLE
         self.use_numba = use_numba
         self.cache_size = cache_size
         self._cache = {}
@@ -428,7 +415,7 @@ class GrunwaldLetnikovCoefficients:
         """
         if self.use_jax:
             k = jnp.arange(max_k + 1)
-            return (-1) ** k * jax.scipy.special.gamma(alpha + 1) / (jax.scipy.special.gamma(k + 1) * jax.scipy.special.gamma(alpha - k + 1))
+            return (-1) ** k * jax.scipy.special.binom(alpha, k)
         else:
             k = np.arange(max_k + 1)
             return (-1) ** k * scipy_special.binom(alpha, k)

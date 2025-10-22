@@ -414,7 +414,7 @@ class TestAccuracyBenchmark:
             return x_input**2  # Analytical solution
         
         result = benchmark.benchmark_method(
-            mock_method, mock_analytical, x, 'test_method'
+            'test_method', mock_method, mock_analytical, {'x': x}
         )
         
         # Result is a dict

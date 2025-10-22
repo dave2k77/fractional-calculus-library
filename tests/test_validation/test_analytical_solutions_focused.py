@@ -100,7 +100,7 @@ class TestAnalyticalSolutionsFocused:
         x = np.array([0.0, 1.0, 2.0])
         
         with pytest.raises(ValueError):
-            solutions.exponential_derivative(x, 1.0, -0.5)
+            solutions.exponential_derivative(x, -0.5, 1.0)
 
     def test_trigonometric_derivative_comprehensive(self):
         """Test trigonometric derivative comprehensive cases."""
@@ -253,7 +253,7 @@ class TestTrigonometricSolutionsFocused:
         ]
         
         for func_type, omega, order in test_cases:
-            result = solutions.get_solution(x, func_type, omega, order)
+            result = solutions.get_solution(x, order, func_type, omega)
             assert isinstance(result, np.ndarray)
             assert len(result) == len(x)
             assert not np.any(np.isnan(result))
@@ -295,7 +295,7 @@ class TestUtilityFunctionsFocused:
         """Test get_analytical_solution for trigonometric functions."""
         x = np.array([1.0, 2.0, 3.0])
         # Use keyword arguments to avoid parameter conflicts
-        result = get_analytical_solution('trigonometric', x, omega=1.0, order=0.5, func_type='sin')
+        result = get_analytical_solution('trigonometric', x, omega=1.0, order=0.5, trig_type='sin')
         assert isinstance(result, np.ndarray)
         assert len(result) == len(x)
 
@@ -315,41 +315,44 @@ class TestUtilityFunctionsFocused:
 
     def test_validate_against_analytical_basic(self):
         """Test validate_against_analytical basic functionality."""
-        def mock_method(x):
+        def mock_method(x, **kwargs):
             return x**2 + 0.01
         
-        def mock_analytical(x):
+        def mock_analytical(x, **kwargs):
             return x**2
         
-        x = np.linspace(0, 1, 10)
-        result = validate_against_analytical(mock_method, mock_analytical, x)
+        result = validate_against_analytical(
+            mock_method, mock_analytical, test_params=[{}]
+        )
         assert isinstance(result, dict)
         assert 'n_points' in result
         assert 'results' in result
 
     def test_validate_against_analytical_single_point(self):
         """Test validate_against_analytical with single point."""
-        def mock_method(x):
+        def mock_method(x, **kwargs):
             return x**2 + 0.01
         
-        def mock_analytical(x):
+        def mock_analytical(x, **kwargs):
             return x**2
         
-        x = np.array([1.0])
-        result = validate_against_analytical(mock_method, mock_analytical, x)
+        result = validate_against_analytical(
+            mock_method, mock_analytical, test_params=[{}], n_points=1
+        )
         assert isinstance(result, dict)
         assert 'n_points' in result
 
     def test_validate_against_analytical_failure_cases(self):
         """Test validate_against_analytical with failing methods."""
-        def failing_method(x):
+        def failing_method(x, **kwargs):
             raise RuntimeError("Method failed")
         
-        def mock_analytical(x):
+        def mock_analytical(x, **kwargs):
             return x**2
         
-        x = np.linspace(0, 1, 10)
-        result = validate_against_analytical(failing_method, mock_analytical, x)
+        result = validate_against_analytical(
+            failing_method, mock_analytical, test_params=[{}]
+        )
         assert isinstance(result, dict)
         assert 'n_points' in result
         assert 'results' in result
@@ -456,40 +459,43 @@ class TestEdgeCasesAndErrorHandling:
 
     def test_validate_against_analytical_edge_cases(self):
         """Test validate_against_analytical with edge cases."""
-        def mock_method(x):
+        def mock_method(x, **kwargs):
             return x**2 + 0.01
         
-        def mock_analytical(x):
+        def mock_analytical(x, **kwargs):
             return x**2
         
         # Test with very small array
-        x_small = np.array([1.0])
-        result = validate_against_analytical(mock_method, mock_analytical, x_small)
+        result = validate_against_analytical(
+            mock_method, mock_analytical, test_params=[{}], n_points=1
+        )
         assert isinstance(result, dict)
         assert 'n_points' in result
         # Note: The function may use a default grid size, so just check it's valid
         assert result['n_points'] > 0
         
         # Test with larger array
-        x_large = np.linspace(0, 1, 50)
-        result = validate_against_analytical(mock_method, mock_analytical, x_large)
+        result = validate_against_analytical(
+            mock_method, mock_analytical, test_params=[{}], n_points=50
+        )
         assert isinstance(result, dict)
         assert 'n_points' in result
         assert result['n_points'] == 50
 
     def test_validate_against_analytical_with_errors(self):
         """Test validate_against_analytical with methods that raise errors."""
-        def error_method(x):
+        def error_method(x, **kwargs):
             if len(x) > 5:
                 raise ValueError("Too many points")
             return x**2
         
-        def mock_analytical(x):
+        def mock_analytical(x, **kwargs):
             return x**2
         
         # Test with array that should cause error
-        x = np.linspace(0, 1, 10)
-        result = validate_against_analytical(error_method, mock_analytical, x)
+        result = validate_against_analytical(
+            error_method, mock_analytical, test_params=[{}], n_points=10
+        )
         assert isinstance(result, dict)
         assert 'n_points' in result
         assert 'results' in result
@@ -533,16 +539,17 @@ class TestEdgeCasesAndErrorHandling:
 
     def test_validate_against_analytical_comprehensive_error_handling(self):
         """Test validate_against_analytical comprehensive error handling."""
-        def mock_method(x):
+        def mock_method(x, **kwargs):
             return x**2 + 0.01
         
-        def mock_analytical(x):
+        def mock_analytical(x, **kwargs):
             return x**2
         
         # Test with various array sizes
         for n in [1, 5, 10, 20]:
-            x = np.linspace(0, 1, n)
-            result = validate_against_analytical(mock_method, mock_analytical, x)
+            result = validate_against_analytical(
+                mock_method, mock_analytical, test_params=[{}], n_points=n
+            )
             assert isinstance(result, dict)
             assert 'n_points' in result
             assert 'results' in result
@@ -550,14 +557,15 @@ class TestEdgeCasesAndErrorHandling:
 
     def test_validate_against_analytical_nan_handling(self):
         """Test validate_against_analytical with NaN values."""
-        def nan_method(x):
+        def nan_method(x, **kwargs):
             return np.full_like(x, np.nan)
         
-        def mock_analytical(x):
+        def mock_analytical(x, **kwargs):
             return x**2
         
-        x = np.linspace(0, 1, 10)
-        result = validate_against_analytical(nan_method, mock_analytical, x)
+        result = validate_against_analytical(
+            nan_method, mock_analytical, test_params=[{}]
+        )
         assert isinstance(result, dict)
         assert 'n_points' in result
         assert 'results' in result

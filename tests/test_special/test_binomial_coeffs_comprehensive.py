@@ -9,6 +9,7 @@ import pytest
 import numpy as np
 import jax.numpy as jnp
 from unittest.mock import patch, MagicMock
+import scipy.special
 
 from hpfracc.special.binomial_coeffs import (
     BinomialCoefficients, GrunwaldLetnikovCoefficients
@@ -26,13 +27,17 @@ class TestBinomialCoefficients:
         assert bc.cache_size == 1000
         assert isinstance(bc._cache, dict)
     
-    def test_binomial_coefficients_initialization_with_jax(self):
+    @patch('hpfracc.special.binomial_coeffs.jnp', np)
+    @patch('hpfracc.special.binomial_coeffs.jax')
+    def test_binomial_coefficients_initialization_with_jax(self, mock_jax):
         """Test BinomialCoefficients initialization with JAX."""
-        bc = BinomialCoefficients(use_jax=True)
-        assert bc.use_jax is True
-        assert bc.use_numba is True
-        assert bc.cache_size == 1000
-        assert hasattr(bc, '_binomial_jax')
+        mock_jax.jit.side_effect = lambda x: x  # Make jit a pass-through
+        with patch('hpfracc.special.binomial_coeffs.JAX_AVAILABLE', True):
+            bc = BinomialCoefficients(use_jax=True)
+            assert bc.use_jax is True
+            assert bc.use_numba is True
+            assert bc.cache_size == 1000
+            assert hasattr(bc, '_binomial_jax')
     
     def test_binomial_coefficients_initialization_with_custom_cache(self):
         """Test BinomialCoefficients initialization with custom cache size."""
@@ -76,29 +81,35 @@ class TestBinomialCoefficients:
         assert results.shape == n_vals.shape
         assert not np.any(np.isnan(results))
     
-    def test_binomial_coefficients_compute_with_jax(self):
+    @patch('hpfracc.special.binomial_coeffs.jnp', np)
+    @patch('hpfracc.special.binomial_coeffs.jax')
+    def test_binomial_coefficients_compute_with_jax(self, mock_jax):
         """Test BinomialCoefficients compute method with JAX."""
-        bc = BinomialCoefficients(use_jax=True)
-        
-        # Test scalar with JAX
-        result = bc.compute(5, 2)
-        # JAX returns arrays, so check for JAX array or convert to scalar
-        if hasattr(result, 'item'):  # JAX array
-            result_scalar = result.item()
-            assert isinstance(result_scalar, (int, float, np.floating))
-        else:
-            assert isinstance(result, (int, float, np.floating))
-        assert not np.isnan(float(result))
-        
-        # Test array with JAX
-        n_vals = np.array([1, 2, 3, 4, 5])
-        k_vals = np.array([0, 1, 2, 3, 4])
+        mock_jax.jit.side_effect = lambda x: x  # Make jit a pass-through
+        mock_jax.scipy.special.gamma.side_effect = scipy.special.gamma
 
-        results = bc.compute(n_vals, k_vals)
-        # JAX returns JAX arrays, not numpy arrays
-        assert hasattr(results, 'shape') and hasattr(results, 'dtype')
-        assert results.shape == n_vals.shape
-        assert not np.any(np.isnan(results))
+        with patch('hpfracc.special.binomial_coeffs.JAX_AVAILABLE', True):
+            bc = BinomialCoefficients(use_jax=True)
+            
+            # Test scalar with JAX
+            result = bc.compute(5, 2)
+            # JAX returns arrays, so check for JAX array or convert to scalar
+            if hasattr(result, 'item'):  # JAX array
+                result_scalar = result.item()
+                assert isinstance(result_scalar, (int, float, np.floating))
+            else:
+                assert isinstance(result, (int, float, np.floating))
+            assert not np.isnan(float(result))
+            
+            # Test array with JAX
+            n_vals = np.array([1, 2, 3, 4, 5])
+            k_vals = np.array([0, 1, 2, 3, 4])
+
+            results = bc.compute(n_vals, k_vals)
+            # JAX returns JAX arrays, not numpy arrays
+            assert hasattr(results, 'shape') and hasattr(results, 'dtype')
+            assert results.shape == n_vals.shape
+            assert not np.any(np.isnan(results))
     
     def test_binomial_coefficients_caching(self):
         """Test BinomialCoefficients caching functionality."""
@@ -154,14 +165,18 @@ class TestGrunwaldLetnikovCoefficients:
         glc = GrunwaldLetnikovCoefficients()
         assert glc is not None
     
-    def test_grunwald_letnikov_coefficients_initialization_with_params(self):
+    @patch('hpfracc.special.binomial_coeffs.jnp', np)
+    @patch('hpfracc.special.binomial_coeffs.jax')
+    def test_grunwald_letnikov_coefficients_initialization_with_params(self, mock_jax):
         """Test GrunwaldLetnikovCoefficients initialization with parameters."""
-        glc = GrunwaldLetnikovCoefficients(
-            use_jax=True,
-            use_numba=True,
-            cache_size=500
-        )
-        assert glc is not None
+        mock_jax.jit.side_effect = lambda x: x  # Make jit a pass-through
+        with patch('hpfracc.special.binomial_coeffs.JAX_AVAILABLE', True):
+            glc = GrunwaldLetnikovCoefficients(
+                use_jax=True,
+                use_numba=True,
+                cache_size=500
+            )
+            assert glc is not None
     
     def test_grunwald_letnikov_coefficients_compute(self):
         """Test GrunwaldLetnikovCoefficients compute method."""
@@ -193,18 +208,23 @@ class TestGrunwaldLetnikovCoefficients:
             assert len(result) == n + 1
             assert not np.any(np.isnan(result))
     
-    def test_grunwald_letnikov_coefficients_compute_with_jax(self):
+    @patch('hpfracc.special.binomial_coeffs.jnp', np)
+    @patch('hpfracc.special.binomial_coeffs.jax')
+    def test_grunwald_letnikov_coefficients_compute_with_jax(self, mock_jax):
         """Test GrunwaldLetnikovCoefficients with JAX."""
-        glc = GrunwaldLetnikovCoefficients(use_jax=True)
-        
-        result = glc.compute(0.5, 10)
-        # JAX returns arrays, so check for JAX array or convert to numpy
-        if hasattr(result, 'shape'):  # JAX array
-            assert hasattr(result, 'shape')  # Just check it's array-like
-        else:
-            assert isinstance(result, np.ndarray)
-        assert len(result) == 11
-        assert not np.any(np.isnan(result))
+        mock_jax.jit.side_effect = lambda x: x  # Make jit a pass-through
+        mock_jax.scipy.special.binom.side_effect = scipy.special.binom
+        with patch('hpfracc.special.binomial_coeffs.JAX_AVAILABLE', True):
+            glc = GrunwaldLetnikovCoefficients(use_jax=True)
+            
+            result = glc.compute(0.5, 10)
+            # JAX returns arrays, so check for JAX array or convert to numpy
+            if hasattr(result, 'shape'):  # JAX array
+                assert hasattr(result, 'shape')  # Just check it's array-like
+            else:
+                assert isinstance(result, np.ndarray)
+            assert len(result) == 11
+            assert not np.any(np.isnan(result))
     
     def test_grunwald_letnikov_coefficients_caching(self):
         """Test GrunwaldLetnikovCoefficients caching."""
@@ -265,58 +285,68 @@ class TestGrunwaldLetnikovCoefficients:
 class TestBinomialCoefficientsIntegration:
     """Test binomial coefficients integration scenarios."""
     
-    def test_binomial_coefficients_workflow(self):
+    @patch('hpfracc.special.binomial_coeffs.jnp', np)
+    @patch('hpfracc.special.binomial_coeffs.jax')
+    def test_binomial_coefficients_workflow(self, mock_jax):
         """Test complete binomial coefficients workflow."""
-        bc = BinomialCoefficients(use_jax=True, cache_size=100)
-        
-        # Test scalar computation
-        result1 = bc.compute(5, 2)
-        # JAX returns arrays, so check for JAX array or convert to scalar
-        if hasattr(result1, 'item'):  # JAX array
-            result_scalar = result1.item()
-            assert isinstance(result_scalar, (int, float, np.floating))
-        else:
-            assert isinstance(result1, (int, float, np.floating))
-        
-        # Test array computation
-        n_vals = np.array([1, 2, 3, 4, 5])
-        k_vals = np.array([0, 1, 2, 3, 4])
-        result2 = bc.compute(n_vals, k_vals)
-        # JAX returns JAX arrays, not numpy arrays
-        assert hasattr(result2, 'shape') and hasattr(result2, 'dtype')
-        
-        # Test fractional computation
-        result3 = bc.compute(0.5, 2)
-        # JAX returns arrays, so check for JAX array or convert to scalar
-        if hasattr(result3, 'item'):  # JAX array
-            result_scalar = result3.item()
-            assert isinstance(result_scalar, (int, float, np.floating))
-        else:
-            assert isinstance(result3, (int, float, np.floating))
+        mock_jax.jit.side_effect = lambda x: x
+        mock_jax.scipy.special.gamma.side_effect = scipy.special.gamma
+        with patch('hpfracc.special.binomial_coeffs.JAX_AVAILABLE', True):
+            bc = BinomialCoefficients(use_jax=True, cache_size=100)
+            
+            # Test scalar computation
+            result1 = bc.compute(5, 2)
+            # JAX returns arrays, so check for JAX array or convert to scalar
+            if hasattr(result1, 'item'):  # JAX array
+                result_scalar = result1.item()
+                assert isinstance(result_scalar, (int, float, np.floating))
+            else:
+                assert isinstance(result1, (int, float, np.floating))
+            
+            # Test array computation
+            n_vals = np.array([1, 2, 3, 4, 5])
+            k_vals = np.array([0, 1, 2, 3, 4])
+            result2 = bc.compute(n_vals, k_vals)
+            # JAX returns JAX arrays, not numpy arrays
+            assert hasattr(result2, 'shape') and hasattr(result2, 'dtype')
+            
+            # Test fractional computation
+            result3 = bc.compute(0.5, 2)
+            # JAX returns arrays, so check for JAX array or convert to scalar
+            if hasattr(result3, 'item'):  # JAX array
+                result_scalar = result3.item()
+                assert isinstance(result_scalar, (int, float, np.floating))
+            else:
+                assert isinstance(result3, (int, float, np.floating))
     
-    def test_grunwald_letnikov_coefficients_workflow(self):
+    @patch('hpfracc.special.binomial_coeffs.jnp', np)
+    @patch('hpfracc.special.binomial_coeffs.jax')
+    def test_grunwald_letnikov_coefficients_workflow(self, mock_jax):
         """Test complete Grünwald-Letnikov coefficients workflow."""
-        glc = GrunwaldLetnikovCoefficients(use_jax=True, cache_size=100)
-        
-        # Test basic computation
-        result = glc.compute(0.5, 10)
-        # JAX returns arrays, so check for JAX array or convert to numpy
-        if hasattr(result, 'shape'):  # JAX array
-            assert hasattr(result, 'shape')  # Just check it's array-like
-        else:
-            assert isinstance(result, np.ndarray)
-        assert len(result) == 11
-        
-        # Test with different parameters
-        for alpha in [0.1, 0.5, 0.9, 1.1, 1.5]:
-            result = glc.compute(alpha, 20)
+        mock_jax.jit.side_effect = lambda x: x
+        mock_jax.scipy.special.binom.side_effect = scipy.special.binom
+        with patch('hpfracc.special.binomial_coeffs.JAX_AVAILABLE', True):
+            glc = GrunwaldLetnikovCoefficients(use_jax=True, cache_size=100)
+            
+            # Test basic computation
+            result = glc.compute(0.5, 10)
             # JAX returns arrays, so check for JAX array or convert to numpy
             if hasattr(result, 'shape'):  # JAX array
                 assert hasattr(result, 'shape')  # Just check it's array-like
             else:
                 assert isinstance(result, np.ndarray)
-            assert len(result) == 21
-            assert not np.any(np.isnan(result))
+            assert len(result) == 11
+            
+            # Test with different parameters
+            for alpha in [0.1, 0.5, 0.9, 1.1, 1.5]:
+                result = glc.compute(alpha, 20)
+                # JAX returns arrays, so check for JAX array or convert to numpy
+                if hasattr(result, 'shape'):  # JAX array
+                    assert hasattr(result, 'shape')  # Just check it's array-like
+                else:
+                    assert isinstance(result, np.ndarray)
+                assert len(result) == 21
+                assert not np.any(np.isnan(result))
     
     def test_coefficients_consistency(self):
         """Test consistency between different coefficient implementations."""

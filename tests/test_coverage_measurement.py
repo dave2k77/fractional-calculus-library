@@ -11,7 +11,7 @@ def test_coverage_measurement():
     result = subprocess.run([
         sys.executable, 
         'scripts/maximize_algorithms_special_coverage.py'
-    ], capture_output=True, text=True, cwd='/home/davianc/fractional-calculus-library')
+    ], capture_output=True, text=True)
     
     # Check that it ran successfully
     assert result.returncode == 0
@@ -27,7 +27,7 @@ def test_coverage_measurement():
         
     try:
         import hpfracc.algorithms.optimized_methods as om
-        rl = om.OptimizedRiemannLiouville(alpha=0.5)
+        rl = om.OptimizedRiemannLiouville(order=0.5)
         assert isinstance(rl, om.OptimizedRiemannLiouville)
     except ImportError:
         pass

@@ -49,7 +49,7 @@ class TestAnalyticalSolutions:
         assert np.all(np.isfinite(result))
 
         # Test trigonometric function
-        result = solutions.trigonometric_derivative(x, "sin", omega=1.0, order=0.5)
+        result = solutions.trigonometric_derivative(x, 0.5, 1.0, "sin")
         assert result.shape == x.shape
         assert np.all(np.isfinite(result))
 
@@ -89,8 +89,9 @@ class TestAnalyticalSolutions:
 
         # Test solution computation
         x = np.array([1.0, 2.0, 3.0])
-        result = solutions.get_solution(x, "sin", omega=1.0, order=0.5)
-        assert result.shape == x.shape
+        result = solutions.get_solution(x, 0.5, "sin", 1.0)
+        assert isinstance(result, np.ndarray)
+        assert len(result) == len(x)
 
         # Test test cases
         test_cases = solutions.get_test_cases()
@@ -232,7 +233,26 @@ class TestConvergenceTests:
         results = run_convergence_study(
             mock_numerical, mock_analytical, test_cases, grid_sizes
         )
-        assert "test_cases" in results
+        assert "summary" in results
+
+    def test_error_reporting(self):
+        """Test error reporting."""
+
+        # Mock functions
+        def mock_numerical(x, **kwargs):
+            return x**1.5
+
+        def mock_analytical(x, **kwargs):
+            return x**1.5 + 0.1 / len(x)
+
+        test_cases = [{"order": 0.5}]
+        grid_sizes = [10, 20, 40]
+
+        # Test run_convergence_study
+        results = run_convergence_study(
+            mock_numerical, mock_analytical, test_cases, grid_sizes
+        )
+        assert "summary" in results
 
         # Test run_method_convergence_test
         test_params = {"order": 0.5}
@@ -263,9 +283,9 @@ class TestBenchmarks:
 
         result = benchmark.benchmark_method(mock_function, test_params, n_runs=3)
 
-        assert result.success is True
-        assert result.execution_time > 0
-        assert result.method_name == "mock_function"
+        assert result['success'] is True
+        assert result['execution_time'] > 0
+        assert result['method_name'] == "mock_function"
 
     def test_accuracy_benchmark(self):
         """Test accuracy benchmark."""
@@ -281,12 +301,12 @@ class TestBenchmarks:
         test_params = {"x": np.array([1.0, 2.0, 3.0])}
 
         result = benchmark.benchmark_method(
-            mock_numerical, mock_analytical, test_params
+            'mock_numerical', mock_numerical, mock_analytical, test_params
         )
 
-        assert result.success is True
-        assert "l2" in result.accuracy_metrics
-        assert "linf" in result.accuracy_metrics
+        assert result['success'] is True
+        assert "l2" in result['accuracy_metrics']
+        assert "linf" in result['accuracy_metrics']
 
     def test_benchmark_suite(self):
         """Test benchmark suite."""
@@ -332,7 +352,7 @@ class TestBenchmarks:
         test_params = {"x": np.array([1.0, 2.0, 3.0])}
         comparison = compare_methods(methods, mock_analytical, test_params)
         assert "methods" in comparison
-        assert "accuracy_comparison" in comparison
+        assert "summary" in comparison
 
         # Test generate_benchmark_report
         report = generate_benchmark_report(results)

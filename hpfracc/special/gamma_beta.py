@@ -8,6 +8,15 @@ which are fundamental special functions used throughout fractional calculus.
 import numpy as np
 from typing import Union
 import scipy.special as scipy_special
+from scipy.special import gamma as gamma_scipy, beta as beta_scipy
+try:
+    import jax
+    import jax.numpy as jnp
+    from jax.scipy.special import gamma as gamma_jax, beta as beta_jax
+    JAX_AVAILABLE = True
+except ImportError:
+    JAX_AVAILABLE = False
+
 # Simple module-level convenience wrappers expected by tests
 def gamma_function(x: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
     return scipy_special.gamma(x)
@@ -22,7 +31,7 @@ def beta_function(a: Union[float, np.ndarray], b: Union[float, np.ndarray]) -> U
     """Optimized Beta function with caching and special case handling."""
     # Handle edge cases
     if np.isscalar(a) and np.isscalar(b):
-        if a < 0 or b < 0 or a == 0 or b == 0:
+        if a <= 0 or b <= 0:
             return np.nan
     else:
         # For arrays, handle element-wise
@@ -56,30 +65,17 @@ except ImportError:
             return func
         return decorator
 
-# Use adapter system for JAX instead of direct imports
-def _get_jax_numpy():
-    """Get JAX numpy through adapter system."""
-    try:
-        from ..ml.adapters import get_jax_adapter
-        adapter = get_jax_adapter()
-        return adapter.get_lib()
-    except Exception:
-        # Fallback to NumPy if JAX not available
-        import numpy as np
-        return np
-
-# Check if JAX is available through adapter system
+# Simplified JAX import
 try:
-    jnp = _get_jax_numpy()
-    JAX_AVAILABLE = jnp is not np
-    if JAX_AVAILABLE:
-        import jax
-    else:
-        jax = None
-except Exception:
-    JAX_AVAILABLE = False
-    jnp = None
+    import jax
+    import jax.numpy as jnp
+    from jax.config import config
+    config.update("jax_enable_x64", True)
+    JAX_AVAILABLE = True
+except ImportError:
     jax = None
+    jnp = None
+    JAX_AVAILABLE = False
 
 
 # Convenience functions for optimized beta function
@@ -158,7 +154,7 @@ class GammaFunction:
             use_numba: Whether to use NUMBA JIT compilation for scalar operations
             cache_size: Size of the cache for frequently used values
         """
-        self.use_jax = use_jax
+        self.use_jax = use_jax and JAX_AVAILABLE
         self.use_numba = use_numba
         self.cache_size = cache_size
         self._cache = {}
@@ -416,60 +412,24 @@ class BetaFunction:
 
 
 # Convenience functions
-def gamma(
-    z: Union[float, np.ndarray, "jnp.ndarray"],
-    use_jax: bool = False,
-    use_numba: bool = True,
-) -> Union[float, np.ndarray, "jnp.ndarray"]:
+def gamma(x):
     """
-    Convenience function to compute Gamma function.
-
-    Args:
-        z: Input value(s)
-        use_jax: Whether to use JAX implementation
-        use_numba: Whether to use NUMBA implementation
-
-    Returns:
-        Gamma function value(s)
+    Gamma function that is compatible with both JAX and NumPy/SciPy.
     """
-    gamma_func = GammaFunction(use_jax=use_jax, use_numba=use_numba)
-    return gamma_func.compute(z)
+    if JAX_AVAILABLE and isinstance(x, (jnp.ndarray, jax.Array)):
+        return gamma_jax(x)
+    return gamma_scipy(x)
 
-
-def beta(
-    x: Union[float, np.ndarray, "jnp.ndarray"],
-    y: Union[float, np.ndarray, "jnp.ndarray"],
-    use_jax: bool = False,
-    use_numba: bool = True,
-) -> Union[float, np.ndarray, "jnp.ndarray"]:
+def beta(x, y):
     """
-    Convenience function to compute Beta function.
-
-    Args:
-        x: First parameter
-        y: Second parameter
-        use_jax: Whether to use JAX implementation (ignored for performance)
-        use_numba: Whether to use NUMBA implementation (ignored for performance)
-
-    Returns:
-        Beta function value(s)
+    Beta function that is compatible with both JAX and NumPy/SciPy.
     """
-    # Handle edge cases
-    if np.isscalar(x) and np.isscalar(y):
-        if x < 0 or y < 0 or x == 0 or y == 0:
-            return np.nan
-    else:
-        # For arrays, handle element-wise
-        x = np.asarray(x)
-        y = np.asarray(y)
-        result = np.full_like(x, np.nan, dtype=float)
-        valid_mask = (x > 0) & (y > 0)
-        if np.any(valid_mask):
-            result[valid_mask] = scipy_special.beta(x[valid_mask], y[valid_mask])
-        return result
-    
-    # Use SciPy directly for better performance
-    return scipy_special.beta(x, y)
+    if np.any(np.asarray(x) <= 0) or np.any(np.asarray(y) <= 0):
+        return np.nan
+        
+    if JAX_AVAILABLE and (isinstance(x, (jnp.ndarray, jax.Array)) or isinstance(y, (jnp.ndarray, jax.Array))):
+        return beta_jax(x, y)
+    return beta_scipy(x, y)
 
 
 def log_gamma(

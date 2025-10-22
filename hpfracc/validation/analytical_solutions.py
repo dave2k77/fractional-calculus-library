@@ -65,8 +65,8 @@ class AnalyticalSolutions:
 
         Args:
             x: Input array
-            a: Coefficient in exp(ax)
             order: Order of fractional derivative
+            a: Coefficient in exp(ax)
 
         Returns:
             Analytical fractional derivative
@@ -165,7 +165,7 @@ def power_function_fractional_derivative(t: np.ndarray, n: int, alpha: float) ->
 
 def exponential_fractional_derivative(t: np.ndarray, lam: float, alpha: float) -> np.ndarray:
     sol = AnalyticalSolutions()
-    return sol.exponential_derivative(t, float(lam), float(alpha))
+    return sol.exponential_derivative(t, float(alpha), float(lam))
 
 
 def fractional_relaxation_solution(t: np.ndarray, alpha: float, tau: float) -> np.ndarray:
@@ -225,9 +225,10 @@ class ExponentialSolutions:
             self,
             x: np.ndarray,
             order: float,
-            a: float = 1.0) -> np.ndarray:
+            a: float
+    ) -> np.ndarray:
         """Get analytical solution for exp(ax)."""
-        return self.base_solutions.exponential_derivative(x, a, order)
+        return self.base_solutions.exponential_derivative(x, order, a)
 
     def get_derivative(
             self,
@@ -235,7 +236,7 @@ class ExponentialSolutions:
             order: float,
             a: float = 1.0) -> np.ndarray:
         """Get analytical derivative for exp(ax)."""
-        return self.base_solutions.exponential_derivative(x, a, order)
+        return self.base_solutions.exponential_derivative(x, order, a)
 
     def get_test_cases(self) -> List[Dict]:
         """Get standard test cases for exponential functions."""
@@ -255,11 +256,12 @@ class TrigonometricSolutions:
         self.base_solutions = AnalyticalSolutions()
 
     def get_solution(
-        self, x: np.ndarray, order: float, func_type: str = "sin", omega: float = 1.0
+        self, x: np.ndarray, order: float, func_type: str, omega: float
     ) -> np.ndarray:
         """Get analytical solution for trigonometric functions."""
         return self.base_solutions.trigonometric_derivative(
-            x, order, omega, func_type)
+            x, order, omega, func_type
+        )
 
     def get_derivative(
         self, x: np.ndarray, order: float, func_type: str = "sin", omega: float = 1.0
@@ -329,7 +331,7 @@ def get_analytical_solution(
     elif func_type == "exponential":
         a = params.get("a", 1.0)
         order = params.get("order", 0.5)
-        return solutions.exponential_derivative(x, a, order)
+        return solutions.exponential_derivative(x, order, a)
 
     elif func_type == "trigonometric":
         trig_type = params.get("trig_type", "sin")

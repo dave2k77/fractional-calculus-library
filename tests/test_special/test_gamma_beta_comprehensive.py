@@ -11,7 +11,7 @@ import jax.numpy as jnp
 from unittest.mock import patch, MagicMock
 
 from hpfracc.special.gamma_beta import (
-    GammaFunction, BetaFunction
+    GammaFunction, BetaFunction, JAX_AVAILABLE
 )
 
 
@@ -26,10 +26,15 @@ class TestGammaFunction:
     
     def test_gamma_function_initialization_with_jax(self):
         """Test GammaFunction initialization with JAX."""
+        print(f"JAX_AVAILABLE in test_gamma_function_initialization_with_jax: {JAX_AVAILABLE}")
         gamma = GammaFunction(use_jax=True)
-        assert gamma.use_jax is True
-        assert gamma.use_numba is True
-        assert hasattr(gamma, '_gamma_jax')
+        if JAX_AVAILABLE:
+            assert gamma.use_jax is True
+            assert gamma.use_numba is True
+            assert hasattr(gamma, '_gamma_jax')
+        else:
+            assert gamma.use_jax is False
+            assert not hasattr(gamma, '_gamma_jax')
     
     def test_gamma_function_initialization_without_numba(self):
         """Test GammaFunction initialization without NUMBA."""
@@ -158,10 +163,15 @@ class TestBetaFunction:
     
     def test_beta_function_initialization_with_jax(self):
         """Test BetaFunction initialization with JAX."""
+        print(f"JAX_AVAILABLE in test_beta_function_initialization_with_jax: {JAX_AVAILABLE}")
         beta = BetaFunction(use_jax=True)
-        assert beta.use_jax is True
-        assert beta.use_numba is True
-        assert hasattr(beta, '_beta_jax')
+        if JAX_AVAILABLE:
+            assert beta.use_jax is True
+            assert beta.use_numba is True
+            assert hasattr(beta, '_beta_jax')
+        else:
+            assert beta.use_jax is False
+            assert not hasattr(beta, '_beta_jax')
     
     def test_beta_function_initialization_without_numba(self):
         """Test BetaFunction initialization without NUMBA."""

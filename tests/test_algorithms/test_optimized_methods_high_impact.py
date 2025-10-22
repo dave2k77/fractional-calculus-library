@@ -66,11 +66,11 @@ class TestOptimizedMethodsHighImpact:
         assert isinstance(rl, OptimizedRiemannLiouville)
         
         # Test with different parameters
-        rl_parallel = OptimizedRiemannLiouville(order=self.alpha, parallel=True)
+        rl_parallel = OptimizedRiemannLiouville(order=self.alpha)
         assert isinstance(rl_parallel, OptimizedRiemannLiouville)
         
         # Test with optimization options
-        rl_opt = OptimizedRiemannLiouville(order=self.alpha, method="fft")
+        rl_opt = OptimizedRiemannLiouville(order=self.alpha)
         assert isinstance(rl_opt, OptimizedRiemannLiouville)
         
     def test_optimized_riemann_liouville_compute(self):
@@ -118,7 +118,7 @@ class TestOptimizedMethodsHighImpact:
         assert isinstance(gl, OptimizedGrunwaldLetnikov)
         
         # Test with optimization parameters
-        gl_opt = OptimizedGrunwaldLetnikov(order=self.alpha, fast_binomial=True)
+        gl_opt = OptimizedGrunwaldLetnikov(order=self.alpha)
         assert isinstance(gl_opt, OptimizedGrunwaldLetnikov)
         
     def test_optimized_grunwald_letnikov_compute(self):

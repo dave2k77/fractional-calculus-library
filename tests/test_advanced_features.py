@@ -492,13 +492,13 @@ class TestRealWorldApplications:
 
         # Calculate VaR
         var = manager.calculate_fractional_var(returns, confidence_level=0.95)
-        assert isinstance(var, float)
+        assert isinstance(var, (float, np.floating))
         assert not np.isnan(var)
         assert not np.isinf(var)
 
         # Calculate CVaR
         cvar = manager.calculate_fractional_cvar(returns, confidence_level=0.95)
-        assert isinstance(cvar, float)
+        assert isinstance(cvar, (float, np.floating))
         assert not np.isnan(cvar)
         assert not np.isinf(cvar)
 

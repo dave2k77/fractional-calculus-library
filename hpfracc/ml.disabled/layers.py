@@ -357,6 +357,45 @@ class FractionalConv2D(FractionalLayerBase):
     def _apply_convolution(self, x: torch.Tensor) -> torch.Tensor:
         return F.conv2d(x, self.weight, self.bias, self.stride, self.padding, self.dilation, self.groups)
 
+class FractionalLinear(FractionalLayerBase):
+    """Optimal Linear layer with fractional calculus integration"""
+
+    def __init__(self, in_features: int, out_features: int, bias: bool = True,
+                 config: LayerConfig = None, backend: Optional[BackendType] = None):
+        if config is None:
+            config = LayerConfig()
+        super().__init__(config, backend=backend)
+
+        self.in_features = in_features
+        self.out_features = out_features
+        self.bias_flag = bool(bias)
+
+        self.weight = nn.Parameter(torch.randn(out_features, in_features, dtype=self.config.dtype))
+        self.bias = None if not self.bias_flag else nn.Parameter(torch.randn(out_features, dtype=self.config.dtype))
+        self._initialize_weights()
+
+    def _initialize_weights(self):
+        """Initialize weights using optimal methods"""
+        fan_in, _ = init._calculate_fan_in_and_fan_out(self.weight)
+        scale = math.sqrt(2.0 / fan_in)
+        
+        with torch.no_grad():
+            self.weight.normal_(0, scale)
+            if self.bias is not None:
+                self.bias.normal_(0, 0.01)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Forward pass with optimal fractional derivative integration"""
+        if x.dtype != self.config.dtype:
+            x = x.to(self.config.dtype)
+        
+        x_frac = self.apply_fractional_derivative(x)
+        x_linear = F.linear(x_frac, self.weight, self.bias)
+        x_act = self.apply_activation(x_linear)
+        x_out = self.apply_dropout(x_act)
+        
+        return x_out
+
 # Placeholder implementations for other layer types
 # These would be fully implemented in a complete version
 

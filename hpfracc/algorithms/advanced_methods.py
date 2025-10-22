@@ -49,6 +49,8 @@ class WeylDerivative:
         if parallel_config is None and 'config' in kwargs:
             parallel_config = kwargs.get('config')
         self.parallel_config = parallel_config or ParallelConfig()
+        if not hasattr(self.parallel_config, 'n_jobs'):
+            self.parallel_config.n_jobs = 1
         self.optimized = optimized
         # expose for tests
         self.fractional_order = self.alpha
@@ -81,6 +83,9 @@ class WeylDerivative:
         min_len = min(len(f_array), len(x_array))
         f_array = f_array[:min_len]
         x_array = x_array[:min_len]
+
+        if len(f_array) == 0:
+            return np.array([])
 
         if use_parallel and self.parallel_config.enabled:
             return self._compute_parallel(f_array, x_array, h or 1.0)
@@ -190,6 +195,8 @@ class MarchaudDerivative:
         if parallel_config is None and 'config' in kwargs:
             parallel_config = kwargs.get('config')
         self.parallel_config = parallel_config or ParallelConfig()
+        if not hasattr(self.parallel_config, 'n_jobs'):
+            self.parallel_config.n_jobs = 1
         self.fractional_order = self.alpha
 
         # Precompute constants
@@ -459,6 +466,8 @@ class ReizFellerDerivative:
         if parallel_config is None and 'config' in kwargs:
             parallel_config = kwargs.get('config')
         self.parallel_config = parallel_config or ParallelConfig()
+        if not hasattr(self.parallel_config, 'n_jobs'):
+            self.parallel_config.n_jobs = 1
         self.fractional_order = self.alpha
 
     def compute(
@@ -548,6 +557,8 @@ class AdomianDecomposition:
         if parallel_config is None and 'config' in kwargs:
             parallel_config = kwargs.get('config')
         self.parallel_config = parallel_config or ParallelConfig()
+        if not hasattr(self.parallel_config, 'n_jobs'):
+            self.parallel_config.n_jobs = 1
         self.fractional_order = self.alpha
 
     def solve(

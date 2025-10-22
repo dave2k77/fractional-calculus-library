@@ -233,10 +233,17 @@ class TestConvergenceAnalyzer:
             'method2': [1.0, 0.25, 0.0625]
         }
         
-        result = analyzer.analyze(methods, grid_sizes, errors)
+        result = analyzer.compare_methods_convergence(methods, grid_sizes, errors)
         assert isinstance(result, dict)
         assert 'convergence_rates' in result
         assert 'best_method' in result
+
+    def test_estimate_optimal_grid_size(self):
+        """Test optimal grid size estimation."""
+        analyzer = ConvergenceAnalyzer()
+        errors = [1.0, 0.5, 0.25, 0.125]
+        grid_sizes = [10, 20, 40, 80]
+        assert isinstance(analyzer.estimate_optimal_grid_size(errors, grid_sizes, target_accuracy=1e-5), (int, float))
 
 
 class TestOrderOfAccuracy:
@@ -337,7 +344,7 @@ class TestBenchmarkSuite:
         results = suite.run_benchmarks()
         
         assert isinstance(results, dict)
-        assert 'test_benchmark' in results
+        assert 'test_benchmark' in results['methods']
 
 
 class TestUtilityFunctions:
@@ -406,7 +413,7 @@ class TestUtilityFunctions:
         benchmarks = {'test_benchmark': test_func}
         results = run_benchmarks(benchmarks)
         assert isinstance(results, dict)
-        assert 'test_benchmark' in results
+        assert 'test_benchmark' in results['methods']
 
     def test_compare_methods(self):
         """Test compare_methods function."""
@@ -424,8 +431,8 @@ class TestUtilityFunctions:
         
         result = compare_methods(methods, analytical, x)
         assert isinstance(result, dict)
-        assert 'method1' in result
-        assert 'method2' in result
+        assert 'method1' in result['methods']
+        assert 'method2' in result['methods']
 
     def test_generate_benchmark_report(self):
         """Test generate_benchmark_report function."""
@@ -521,7 +528,7 @@ class TestIntegration:
         # Verify results
         assert isinstance(benchmark_results, dict)
         assert isinstance(convergence_result, dict)
-        assert 'test_method' in benchmark_results
+        assert 'test_method' in benchmark_results['methods']
         assert 'convergence_rate' in convergence_result
 
 

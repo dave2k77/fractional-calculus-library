@@ -38,20 +38,20 @@ class TestSpecialMethodsHighImpact:
     def test_fractional_laplacian_initialization(self):
         """Test FractionalLaplacian initialization - MAJOR COVERAGE TARGET."""
         # Basic initialization
-        laplacian = FractionalLaplacian(order=self.alpha)
+        laplacian = FractionalLaplacian(alpha=self.alpha)
         assert isinstance(laplacian, FractionalLaplacian)
         
         # With different parameters
-        laplacian_2d = FractionalLaplacian(order=self.alpha, dimension=2)
+        laplacian_2d = FractionalLaplacian(alpha=self.alpha, dimension=2)
         assert isinstance(laplacian_2d, FractionalLaplacian)
         
         # With boundary conditions
-        laplacian_bc = FractionalLaplacian(order=self.alpha, boundary_conditions="periodic")
+        laplacian_bc = FractionalLaplacian(alpha=self.alpha, boundary_conditions="periodic")
         assert isinstance(laplacian_bc, FractionalLaplacian)
         
     def test_fractional_laplacian_compute(self):
         """Test FractionalLaplacian compute method."""
-        laplacian = FractionalLaplacian(order=self.alpha)
+        laplacian = FractionalLaplacian(alpha=self.alpha)
         
         try:
             result = laplacian.compute(self.f, self.x)
@@ -65,16 +65,16 @@ class TestSpecialMethodsHighImpact:
     def test_fractional_fourier_transform_initialization(self):
         """Test FractionalFourierTransform initialization - HIGH IMPACT."""
         # Basic initialization
-        fft_obj = FractionalFourierTransform(order=self.alpha)
+        fft_obj = FractionalFourierTransform(alpha=self.alpha)
         assert isinstance(fft_obj, FractionalFourierTransform)
         
         # With different parameters
-        fft_custom = FractionalFourierTransform(order=self.alpha, method="spectral")
+        fft_custom = FractionalFourierTransform(alpha=self.alpha, method="spectral")
         assert isinstance(fft_custom, FractionalFourierTransform)
         
     def test_fractional_fourier_transform_compute(self):
         """Test FractionalFourierTransform compute method."""
-        fft_obj = FractionalFourierTransform(order=self.alpha)
+        fft_obj = FractionalFourierTransform(alpha=self.alpha)
         
         try:
             result = fft_obj.compute(self.f)
@@ -85,16 +85,16 @@ class TestSpecialMethodsHighImpact:
             
     def test_fractional_z_transform_initialization(self):
         """Test FractionalZTransform initialization - HIGH IMPACT."""
-        z_transform = FractionalZTransform(order=self.alpha)
+        z_transform = FractionalZTransform(alpha=self.alpha)
         assert isinstance(z_transform, FractionalZTransform)
         
         # With different parameters
-        z_transform_custom = FractionalZTransform(order=self.alpha, method="direct")
+        z_transform_custom = FractionalZTransform(alpha=self.alpha, method="direct")
         assert isinstance(z_transform_custom, FractionalZTransform)
         
     def test_fractional_z_transform_compute(self):
         """Test FractionalZTransform compute method."""
-        z_transform = FractionalZTransform(order=self.alpha)
+        z_transform = FractionalZTransform(alpha=self.alpha)
         
         # Discrete signal
         signal = np.array([1, 0.5, 0.25, 0.125, 0.0625])
@@ -107,12 +107,12 @@ class TestSpecialMethodsHighImpact:
             
     def test_fractional_mellin_transform_initialization(self):
         """Test FractionalMellinTransform initialization - HIGH IMPACT."""
-        mellin = FractionalMellinTransform(order=self.alpha)
+        mellin = FractionalMellinTransform(alpha=self.alpha)
         assert isinstance(mellin, FractionalMellinTransform)
         
     def test_fractional_mellin_transform_compute(self):
         """Test FractionalMellinTransform compute method."""
-        mellin = FractionalMellinTransform(order=self.alpha)
+        mellin = FractionalMellinTransform(alpha=self.alpha)
         
         try:
             result = mellin.compute(self.f, self.x)
@@ -166,7 +166,7 @@ class TestSpecialMethodsHighImpact:
             
     def test_special_optimized_weyl_derivative(self):
         """Test SpecialOptimizedWeylDerivative - HIGH IMPACT."""
-        weyl = SpecialOptimizedWeylDerivative(order=self.alpha)
+        weyl = SpecialOptimizedWeylDerivative(alpha=self.alpha)
         assert isinstance(weyl, SpecialOptimizedWeylDerivative)
         
         try:
@@ -178,7 +178,7 @@ class TestSpecialMethodsHighImpact:
             
     def test_special_optimized_marchaud_derivative(self):
         """Test SpecialOptimizedMarchaudDerivative - HIGH IMPACT."""
-        marchaud = SpecialOptimizedMarchaudDerivative(order=self.alpha)
+        marchaud = SpecialOptimizedMarchaudDerivative(alpha=self.alpha)
         assert isinstance(marchaud, SpecialOptimizedMarchaudDerivative)
         
         try:
@@ -190,7 +190,7 @@ class TestSpecialMethodsHighImpact:
             
     def test_special_optimized_reiz_feller_derivative(self):
         """Test SpecialOptimizedReizFellerDerivative - HIGH IMPACT."""
-        reiz_feller = SpecialOptimizedReizFellerDerivative(order=self.alpha)
+        reiz_feller = SpecialOptimizedReizFellerDerivative(alpha=self.alpha)
         assert isinstance(reiz_feller, SpecialOptimizedReizFellerDerivative)
         
         try:
@@ -387,7 +387,7 @@ class TestSpecialMethodsHighImpact:
                 
     def test_mathematical_properties(self):
         """Test mathematical properties - VALIDATION COVERAGE."""
-        laplacian = FractionalLaplacian(order=self.alpha)
+        laplacian = FractionalLaplacian(alpha=self.alpha)
         
         try:
             # Test linearity: L[af + bg] = aL[f] + bL[g]
@@ -411,8 +411,8 @@ class TestSpecialMethodsHighImpact:
         """Test integration with other methods - INTEGRATION COVERAGE."""
         # Test that different methods give consistent results for similar problems
         try:
-            weyl = SpecialOptimizedWeylDerivative(order=self.alpha)
-            marchaud = SpecialOptimizedMarchaudDerivative(order=self.alpha)
+            weyl = SpecialOptimizedWeylDerivative(alpha=self.alpha)
+            marchaud = SpecialOptimizedMarchaudDerivative(alpha=self.alpha)
             
             result_weyl = weyl.compute(self.f, self.x)
             result_marchaud = marchaud.compute(self.f, self.x)

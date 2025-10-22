@@ -56,7 +56,7 @@ def test_simple_class_instantiation():
         
     try:
         from hpfracc.algorithms.optimized_methods import OptimizedRiemannLiouville
-        rl = OptimizedRiemannLiouville(alpha=0.5)
+        rl = OptimizedRiemannLiouville(order=0.5)
         assert isinstance(rl, OptimizedRiemannLiouville)
         
     except ImportError:
