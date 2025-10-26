@@ -78,6 +78,17 @@ target/
 # Jupyter Notebook
 .ipynb_checkpoints
 
+# Manuscript and research documents (private)
+manuscript/
+*.tex
+*.bib
+*.aux
+*.log
+*.out
+*.synctex.gz
+*.fdb_latexmk
+*.fls
+
 # IPython
 profile_default/
 ipython_config.py
