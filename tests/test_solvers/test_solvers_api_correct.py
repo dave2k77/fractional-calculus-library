@@ -3,7 +3,7 @@
 
 import pytest
 import numpy as np
-from hpfracc.solvers.ode_solvers import FractionalODESolver, AdaptiveFractionalODESolver
+from hpfracc.solvers.ode_solvers import FixedStepODESolver
 from hpfracc.solvers.pde_solvers import FractionalPDESolver
 from hpfracc.core.definitions import FractionalOrder
 
@@ -19,7 +19,7 @@ class TestSolversAPICorrect:
     def test_ode_solver_correct_api(self):
         """Test ODE solver with CORRECT API signature."""
         # Test FractionalODESolver with correct parameters
-        solver = FractionalODESolver(
+        solver = FixedStepODESolver(
             derivative_type="caputo",
             method="predictor_corrector",
             adaptive=True,
@@ -53,7 +53,7 @@ class TestSolversAPICorrect:
             
     def test_adaptive_ode_solver_correct_api(self):
         """Test AdaptiveFractionalODESolver with correct API."""
-        adaptive_solver = AdaptiveFractionalODESolver(
+        adaptive_solver = AdaptiveFixedStepODESolver(
             rtol=1e-6,
             atol=1e-8,
             max_step=0.1,
@@ -127,7 +127,7 @@ class TestSolversAPICorrect:
         
         for deriv_type in derivative_types:
             try:
-                solver = FractionalODESolver(derivative_type=deriv_type)
+                solver = FixedStepODESolver(derivative_type=deriv_type)
                 assert isinstance(solver, FractionalODESolver)
                 
                 def test_ode(t, y):
@@ -147,7 +147,7 @@ class TestSolversAPICorrect:
         
         for method in methods:
             try:
-                solver = FractionalODESolver(method=method)
+                solver = FixedStepODESolver(method=method)
                 assert isinstance(solver, FractionalODESolver)
                 
                 def test_ode(t, y):
@@ -198,7 +198,7 @@ class TestSolversAPICorrect:
         
         for alpha in alphas:
             try:
-                solver = FractionalODESolver()
+                solver = FixedStepODESolver()
                 
                 def test_ode(t, y):
                     return -y
@@ -219,7 +219,7 @@ class TestSolversAPICorrect:
     def test_system_of_odes_correct_api(self):
         """Test system of ODEs with correct API."""
         try:
-            solver = FractionalODESolver(derivative_type="caputo")
+            solver = FixedStepODESolver(derivative_type="caputo")
             
             # System: dy1/dt = -y1, dy2/dt = y1 - y2
             def system_ode(t, y):
@@ -243,7 +243,7 @@ class TestSolversAPICorrect:
     def test_adaptive_parameters(self):
         """Test adaptive solver parameters."""
         try:
-            adaptive_solver = AdaptiveFractionalODESolver(
+            adaptive_solver = AdaptiveFixedStepODESolver(
                 rtol=1e-8,
                 atol=1e-10,
                 max_step=0.05,
@@ -292,7 +292,7 @@ class TestSolversAPICorrect:
         """Test solver performance characteristics."""
         import time
         
-        solver = FractionalODESolver(method="euler")  # Simplest method
+        solver = FixedStepODESolver(method="euler")  # Simplest method
         
         def simple_ode(t, y):
             return -y
@@ -316,7 +316,7 @@ class TestSolversAPICorrect:
         step_sizes = [0.1, 0.05, 0.025]
         results = []
         
-        solver = FractionalODESolver(method="euler")
+        solver = FixedStepODESolver(method="euler")
         
         def test_ode(t, y):
             return -y
@@ -339,7 +339,7 @@ class TestSolversAPICorrect:
             
     def test_error_handling_correct(self):
         """Test error handling with correct API understanding."""
-        solver = FractionalODESolver()
+        solver = FixedStepODESolver()
         
         # Test with invalid function
         try:
@@ -367,7 +367,7 @@ class TestSolversAPICorrect:
         """Test numerical accuracy for known solutions."""
         try:
             # For integer order (alpha=1), dy/dt = -y has exact solution y(t) = y0*exp(-t)
-            solver = FractionalODESolver(method="runge_kutta")
+            solver = FixedStepODESolver(method="runge_kutta")
             
             def exponential_decay(t, y):
                 return -y

@@ -605,10 +605,10 @@ class TestEdgeCases:
         assert rl_deriv.alpha == 0.0
     
     def test_alpha_one(self):
-        """Test behavior with alpha = 1."""
-        # Caputo derivative has restrictions on alpha
-        with pytest.raises(ValueError, match="L1 scheme for Caputo derivative requires 0 < alpha < 1"):
-            CaputoDerivative(1.0)
+        """Test behavior with alpha = 1 (now valid)."""
+        # Caputo now supports alpha = 1.0
+        caputo = CaputoDerivative(1.0)
+        assert caputo.alpha.alpha == 1.0
     
     def test_negative_alpha(self):
         """Test behavior with negative alpha."""

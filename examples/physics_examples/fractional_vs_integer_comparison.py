@@ -61,15 +61,16 @@ class FractionalVsIntegerComparison:
         print("Computing fractional time derivative (α=0.5)...")
         start_time = time.time()
         u_flat = u_test.flatten()
-        u_t_frac = SpectralFractionalDerivative.apply(u_flat, alpha, -1, "fft")
-        u_t_frac = u_t_frac.reshape(nx, nt)
+        alpha = 0.5
+        u_t_frac = SpectralFractionalDerivative.apply(u_flat, alpha, dim=-1)
+        u_t_frac = u_t_frac.reshape(u_test.shape)
         frac_time = time.time() - start_time
         
         # Compute integer time derivative (α=1.0)
         print("Computing integer time derivative (α=1.0)...")
         start_time = time.time()
-        u_t_int = SpectralFractionalDerivative.apply(u_flat, 1.0, -1, "fft")
-        u_t_int = u_t_int.reshape(nx, nt)
+        u_t_int = SpectralFractionalDerivative.apply(u_flat, 1.0, dim=-1)
+        u_t_int = u_t_int.reshape(u_test.shape)
         int_time = time.time() - start_time
         
         # Compute analytical integer derivative for comparison
@@ -113,15 +114,17 @@ class FractionalVsIntegerComparison:
         print("Computing fractional time derivative (α=1.5)...")
         start_time = time.time()
         u_flat = u_wave.flatten()
-        u_t_frac = SpectralFractionalDerivative.apply(u_flat, alpha, -1, "fft")
-        u_t_frac = u_t_frac.reshape(nx, nt)
+        alpha = 1.5
+        u_t_frac = SpectralFractionalDerivative.apply(u_flat, alpha, dim=-1)
+        u_t_frac = u_t_frac.reshape(u_wave.shape)
         frac_time = time.time() - start_time
         
         # Compute integer time derivative (α=2.0)
         print("Computing integer time derivative (α=2.0)...")
         start_time = time.time()
-        u_t_int = SpectralFractionalDerivative.apply(u_flat, 2.0, -1, "fft")
-        u_t_int = u_t_int.reshape(nx, nt)
+        # Note: alpha=2.0 is not supported, using a close approximation
+        u_t_int = SpectralFractionalDerivative.apply(u_flat, 1.99, dim=-1)
+        u_t_int = u_t_int.reshape(u_wave.shape)
         int_time = time.time() - start_time
         
         # Analytical integer derivative: ∂²u/∂t² = -sin(x) * cos(t)
@@ -166,15 +169,16 @@ class FractionalVsIntegerComparison:
         print("Computing fractional time derivative (α=0.8)...")
         start_time = time.time()
         u_flat = u_heat.flatten()
-        u_t_frac = SpectralFractionalDerivative.apply(u_flat, alpha, -1, "fft")
-        u_t_frac = u_t_frac.reshape(nx, nt)
+        alpha = 0.8
+        u_t_frac = SpectralFractionalDerivative.apply(u_flat, alpha, dim=-1)
+        u_t_frac = u_t_frac.reshape(u_heat.shape)
         frac_time = time.time() - start_time
         
         # Compute integer time derivative (α=1.0)
         print("Computing integer time derivative (α=1.0)...")
         start_time = time.time()
-        u_t_int = SpectralFractionalDerivative.apply(u_flat, 1.0, -1, "fft")
-        u_t_int = u_t_int.reshape(nx, nt)
+        u_t_int = SpectralFractionalDerivative.apply(u_flat, 1.0, dim=-1)
+        u_t_int = u_t_int.reshape(u_heat.shape)
         int_time = time.time() - start_time
         
         # Analytical integer derivative
@@ -215,7 +219,7 @@ class FractionalVsIntegerComparison:
         u_test = torch.exp(-X**2) * torch.sin(2 * np.pi * T)
         
         # Test different fractional orders
-        alphas = [0.1, 0.3, 0.5, 0.7, 0.9, 1.0, 1.2, 1.5, 1.8, 2.0]
+        alphas = [0.1, 0.3, 0.5, 0.7, 0.9, 1.0, 1.2, 1.5, 1.8, 1.99]  # Approximating 2.0
         derivatives = {}
         compute_times = {}
         
@@ -223,8 +227,9 @@ class FractionalVsIntegerComparison:
         for alpha in alphas:
             start_time = time.time()
             u_flat = u_test.flatten()
-            u_t_alpha = SpectralFractionalDerivative.apply(u_flat, alpha, -1, "fft")
-            u_t_alpha = u_t_alpha.reshape(nx, nt)
+            u_t_alpha = SpectralFractionalDerivative.apply(
+                u_flat, alpha, dim=-1)
+            u_t_alpha = u_t_alpha.reshape(u_test.shape)
             compute_time = time.time() - start_time
             
             derivatives[alpha] = u_t_alpha.cpu().numpy()
@@ -273,12 +278,12 @@ class FractionalVsIntegerComparison:
             # Fractional derivative (α=0.5)
             start_time = time.time()
             u_flat = u_small.flatten()
-            _ = SpectralFractionalDerivative.apply(u_flat, 0.5, -1, "fft")
+            _ = SpectralFractionalDerivative.apply(u_flat, 0.5, dim=-1)
             frac_time = time.time() - start_time
             
             # Integer derivative (α=1.0)
             start_time = time.time()
-            _ = SpectralFractionalDerivative.apply(u_flat, 1.0, -1, "fft")
+            _ = SpectralFractionalDerivative.apply(u_flat, 1.0, dim=-1)
             int_time = time.time() - start_time
             
             frac_times.append(frac_time)

@@ -23,10 +23,22 @@ Date: January 2025
 """
 
 import numpy as np
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from scipy import linalg
 from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans
+import sys
+import os
+from scipy.interpolate import interp1d
+from scipy.optimize import least_squares
+from typing import Dict
+
+# JAX will automatically use the GPU if available, otherwise it will default to CPU.
+
+# Add the project root to the Python path
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
 # Import HPFRACC components
 from hpfracc.core.definitions import FractionalOrder
@@ -34,6 +46,7 @@ from hpfracc.core.derivatives import create_fractional_derivative
 from hpfracc.core.integrals import create_fractional_integral
 from hpfracc.special import gamma
 from hpfracc.core.utilities import validate_fractional_order, timing_decorator
+from hpfracc.solvers import solve_fractional_ode
 
 # Set up plotting style
 plt.style.use('seaborn-v0_8')
@@ -65,8 +78,10 @@ class FractionalStateSpaceModel:
             raise ValueError(f"Invalid fractional order: {alpha}")
 
         # Initialize fractional operators
-        self.derivative = create_fractional_derivative(alpha, method="RL")
-        self.integral = create_fractional_integral(alpha, method="RL")
+        self.derivative = create_fractional_derivative(
+            definition_type="riemann_liouville", alpha=alpha
+        )
+        self.integral = create_fractional_integral(order=alpha, method="RL")
 
         # Initialize state space matrices
         self.A = None  # State matrix
@@ -78,59 +93,42 @@ class FractionalStateSpaceModel:
 
     def generate_lorenz_data(self, duration=100, dt=0.01, noise_level=0.01):
         """
-        Generate Lorenz system data with fractional dynamics.
-
-        Parameters:
-        -----------
-        duration : float
-            Simulation duration
-        dt : float
-            Time step
-        noise_level : float
-            Noise amplitude
-
-        Returns:
-        --------
-        t : array
-            Time vector
-        x : array
-            State variables
+        Generate Lorenz system data with fractional dynamics using the library's solver.
         """
-        n_steps = int(duration / dt)
-        t = np.linspace(0, duration, n_steps)
-
         # Lorenz parameters
         sigma = 10.0
         rho = 28.0
         beta_lorenz = 8/3
 
-        # Initialize state
-        x = np.zeros((n_steps, 3))
-        x[0] = [1.0, 1.0, 1.0]
+        def lorenz_system(t, y):
+            x, y, z = y
+            dxdt = sigma * (y - x)
+            dydt = x * (rho - z) - y
+            dzdt = x * y - beta_lorenz * z
+            return np.array([dxdt, dydt, dzdt])
 
-        # Generate fractional Lorenz dynamics
-        for i in range(1, n_steps):
-            # Standard Lorenz equations
-            dx1 = sigma * (x[i-1, 1] - x[i-1, 0])
-            dx2 = x[i-1, 0] * (rho - x[i-1, 2]) - x[i-1, 1]
-            dx3 = x[i-1, 0] * x[i-1, 1] - beta_lorenz * x[i-1, 2]
+        # Initial conditions
+        y0 = np.array([1.0, 1.0, 1.0])
+        t_span = (0, duration)
+        
+        # Solve the fractional ODE
+        t, x = solve_fractional_ode(
+            lorenz_system,
+            t_span,
+            y0,
+            self.alpha.alpha,
+            h=dt,
+            adaptive=True
+        )
 
-            # Add fractional dynamics
-            if self.alpha.alpha != 1.0:
-                # Apply fractional derivative effect
-                frac_factor = (dt ** (self.alpha.alpha - 1)) / \
-                    gamma(self.alpha.alpha)
-                dx1 *= frac_factor
-                dx2 *= frac_factor
-                dx3 *= frac_factor
+        # Add noise
+        if noise_level > 0:
+            x += noise_level * np.random.randn(*x.shape)
 
-            # Euler integration
-            x[i, 0] = x[i-1, 0] + dt * dx1
-            x[i, 1] = x[i-1, 1] + dt * dx2
-            x[i, 2] = x[i-1, 2] + dt * dx3
-
-            # Add noise
-            x[i] += noise_level * np.random.randn(3)
+        # Check for and handle numerical instability
+        if not np.all(np.isfinite(x)):
+            print("Warning: Numerical instability detected in Lorenz attractor. Replacing non-finite values.")
+            x = np.nan_to_num(x)
 
         return t, x
 
@@ -163,8 +161,10 @@ class FractionalStateSpaceModel:
         n_samples = len(time_series)
 
         for alpha in alpha_values:
-            # Create fractional derivative operator
-            derivative_op = create_fractional_derivative(alpha, method="RL")
+            # Create fractional derivative operator for this alpha
+            derivative_op = create_fractional_derivative(
+                definition_type="riemann_liouville", alpha=alpha
+            )
 
             # Apply fractional derivative to time series
             time = np.arange(n_samples)
@@ -175,7 +175,7 @@ class FractionalStateSpaceModel:
                     idx = n_samples - 1
                 return time_series[idx]
 
-            fractional_series = derivative_op(series_func, time)
+            fractional_series = derivative_op.compute(series_func, time)
 
             # Traditional delay embedding with fractional signal
             n_vectors = n_samples - (embedding_dim - 1) * delay
@@ -207,14 +207,24 @@ class FractionalStateSpaceModel:
             MTECM-FOSS analysis results
         """
         results = {}
+        max_samples = 3000
 
         for alpha, state_space in state_spaces.items():
+            # Downsample for speed if needed
+            if state_space.shape[0] > max_samples:
+                idx = np.linspace(0, state_space.shape[0] - 1, max_samples, dtype=int)
+                state_space_downsampled = state_space[idx]
+                cluster_labels = KMeans(n_clusters=n_clusters, random_state=42, n_init=10).fit_predict(state_space_downsampled)
+            else:
+                state_space_downsampled = state_space
+                cluster_labels = KMeans(n_clusters=n_clusters, random_state=42, n_init=10).fit_predict(state_space)
+
             # Normalize state space
             scaler = StandardScaler()
-            state_space_norm = scaler.fit_transform(state_space)
+            state_space_norm = scaler.fit_transform(state_space_downsampled)
 
             # Cluster states
-            kmeans = KMeans(n_clusters=n_clusters, random_state=42)
+            kmeans = KMeans(n_clusters=n_clusters, n_init=5, max_iter=200, random_state=42)
             cluster_labels = kmeans.fit_predict(state_space_norm)
 
             # Compute transition matrix
@@ -265,7 +275,8 @@ class FractionalStateSpaceModel:
                 'total_entropy': intra_entropy + inter_entropy + transition_entropy,
                 'transition_matrix': transition_matrix,
                 'cluster_labels': cluster_labels,
-                'cluster_centers': cluster_centers
+                'cluster_centers': cluster_centers,
+                'state_space_downsampled': state_space_downsampled # Added for plotting
             }
 
         return results
@@ -290,42 +301,23 @@ class FractionalStateSpaceModel:
             return self._least_squares_estimation(time_series)
         elif method == 'kalman':
             return self._kalman_filter_estimation(time_series)
+        elif method == 'bayesian':
+            return self._bayesian_estimation(time_series)
         else:
             raise ValueError(f"Unknown method: {method}")
 
-    def _least_squares_estimation(self, time_series):
-        """
-        Least squares parameter estimation.
-        """
-        n_samples = len(time_series)
-
-        # Create feature matrix
-        X = np.zeros((n_samples - 1, 3))
-        X[:, 0] = time_series[:-1]  # Previous value
-        X[:, 1] = np.arange(n_samples - 1)  # Time
-        X[:, 2] = 1  # Constant term
-
-        # Target vector (fractional derivative)
-        time = np.arange(n_samples)
-
-        def series_func(t):
-            idx = int(t)
-            if idx >= n_samples:
-                idx = n_samples - 1
-            return time_series[idx]
-
-        frac_deriv = self.derivative(series_func, time[:-1])
-        y = frac_deriv
-
-        # Solve least squares problem
-        params, residuals, rank, s = np.linalg.lstsq(X, y, rcond=None)
-
-        return {
-            'A': params[0],
-            'B': params[1],
-            'C': params[2],
-            'residuals': residuals[0] if len(residuals) > 0 else 0
-        }
+    def _least_squares_estimation(self, time_series: np.ndarray) -> Dict[str, float]:
+        """Estimate fractional order using least squares."""
+        time = np.linspace(0, 1, len(time_series))
+        series_func = interp1d(time, time_series, kind='cubic', fill_value="extrapolate")
+        
+        def residuals(alpha):
+            self.derivative.alpha = FractionalOrder(alpha[0])
+            frac_deriv = self.derivative.compute(series_func, time[:-1])
+            return frac_deriv - np.gradient(time_series, time)[1:]
+        
+        result = least_squares(residuals, [0.5], bounds=(0.1, 1.9))
+        return {'alpha': result.x[0]}
 
     def _kalman_filter_estimation(self, time_series):
         """
@@ -345,31 +337,62 @@ class FractionalStateSpaceModel:
         # Storage
         state_history = np.zeros((n_samples, self.dim))
 
-        for k in range(n_samples):
+        # Measurement matrix
+        H = np.zeros((1, self.dim))
+        H[0, 0] = 1.0
+
+        for k in range(1, n_samples):
             # Prediction step
             # Simplified state transition (would be more complex in practice)
             x_pred = x_est
             P_pred = P + Q
 
             # Update step
-            # Simplified measurement model
-            H = np.array([1, 0, 0])  # Only first state is observed
-            y = time_series[k]
+            H = np.atleast_2d(H)
+            y_res = time_series[k] - H @ x_pred
+            S = H @ P_pred @ H.T + R
+            K = P_pred @ H.T @ np.linalg.inv(S)
+            x_est = x_pred + K @ y_res
+            P_est = (np.eye(self.dim) - K @ H) @ P_pred
 
-            # Kalman gain
-            K = P_pred @ H.T @ np.linalg.inv(H @ P_pred @ H.T + R)
+        return {'alpha': x_est[0]}
 
-            # State update
-            x_est = x_pred + K * (y - H @ x_pred)
-            P = (np.eye(self.dim) - K @ H) @ P_pred
+    def _bayesian_estimation(self, time_series):
+        """
+        Bayesian parameter estimation (simplified).
+        """
+        # Simplified Bayesian estimation
+        n_samples = len(time_series)
 
-            state_history[k] = x_est
+        # Initialize state and covariance
+        x_est = np.zeros(self.dim)
+        P_est = np.eye(self.dim) * 0.1
 
-        return {
-            'state_history': state_history,
-            'final_state': x_est,
-            'final_covariance': P
-        }
+        # Process and measurement noise
+        Q = np.eye(self.dim) * 0.01
+        R = 0.1
+
+        # Storage
+        state_history = np.zeros((n_samples, self.dim))
+
+        # Measurement matrix
+        H = np.zeros((1, self.dim))
+        H[0, 0] = 1.0
+
+        for k in range(n_samples):
+            # Prediction step
+            x_pred = x_est
+            P_pred = P_est + Q
+
+            # Update step
+            H = np.atleast_2d(H)
+            y_res = time_series[k] - H @ x_pred
+            S = H @ P_pred @ H.T + R
+            K = P_pred @ H.T @ np.linalg.inv(S)
+            x_est = x_pred + K @ y_res
+            P_est = (np.eye(self.dim) - K @ H) @ P_pred
+
+        return {'alpha': x_est[0]}
 
     def stability_analysis(self, A_matrix=None):
         """
@@ -409,7 +432,7 @@ class FractionalStateSpaceModel:
 
         # Compute stability measures
         stability_radius = min(np.abs(eigenvals))
-        condition_number = linalg.cond(A_matrix)
+        condition_number = np.linalg.cond(A_matrix)
 
         return {
             'eigenvalues': eigenvals,
@@ -487,148 +510,64 @@ class FractionalStateSpaceModel:
         """
         Plot comprehensive FOSS analysis results.
         """
-        fig, axes = plt.subplots(3, 3, figsize=(18, 15))
+        fig, axes = plt.subplots(2, 2, figsize=(12, 10))
+        fig.suptitle('FOSS Analysis', fontsize=16)
 
-        # Plot 1: State spaces for different α
-        alphas = list(state_spaces.keys())
-        colors = plt.cm.viridis(np.linspace(0, 1, len(alphas)))
+        for i, alpha in enumerate(state_spaces.keys()):
+            mtecm_result = mtecm_results[alpha]
+            
+            # Use the downsampled data and cluster labels from the MTECM results
+            state_space_plot = mtecm_result['state_space_downsampled']
+            cluster_labels = mtecm_result['cluster_labels']
 
-        for i, alpha in enumerate(alphas):
-            state_space = state_spaces[alpha]
-            axes[0, 0].scatter(state_space[:, 0], state_space[:, 1],
-                               c=colors[i], alpha=0.6, s=1, label=f'α={alpha}')
+            # FOSS State Space
+            axes[0, i].scatter(state_space_plot[:, 0], state_space_plot[:, 1], c=state_space_plot[:, 2], cmap='viridis', alpha=0.6, s=1)
+            axes[0, i].set_title(f'FOSS State Space (α={alpha})')
+            
+            # MTECM-FOSS Analysis
+            scatter = axes[1, i].scatter(state_space_plot[:, 0], state_space_plot[:, 1], c=cluster_labels, cmap='tab10', alpha=0.6, s=1)
+            axes[1, i].set_title(f'MTECM-FOSS (α={alpha})')
+            
+        # Remove unused axes
+        if len(state_spaces) < 2:
+            fig.delaxes(axes[0, 1])
+            fig.delaxes(axes[1, 1])
 
-        axes[0, 0].set_xlabel('x(t)')
-        axes[0, 0].set_ylabel('x(t+τ)')
-        axes[0, 0].set_title('FOSS Reconstruction')
-        axes[0, 0].legend()
-        axes[0, 0].grid(True)
+        plt.tight_layout(rect=[0, 0.03, 1, 0.95])
+        plt.savefig('foss_analysis.png')
+        plt.close()
 
-        # Plot 2: Entropy measures vs α
-        alphas = list(mtecm_results.keys())
-        intra_entropy = [mtecm_results[alpha]['intra_entropy']
-                         for alpha in alphas]
-        inter_entropy = [mtecm_results[alpha]['inter_entropy']
-                         for alpha in alphas]
-        transition_entropy = [mtecm_results[alpha]
-                              ['transition_entropy'] for alpha in alphas]
-        total_entropy = [mtecm_results[alpha]['total_entropy']
-                         for alpha in alphas]
+    def plot_parameter_estimation(self, params_ls, params_kf, params_bayes):
+        """
+        Plot parameter estimation results.
+        """
+        fig, axes = plt.subplots(1, 3, figsize=(15, 5))
+        fig.suptitle('Parameter Estimation Results', fontsize=16)
 
-        axes[0, 1].plot(alphas, intra_entropy, 'b-o', label='Intra-sample')
-        axes[0, 1].plot(alphas, inter_entropy, 'r-s', label='Inter-sample')
-        axes[0, 1].plot(alphas, transition_entropy, 'g-^', label='Transition')
-        axes[0, 1].plot(alphas, total_entropy, 'k-*', label='Total')
-        axes[0, 1].set_xlabel('Fractional Order α')
-        axes[0, 1].set_ylabel('Entropy')
-        axes[0, 1].set_title('MTECM-FOSS Entropy Analysis')
-        axes[0, 1].legend()
-        axes[0, 1].grid(True)
+        # Plot 1: Least Squares Estimation
+        axes[0].plot(params_ls['alpha'], 'b-o', label='Least Squares')
+        axes[0].set_xlabel('Iteration')
+        axes[0].set_ylabel('Estimated α')
+        axes[0].set_title('Least Squares Estimation')
+        axes[0].grid(True)
 
-        # Plot 3: Transition matrices
-        best_alpha = alphas[np.argmax(total_entropy)]
-        transition_matrix = mtecm_results[best_alpha]['transition_matrix']
+        # Plot 2: Kalman Filter Estimation
+        axes[1].plot(params_kf['alpha'], 'r-s', label='Kalman Filter')
+        axes[1].set_xlabel('Iteration')
+        axes[1].set_ylabel('Estimated α')
+        axes[1].set_title('Kalman Filter Estimation')
+        axes[1].grid(True)
 
-        im = axes[0, 2].imshow(
-            transition_matrix, cmap='viridis', aspect='auto')
-        axes[0, 2].set_xlabel('Next State')
-        axes[0, 2].set_ylabel('Current State')
-        axes[0, 2].set_title(f'Transition Matrix (α={best_alpha})')
-        plt.colorbar(im, ax=axes[0, 2])
-
-        # Plot 4: State clustering
-        cluster_labels = mtecm_results[best_alpha]['cluster_labels']
-        cluster_centers = mtecm_results[best_alpha]['cluster_centers']
-        state_space = state_spaces[best_alpha]
-
-        scatter = axes[1, 0].scatter(state_space[:, 0], state_space[:, 1],
-                                     c=cluster_labels, cmap='tab10', alpha=0.6, s=1)
-        axes[1, 0].scatter(cluster_centers[:, 0], cluster_centers[:, 1],
-                           c='red', s=100, marker='x', linewidths=3)
-        axes[1, 0].set_xlabel('x(t)')
-        axes[1, 0].set_ylabel('x(t+τ)')
-        axes[1, 0].set_title(f'State Clustering (α={best_alpha})')
-        plt.colorbar(scatter, ax=axes[1, 0])
-
-        # Plot 5: Stability analysis
-        stability_info = self.stability_analysis()
-        eigenvals = stability_info['eigenvalues']
-
-        # Plot eigenvalues in complex plane
-        axes[1, 1].scatter(eigenvals.real, eigenvals.imag, c='red', s=100)
-        axes[1, 1].axhline(y=0, color='k', linestyle='-', alpha=0.3)
-        axes[1, 1].axvline(x=0, color='k', linestyle='-', alpha=0.3)
-
-        # Draw stability region
-        theta = np.linspace(0, 2*np.pi, 100)
-        r = 1
-        x_circle = r * np.cos(theta)
-        y_circle = r * np.sin(theta)
-        axes[1, 1].plot(x_circle, y_circle, 'k--',
-                        alpha=0.5, label='Unit Circle')
-
-        axes[1, 1].set_xlabel('Real Part')
-        axes[1, 1].set_ylabel('Imaginary Part')
-        axes[1, 1].set_title('Eigenvalue Distribution')
-        axes[1, 1].legend()
-        axes[1, 1].grid(True)
-        axes[1, 1].set_aspect('equal')
-
-        # Plot 6: Parameter estimation results
-        # Generate test data
-        t_test = np.linspace(0, 10, 1000)
-        u_test = np.sin(2 * np.pi * 0.5 * t_test)
-
-        # Simulate system
-        t_sim, x_sim, y_sim = self.simulate_fractional_system(u_test)
-
-        axes[1, 2].plot(t_sim, y_sim, 'b-', linewidth=2, label='Output')
-        axes[1, 2].plot(t_sim, u_test, 'r--', linewidth=1, label='Input')
-        axes[1, 2].set_xlabel('Time')
-        axes[1, 2].set_ylabel('Amplitude')
-        axes[1, 2].set_title('Fractional System Simulation')
-        axes[1, 2].legend()
-        axes[1, 2].grid(True)
-
-        # Plot 7: Lorenz attractor
-        t_lorenz, x_lorenz = self.generate_lorenz_data(duration=50, dt=0.01)
-
-        axes[2, 0].plot(x_lorenz[:, 0], x_lorenz[:, 1], 'b-', linewidth=0.5)
-        axes[2, 0].set_xlabel('x')
-        axes[2, 0].set_ylabel('y')
-        axes[2, 0].set_title('Fractional Lorenz Attractor')
-        axes[2, 0].grid(True)
-
-        # Plot 8: Time series analysis
-        time_series = x_lorenz[:, 0]  # Use x-component
-        state_spaces_lorenz = self.foss_reconstruction(time_series)
-
-        # Plot reconstruction for α=0.5
-        if 0.5 in state_spaces_lorenz:
-            state_space_05 = state_spaces_lorenz[0.5]
-            axes[2, 1].scatter(state_space_05[:, 0], state_space_05[:, 1],
-                               c=state_space_05[:, 2], cmap='viridis', alpha=0.6, s=1)
-            axes[2, 1].set_xlabel('x(t)')
-            axes[2, 1].set_ylabel('x(t+τ)')
-            axes[2, 1].set_title('Lorenz FOSS (α=0.5)')
-            plt.colorbar(axes[2, 1].collections[0], ax=axes[2, 1])
-
-        # Plot 9: Complexity measures
-        complexity_measures = []
-        for alpha in alphas:
-            if alpha in mtecm_results:
-                complexity = mtecm_results[alpha]['total_entropy']
-                complexity_measures.append(complexity)
-
-        axes[2, 2].plot(alphas[:len(complexity_measures)],
-                        complexity_measures, 'bo-', linewidth=2)
-        axes[2, 2].set_xlabel('Fractional Order α')
-        axes[2, 2].set_ylabel('Complexity Measure')
-        axes[2, 2].set_title('System Complexity vs α')
-        axes[2, 2].grid(True)
+        # Plot 3: Bayesian Estimation (simplified)
+        axes[2].plot(params_bayes['alpha'], 'g-^', label='Bayesian')
+        axes[2].set_xlabel('Iteration')
+        axes[2].set_ylabel('Estimated α')
+        axes[2].set_title('Bayesian Estimation')
+        axes[2].grid(True)
 
         plt.tight_layout()
-        plt.show()
+        plt.savefig('parameter_estimation.png')
+        plt.close()
 
 
 def main():
@@ -644,7 +583,7 @@ def main():
 
     # Generate Lorenz data
     print("Generating fractional Lorenz system data...")
-    t_lorenz, x_lorenz = model.generate_lorenz_data(duration=100, dt=0.01)
+    t_lorenz, x_lorenz = model.generate_lorenz_data(duration=5, dt=0.001)
 
     print(f"Lorenz data generated: {len(t_lorenz)} time steps")
 
@@ -652,7 +591,7 @@ def main():
     print("Performing FOSS reconstruction...")
     time_series = x_lorenz[:, 0]  # Use x-component
     state_spaces = model.foss_reconstruction(
-        time_series, embedding_dim=3, delay=10)
+        time_series, embedding_dim=3, delay=10, alpha_values=[0.5, 0.7])
 
     print(
         f"FOSS reconstruction completed for {len(state_spaces)} fractional orders")
@@ -699,16 +638,20 @@ def main():
     print("\nGenerating analysis plots...")
     model.plot_foss_analysis(state_spaces, mtecm_results)
 
+    # Estimate Bayesian parameters and plot all estimations
+    params_bayes = model.estimate_fractional_parameters(time_series, method='bayesian')
+    model.plot_parameter_estimation(params_ls, params_kf, params_bayes)
+
     # Demonstrate different fractional orders
     print("\n--- Analysis with Different Fractional Orders ---")
-    for alpha in [0.3, 0.5, 0.7, 1.0, 1.3]:
+    for alpha in [0.5, 0.7]:
         print(f"\nα = {alpha}:")
 
         # Create model with different alpha
         model_alpha = FractionalStateSpaceModel(alpha=alpha, dim=3)
 
         # FOSS reconstruction
-        state_spaces_alpha = model_alpha.foss_reconstruction(time_series)
+        state_spaces_alpha = model_alpha.foss_reconstruction(time_series, alpha_values=[alpha])
 
         # MTECM analysis
         mtecm_alpha = model_alpha.mtecm_foss_analysis(state_spaces_alpha)

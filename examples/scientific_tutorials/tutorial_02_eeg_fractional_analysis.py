@@ -28,6 +28,11 @@ import matplotlib.pyplot as plt
 from scipy import signal
 from scipy.stats import linregress
 from sklearn.preprocessing import StandardScaler
+import sys
+import os
+
+# Add the project root to the Python path
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
 # Import HPFRACC components
 from hpfracc.core.derivatives import create_fractional_derivative
@@ -63,9 +68,11 @@ class EEGFractionalAnalyzer:
 
         for alpha in self.alpha_values:
             self.derivatives[alpha] = create_fractional_derivative(
-                alpha, method="RL")
+                definition_type="riemann_liouville", alpha=alpha
+            )
             self.integrals[alpha] = create_fractional_integral(
-                alpha, method="RL")
+                order=alpha, method="RL"
+            )
 
         print(f"EEGFractionalAnalyzer initialized (fs={sampling_rate} Hz)")
 
@@ -125,7 +132,7 @@ class EEGFractionalAnalyzer:
 
     @timing_decorator
     def fractional_state_space_reconstruction(self, eeg_data, alpha=0.5,
-                                              embedding_dim=3, delay=25):
+                                              embedding_dim=3, delay=6):
         """
         Perform fractional state space reconstruction using FOSS method.
 
@@ -160,7 +167,7 @@ class EEGFractionalAnalyzer:
                 idx = n_samples - 1
             return eeg_data[idx]
 
-        fractional_signal = derivative_op(signal_func, time)
+        fractional_signal = derivative_op.compute(signal_func, time)
 
         # Traditional delay embedding with fractional signal
         n_vectors = n_samples - (embedding_dim - 1) * delay
@@ -308,7 +315,7 @@ class EEGFractionalAnalyzer:
         Box-counting dimension estimation.
         """
         # Create phase space using delay embedding
-        delay = 25
+        delay = 6
         embedding_dim = 3
         state_space = self.fractional_state_space_reconstruction(
             eeg_data, alpha=0.5, embedding_dim=embedding_dim, delay=delay
@@ -358,7 +365,7 @@ class EEGFractionalAnalyzer:
         """
         # Create phase space
         state_space = self.fractional_state_space_reconstruction(
-            eeg_data, alpha=0.5, embedding_dim=3, delay=25
+            eeg_data, alpha=0.5, embedding_dim=3, delay=6
         )
 
         # Compute correlation integral
@@ -432,7 +439,7 @@ class EEGFractionalAnalyzer:
                     idx = len(eeg_data) - 1
                 return eeg_data[idx]
 
-            frac_deriv = derivative_op(signal_func, time)
+            frac_deriv = derivative_op.compute(signal_func, time)
             features[f'frac_deriv_alpha_{alpha}_mean'] = np.mean(frac_deriv)
             features[f'frac_deriv_alpha_{alpha}_std'] = np.std(frac_deriv)
             features[f'frac_deriv_alpha_{alpha}_max'] = np.max(frac_deriv)
@@ -557,7 +564,7 @@ class EEGFractionalAnalyzer:
                     idx = len(eeg_short) - 1
                 return eeg_short[idx]
 
-            frac_deriv = derivative_op(signal_func, time_short)
+            frac_deriv = derivative_op.compute(signal_func, time_short)
             axes[0, 2].plot(time_short, frac_deriv, label=f'α={alpha}')
 
         axes[0, 2].set_xlabel('Time (s)')
@@ -568,7 +575,7 @@ class EEGFractionalAnalyzer:
 
         # Plot 4: State space reconstruction
         state_space = self.fractional_state_space_reconstruction(
-            eeg_data, alpha=0.5, embedding_dim=3, delay=25
+            eeg_data, alpha=0.5, embedding_dim=3, delay=6
         )
         axes[1, 0].scatter(state_space[:, 0], state_space[:, 1],
                            c=state_space[:, 2], cmap='viridis', alpha=0.6, s=1)
@@ -605,7 +612,7 @@ class EEGFractionalAnalyzer:
 
         valid_idx = ~np.isnan(rs_values)
         if np.sum(valid_idx) > 5:
-            axes[1, 1].loglog(scales[valid_idx], rs_values[valid_idx], 'bo-')
+            axes[1, 1].loglog(scales[valid_idx], np.array(rs_values)[valid_idx], 'bo-')
             axes[1, 1].set_xlabel('Scale')
             axes[1, 1].set_ylabel('R/S')
             axes[1, 1].set_title(
@@ -699,7 +706,7 @@ def main():
     # Perform state space reconstruction
     print("\nPerforming fractional state space reconstruction...")
     state_space = analyzer.fractional_state_space_reconstruction(
-        eeg_data, alpha=0.5, embedding_dim=3, delay=25
+        eeg_data, alpha=0.5, embedding_dim=3, delay=6
     )
 
     print(f"State space reconstructed: {state_space.shape}")
@@ -729,7 +736,7 @@ def main():
     for alpha in [0.3, 0.5, 0.7, 1.0]:
         print(f"\nα = {alpha}:")
         state_space_alpha = analyzer.fractional_state_space_reconstruction(
-            eeg_data, alpha=alpha, embedding_dim=3, delay=25
+            eeg_data, alpha=alpha, embedding_dim=3, delay=6
         )
 
         # Compute some statistics

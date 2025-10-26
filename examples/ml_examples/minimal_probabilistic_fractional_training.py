@@ -22,27 +22,14 @@ class TinyNet(nn.Module):
 
     def forward(self, x):
         # x: [B, N]
-        y1 = self.frac_spec(x)      # [B, N] or scalar
-        y2 = self.frac_stoch(x)     # scalar
-        y3 = self.frac_prob(x)      # scalar
+        y1 = self.frac_spec(x)      # [B, N]
+        y2 = self.frac_stoch(x)     # [B, N]
+        y3 = self.frac_prob(x)      # [B, N]
         
-        # Ensure all outputs are [B, 1]
-        if y1.dim() == 2:
-            y1 = y1.mean(dim=-1, keepdim=True)
-        elif y1.dim() == 1:
-            y1 = y1.unsqueeze(-1)
-        elif y1.dim() == 0:
-            y1 = y1.unsqueeze(0).unsqueeze(-1)
-        
-        if y2.dim() == 1:
-            y2 = y2.unsqueeze(-1)
-        elif y2.dim() == 0:
-            y2 = y2.unsqueeze(0).unsqueeze(-1)
-            
-        if y3.dim() == 1:
-            y3 = y3.unsqueeze(-1)
-        elif y3.dim() == 0:
-            y3 = y3.unsqueeze(0).unsqueeze(-1)
+        # Reduce all outputs to [B, 1]
+        y1 = y1.mean(dim=1, keepdim=True)
+        y2 = y2.mean(dim=1, keepdim=True)
+        y3 = y3.mean(dim=1, keepdim=True)
         
         feats = torch.cat([y1, y2, y3], dim=-1)  # [B, 3]
         return self.linear(feats)

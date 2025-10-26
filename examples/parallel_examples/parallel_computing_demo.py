@@ -6,27 +6,35 @@ This example demonstrates the use of parallel computing backends (Joblib, Dask, 
 for accelerating fractional calculus computations.
 """
 
-from hpfracc.algorithms.optimized_methods import (
-    OptimizedCaputo,
-    ParallelConfig,
-    ParallelOptimizedCaputo,
-)
+from hpfracc.algorithms.optimized_methods import OptimizedCaputo, JAX_AVAILABLE
 import numpy as np
 import matplotlib.pyplot as plt
 import time
 import sys
 import os
+from joblib import Parallel, delayed
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
-
-# Updated imports for consolidated structure
 
 
 def compute_derivative(data):
     """Compute fractional derivative for parallel processing."""
-    f_data, t_data, alpha_data, h_data = data
-    caputo = OptimizedCaputo(alpha=alpha_data)
-    return caputo.compute(f_data, t_data, h_data)
+    f_data, t_data, order_data, h_data = data
+    
+    # Temporarily disable JAX for multiprocessing safety
+    original_jax_status = JAX_AVAILABLE
+    if original_jax_status:
+        from hpfracc.algorithms import optimized_methods
+        optimized_methods.JAX_AVAILABLE = False
+
+    caputo = OptimizedCaputo(order=order_data)
+    result = caputo.compute(f_data, t_data, h_data)
+
+    # Restore JAX status
+    if original_jax_status:
+        optimized_methods.JAX_AVAILABLE = True
+        
+    return result
 
 
 def parallel_backend_comparison():
@@ -36,18 +44,18 @@ def parallel_backend_comparison():
 
     # Check available backends
     print("Available parallel computing backends:")
-    backends = ["joblib", "multiprocessing", "threading"]
+    backends = ["loky", "multiprocessing", "threading"]
     available = {}
 
     # Check joblib availability
     try:
         pass
 
-        available["joblib"] = True
-        print("  ✅ joblib")
+        available["loky"] = True
+        print("  ✅ loky")
     except ImportError:
-        available["joblib"] = False
-        print("  ❌ joblib")
+        available["loky"] = False
+        print("  ❌ loky")
 
     # Check multiprocessing availability
     try:
@@ -70,7 +78,7 @@ def parallel_backend_comparison():
         print("  ❌ threading")
 
     # Test different backends
-    backends = ["joblib", "multiprocessing", "threading"]
+    backends = ["loky", "multiprocessing", "threading"]
     grid_sizes = [100, 500, 1000]
     alpha = 0.5
 
@@ -93,9 +101,6 @@ def parallel_backend_comparison():
             h = t[1] - t[0]
             f = np.sin(t)
 
-            # Create parallel backend
-            parallel_config = ParallelConfig(backend=backend)
-
             # Prepare work items (multiple datasets)
             work_items = []
             for i in range(10):  # 10 different datasets
@@ -104,9 +109,7 @@ def parallel_backend_comparison():
 
             # Time parallel computation
             start_time = time.time()
-            results_parallel = parallel_optimized_caputo(
-                f, t, alpha, h, parallel_config=parallel_config
-            )
+            Parallel(n_jobs=-1, backend=backend)(delayed(compute_derivative)(item) for item in work_items)
             end_time = time.time()
 
             backend_results[N] = end_time - start_time
@@ -172,25 +175,17 @@ def joblib_optimization_demo():
     for n_workers in worker_counts:
         print(f"\n🧪 Testing with {n_workers} workers...")
 
-        # Create parallel configuration
-        parallel_config = ParallelConfig(n_jobs=n_workers, backend="joblib")
-
         # Prepare multiple datasets
         datasets = []
         for i in range(20):  # 20 different datasets
             f_shifted = f * (1 + 0.05 * i)
-            datasets.append(f_shifted)
+            datasets.append((f_shifted, t, alpha, h))
 
         # Time computation
         start_time = time.time()
 
         # Use parallel optimized Caputo for each dataset
-        results = []
-        for f_data in datasets:
-            result = parallel_optimized_caputo(
-                f_data, t, alpha, h, parallel_config=parallel_config
-            )
-            results.append(result)
+        Parallel(n_jobs=n_workers, backend="loky")(delayed(compute_derivative)(item) for item in datasets)
         end_time = time.time()
 
         timings[n_workers] = end_time - start_time
@@ -242,19 +237,12 @@ def vectorized_parallel_demo():
     print(
         f"Computing vectorized fractional derivatives for {len(alphas)} α values")
 
-    # Create parallel configuration
-    parallel_config = ParallelConfig(backend="joblib")
-
     # Time vectorized computation
     start_time = time.time()
 
     # Use parallel optimized Caputo for each alpha value
-    results = []
-    for alpha_val in alphas:
-        result = parallel_optimized_caputo(
-            f, t, alpha_val, h, parallel_config=parallel_config
-        )
-        results.append(result)
+    work_items = [(f, t, alpha_val, h) for alpha_val in alphas]
+    results = Parallel(n_jobs=-1, backend="loky")(delayed(compute_derivative)(item) for item in work_items)
     end_time = time.time()
 
     print(f"⏱️  Vectorized computation time: {end_time - start_time:.4f}s")
@@ -465,9 +453,6 @@ def main():
     parallel_backend_comparison()
     joblib_optimization_demo()
     vectorized_parallel_demo()
-    load_balancing_demo()
-    memory_optimization_demo()
-    system_info_demo()
 
     print("\n🎉 All parallel computing examples completed!")
     print("\n📁 Generated plots saved in 'examples/parallel_examples/' directory")

@@ -1,0 +1,67 @@
+HPFRACC Benchmark Summary
+==================================================
+
+PERFORMANCE BENCHMARK
+------------------------------
+
+Method: RL
+  Execution Time: 0.001188s ± 0.000135s
+  Memory Usage: 0.00MB ± 0.00MB
+
+Method: GL
+  Execution Time: 0.004368s ± 0.002292s
+
+Method: Caputo
+  Execution Time: 0.001159s ± 0.000164s
+
+==================================================
+
+ACCURACY BENCHMARK
+------------------------------
+
+Method: RL
+  Execution Time: 0.000465s ± 0.000070s
+  Relative Error: 4.90e-01 ± 4.61e-01
+
+Method: GL
+  Execution Time: 0.001150s ± 0.000309s
+  Relative Error: 4.86e-01 ± 4.70e-01
+
+Method: Caputo
+  Execution Time: 0.000405s ± 0.000033s
+  Relative Error: 3.53e-01 ± 3.32e-01
+
+==================================================
+
+SCALING BENCHMARK
+------------------------------
+
+Method: RL
+  Execution Time: 0.001983s ± 0.001310s
+
+Method: GL
+  Execution Time: 0.018392s ± 0.022069s
+
+Method: Caputo
+  Execution Time: 0.001981s ± 0.001232s
+  Memory Usage: 0.00MB ± 0.00MB
+
+==================================================
+
+MEMORY BENCHMARK
+------------------------------
+
+Method: RL
+  Execution Time: 0.004549s ± 0.002990s
+  Memory Usage: 0.09MB ± 0.00MB
+
+Method: GL
+  Execution Time: 0.074443s ± 0.070285s
+  Memory Usage: 0.09MB ± 0.00MB
+
+Method: Caputo
+  Execution Time: 0.004349s ± 0.002703s
+  Memory Usage: 0.07MB ± 0.00MB
+
+==================================================
+

@@ -18,6 +18,8 @@ import time
 from typing import Dict, List, Tuple
 import warnings
 warnings.filterwarnings('ignore')
+import jax
+import torch
 
 # Import our fractional GNN components
 
@@ -100,17 +102,32 @@ def benchmark_backend_performance(
         tensor_ops = get_tensor_ops(backend)
 
         # Convert data to backend tensors
-        x = tensor_ops.create_tensor(node_features)
+        dtype = torch.float32 if backend == BackendType.TORCH else 'float32'
+        x = tensor_ops.create_tensor(node_features, dtype=dtype)
         edge_idx = tensor_ops.create_tensor(edge_index)
 
         # Warm-up run
-        _ = model.forward(x, edge_idx)
+        if backend == BackendType.JAX:
+            key = jax.random.PRNGKey(0)
+            if model_type == 'gat':
+                _ = model.forward(x, edge_idx, key=key)
+            else:
+                _ = model.forward(x, edge_idx)
+        else:
+            _ = model.forward(x, edge_idx)
 
         # Benchmark runs
         forward_times = []
-        for _ in range(num_runs):
+        for i in range(num_runs):
             start_time = time.time()
-            _ = model.forward(x, edge_idx)
+            if backend == BackendType.JAX:
+                key, subkey = jax.random.split(key)
+                if model_type == 'gat':
+                    _ = model.forward(x, edge_idx, key=subkey)
+                else:
+                    _ = model.forward(x, edge_idx)
+            else:
+                _ = model.forward(x, edge_idx)
             forward_times.append(time.time() - start_time)
 
         avg_time = np.mean(forward_times)

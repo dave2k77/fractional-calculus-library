@@ -6,9 +6,10 @@ finite difference methods, spectral methods, and adaptive mesh refinement.
 """
 
 import numpy as np
-from typing import Union, Optional, Tuple, Callable
+from typing import Union, Optional, Tuple, Callable, Dict
 from scipy import sparse
-from scipy.sparse.linalg import spsolve
+from scipy.sparse.linalg import spsolve, splu
+from scipy.special import gamma
 
 from ..core.definitions import FractionalOrder
 
@@ -62,6 +63,69 @@ class FractionalPDESolver:
         valid_methods = ["finite_difference", "spectral", "finite_element"]
         if self.method not in valid_methods:
             raise ValueError(f"Method must be one of {valid_methods}")
+
+    def _validate_orders(self, alpha: float, beta: float):
+        """Validate fractional orders for PDE solver."""
+        if not 0 < alpha <= 2:
+            raise ValueError(f"Temporal order alpha must be in (0, 2], but got {alpha}")
+        if not 0 < beta <= 2:
+            raise ValueError(f"Spatial order beta must be in (0, 2], but got {beta}")
+
+    def solve(
+        self,
+        t_span: Tuple[float, float],
+        x_span: Tuple[float, float],
+        initial_condition: Callable,
+        boundary_conditions: Dict,
+        alpha: float,
+        beta: float,
+        **kwargs,
+    ) -> Dict[str, np.ndarray]:
+        """Solve the fractional PDE."""
+        self._validate_orders(alpha, beta)
+
+        t0, tf = t_span
+        x_start, x_end = x_span
+        
+        nt = kwargs.get("nt", 100)
+        nx = kwargs.get("nx", 100)
+        
+        t_values = np.linspace(t0, tf, nt)
+        x_values = np.linspace(x_start, x_end, nx)
+        
+        dt = t_values[1] - t_values[0]
+        dx = x_values[1] - x_values[0]
+        
+        solution = np.zeros((nx, nt))
+        solution[:, 0] = initial_condition(x_values)
+        
+        diffusion_coeff = kwargs.get("diffusion_coeff", 1.0)
+        
+        A = self._build_spatial_matrix(nx, dx, beta, diffusion_coeff)
+        A_lu = splu(A)
+
+        # Precompute L1 weights
+        j = np.arange(1, nt)
+        l1_weights = (j + 1)**(1 - alpha) - j**(1 - alpha)
+
+        for n in range(nt - 1):
+            history = np.sum(l1_weights[:n] * np.diff(solution[:, :n+1], axis=1), axis=1)
+            
+            rhs = solution[:, n] - (dt**alpha / gamma(2 - alpha)) * history
+            
+            # Add source term if provided
+            if 'source_term' in kwargs:
+                source = kwargs['source_term'](x_values, t_values[n+1])
+                rhs += dt * source
+
+            solution[1:-1, n + 1] = A_lu.solve(rhs[1:-1])
+
+            # Apply boundary conditions
+            if 'dirichlet' in boundary_conditions:
+                solution[0, n + 1] = boundary_conditions['dirichlet'][0](t_values[n+1])
+                solution[-1, n + 1] = boundary_conditions['dirichlet'][1](t_values[n+1])
+
+        return {"t": t_values, "x": x_values, "u": solution}
 
 
 class FractionalDiffusionSolver(FractionalPDESolver):
@@ -126,62 +190,148 @@ class FractionalDiffusionSolver(FractionalPDESolver):
         Returns:
             Tuple of (t_values, x_values, solution)
         """
+        self._validate_orders(alpha, beta)
+
         x0, xf = x_span
         t0, tf = t_span
 
-        # Spatial and temporal grids
+        # Grids
         x_values = np.linspace(x0, xf, nx)
         t_values = np.linspace(t0, tf, nt)
         dx = x_values[1] - x_values[0]
         dt = t_values[1] - t_values[0]
 
-        # Initialize solution array
-        solution = np.zeros((nt, nx))
+        # Solution array in (nx, nt) to reuse base formulations
+        solution = np.zeros((nx, nt), dtype=float)
+        solution[:, 0] = np.array([initial_condition(xi) for xi in x_values], dtype=float)
 
-        # Set initial condition
-        for i, x in enumerate(x_values):
-            solution[0, i] = initial_condition(x)
+        alpha_val = float(alpha.alpha) if hasattr(alpha, 'alpha') else float(alpha)
 
-        # Set boundary conditions
-        left_bc, right_bc = boundary_conditions
-        for n in range(nt):
-            solution[n, 0] = left_bc(t_values[n])
-            solution[n, -1] = right_bc(t_values[n])
+        if self.method == "spectral":
+            # Periodic spectral implicit step per time level
+            D = diffusion_coeff
+            k = 2.0 * np.pi * np.fft.fftfreq(nx, d=dx)
+            abs_k_beta = np.abs(k) ** (float(beta.alpha) if hasattr(beta, 'alpha') else float(beta))
 
-        # Main time-stepping loop
-        for n in range(1, nt):
-            t_n = t_values[n]
+            for n in range(1, nt):
+                # L1 history accumulation for 0<alpha<1, fallback to CN at alpha=1
+                if 0.0 < alpha_val < 1.0:
+                    j = np.arange(1, n + 1, dtype=float)
+                    a = j**(1.0 - alpha_val) - (j - 1.0)**(1.0 - alpha_val)
+                    hist = np.zeros(nx, dtype=float)
+                    for m in range(1, n + 1):
+                        hist += a[m - 1] * (solution[:, n - m + 1 - 1] if n - m >= 0 else 0.0)
+                    scale = gamma(2.0 - alpha_val) * (dt ** alpha_val)
+                    rhs = hist.copy()
+                elif alpha_val == 1.0:
+                    # CN-like scaling
+                    rhs = solution[:, n - 1]
+                    scale = dt
+                else:
+                    # Fallback simple history for 1<alpha<2
+                    j = np.arange(1, n + 1, dtype=float)
+                    c = j**(2.0 - alpha_val) - (j - 1.0)**(2.0 - alpha_val)
+                    hist = np.zeros(nx, dtype=float)
+                    for m in range(1, n + 1):
+                        hist += c[m - 1] * solution[:, n - m]
+                    scale = 1.0 / (gamma(3.0 - alpha_val) * (dt ** alpha_val))
+                    rhs = hist.copy()
 
-            # Solve spatial problem at current time step
-            solution[n, 1:-1] = self._solve_spatial_step(
-                solution,
-                n,
-                x_values,
-                t_n,
-                alpha,
-                beta,
-                diffusion_coeff,
-                source_term,
-                dx,
-                dt,
-                **kwargs,
-            )
+                if source_term is not None:
+                    s = np.array([source_term(xi, t_values[n], solution[n - 1, ix] if n > 0 else solution[0, ix]) for ix, xi in enumerate(x_values)], dtype=float)
+                    rhs = rhs + scale * s
 
-        return t_values, x_values, solution
+                rhs_hat = np.fft.fft(rhs)
+                denom = 1.0 + scale * D * abs_k_beta
+                u_hat = rhs_hat / denom
+                u_new = np.fft.ifft(u_hat).real
+                solution[:, n] = u_new
+
+            return t_values, x_values, solution.T
+
+        # Finite difference implicit solve with L1/CN/L2-1σ variants
+        A = self._build_spatial_matrix(nx, beta, diffusion_coeff, dx, dt, alpha, side='lhs')
+        A_lu = splu(A.tocsc())
+
+        if 0.0 < alpha_val < 1.0:
+            # Precompute L1 weights
+            j = np.arange(1, nt, dtype=float)
+            a = j**(1.0 - alpha_val) - (j - 1.0)**(1.0 - alpha_val)
+            scale = dt ** alpha_val / gamma(2.0 - alpha_val)
+
+            for n in range(0, nt - 1):
+                # Build RHS using history of increments
+                if n >= 1:
+                    # increments of u in time for all past steps 1..n
+                    diffs = np.diff(solution[:, : n + 1], axis=1)  # shape (nx, n)
+                    # weight for each past increment Δu^{k} is a_{n-k}
+                    weights = a[:n][::-1]  # length n
+                    history = diffs @ weights  # (nx,)
+                else:
+                    history = np.zeros(nx, dtype=float)
+                rhs_full = solution[:, n] - scale * history
+
+                if source_term is not None:
+                    # Source term may accept (x, t) or (x, t, u); support both
+                    try:
+                        s_n = np.array([source_term(xi, t_values[n + 1], solution[ix, n]) for ix, xi in enumerate(x_values)], dtype=float)
+                    except TypeError:
+                        s_n = np.array([source_term(xi, t_values[n + 1]) for xi in x_values], dtype=float)
+                    rhs_full += dt * s_n
+
+                # Dirichlet boundaries enforced after solve; interior system
+                rhs = rhs_full[1:-1]
+                sol_interior = A_lu.solve(rhs)
+                solution[1:-1, n + 1] = sol_interior
+                # Apply boundary conditions
+                solution[0, n + 1] = boundary_conditions[0](t_values[n + 1])
+                solution[-1, n + 1] = boundary_conditions[1](t_values[n + 1])
+
+        elif alpha_val == 1.0:
+            A_lhs = self._build_spatial_matrix(nx, beta, diffusion_coeff, dx, dt, alpha_val, side='lhs')
+            A_rhs = self._build_spatial_matrix(nx, beta, diffusion_coeff, dx, dt, alpha_val, side='rhs')
+            A_lu = splu(A_lhs.tocsc())
+            for n in range(0, nt - 1):
+                rhs_full = (A_rhs @ solution[1:-1, n])
+                if source_term is not None:
+                    s_n = np.array([source_term(xi, t_values[n + 1]) for xi in x_values[1:-1]], dtype=float)
+                    rhs_full += dt * s_n
+                sol_interior = A_lu.solve(rhs_full)
+                solution[1:-1, n + 1] = sol_interior
+                solution[0, n + 1] = boundary_conditions[0](t_values[n + 1])
+                solution[-1, n + 1] = boundary_conditions[1](t_values[n + 1])
+        else:
+            # Basic L2-1σ-like accumulation (smoke path)
+            j = np.arange(1, nt, dtype=float)
+            c = j**(2.0 - alpha_val) - (j - 1.0)**(2.0 - alpha_val)
+            inv_scale = 1.0 / (gamma(3.0 - alpha_val) * (dt ** alpha_val))
+            for n in range(0, nt - 1):
+                hist = np.zeros(nx - 2, dtype=float)
+                for m in range(1, n + 1):
+                    hist += c[m - 1] * solution[1:-1, n + 1 - m]
+                rhs = inv_scale * hist
+                if source_term is not None:
+                    s_n = np.array([source_term(xi, t_values[n + 1]) for xi in x_values[1:-1]], dtype=float)
+                    rhs += dt * s_n
+                sol_interior = A_lu.solve(rhs)
+                solution[1:-1, n + 1] = sol_interior
+                solution[0, n + 1] = boundary_conditions[0](t_values[n + 1])
+                solution[-1, n + 1] = boundary_conditions[1](t_values[n + 1])
+
+        return t_values, x_values, solution.T
 
     def _solve_spatial_step(
         self,
         solution: np.ndarray,
         n: int,
         x_values: np.ndarray,
-        t_n: float,
+        t_values: np.ndarray,
         alpha: Union[float, FractionalOrder],
         beta: Union[float, FractionalOrder],
-        diffusion_coeff: float,
         source_term: Optional[Callable],
-        dx: float,
-        dt: float,
-        **kwargs,
+        nx: int,
+        nt: int,
+        pde_params: dict,
     ) -> np.ndarray:
         """
         Solve spatial problem at current time step.
@@ -190,64 +340,55 @@ class FractionalDiffusionSolver(FractionalPDESolver):
             solution: Solution array
             n: Current time step
             x_values: Spatial grid
-            t_n: Current time
+            t_values: Time grid
             alpha: Temporal fractional order
             beta: Spatial fractional order
-            diffusion_coeff: Diffusion coefficient
             source_term: Source term
-            dx: Spatial step size
-            dt: Temporal step size
-            **kwargs: Additional parameters
+            nx: Number of spatial grid points
+            nt: Number of temporal grid points
+            pde_params: Dictionary of parameters (diffusion_coeff, dx, dt)
 
         Returns:
             Solution at interior points
         """
-        len(x_values)
+        if isinstance(alpha, FractionalOrder):
+            alpha_val = alpha.alpha
+        else:
+            alpha_val = alpha
+        
+        dt = t_values[1] - t_values[0]
+
+        # Handle explicit scheme for alpha=2.0 (wave equation) separately
+        if alpha_val == 2.0:
+            diffusion_coeff = pde_params.get('diffusion_coeff', 1.0)
+            dx = pde_params.get('dx')
+            
+            spatial_op = self._get_spatial_operator(nx, beta, dx)
+            
+            if n == 1: # First step, assuming u_t(x,0)=0
+                spatial_deriv_term = diffusion_coeff * (spatial_op @ solution[1:-1, 0])
+                return solution[1:-1, 0] + (dt**2 / 2) * spatial_deriv_term
+            else: # Subsequent steps
+                spatial_deriv_term = diffusion_coeff * (spatial_op @ solution[1:-1, n-1])
+                return 2*solution[1:-1, n-1] - solution[1:-1, n-2] + dt**2 * spatial_deriv_term
 
         if self.method == "finite_difference":
             return self._finite_difference_step(
-                solution,
-                n,
-                x_values,
-                t_n,
-                alpha,
-                beta,
-                diffusion_coeff,
-                source_term,
-                dx,
-                dt,
-                **kwargs,
+                solution, n, x_values, t_values,
+                alpha, beta, source_term, nx, nt, pde_params
             )
         elif self.method == "spectral":
             return self._spectral_step(
-                solution,
-                n,
-                x_values,
-                t_n,
-                alpha,
-                beta,
-                diffusion_coeff,
-                source_term,
-                dx,
-                dt,
-                **kwargs,
+                solution, n, x_values, t_values,
+                alpha, beta, source_term, nx, nt, pde_params
             )
         else:
             raise ValueError(f"Unknown method: {self.method}")
 
     def _finite_difference_step(
-        self,
-        solution: np.ndarray,
-        n: int,
-        x_values: np.ndarray,
-        t_n: float,
-        alpha: Union[float, FractionalOrder],
-        beta: Union[float, FractionalOrder],
-        diffusion_coeff: float,
-        source_term: Optional[Callable],
-        dx: float,
-        dt: float,
-        **kwargs,
+        self, solution: np.ndarray, n: int, x_values: np.ndarray, t_values: np.ndarray,
+        alpha: Union[float, FractionalOrder], beta: Union[float, FractionalOrder],
+        source_term: Optional[Callable], nx: int, nt: int, pde_params: dict,
     ) -> np.ndarray:
         """
         Finite difference step.
@@ -256,109 +397,80 @@ class FractionalDiffusionSolver(FractionalPDESolver):
             solution: Solution array
             n: Current time step
             x_values: Spatial grid
-            t_n: Current time
+            t_values: Time grid
             alpha: Temporal fractional order
             beta: Spatial fractional order
-            diffusion_coeff: Diffusion coefficient
             source_term: Source term
-            dx: Spatial step size
-            dt: Temporal step size
-            **kwargs: Additional parameters
+            nx: Number of spatial grid points
+            nt: Number of temporal grid points
+            pde_params: Dictionary of parameters (diffusion_coeff, dx, dt)
 
         Returns:
             Solution at interior points
         """
-        nx = len(x_values)
+        dt = t_values[1] - t_values[0]
+        dx = x_values[1] - x_values[0]
+        diffusion_coeff = pde_params.get("diffusion_coeff", 1.0)
 
-        # Compute temporal fractional derivative
-        temporal_deriv = self._compute_temporal_derivative(
-            solution, n, alpha, dt)
+        # Build the left-hand side matrix A
+        A = self._build_spatial_matrix(nx, beta, diffusion_coeff, dx, dt, alpha, side='lhs')
 
-        # Compute spatial fractional derivative
-        self._compute_spatial_derivative(
-            solution[n - 1, :], beta, dx)
+        # Build the right-hand side vector b from previous time steps
+        b = self._compute_temporal_derivative(solution, n, alpha, dt, **pde_params)
 
-        # Source term
-        source = np.zeros(nx)
-        if source_term is not None:
-            for i, x in enumerate(x_values):
-                source[i] = source_term(x, t_n, solution[n - 1, i])
+        # Add source term if provided
+        if source_term:
+            source_at_n = np.array(
+                [source_term(xi, t_values[n]) for xi in x_values[1:-1]]
+            )
+            b += source_at_n
 
-        # Implicit scheme: solve linear system
-        A = self._build_spatial_matrix(
-            nx, beta, diffusion_coeff, dx, dt, alpha)
-        b = temporal_deriv[1:-1] + source[1:-1]  # Interior points only
-
-        # Solve linear system
+        # Solve the linear system Au_n = b
         u_interior = spsolve(A, b)
 
         return u_interior
 
     def _spectral_step(
-        self,
-        solution: np.ndarray,
-        n: int,
-        x_values: np.ndarray,
-        t_n: float,
-        alpha: Union[float, FractionalOrder],
-        beta: Union[float, FractionalOrder],
-        diffusion_coeff: float,
-        source_term: Optional[Callable],
-        dx: float,
-        dt: float,
-        **kwargs,
-    ) -> np.ndarray:
+        self, 
+        solution, n, x_values, t_values, alpha, beta, source_term, nx, nt, pde_params
+    ):
         """
-        Spectral method step.
-
-        Args:
-            solution: Solution array
-            n: Current time step
-            x_values: Spatial grid
-            t_n: Current time
-            alpha: Temporal fractional order
-            beta: Spatial fractional order
-            diffusion_coeff: Diffusion coefficient
-            source_term: Source term
-            dx: Spatial step size
-            dt: Temporal step size
-            **kwargs: Additional parameters
-
-        Returns:
-            Solution at interior points
+        Correct, efficient, diagonal spectral solve for periodic BCs.
         """
-        nx = len(x_values)
-
-        # FFT of current solution
-        u_hat = np.fft.fft(solution[n - 1, :])
-
-        # Wavenumbers
-        k = np.fft.fftfreq(nx, dx) * 2 * np.pi
-
-        # Spectral fractional derivative
-        spatial_deriv_hat = (1j * k) ** beta * u_hat
-
-        # Temporal fractional derivative
-        self._compute_temporal_derivative(solution, n, alpha, dt)
-
-        # Source term
-        source = np.zeros(nx)
+        dx = x_values[1] - x_values[0]
+        dt = t_values[1] - t_values[0]
+        D = pde_params.get("diffusion_coeff", 1.0)
+        
+        alpha_val = float(alpha.alpha) if hasattr(alpha, "alpha") else float(alpha)
+        beta_val = float(beta.alpha) if hasattr(beta, "alpha") else float(beta)
+        
+        if not (0.0 < alpha_val < 1.0):
+            raise NotImplementedError("Spectral scheme below is for 0 < alpha < 1.")
+            
+        u_prev = solution[:, n-1]
+        
+        # L1 history RHS: sum_{j=1..n} a_j * u^{n-j}
+        j = np.arange(1, n+1, dtype=float)
+        a = j**(1.0 - alpha_val) - (j - 1.0)**(1.0 - alpha_val)
+        hist = np.zeros_like(u_prev)
+        for m in range(1, n+1):
+            hist += a[m-1] * solution[:, n-m]
+            
+        scale = gamma(2.0 - alpha_val) * (dt ** alpha_val)
+        rhs = hist.copy()
+        
         if source_term is not None:
-            for i, x in enumerate(x_values):
-                source[i] = source_term(x, t_n, solution[n - 1, i])
-        source_hat = np.fft.fft(source)
-
-        # Update in spectral space
-        from scipy.special import gamma
-
-        u_hat_new = u_hat + dt**alpha / gamma(alpha + 1) * (
-            diffusion_coeff * spatial_deriv_hat + source_hat
-        )
-
-        # Transform back to physical space
-        u_new = np.real(np.fft.ifft(u_hat_new))
-
-        return u_new[1:-1]  # Interior points only
+            s = np.array([source_term(x, t_values[n], u_prev[ix]) for ix, x in enumerate(x_values)])
+            rhs += scale * s
+            
+        k = 2.0 * np.pi * np.fft.fftfreq(nx, d=dx)
+        rhs_hat = np.fft.fft(rhs)
+        
+        denom = 1.0 + scale * D * (np.abs(k) ** beta_val) # implicit-in-time diagonal
+        u_hat = rhs_hat / denom
+        u_new = np.fft.ifft(u_hat).real
+        
+        return u_new[1:-1] # interior to match caller
 
     def _compute_temporal_derivative(
         self,
@@ -366,48 +478,67 @@ class FractionalDiffusionSolver(FractionalPDESolver):
         n: int,
         alpha: Union[float, FractionalOrder],
         dt: float,
+        **kwargs,
     ) -> np.ndarray:
-        """
-        Compute temporal fractional derivative.
-
-        Args:
-            solution: Solution array
-            n: Current time step
-            alpha: Temporal fractional order
-            dt: Temporal step size
-
-        Returns:
-            Temporal derivative
-        """
+        """Computes the RHS vector of the system, based on previous time steps."""
         if isinstance(alpha, FractionalOrder):
             alpha_val = alpha.alpha
         else:
             alpha_val = alpha
 
-        # Compute coefficients for temporal derivative
-        coeffs = np.zeros(n + 1)
-        coeffs[0] = 1.0
-        for j in range(1, n + 1):
-            if self.derivative_type == "caputo":
-                coeffs[j] = (j + 1) ** alpha_val - j**alpha_val
-            elif self.derivative_type == "grunwald_letnikov":
-                coeffs[j] = coeffs[j - 1] * (1 - (alpha_val + 1) / j)
-            else:  # Riemann-Liouville
-                from scipy.special import gamma
+        # For implicit schemes, construct the historical part of the temporal derivative
+        sum_term = np.zeros_like(solution[1:-1, 0])
 
-                coeffs[j] = (
-                    (-1) ** j
-                    * gamma(alpha_val + 1)
-                    / (gamma(j + 1) * gamma(alpha_val - j + 1))
-                )
+        if 0 < alpha_val < 1:
+            # L1 scheme coefficients
+            def l1_coeffs(k):
+                if k < 0: return 0
+                return (k + 1)**(1 - alpha_val) - k**(1 - alpha_val)
 
-        # Compute temporal derivative
-        temporal_deriv = np.zeros_like(solution[n, :])
-        for j in range(n + 1):
-            temporal_deriv += coeffs[j] * \
-                (solution[n - j, :] - solution[n - j - 1, :])
+            for j in range(1, n):
+                sum_term += (l1_coeffs(n - j - 1) - l1_coeffs(n - j)) * solution[1:-1, j]
+            
+            rhs_temporal = sum_term + l1_coeffs(n - 1) * solution[1:-1, 0]
+        
+        elif 1 < alpha_val < 2:
+            from scipy.special import gamma
+            # L2-type scheme coefficients
+            def c_coeffs(k):
+                if k < 0: return 0
+                return (k + 1)**(2 - alpha_val) - k**(2 - alpha_val)
 
-        return temporal_deriv / (dt**alpha_val)
+            # Summation part of the history term
+            for j in range(1, n):
+                sum_term += (c_coeffs(n - j - 1) - c_coeffs(n - j)) * solution[1:-1, j]
+                
+            # Add the u_0 term
+            history_term = sum_term + c_coeffs(n - 1) * solution[1:-1, 0]
+            
+            # This is only part of the RHS, needs scaling and other terms.
+            # (u_n - (2u_{n-1} - u_{n-2}) - history) / scale = D*A*u_n
+            # (1/scale)u_n - D*A*u_n = (1/scale)*(2u_{n-1} - u_{n-2} + history)
+            scaling_factor = 1 / (gamma(3 - alpha_val) * (dt ** alpha_val))
+            
+            if n > 1:
+                 rhs_temporal = scaling_factor * (2*solution[1:-1, n-1] - solution[1:-1, n-2] + history_term)
+            else: # n=1
+                 rhs_temporal = scaling_factor * (2*solution[1:-1, n-1] + history_term)
+
+
+        elif alpha_val == 1.0:
+            # Crank-Nicolson for RHS
+            # A_LHS u_n = A_RHS u_{n-1}
+            # We solve A_LHS u_n = b, so b = A_RHS u_{n-1}
+            nx = kwargs['nx']
+            beta = kwargs['beta']
+            diffusion_coeff = kwargs['diffusion_coeff']
+            dx = kwargs['dx']
+            A_RHS = self._build_spatial_matrix(nx, beta, diffusion_coeff, dx, dt, alpha_val, side='rhs')
+            rhs_temporal = A_RHS @ solution[1:-1, n-1]
+        else: # Should not happen for alpha > 0
+            rhs_temporal = np.zeros_like(solution[1:-1, 0])
+            
+        return rhs_temporal
 
     def _compute_spatial_derivative(
         self, u: np.ndarray, beta: Union[float, FractionalOrder], dx: float
@@ -431,20 +562,28 @@ class FractionalDiffusionSolver(FractionalPDESolver):
         nx = len(u)
 
         # Use finite difference approximation for spatial derivative
-        if self.spatial_order == 2:
-            # Second-order central difference
-            d2u = np.zeros(nx)
-            d2u[1:-1] = (u[2:] - 2 * u[1:-1] + u[:-2]) / (dx**2)
+        spatial_deriv = np.zeros(nx)
+        coeffs = self._grunwald_letnikov_coeffs(beta_val, nx)
+        for i in range(1, nx - 1):
+            for k in range(i + 1):
+                spatial_deriv[i] += coeffs[k] * u[i - k]
+        return spatial_deriv / (dx ** beta_val)
 
-            # Apply fractional power (simplified)
-            spatial_deriv = np.sign(d2u) * np.abs(d2u) ** (beta_val / 2)
-        else:
-            # First-order approximation
-            du = np.zeros(nx)
-            du[1:-1] = (u[2:] - u[:-2]) / (2 * dx)
-            spatial_deriv = np.sign(du) * np.abs(du) ** beta_val
+    def _grunwald_letnikov_coeffs(self, order: float, n_points: int) -> np.ndarray:
+        """Compute Grünwald-Letnikov coefficients."""
+        coeffs = np.zeros(n_points, dtype=float)
+        coeffs[0] = 1.0
+        for k in range(1, n_points):
+            # c_k = (-1)^k * C(order, k) with recursive form
+            coeffs[k] = -coeffs[k - 1] * (order - (k - 1)) / k
+        return coeffs
 
-        return spatial_deriv
+    def _validate_orders(self, alpha: float, beta: float):
+        """Validate fractional orders for PDE solver."""
+        if not 0 < alpha <= 2:
+            raise ValueError(f"Temporal order alpha must be in (0, 2], but got {alpha}")
+        if not 0 < beta <= 2:
+            raise ValueError(f"Spatial order beta must be in (0, 2], but got {beta}")
 
     def _build_spatial_matrix(
         self,
@@ -454,6 +593,7 @@ class FractionalDiffusionSolver(FractionalPDESolver):
         dx: float,
         dt: float,
         alpha: Union[float, FractionalOrder],
+        side: str = 'lhs', # 'lhs' or 'rhs'
     ) -> sparse.spmatrix:
         """
         Build spatial discretization matrix.
@@ -465,6 +605,7 @@ class FractionalDiffusionSolver(FractionalPDESolver):
             dx: Spatial step size
             dt: Temporal step size
             alpha: Temporal fractional order
+            side: 'lhs' for left-hand side of the equation, 'rhs' for right-hand side
 
         Returns:
             Sparse matrix for spatial discretization
@@ -473,56 +614,65 @@ class FractionalDiffusionSolver(FractionalPDESolver):
             alpha_val = alpha.alpha
         else:
             alpha_val = alpha
-
-        if isinstance(beta, FractionalOrder):
-            beta.alpha
-        else:
-            pass
-
-        # Build tridiagonal matrix for spatial discretization
+            
+        A = self._get_spatial_operator(nx, beta, dx)
         n_interior = nx - 2
-        diagonals = []
-        offsets = []
+        
+        from scipy.special import gamma
+        I = np.eye(n_interior)
 
-        # Main diagonal
-        main_diag = np.ones(n_interior) * (
-            1 + 2 * diffusion_coeff * dt**alpha_val / (dx**2)
-        )
-        diagonals.append(main_diag)
-        offsets.append(0)
+        if 0 < alpha_val < 1:
+            # Implicit Euler for fractional derivative: (I - D*gamma(2-a)dt^a * A) u_n = history
+            factor = diffusion_coeff * gamma(2 - alpha_val) * (dt ** alpha_val)
+            final_matrix = I - factor * A
+        elif 1 < alpha_val < 2:
+            i_factor = 1 / (gamma(3 - alpha_val) * (dt ** alpha_val))
+            spatial_factor = diffusion_coeff
+            final_matrix = i_factor * I - spatial_factor * A
+        elif alpha_val == 1.0:
+            # Crank-Nicolson: (I - k/2 A) u_n = (I + k/2 A) u_{n-1}
+            k = diffusion_coeff * dt
+            if side == 'lhs':
+                final_matrix = I - (k/2) * A
+            else: # rhs
+                final_matrix = I + (k/2) * A
+        else: # alpha = 2.0 handled explicitly, this is a fallback
+            final_matrix = np.eye(n_interior)
 
-        # Sub-diagonal
-        sub_diag = np.ones(n_interior - 1) * (
-            -diffusion_coeff * dt**alpha_val / (dx**2)
-        )
-        diagonals.append(sub_diag)
-        offsets.append(-1)
+        return sparse.csr_matrix(final_matrix)
 
-        # Super-diagonal
-        super_diag = np.ones(n_interior - 1) * (
-            -diffusion_coeff * dt**alpha_val / (dx**2)
-        )
-        diagonals.append(super_diag)
-        offsets.append(1)
+    def _get_spatial_operator(
+        self, nx: int, beta: Union[float, FractionalOrder], dx: float
+    ) -> np.ndarray:
+        """Computes the matrix for the Grünwald-Letnikov spatial derivative."""
+        if isinstance(beta, FractionalOrder):
+            beta_val = beta.alpha
+        else:
+            beta_val = beta
+            
+        n_interior = nx - 2
+        A = np.zeros((n_interior, n_interior))
+        coeffs = self._grunwald_letnikov_coeffs(beta_val, nx)
 
-        # Create sparse matrix
-        A = sparse.diags(
-            diagonals, offsets, shape=(n_interior, n_interior), format="csr"
-        )
-
-        return A
+        for i in range(n_interior):
+            for j in range(n_interior):
+                k = i - j
+                if 0 <= k < len(coeffs):
+                    A[i, j] = coeffs[k]
+        
+        return A / (dx ** beta_val)
 
 
 class FractionalAdvectionSolver(FractionalPDESolver):
     """
-    Solver for fractional advection equations.
+    Solver for fractional advection-diffusion equations.
 
     Solves equations of the form:
-    ∂^α u/∂t^α + v ∂^β u/∂x^β = f(x, t, u)
-
-    where α and β are fractional orders.
+        D_t^α u = v * D_x^β u
+    
+    Currently, only integer orders (alpha=1, beta=1) are supported.
     """
-
+    
     def __init__(
         self,
         method: str = "finite_difference",
@@ -530,91 +680,105 @@ class FractionalAdvectionSolver(FractionalPDESolver):
         temporal_order: int = 1,
         derivative_type: str = "caputo",
     ):
-        """
-        Initialize fractional advection solver.
-
-        Args:
-            method: Numerical method
-            spatial_order: Order of spatial discretization
-            temporal_order: Order of temporal discretization
-            derivative_type: Type of fractional derivative
-        """
         super().__init__("advection", method, spatial_order, temporal_order)
         self.derivative_type = derivative_type.lower()
 
     def solve(
         self,
-        x_span: Tuple[float, float],
         t_span: Tuple[float, float],
+        x_span: Tuple[float, float],
         initial_condition: Callable,
-        boundary_conditions: Tuple[Callable, Callable],
-        alpha: Union[float, FractionalOrder],
-        beta: Union[float, FractionalOrder],
-        velocity: float = 1.0,
-        source_term: Optional[Callable] = None,
-        nx: int = 100,
-        nt: int = 100,
+        boundary_conditions: Dict,
+        alpha: float,
+        beta: float,
         **kwargs,
-    ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    ) -> Dict[str, np.ndarray]:
+        """Solve the fractional advection equation."""
+        if not (alpha == 1.0 and beta == 1.0):
+            raise NotImplementedError(
+                "FractionalAdvectionSolver currently only supports integer orders (alpha=1, beta=1)."
+            )
+        
+        return super().solve(
+            t_span, x_span, initial_condition, boundary_conditions, alpha, beta, **kwargs
+        )
+
+    def _build_spatial_matrix(
+        self,
+        nx: int,
+        beta: Union[float, FractionalOrder],
+        diffusion_coeff: float,
+        dx: float,
+        dt: float,
+        alpha: Union[float, FractionalOrder],
+        side: str = 'lhs', # 'lhs' or 'rhs'
+    ) -> sparse.spmatrix:
         """
-        Solve fractional advection equation.
+        Build spatial discretization matrix.
 
         Args:
-            x_span: Spatial interval (x0, xf)
-            t_span: Time interval (t0, tf)
-            initial_condition: Initial condition u(x, 0)
-            boundary_conditions: Boundary conditions (left_bc, right_bc)
-            alpha: Temporal fractional order
+            nx: Number of spatial points
             beta: Spatial fractional order
-            velocity: Advection velocity
-            source_term: Source term f(x, t, u)
-            nx: Number of spatial grid points
-            nt: Number of temporal grid points
-            **kwargs: Additional solver parameters
+            diffusion_coeff: Diffusion coefficient
+            dx: Spatial step size
+            dt: Temporal step size
+            alpha: Temporal fractional order
+            side: 'lhs' for left-hand side of the equation, 'rhs' for right-hand side
 
         Returns:
-            Tuple of (t_values, x_values, solution)
+            Sparse matrix for spatial discretization
         """
-        # Similar implementation to diffusion solver but with advection term
-        # This is a simplified implementation
-        x0, xf = x_span
-        t0, tf = t_span
+        if isinstance(alpha, FractionalOrder):
+            alpha_val = alpha.alpha
+        else:
+            alpha_val = alpha
+            
+        A = self._get_spatial_operator(nx, beta, dx)
+        n_interior = nx - 2
+        
+        from scipy.special import gamma
+        I = np.eye(n_interior)
 
-        # Spatial and temporal grids
-        x_values = np.linspace(x0, xf, nx)
-        t_values = np.linspace(t0, tf, nt)
-        dx = x_values[1] - x_values[0]
-        dt = t_values[1] - t_values[0]
+        if 0 < alpha_val < 1:
+            # Implicit Euler for fractional derivative: (I - D*gamma(2-a)dt^a * A) u_n = history
+            factor = diffusion_coeff * gamma(2 - alpha_val) * (dt ** alpha_val)
+            final_matrix = I - factor * A
+        elif 1 < alpha_val < 2:
+            i_factor = 1 / (gamma(3 - alpha_val) * (dt ** alpha_val))
+            spatial_factor = diffusion_coeff
+            final_matrix = i_factor * I - spatial_factor * A
+        elif alpha_val == 1.0:
+            # Crank-Nicolson: (I - k/2 A) u_n = (I + k/2 A) u_{n-1}
+            k = diffusion_coeff * dt
+            if side == 'lhs':
+                final_matrix = I - (k/2) * A
+            else: # rhs
+                final_matrix = I + (k/2) * A
+        else: # alpha = 2.0 handled explicitly, this is a fallback
+            final_matrix = np.eye(n_interior)
 
-        # Initialize solution array
-        solution = np.zeros((nt, nx))
+        return sparse.csr_matrix(final_matrix)
 
-        # Set initial condition
-        for i, x in enumerate(x_values):
-            solution[0, i] = initial_condition(x)
+    def _get_spatial_operator(
+        self, nx: int, beta: Union[float, FractionalOrder], dx: float
+    ) -> np.ndarray:
+        """Computes the matrix for the Grünwald-Letnikov spatial derivative."""
+        if isinstance(beta, FractionalOrder):
+            beta_val = beta.alpha
+        else:
+            beta_val = beta
+            
+        n_interior = nx - 2
+        A = np.zeros((n_interior, n_interior))
+        coeffs = self._grunwald_letnikov_coeffs(beta_val, nx)
 
-        # Set boundary conditions
-        left_bc, right_bc = boundary_conditions
-        for n in range(nt):
-            solution[n, 0] = left_bc(t_values[n])
-            solution[n, -1] = right_bc(t_values[n])
-
-        # Main time-stepping loop (simplified)
-        for n in range(1, nt):
-            t_values[n]
-
-            # Simple upwind scheme for advection
-            for i in range(1, nx - 1):
-                if velocity > 0:
-                    # Upwind
-                    solution[n, i] = solution[n - 1, i] - velocity * dt / \
-                        dx * (solution[n - 1, i] - solution[n - 1, i - 1])
-                else:
-                    # Downwind
-                    solution[n, i] = solution[n - 1, i] - velocity * dt / \
-                        dx * (solution[n - 1, i + 1] - solution[n - 1, i])
-
-        return t_values, x_values, solution
+        for i in range(n_interior):
+            for j in range(n_interior):
+                k = i - j
+                if 0 <= k < len(coeffs):
+                    A[i, j] = coeffs[k]
+        
+        return A / (dx ** beta_val)
 
 
 class FractionalReactionDiffusionSolver(FractionalPDESolver):

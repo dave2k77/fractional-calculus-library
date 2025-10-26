@@ -5,24 +5,27 @@ Machine Learning Integration Demo
 This script demonstrates the comprehensive ML integration system for hpfracc,
 including fractional neural networks, model registry, and development vs.
 production workflow management.
+
+NOTE: The MLOps features in this demo are currently under development.
+This example is a placeholder for future functionality.
 """
 
-from hpfracc.ml import (
-    FractionalNeuralNetwork,
-    FractionalAttention,
-    FractionalMSELoss,
-    FractionalAdam,
-    ModelRegistry,
-    DevelopmentWorkflow,
-    ProductionWorkflow,
-    ModelValidator,
-    FractionalConv1D,
-    FractionalConv2D,
-    FractionalLSTM,
-    FractionalTransformer,
-    FractionalPooling,
-    FractionalBatchNorm1d
-)
+# from hpfracc.ml import (
+#     FractionalNeuralNetwork,
+#     FractionalAttention,
+#     FractionalMSELoss,
+#     FractionalAdam,
+#     ModelRegistry,
+#     DevelopmentWorkflow,
+#     ProductionWorkflow,
+#     ModelValidator,
+#     FractionalConv1D,
+#     FractionalConv2D,
+#     FractionalLSTM,
+#     FractionalTransformer,
+#     FractionalPooling,
+#     FractionalBatchNorm1d
+# )
 import sys
 import os
 import logging
@@ -466,68 +469,69 @@ def main():
     """Main demonstration function"""
     print("🚀 Starting hpfracc ML Integration Demo")
     print("=" * 50)
+    print("NOTE: The MLOps features are under development. This demo is a placeholder.")
 
-    # Setup logging
-    setup_logging()
+    # # Setup logging
+    # setup_logging()
 
-    # Set random seeds for reproducibility
-    torch.manual_seed(42)
-    np.random.seed(42)
+    # # Set random seeds for reproducibility
+    # torch.manual_seed(42)
+    # np.random.seed(42)
 
-    try:
-        # 1. Create sample data
-        train_data, val_data = create_sample_data()
+    # try:
+    #     # 1. Create sample data
+    #     train_data, val_data = create_sample_data()
 
-        # 2. Create and train fractional model
-        model = create_fractional_model()
-        train_losses, val_losses = train_model(model, train_data, val_data)
+    #     # 2. Create and train fractional model
+    #     model = create_fractional_model()
+    #     train_losses, val_losses = train_model(model, train_data, val_data)
 
-        # 3. Evaluate model
-        performance_metrics = evaluate_model(model, val_data)
+    #     # 3. Evaluate model
+    #     performance_metrics = evaluate_model(model, val_data)
 
-        # 4. Demonstrate model registry
-        registry, model_id = demonstrate_model_registry(
-            model, performance_metrics)
+    #     # 4. Demonstrate model registry
+    #     registry, model_id = demonstrate_model_registry(
+    #         model, performance_metrics)
 
-        # 5. Demonstrate development workflow
-        demonstrate_development_workflow(registry, model_id, val_data)
+    #     # 5. Demonstrate development workflow
+    #     demonstrate_development_workflow(registry, model_id, val_data)
 
-        # 6. Demonstrate production workflow
-        prod_workflow = ProductionWorkflow(registry, ModelValidator())
-        promotion_results = demonstrate_production_workflow(
-            registry, model_id, val_data)
+    #     # 6. Demonstrate production workflow
+    #     prod_workflow = ProductionWorkflow(registry, ModelValidator())
+    #     promotion_results = demonstrate_production_workflow(
+    #         registry, model_id, val_data)
 
-        # 7. Demonstrate model monitoring
-        if promotion_results['promoted']:
-            demonstrate_model_monitoring(prod_workflow)
+    #     # 7. Demonstrate model monitoring
+    #     if promotion_results['promoted']:
+    #         demonstrate_model_monitoring(prod_workflow)
 
-        # 8. Demonstrate fractional attention
-        demonstrate_fractional_attention()
+    #     # 8. Demonstrate fractional attention
+    #     demonstrate_fractional_attention()
 
-        # 9. Demonstrate fractional layers
-        demonstrate_fractional_layers()
+    #     # 9. Demonstrate fractional layers
+    #     demonstrate_fractional_layers()
 
-        print("\n" + "=" * 50)
-        print("🎉 ML Integration Demo Completed Successfully!")
-        print("\n📋 Summary of Features Demonstrated:")
-        print("   ✅ Fractional Neural Networks")
-        print("   ✅ Model Registry and Versioning")
-        print("   ✅ Development vs. Production Workflow")
-        print("   ✅ Quality Gates and Validation")
-        print("   ✅ Production Monitoring and Alerts")
-        print("   ✅ Fractional Attention Mechanisms")
-        print("   ✅ Fractional Convolutional Layers")
-        print("   ✅ Fractional LSTM Layers")
-        print("   ✅ Fractional Loss Functions")
-        print("   ✅ Fractional Optimizers")
+    #     print("\n" + "=" * 50)
+    #     print("🎉 ML Integration Demo Completed Successfully!")
+    #     print("\n📋 Summary of Features Demonstrated:")
+    #     print("   ✅ Fractional Neural Networks")
+    #     print("   ✅ Model Registry and Versioning")
+    #     print("   ✅ Development vs. Production Workflow")
+    #     print("   ✅ Quality Gates and Validation")
+    #     print("   ✅ Production Monitoring and Alerts")
+    #     print("   ✅ Fractional Attention Mechanisms")
+    #     print("   ✅ Fractional Convolutional Layers")
+    #     print("   ✅ Fractional LSTM Layers")
+    #     print("   ✅ Fractional Loss Functions")
+    #     print("   ✅ Fractional Optimizers")
 
-        print(f"\n📁 Model files saved to: {Path('models/').absolute()}")
-        print(f"📊 Registry database: {Path('models/registry.db').absolute()}")
+    #     print(f"\n📁 Model files saved to: {Path('models/').absolute()}")
+    #     print(f"\n📊 Registry database: {Path('models/registry.db').absolute()}")
 
-    except Exception as e:
-        print(f"❌ Error during demo: {e}")
-        logging.error(f"Demo failed: {e}", exc_info=True)
-        raise
+    # except Exception as e:
+    #     print(f"❌ Error during demo: {e}")
+    #     logging.error(f"Demo failed: {e}", exc_info=True)
+    #     raise
 
 
 if __name__ == "__main__":

@@ -8,8 +8,7 @@ import pytest
 import numpy as np
 
 from hpfracc.solvers import (
-    FractionalODESolver,
-    AdaptiveFractionalODESolver,
+    FixedStepODESolver,
     solve_fractional_ode,
     FractionalPDESolver,
     solve_fractional_pde,
@@ -21,7 +20,7 @@ class TestFractionalODESolver:
 
     def test_initialization_default(self):
         """Test solver initialization with default parameters."""
-        solver = FractionalODESolver()
+        solver = FixedStepODESolver()
         assert solver.derivative_type == "caputo"
         assert solver.method == "predictor_corrector"
         assert solver.adaptive is True
@@ -29,7 +28,7 @@ class TestFractionalODESolver:
 
     def test_initialization_custom_params(self):
         """Test solver initialization with custom parameters."""
-        solver = FractionalODESolver(
+        solver = FixedStepODESolver(
             derivative_type="riemann_liouville",
             method="euler",
             adaptive=False,
@@ -43,16 +42,16 @@ class TestFractionalODESolver:
     def test_invalid_derivative_type(self):
         """Test that invalid derivative type raises error."""
         with pytest.raises(ValueError, match="Derivative type must be"):
-            FractionalODESolver(derivative_type="invalid")
+            FixedStepODESolver(derivative_type="invalid")
 
     def test_invalid_method(self):
         """Test that invalid method raises error."""
         with pytest.raises(ValueError, match="Method must be"):
-            FractionalODESolver(method="invalid_method")
+            FixedStepODESolver(method="invalid_method")
 
     def test_solve_simple_ode(self):
         """Test solving a simple fractional ODE: D^α y = -y"""
-        solver = FractionalODESolver(method="euler", adaptive=False)
+        solver = FixedStepODESolver(method="euler", adaptive=False)
         
         # D^0.5 y = -y with y(0) = 1
         def f(t, y):
@@ -73,7 +72,7 @@ class TestFractionalODESolver:
 
     def test_solve_with_array_initial_condition(self):
         """Test solving ODE with array initial condition."""
-        solver = FractionalODESolver(method="euler", adaptive=False)
+        solver = FixedStepODESolver(method="euler", adaptive=False)
         
         def f(t, y):
             return -y  # Linear decay
@@ -91,7 +90,7 @@ class TestFractionalODESolver:
 
     def test_solve_predictor_corrector_method(self):
         """Test solver with predictor-corrector method."""
-        solver = FractionalODESolver(method="predictor_corrector", adaptive=False)
+        solver = FixedStepODESolver(method="predictor_corrector", adaptive=False)
         
         def f(t, y):
             return y  # Exponential growth
@@ -114,7 +113,7 @@ class TestAdaptiveFractionalODESolver:
 
     def test_initialization(self):
         """Test adaptive solver initialization."""
-        solver = AdaptiveFractionalODESolver(
+        solver = AdaptiveFixedStepODESolver(
             min_h=1e-6,
             max_h=0.1,
             tol=1e-7
@@ -126,7 +125,7 @@ class TestAdaptiveFractionalODESolver:
 
     def test_solve_with_adaptive_steps(self):
         """Test adaptive solver adjusts step size."""
-        solver = AdaptiveFractionalODESolver(tol=1e-6)
+        solver = AdaptiveFixedStepODESolver(tol=1e-6)
         
         def f(t, y):
             return -y
@@ -225,7 +224,7 @@ class TestEdgeCases:
 
     def test_zero_initial_condition(self):
         """Test with zero initial condition."""
-        solver = FractionalODESolver(method="euler", adaptive=False)
+        solver = FixedStepODESolver(method="euler", adaptive=False)
         
         def f(t, y):
             return 0
@@ -241,7 +240,7 @@ class TestEdgeCases:
 
     def test_fractional_order_one(self):
         """Test with α = 1 (standard derivative)."""
-        solver = FractionalODESolver(method="euler", adaptive=False)
+        solver = FixedStepODESolver(method="euler", adaptive=False)
         
         def f(t, y):
             return y
@@ -260,7 +259,7 @@ class TestEdgeCases:
 
     def test_very_small_step_size(self):
         """Test with very small step size."""
-        solver = FractionalODESolver(method="euler", adaptive=False)
+        solver = FixedStepODESolver(method="euler", adaptive=False)
         
         def f(t, y):
             return -y

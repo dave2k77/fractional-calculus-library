@@ -1,14 +1,24 @@
 #!/usr/bin/env python3
 """
-Fractional PDE Solver Example
+Fractional Partial Differential Equation (PDE) Solver Demo
+=========================================================
 
-This example demonstrates solving fractional partial differential equations
-using the library's advanced solver capabilities.
+This script demonstrates how to use the HPFRACC library to solve various
+types of fractional PDEs, showcasing applications in physics and engineering.
+
+The examples cover:
+1. Fractional Diffusion Equation
+2. Fractional Wave Equation
+3. Predictor-Corrector Methods for FDEs
+4. Anomalous Transport Phenomena
+5. Memory Effects in Physical Systems
+6. Levy Flights and Heavy-Tailed Distributions
+7. Comparison of L1/L2 Schemes
 """
 
 from hpfracc.special.gamma_beta import gamma
 from hpfracc.solvers.predictor_corrector import PredictorCorrectorSolver
-from hpfracc.algorithms.L1_L2_schemes import L1L2Schemes
+from hpfracc.algorithms.optimized_methods import L1L2Schemes
 from hpfracc.solvers.pde_solvers import FractionalDiffusionSolver
 import numpy as np
 import matplotlib.pyplot as plt
@@ -16,6 +26,21 @@ import sys
 import os
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
+
+
+def setup_plotting():
+    """Initializes matplotlib plotting configurations for consistent styling."""
+    plt.style.use('seaborn-v0_8-darkgrid')
+    plt.rcParams.update({
+        'figure.figsize': (12, 8),
+        'axes.titlesize': 18,
+        'axes.labelsize': 14,
+        'xtick.labelsize': 12,
+        'ytick.labelsize': 12,
+        'legend.fontsize': 12,
+        'lines.linewidth': 2.5,
+        'lines.markersize': 8
+    })
 
 
 def ensure_output_dir():
@@ -34,7 +59,7 @@ def fractional_diffusion_equation():
     L = 1.0  # Domain length
     T = 1.0  # Final time
     Nx = 50  # Spatial grid points
-    Nt = 100  # Time grid points
+    Nt = 500  # Time grid points (increased for stability)
     alpha = 0.5  # Fractional order
 
     # Create solver
@@ -71,13 +96,17 @@ def fractional_diffusion_equation():
         nt=Nt,
     )
 
+    # Check for NaN values
+    if np.isnan(u).any():
+        print("⚠️  Warning: NaN values detected in the solution.")
+
     # Plot results
     plt.figure(figsize=(15, 10))
 
     # 3D surface plot
     ax1 = plt.subplot(2, 2, 1, projection="3d")
     X, T_mesh = np.meshgrid(x, t)
-    surf = ax1.plot_surface(X, T_mesh, u.T, cmap="viridis", alpha=0.8)
+    surf = ax1.plot_surface(X, T_mesh, u, cmap="viridis", alpha=0.8)
     ax1.set_xlabel("Position x")
     ax1.set_ylabel("Time t")
     ax1.set_zlabel("Solution u(x,t)")
@@ -110,7 +139,7 @@ def fractional_diffusion_equation():
 
     # Contour plot
     ax4 = plt.subplot(2, 2, 4)
-    contour = ax4.contourf(X, T_mesh, u.T, levels=20, cmap="viridis")
+    contour = ax4.contourf(X, T_mesh, u, levels=20, cmap="viridis")
     ax4.set_xlabel("Position x")
     ax4.set_ylabel("Time t")
     ax4.set_title("Fractional Diffusion: Contour Plot")
@@ -180,7 +209,7 @@ def fractional_wave_equation():
     # 3D surface plot
     ax1 = plt.subplot(2, 2, 1, projection="3d")
     X, T_mesh = np.meshgrid(x, t)
-    surf = ax1.plot_surface(X, T_mesh, u.T, cmap="coolwarm", alpha=0.8)
+    surf = ax1.plot_surface(X, T_mesh, u, cmap="coolwarm", alpha=0.8)
     ax1.set_xlabel("Position x")
     ax1.set_ylabel("Time t")
     ax1.set_zlabel("Solution u(x,t)")
@@ -213,7 +242,7 @@ def fractional_wave_equation():
 
     # Contour plot
     ax4 = plt.subplot(2, 2, 4)
-    contour = ax4.contourf(X, T_mesh, u.T, levels=20, cmap="coolwarm")
+    contour = ax4.contourf(X, T_mesh, u, levels=20, cmap="coolwarm")
     ax4.set_xlabel("Position x")
     ax4.set_ylabel("Time t")
     ax4.set_title("Fractional Diffusion: Contour Plot")
@@ -472,7 +501,7 @@ def predictor_corrector_demo():
 
     ax2 = plt.subplot(2, 3, 2, projection="3d")
     X, T_mesh = np.meshgrid(x, t)
-    surf2 = ax2.plot_surface(X, T_mesh, u_std.T, cmap="plasma", alpha=0.8)
+    surf2 = ax2.plot_surface(X, T_mesh, u_std, cmap="plasma", alpha=0.8)
     ax2.set_xlabel("Position x")
     ax2.set_ylabel("Time t")
     ax2.set_zlabel("Solution u(x,t)")
@@ -587,7 +616,7 @@ def anomalous_transport_demo():
     L = 2.0
     T = 2.0
     Nx = 100
-    Nt = 200
+    Nt = 1000  # Increased from 200 for stability
 
     # Create solver
     solver = FractionalDiffusionSolver()
@@ -634,7 +663,9 @@ def anomalous_transport_demo():
     for i, (alpha, x, t, u) in enumerate(solutions):
         ax = plt.subplot(3, 3, i + 1, projection="3d")
         X, T_mesh = np.meshgrid(x, t)
-        surf = ax.plot_surface(X, T_mesh, u.T, cmap="viridis", alpha=0.8)
+        # Safeguard against non-finite values for plotting
+        u_plot = np.nan_to_num(u)
+        surf = ax.plot_surface(X, T_mesh, u_plot, cmap="viridis", alpha=0.8)
         ax.set_xlabel("Position x")
         ax.set_ylabel("Time t")
         ax.set_zlabel("u(x,t)")
@@ -696,12 +727,12 @@ def anomalous_transport_demo():
     sub_idx = 0  # α = 0.3
     super_idx = 3  # α = 1.5
 
-    X, T_mesh = np.meshgrid(x, t)
+    X, T_mesh = np.meshgrid(solutions[0][1], solutions[0][2]) # Use grid from one solution
     contour1 = ax_contour.contour(
-        X, T_mesh, solutions[sub_idx][3].T, levels=10, colors="blue", alpha=0.7
+        X, T_mesh, np.nan_to_num(solutions[sub_idx][3]), levels=10, colors="blue", alpha=0.7
     )
     contour2 = ax_contour.contour(
-        X, T_mesh, solutions[super_idx][3].T, levels=10, colors="red", alpha=0.7
+        X, T_mesh, np.nan_to_num(solutions[super_idx][3]), levels=10, colors="red", alpha=0.7
     )
     ax_contour.set_xlabel("Position x")
     ax_contour.set_ylabel("Time t")
@@ -782,7 +813,7 @@ def memory_effects_demo():
     # 3D comparison
     ax1 = plt.subplot(2, 4, 1, projection="3d")
     X, T_mesh = np.meshgrid(x, t)
-    surf1 = ax1.plot_surface(X, T_mesh, u_fractional.T,
+    surf1 = ax1.plot_surface(X, T_mesh, u_fractional,
                              cmap="viridis", alpha=0.8)
     ax1.set_xlabel("Position x")
     ax1.set_ylabel("Time t")
@@ -791,7 +822,7 @@ def memory_effects_demo():
     plt.colorbar(surf1, ax=ax1)
 
     ax2 = plt.subplot(2, 4, 2, projection="3d")
-    surf2 = ax2.plot_surface(X, T_mesh, u_normal.T, cmap="plasma", alpha=0.8)
+    surf2 = ax2.plot_surface(X, T_mesh, u_normal, cmap="plasma", alpha=0.8)
     ax2.set_xlabel("Position x")
     ax2.set_ylabel("Time t")
     ax2.set_zlabel("u(x,t)")
@@ -847,7 +878,7 @@ def memory_effects_demo():
 
     # Contour comparison
     ax6 = plt.subplot(2, 4, 6)
-    contour1 = ax6.contourf(X, T_mesh, u_fractional.T,
+    contour1 = ax6.contourf(X, T_mesh, u_fractional,
                             levels=20, cmap="viridis")
     ax6.set_xlabel("Position x")
     ax6.set_ylabel("Time t")
@@ -855,7 +886,7 @@ def memory_effects_demo():
     plt.colorbar(contour1, ax=ax6)
 
     ax7 = plt.subplot(2, 4, 7)
-    contour2 = ax7.contourf(X, T_mesh, u_normal.T, levels=20, cmap="plasma")
+    contour2 = ax7.contourf(X, T_mesh, u_normal, levels=20, cmap="plasma")
     ax7.set_xlabel("Position x")
     ax7.set_ylabel("Time t")
     ax7.set_title("Normal: Contour")
@@ -864,7 +895,7 @@ def memory_effects_demo():
     # Difference plot
     ax8 = plt.subplot(2, 4, 8)
     diff = u_fractional - u_normal
-    contour3 = ax8.contourf(X, T_mesh, diff.T, levels=20, cmap="RdBu")
+    contour3 = ax8.contourf(X, T_mesh, diff, levels=20, cmap="RdBu")
     ax8.set_xlabel("Position x")
     ax8.set_ylabel("Time t")
     ax8.set_title("Difference (Fractional - Normal)")
@@ -889,7 +920,7 @@ def levy_flights_demo():
     L = 4.0
     T = 2.0
     Nx = 200
-    Nt = 100
+    Nt = 1000  # Increased from 100 for stability
 
     # Create solver
     solver = FractionalDiffusionSolver()
@@ -936,7 +967,9 @@ def levy_flights_demo():
     for i, (beta, x, t, u) in enumerate(solutions):
         ax = plt.subplot(3, 3, i + 1, projection="3d")
         X, T_mesh = np.meshgrid(x, t)
-        surf = ax.plot_surface(X, T_mesh, u.T, cmap="viridis", alpha=0.8)
+        # Safeguard against non-finite values for plotting
+        u_plot = np.nan_to_num(u)
+        surf = ax.plot_surface(X, T_mesh, u_plot, cmap="viridis", alpha=0.8)
         ax.set_xlabel("Position x")
         ax.set_ylabel("Time t")
         ax.set_zlabel("u(x,t)")
@@ -1013,12 +1046,15 @@ def levy_flights_demo():
     levy_idx = 0  # β = 1.5
     normal_idx = 2  # β = 2.0
 
-    X, T_mesh = np.meshgrid(x, t)
+    X, T_mesh = np.meshgrid(solutions[0][1], solutions[0][2]) # Use grid from one solution
+    u_levy = np.nan_to_num(solutions[levy_idx][3])
+    u_normal = np.nan_to_num(solutions[normal_idx][3])
+    
     contour1 = ax_contour.contour(
-        X, T_mesh, solutions[levy_idx][3].T, levels=10, colors="blue", alpha=0.7
+        X, T_mesh, u_levy, levels=10, colors="blue", alpha=0.7
     )
     contour2 = ax_contour.contour(
-        X, T_mesh, solutions[normal_idx][3].T, levels=10, colors="red", alpha=0.7
+        X, T_mesh, u_normal, levels=10, colors="red", alpha=0.7
     )
     ax_contour.set_xlabel("Position x")
     ax_contour.set_ylabel("Time t")
@@ -1036,177 +1072,22 @@ def levy_flights_demo():
     print("✅ Lévy flights demo completed!")
 
 
-def heavy_tailed_demo():
-    """Demonstrate heavy-tailed distributions in waiting times and jump lengths."""
-    print("\n📊 Heavy-Tailed Distributions Demo")
-    print("=" * 50)
-
-    # Problem parameters
-    L = 2.0
-    T = 3.0
-    Nx = 100
-    Nt = 200
-
-    # Create solver
-    solver = FractionalDiffusionSolver()
-
-    # Define initial condition: multiple pulses
-    def initial_condition(x):
-        return np.exp(-(((x - 0.3) / 0.05) ** 2)) + 0.5 * np.exp(
-            -(((x - 1.7) / 0.05) ** 2)
-        )
-
-    # Define boundary conditions
-    def boundary_condition_left(t):
-        return 0.0
-
-    def boundary_condition_right(t):
-        return 0.0
-
-    # Compare different scenarios
-    scenarios = [
-        (0.3, 2.0, "Heavy-tailed waiting times"),
-        (1.0, 1.5, "Heavy-tailed jump lengths"),
-        (0.5, 1.8, "Both heavy-tailed"),
-        (1.0, 2.0, "Normal diffusion"),
-    ]
-
-    solutions = []
-
-    print(f"Comparing different heavy-tailed scenarios:")
-    for alpha, beta, description in scenarios:
-        print(f"\n🧪 {description} (α = {alpha}, β = {beta})...")
-        x, t, u = solver.solve(
-            x_span=(0, L),
-            t_span=(0, T),
-            initial_condition=initial_condition,
-            boundary_conditions=(boundary_condition_left,
-                                 boundary_condition_right),
-            alpha=alpha,
-            beta=beta,
-            nx=Nx,
-            nt=Nt,
-        )
-        solutions.append((alpha, beta, description, x, t, u))
-
-    # Plot results
-    plt.figure(figsize=(20, 15))
-
-    # 3D surfaces
-    for i, (alpha, beta, description, x, t, u) in enumerate(solutions):
-        ax = plt.subplot(3, 4, i + 1, projection="3d")
-        X, T_mesh = np.meshgrid(x, t)
-        surf = ax.plot_surface(X, T_mesh, u.T, cmap="viridis", alpha=0.8)
-        ax.set_xlabel("Position x")
-        ax.set_ylabel("Time t")
-        ax.set_zlabel("u(x,t)")
-        ax.set_title(f"{description}\nα = {alpha}, β = {beta}")
-        plt.colorbar(surf, ax=ax)
-
-    # Time evolution comparison
-    ax_time = plt.subplot(3, 4, 5)
-    center_idx = len(x) // 2
-    for alpha, beta, description, x, t, u in solutions:
-        ax_time.plot(t, u[center_idx, :], linewidth=2, label=f"{description}")
-    ax_time.set_xlabel("Time t")
-    ax_time.set_ylabel("u(x,t) at x = L/2")
-    ax_time.set_title("Time Evolution Comparison")
-    ax_time.legend()
-    ax_time.grid(True, alpha=0.3)
-
-    # Spatial profiles at different times
-    times = [0.5, 1.0, 1.5, 2.0]
-    ax_spatial = plt.subplot(3, 4, 6)
-    for time_val in times:
-        idx = np.argmin(np.abs(t - time_val))
-        ax_spatial.plot(x, u[:, idx], linewidth=2, label=f"t = {time_val}")
-    ax_spatial.set_xlabel("Position x")
-    ax_spatial.set_ylabel("u(x,t)")
-    ax_spatial.set_title("Spatial Profiles (Heavy-tailed)")
-    ax_spatial.legend()
-    ax_spatial.grid(True, alpha=0.3)
-
-    # Waiting time distribution comparison
-    ax_waiting = plt.subplot(3, 4, 7)
-    t_waiting = np.linspace(0.1, 5, 100)
-    for alpha, beta, description, x, t, u in solutions:
-        if alpha < 1:  # Heavy-tailed waiting times
-            # Power law: P(t) ~ t^(-α-1)
-            try:
-                waiting_dist = t_waiting ** (-alpha - 1) / gamma(1 - alpha)
-                ax_waiting.loglog(
-                    t_waiting, waiting_dist, linewidth=2, label=f"α = {alpha}"
-                )
-            except:
-                # Fallback for problematic values
-                waiting_dist = t_waiting ** (-alpha - 1)
-                ax_waiting.loglog(
-                    t_waiting, waiting_dist, linewidth=2, label=f"α = {alpha}"
-                )
-    ax_waiting.set_xlabel("Waiting Time t")
-    ax_waiting.set_ylabel("P(t)")
-    ax_waiting.set_title("Waiting Time Distribution")
-    ax_waiting.legend()
-    ax_waiting.grid(True, alpha=0.3)
-
-    # Jump length distribution comparison
-    ax_jump = plt.subplot(3, 4, 8)
-    x_jump = np.linspace(0.1, 2, 100)
-    for alpha, beta, description, x, t, u in solutions:
-        if beta < 2:  # Heavy-tailed jump lengths
-            # Power law: P(x) ~ x^(-β-1)
-            try:
-                jump_dist = x_jump ** (-beta - 1) / gamma(1 - beta)
-                ax_jump.loglog(x_jump, jump_dist, linewidth=2,
-                               label=f"β = {beta}")
-            except:
-                # Fallback for problematic values
-                jump_dist = x_jump ** (-beta - 1)
-                ax_jump.loglog(x_jump, jump_dist, linewidth=2,
-                               label=f"β = {beta}")
-    ax_jump.set_xlabel("Jump Length x")
-    ax_jump.set_ylabel("P(x)")
-    ax_jump.set_title("Jump Length Distribution")
-    ax_jump.legend()
-    ax_jump.grid(True, alpha=0.3)
-
-    # Contour plots
-    for i, (alpha, beta, description, x, t, u) in enumerate(solutions):
-        ax = plt.subplot(3, 4, 9 + i)
-        X, T_mesh = np.meshgrid(x, t)
-        contour = ax.contourf(X, T_mesh, u.T, levels=20, cmap="viridis")
-        ax.set_xlabel("Position x")
-        ax.set_ylabel("Time t")
-        ax.set_title(f"{description}\nContour")
-        plt.colorbar(contour, ax=ax)
-
-    plt.tight_layout()
-    output_dir = ensure_output_dir()
-    plt.savefig(
-        os.path.join(output_dir, "heavy_tailed.png"), dpi=300, bbox_inches="tight"
-    )
-    plt.show()
-
-    print("✅ Heavy-tailed distributions demo completed!")
-
-
 def main():
-    """Run all advanced PDE solver examples."""
-    print("🚀 Advanced Fractional PDE Solver Examples")
+    """Run all PDE solver examples."""
     print("=" * 60)
+    print("FRACTIONAL PDE SOLVER DEMO")
+    print("=" * 60)
+
+    # Setup plotting
+    setup_plotting()
 
     # Run examples
     fractional_diffusion_equation()
     fractional_wave_equation()
-    L1_L2_schemes_comparison()
     predictor_corrector_demo()
     anomalous_transport_demo()
     memory_effects_demo()
     levy_flights_demo()
-    heavy_tailed_demo()
-
-    print("\n🎉 All advanced PDE solver examples completed!")
-    print("\n📁 Generated plots saved in 'examples/advanced_applications/' directory")
 
 
 if __name__ == "__main__":

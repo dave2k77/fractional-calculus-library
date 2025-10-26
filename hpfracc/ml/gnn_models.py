@@ -62,7 +62,8 @@ class BaseFractionalGNN(ABC):
             self,
             x: Any,
             edge_index: Any,
-            batch: Optional[Any] = None) -> Any:
+            batch: Optional[Any] = None,
+            **kwargs) -> Any:
         """Forward pass through the network"""
 
     def get_backend_info(self) -> Dict[str, Any]:
@@ -79,9 +80,10 @@ class BaseFractionalGNN(ABC):
             self,
             x: Any,
             edge_index: Any,
-            batch: Optional[Any] = None) -> Any:
+            batch: Optional[Any] = None,
+            **kwargs) -> Any:
         """Make models callable like torch modules"""
-        return self.forward(x, edge_index, batch)
+        return self.forward(x, edge_index, batch, **kwargs)
 
     def parameters(self) -> List[Any]:
         """Collect learnable parameters from sub-layers for testing/optimizers"""
@@ -171,7 +173,8 @@ class FractionalGCN(BaseFractionalGNN):
             self,
             x: Any,
             edge_index: Any,
-            batch: Optional[Any] = None) -> Any:
+            batch: Optional[Any] = None,
+            **kwargs) -> Any:
         """
         Forward pass through the fractional GCN
 
@@ -185,7 +188,7 @@ class FractionalGCN(BaseFractionalGNN):
         """
         # Pass through all layers
         for layer in self.layers:
-            x = layer.forward(x, edge_index)
+            x = layer.forward(x, edge_index, **kwargs)
 
         return x
 
@@ -279,7 +282,8 @@ class FractionalGAT(BaseFractionalGNN):
             self,
             x: Any,
             edge_index: Any,
-            batch: Optional[Any] = None) -> Any:
+            batch: Optional[Any] = None,
+            **kwargs) -> Any:
         """
         Forward pass through the fractional GAT
 
@@ -293,7 +297,7 @@ class FractionalGAT(BaseFractionalGNN):
         """
         # Pass through all layers
         for layer in self.layers:
-            x = layer.forward(x, edge_index)
+            x = layer.forward(x, edge_index, **kwargs)
 
         return x
 
@@ -384,7 +388,8 @@ class FractionalGraphSAGE(BaseFractionalGNN):
             self,
             x: Any,
             edge_index: Any,
-            batch: Optional[Any] = None) -> Any:
+            batch: Optional[Any] = None,
+            **kwargs) -> Any:
         """
         Forward pass through the fractional GraphSAGE
 
@@ -398,7 +403,7 @@ class FractionalGraphSAGE(BaseFractionalGNN):
         """
         # Pass through all layers
         for layer in self.layers:
-            x = layer.forward(x, edge_index)
+            x = layer.forward(x, edge_index, **kwargs)
 
         return x
 
@@ -507,7 +512,8 @@ class FractionalGraphUNet(BaseFractionalGNN):
             self,
             x: Any,
             edge_index: Any,
-            batch: Optional[Any] = None) -> Any:
+            batch: Optional[Any] = None,
+            **kwargs) -> Any:
         """
         Forward pass through the fractional Graph U-Net
 
@@ -526,14 +532,14 @@ class FractionalGraphUNet(BaseFractionalGNN):
         current_batch = batch
 
         for i, layer in enumerate(self.encoder_layers):
-            current_x = layer.forward(current_x, current_edge_index)
+            current_x = layer.forward(current_x, current_edge_index, **kwargs)
             encoder_outputs.append(current_x)
 
             # Apply pooling (except for the last layer and if pooling layers
             # exist)
             if i < len(self.pooling_layers) and len(self.pooling_layers) > 0:
                 current_x, current_edge_index, current_batch = self.pooling_layers[i].forward(
-                    current_x, current_edge_index, current_batch)
+                    current_x, current_edge_index, current_batch, **kwargs)
 
         # Decoder path with skip connections (only if decoder layers exist)
         if len(self.decoder_layers) > 0:
@@ -577,10 +583,10 @@ class FractionalGraphUNet(BaseFractionalGNN):
                 current_x = self.tensor_ops.cat([current_x, skip_x], dim=-1)
 
                 # Pass through decoder layer
-                current_x = layer.forward(current_x, current_edge_index)
+                current_x = layer.forward(current_x, current_edge_index, **kwargs)
 
         # Output layer
-        output = self.output_layer.forward(current_x, current_edge_index)
+        output = self.output_layer.forward(current_x, current_edge_index, **kwargs)
 
         return output
 

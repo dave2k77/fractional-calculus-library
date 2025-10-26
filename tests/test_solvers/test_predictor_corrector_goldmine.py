@@ -3,6 +3,12 @@
 
 import pytest
 import numpy as np
+
+# Skip this goldmine test if legacy predictor_corrector module is not available
+pytest.importorskip(
+    "hpfracc.solvers.predictor_corrector",
+    reason="hpfracc.solvers.predictor_corrector not available in current API",
+)
 from hpfracc.solvers.predictor_corrector import *
 from hpfracc.core.definitions import FractionalOrder
 

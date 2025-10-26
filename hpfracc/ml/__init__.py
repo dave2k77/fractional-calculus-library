@@ -70,8 +70,8 @@ from .losses import (
     FractionalCombinedLoss,
 )
 
-# Optimizers (using actual class names from optimizers.py)
-from .optimizers import (
+# Optimizers (using actual class names from optimized_optimizers.py)
+from .optimized_optimizers import (
     OptimizedBaseOptimizer as FractionalOptimizer,
     OptimizedFractionalAdam as FractionalAdam,
     OptimizedFractionalSGD as FractionalSGD,

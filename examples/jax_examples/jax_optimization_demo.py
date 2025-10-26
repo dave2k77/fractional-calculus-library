@@ -6,16 +6,15 @@ This example demonstrates the use of JAX for GPU acceleration, automatic
 differentiation, and vectorization in fractional calculus computations.
 """
 
-from hpfracc.algorithms.gpu_optimized_methods import (
-    JAXAutomaticDifferentiation,
-    gpu_optimized_caputo,
-    gpu_optimized_riemann_liouville,
-    gpu_optimized_grunwald_letnikov,
-    optimize_fractional_derivative_jax,
-    vectorize_fractional_derivatives,
+from hpfracc.algorithms.optimized_methods import (
+    _caputo_jax,
+    _riemann_liouville_jax,
+    _grunwald_letnikov_jax,
 )
 import numpy as np
+import jax
 import jax.numpy as jnp
+from jax import grad, jacrev, hessian, vmap
 import matplotlib.pyplot as plt
 import time
 import sys
@@ -38,9 +37,9 @@ def gpu_acceleration_demo():
 
     # Test different derivative methods
     methods = {
-        "Caputo": gpu_optimized_caputo,
-        "Riemann-Liouville": gpu_optimized_riemann_liouville,
-        "Grünwald-Letnikov": gpu_optimized_grunwald_letnikov,
+        "Caputo": _caputo_jax,
+        "Riemann-Liouville": _riemann_liouville_jax,
+        "Grünwald-Letnikov": _grunwald_letnikov_jax,
     }
 
     alpha = 0.5
@@ -56,17 +55,18 @@ def gpu_acceleration_demo():
         print(f"\n🧪 Testing {method_name}...")
 
         try:
-            # Convert JAX arrays to numpy for compatibility
-            f_np = np.array(f)
-            t_np = np.array(t)
-            h_np = float(h)
-
             # Warm-up run
-            _ = method_func(f_np, t_np, alpha, h_np)
+            if "riemann" in method_name.lower():
+                _ = method_func(f, alpha, int(np.ceil(alpha)), h)
+            else:
+                _ = method_func(f, alpha, h)
 
             # Time the computation
             start_time = time.time()
-            result = method_func(f_np, t_np, alpha, h_np)
+            if "riemann" in method_name.lower():
+                result = method_func(f, alpha, int(np.ceil(alpha)), h)
+            else:
+                result = method_func(f, alpha, h)
             end_time = time.time()
 
             results[method_name] = result
@@ -138,23 +138,23 @@ def automatic_differentiation_demo():
 
     # Test automatic differentiation
     try:
+        def caputo_for_grad(a):
+            return _caputo_jax(f, a, h).sum()
+
         # Gradient with respect to alpha
-        grad_alpha = JAXAutomaticDifferentiation.gradient_wrt_alpha(
-            lambda f, t, a, h: gpu_optimized_caputo(f, t, a, h), f, t, alpha, h
-        )
+        grad_alpha = grad(caputo_for_grad)(alpha)
         print(f"✅ Gradient w.r.t. α computed: {grad_alpha}")
+        
+        def caputo_for_jac(f_vals):
+            return _caputo_jax(f_vals, alpha, h)
 
         # Jacobian with respect to function values
-        jacobian = JAXAutomaticDifferentiation.jacobian_wrt_function(
-            lambda f, t, a, h: gpu_optimized_caputo(f, t, a, h), f, t, alpha, h
-        )
+        jacobian = jacrev(caputo_for_jac)(f)
         print(f"✅ Jacobian w.r.t. f computed: shape {jacobian.shape}")
 
         # Hessian with respect to alpha
-        hessian = JAXAutomaticDifferentiation.hessian_wrt_alpha(
-            lambda f, t, a, h: gpu_optimized_caputo(f, t, a, h), f, t, alpha, h
-        )
-        print(f"✅ Hessian w.r.t. α computed: {hessian}")
+        hessian_val = hessian(caputo_for_grad)(alpha)
+        print(f"✅ Hessian w.r.t. α computed: {hessian_val}")
 
     except Exception as e:
         print(f"⚠️  Automatic differentiation failed: {e}")
@@ -180,9 +180,7 @@ def vectorization_demo():
 
     try:
         # Vectorize over alpha values
-        vectorized_results = vectorize_fractional_derivatives(
-            gpu_optimized_caputo, f, t, alphas, h
-        )
+        vectorized_results = vmap(_caputo_jax, in_axes=(None, 0, None))(f, alphas, h)
 
         print(
             f"✅ Vectorized computation completed: shape {vectorized_results.shape}")
@@ -246,26 +244,21 @@ def performance_benchmark():
 
         # Test different methods
         methods = {
-            "Caputo GPU": gpu_optimized_caputo,
-            "Riemann-Liouville GPU": gpu_optimized_riemann_liouville,
-            "Grünwald-Letnikov GPU": gpu_optimized_grunwald_letnikov,
+            "Caputo GPU": _caputo_jax,
+            "Riemann-Liouville GPU": _riemann_liouville_jax,
+            "Grünwald-Letnikov GPU": _grunwald_letnikov_jax,
         }
 
         timings = {}
 
         for method_name, method_func in methods.items():
             try:
-                # Convert JAX arrays to numpy for compatibility
-                f_np = np.array(f)
-                t_np = np.array(t)
-                h_np = float(h)
-
-                # Warm-up
-                _ = method_func(f_np, t_np, alpha, h_np)
-
                 # Time the computation
                 start_time = time.time()
-                method_func(f_np, t_np, alpha, h_np)
+                if "riemann" in method_name.lower():
+                    _ = method_func(f, alpha, int(np.ceil(alpha)), h).block_until_ready()
+                else:
+                    _ = method_func(f, alpha, h).block_until_ready()
                 end_time = time.time()
 
                 timings[method_name] = end_time - start_time
@@ -331,19 +324,19 @@ def fft_methods_demo():
 
     try:
         # Test different FFT methods
-        methods = ["spectral", "convolution"]
+        methods = {"Riemann-Liouville": _riemann_liouville_jax}
         results = {}
 
-        for method in methods:
-            result = optimize_fractional_derivative_jax(f, t, alpha, h, method)
-            results[method] = result
-            print(f"✅ {method.capitalize()} method completed")
+        for method_name, method_func in methods.items():
+            result = method_func(f, alpha, int(np.ceil(alpha)), h)
+            results[method_name] = result
+            print(f"✅ {method_name} method completed")
 
         # Plot results
-        plt.figure(figsize=(15, 5))
+        plt.figure(figsize=(10, 5))
 
         # Original function
-        plt.subplot(1, 3, 1)
+        plt.subplot(1, 2, 1)
         plt.plot(t, f, "k-", linewidth=2, label="Original")
         plt.xlabel("Time t")
         plt.ylabel("Function Value")
@@ -352,24 +345,13 @@ def fft_methods_demo():
         plt.grid(True, alpha=0.3)
 
         # Spectral method
-        plt.subplot(1, 3, 2)
+        plt.subplot(1, 2, 2)
         plt.plot(t, f, "k-", linewidth=1, alpha=0.3, label="Original")
-        plt.plot(t, results["spectral"], "r-",
-                 linewidth=2, label="Spectral FFT")
+        plt.plot(t, results["Riemann-Liouville"], "r-",
+                 linewidth=2, label="Riemann-Liouville (FFT)")
         plt.xlabel("Time t")
         plt.ylabel("Derivative Value")
-        plt.title("Spectral FFT Method")
-        plt.legend()
-        plt.grid(True, alpha=0.3)
-
-        # Convolution method
-        plt.subplot(1, 3, 3)
-        plt.plot(t, f, "k-", linewidth=1, alpha=0.3, label="Original")
-        plt.plot(t, results["convolution"], "b-",
-                 linewidth=2, label="Convolution FFT")
-        plt.xlabel("Time t")
-        plt.ylabel("Derivative Value")
-        plt.title("Convolution FFT Method")
+        plt.title("FFT-based Method")
         plt.legend()
         plt.grid(True, alpha=0.3)
 

@@ -71,7 +71,8 @@ class BaseFractionalGNNLayer(ABC):
             self,
             x: Any,
             edge_index: Any,
-            edge_weight: Optional[Any] = None) -> Any:
+            edge_weight: Optional[Any] = None,
+            **kwargs) -> Any:
         """Forward pass through the layer"""
 
     def apply_fractional_derivative(self, x: Any) -> Any:
@@ -245,7 +246,8 @@ class FractionalGraphConv(BaseFractionalGNNLayer):
             self,
             x: Any,
             edge_index: Any,
-            edge_weight: Optional[Any] = None) -> Any:
+            edge_weight: Optional[Any] = None,
+            **kwargs) -> Any:
         """
         Forward pass through the fractional graph convolution layer
 
@@ -262,11 +264,11 @@ class FractionalGraphConv(BaseFractionalGNNLayer):
 
         # Perform graph convolution
         if self.backend == BackendType.TORCH or self.backend == BackendType.AUTO:
-            return self._torch_forward(x, edge_index, edge_weight)
+            return self._torch_forward(x, edge_index, edge_weight, **kwargs)
         elif self.backend == BackendType.JAX:
-            return self._jax_forward(x, edge_index, edge_weight)
+            return self._jax_forward(x, edge_index, edge_weight, **kwargs)
         elif self.backend == BackendType.NUMBA:
-            return self._numba_forward(x, edge_index, edge_weight)
+            return self._numba_forward(x, edge_index, edge_weight, **kwargs)
         else:
             raise RuntimeError(f"Unknown backend: {self.backend}")
 
@@ -274,7 +276,8 @@ class FractionalGraphConv(BaseFractionalGNNLayer):
             self,
             x: Any,
             edge_index: Any,
-            edge_weight: Optional[Any] = None) -> Any:
+            edge_weight: Optional[Any] = None,
+            **kwargs) -> Any:
         """PyTorch implementation of forward pass"""
         import torch
         import torch.nn.functional as F
@@ -353,7 +356,8 @@ class FractionalGraphConv(BaseFractionalGNNLayer):
             self,
             x: Any,
             edge_index: Any,
-            edge_weight: Optional[Any] = None) -> Any:
+            edge_weight: Optional[Any] = None,
+            **kwargs) -> Any:
         """JAX implementation of forward pass"""
         import jax.numpy as jnp
 
@@ -398,7 +402,8 @@ class FractionalGraphConv(BaseFractionalGNNLayer):
             self,
             x: Any,
             edge_index: Any,
-            edge_weight: Optional[Any] = None) -> Any:
+            edge_weight: Optional[Any] = None,
+            **kwargs) -> Any:
         """NUMBA implementation of forward pass"""
         import numpy as np
 
@@ -644,7 +649,8 @@ class FractionalGraphAttention(BaseFractionalGNNLayer):
             self,
             x: Any,
             edge_index: Any,
-            edge_weight: Optional[Any] = None) -> Any:
+            edge_weight: Optional[Any] = None,
+            **kwargs) -> Any:
         """
         Forward pass through the fractional graph attention layer
 
@@ -738,7 +744,7 @@ class FractionalGraphAttention(BaseFractionalGNNLayer):
 
         # Apply activation and dropout
         out = self._apply_activation(out)
-        out = self._apply_dropout(out)
+        out = self._apply_dropout(out, **kwargs)
 
         return out
 
@@ -808,10 +814,10 @@ class FractionalGraphAttention(BaseFractionalGNNLayer):
         else:
             return x
 
-    def _apply_dropout(self, x: Any) -> Any:
+    def _apply_dropout(self, x: Any, **kwargs) -> Any:
         """Apply dropout"""
         return self.tensor_ops.dropout(
-            x, p=self.dropout, training=self.training)
+            x, p=self.dropout, training=self.training, **kwargs)
 
     def train(self, mode: bool = True):
         """Set the layer in training mode."""
@@ -962,7 +968,8 @@ class FractionalGraphPooling(BaseFractionalGNNLayer):
             self.linear_bias = self.linear_bias * 0.1
 
     def forward(self, x: Any, edge_index: Any,
-                batch: Optional[Any] = None) -> Tuple[Any, Any, Any]:
+                batch: Optional[Any] = None,
+                **kwargs) -> Tuple[Any, Any, Any]:
         """
         Forward pass through the fractional graph pooling layer
 

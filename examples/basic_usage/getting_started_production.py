@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 import torch
 import sys
 import os
+import math
 
 # Add the library to the path
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
@@ -166,17 +167,11 @@ def special_functions_production():
 
     # Test Gamma function properties
     print("Testing Gamma function properties...")
-    n_values = range(1, 6)
-    gamma_results = []
-    factorial_results = []
-    
-    for n in n_values:
-        gamma_n = gamma(n + 1)
-        factorial_n = np.math.factorial(n)
-        gamma_results.append(gamma_n)
-        factorial_results.append(factorial_n)
-        
-        print(f"  Γ({n+1}) = {gamma_n:.6f}, {n}! = {factorial_n}")
+    n = 5
+    gamma_n_plus_1 = gamma(n + 1)
+    factorial_n = math.factorial(n)
+    print(f"  Γ({n + 1}) = {gamma_n_plus_1:.4f}")
+    print(f"  {n}! = {factorial_n}")
     
     # Test Beta function
     print("Testing Beta function...")

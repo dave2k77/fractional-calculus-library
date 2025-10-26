@@ -401,6 +401,9 @@ def application_5_control_systems():
     """
     Application 5: Control Systems with Fractional Controllers
 
+    NOTE: The Adomian Decomposition solver used in this example is currently
+    under development. This application is a placeholder for future functionality.
+
     Demonstrates fractional PID controllers using Adomian decomposition.
     Applications in robotics, process control, and automation.
     """
@@ -457,10 +460,10 @@ def application_5_control_systems():
 
         # Solve for one step
         t[1] - t[0]
-        y_step = adomian.solve(
-            rhs, np.array([t[i - 1], t[i]]), initial_condition=y[i - 1], terms=5
-        )
-        y[i] = y_step[-1]
+        # y_step = adomian.solve(
+        #     rhs, np.array([t[i - 1], t[i]]), initial_condition=y[i - 1], terms=5
+        # )
+        # y[i] = y_step[-1]
 
     # Plot results
     plt.figure(figsize=(15, 10))
@@ -551,7 +554,7 @@ def application_6_material_science():
     stress = stress_relaxation(t, alpha, E0, eta)
 
     # Compute strain rate (simplified)
-    strain_rate = marchaud.compute(lambda x: stress, t, t[1] - t[0])
+    strain_rate = marchaud.compute(stress, t, t[1] - t[0])
 
     # Plot results
     plt.figure(figsize=(15, 10))
@@ -633,7 +636,7 @@ def application_7_signal_processing():
 
     # Apply fractional filter
     h = t[1] - t[0]
-    filtered_signal = weyl.compute(lambda x: noisy_signal, t, h)
+    filtered_signal = weyl.compute(noisy_signal, t, h)
 
     # Plot results
     plt.figure(figsize=(15, 10))
@@ -869,7 +872,7 @@ def main():
         application_2_fractional_wave_equations()
         application_3_financial_modeling()
         application_4_biomedical_signal_processing()
-        application_5_control_systems()
+        # application_5_control_systems()
         application_6_material_science()
         application_7_signal_processing()
         application_8_climate_modeling()
@@ -883,7 +886,7 @@ def main():
         print("2. Fractional Wave Equations - Acoustics and electromagnetics")
         print("3. Financial Modeling - Option pricing and volatility")
         print("4. Biomedical Signal Processing - EEG, ECG analysis")
-        print("5. Control Systems - Fractional PID controllers")
+        # print("5. Control Systems - Fractional PID controllers")
         print("6. Material Science - Viscoelastic materials")
         print("7. Signal Processing - Fractional filters")
         print("8. Climate Modeling - Long memory processes")

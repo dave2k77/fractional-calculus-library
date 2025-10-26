@@ -1,0 +1,808 @@
+{
+  "performance": [
+    {
+      "method_name": "RL",
+      "array_size": 100,
+      "execution_time": 0.0010262727737426758,
+      "memory_usage": 0.001953125,
+      "accuracy": null,
+      "speedup": null,
+      "parameters": {
+        "alpha": 0.5,
+        "function": "polynomial"
+      },
+      "timestamp": "2025-10-22 09:42:15"
+    },
+    {
+      "method_name": "GL",
+      "array_size": 100,
+      "execution_time": 0.0016429424285888672,
+      "memory_usage": 0.0,
+      "accuracy": null,
+      "speedup": null,
+      "parameters": {
+        "alpha": 0.5,
+        "function": "polynomial"
+      },
+      "timestamp": "2025-10-22 09:42:16"
+    },
+    {
+      "method_name": "Caputo",
+      "array_size": 100,
+      "execution_time": 0.0010734796524047852,
+      "memory_usage": 0.0,
+      "accuracy": null,
+      "speedup": null,
+      "parameters": {
+        "alpha": 0.5,
+        "function": "polynomial"
+      },
+      "timestamp": "2025-10-22 09:42:16"
+    },
+    {
+      "method_name": "RL",
+      "array_size": 500,
+      "execution_time": 0.0011792182922363281,
+      "memory_usage": 0.0,
+      "accuracy": null,
+      "speedup": null,
+      "parameters": {
+        "alpha": 0.5,
+        "function": "polynomial"
+      },
+      "timestamp": "2025-10-22 09:42:16"
+    },
+    {
+      "method_name": "GL",
+      "array_size": 500,
+      "execution_time": 0.004210472106933594,
+      "memory_usage": 0.0,
+      "accuracy": null,
+      "speedup": null,
+      "parameters": {
+        "alpha": 0.5,
+        "function": "polynomial"
+      },
+      "timestamp": "2025-10-22 09:42:16"
+    },
+    {
+      "method_name": "Caputo",
+      "array_size": 500,
+      "execution_time": 0.0010156631469726562,
+      "memory_usage": 0.0,
+      "accuracy": null,
+      "speedup": null,
+      "parameters": {
+        "alpha": 0.5,
+        "function": "polynomial"
+      },
+      "timestamp": "2025-10-22 09:42:17"
+    },
+    {
+      "method_name": "RL",
+      "array_size": 1000,
+      "execution_time": 0.0013577938079833984,
+      "memory_usage": 0.001953125,
+      "accuracy": null,
+      "speedup": null,
+      "parameters": {
+        "alpha": 0.5,
+        "function": "polynomial"
+      },
+      "timestamp": "2025-10-22 09:42:17"
+    },
+    {
+      "method_name": "GL",
+      "array_size": 1000,
+      "execution_time": 0.007250785827636719,
+      "memory_usage": 0.0,
+      "accuracy": null,
+      "speedup": null,
+      "parameters": {
+        "alpha": 0.5,
+        "function": "polynomial"
+      },
+      "timestamp": "2025-10-22 09:42:17"
+    },
+    {
+      "method_name": "Caputo",
+      "array_size": 1000,
+      "execution_time": 0.0013889074325561523,
+      "memory_usage": 0.0,
+      "accuracy": null,
+      "speedup": null,
+      "parameters": {
+        "alpha": 0.5,
+        "function": "polynomial"
+      },
+      "timestamp": "2025-10-22 09:42:17"
+    }
+  ],
+  "accuracy": [
+    {
+      "method_name": "RL",
+      "array_size": 50,
+      "execution_time": 0.0006031990051269531,
+      "memory_usage": 0.0,
+      "accuracy": 0.04452767928302011,
+      "speedup": null,
+      "parameters": {
+        "alpha": 0.5,
+        "function": "power",
+        "test_type": "accuracy"
+      },
+      "timestamp": null
+    },
+    {
+      "method_name": "GL",
+      "array_size": 50,
+      "execution_time": 0.0009036064147949219,
+      "memory_usage": 0.0,
+      "accuracy": 0.02110293174203763,
+      "speedup": null,
+      "parameters": {
+        "alpha": 0.5,
+        "function": "power",
+        "test_type": "accuracy"
+      },
+      "timestamp": null
+    },
+    {
+      "method_name": "Caputo",
+      "array_size": 50,
+      "execution_time": 0.0003998279571533203,
+      "memory_usage": 0.0,
+      "accuracy": 0.028593128841690296,
+      "speedup": null,
+      "parameters": {
+        "alpha": 0.5,
+        "function": "power",
+        "test_type": "accuracy"
+      },
+      "timestamp": null
+    },
+    {
+      "method_name": "RL",
+      "array_size": 50,
+      "execution_time": 0.00038695335388183594,
+      "memory_usage": 0.0,
+      "accuracy": 0.9467872464869257,
+      "speedup": null,
+      "parameters": {
+        "alpha": 0.5,
+        "function": "exponential",
+        "test_type": "accuracy"
+      },
+      "timestamp": null
+    },
+    {
+      "method_name": "GL",
+      "array_size": 50,
+      "execution_time": 0.0007119178771972656,
+      "memory_usage": 0.0,
+      "accuracy": 0.9410588109319452,
+      "speedup": null,
+      "parameters": {
+        "alpha": 0.5,
+        "function": "exponential",
+        "test_type": "accuracy"
+      },
+      "timestamp": null
+    },
+    {
+      "method_name": "Caputo",
+      "array_size": 50,
+      "execution_time": 0.0004439353942871094,
+      "memory_usage": 0.0,
+      "accuracy": 0.6964034061182031,
+      "speedup": null,
+      "parameters": {
+        "alpha": 0.5,
+        "function": "exponential",
+        "test_type": "accuracy"
+      },
+      "timestamp": null
+    },
+    {
+      "method_name": "RL",
+      "array_size": 100,
+      "execution_time": 0.00048041343688964844,
+      "memory_usage": 0.0,
+      "accuracy": 0.025462632063848245,
+      "speedup": null,
+      "parameters": {
+        "alpha": 0.5,
+        "function": "power",
+        "test_type": "accuracy"
+      },
+      "timestamp": null
+    },
+    {
+      "method_name": "GL",
+      "array_size": 100,
+      "execution_time": 0.0010142326354980469,
+      "memory_usage": 0.0,
+      "accuracy": 0.014649262239116287,
+      "speedup": null,
+      "parameters": {
+        "alpha": 0.5,
+        "function": "power",
+        "test_type": "accuracy"
+      },
+      "timestamp": null
+    },
+    {
+      "method_name": "Caputo",
+      "array_size": 100,
+      "execution_time": 0.0004131793975830078,
+      "memory_usage": 0.0,
+      "accuracy": 0.01683891622658094,
+      "speedup": null,
+      "parameters": {
+        "alpha": 0.5,
+        "function": "power",
+        "test_type": "accuracy"
+      },
+      "timestamp": null
+    },
+    {
+      "method_name": "RL",
+      "array_size": 100,
+      "execution_time": 0.0004589557647705078,
+      "memory_usage": 0.0,
+      "accuracy": 0.9509847297332324,
+      "speedup": null,
+      "parameters": {
+        "alpha": 0.5,
+        "function": "exponential",
+        "test_type": "accuracy"
+      },
+      "timestamp": null
+    },
+    {
+      "method_name": "GL",
+      "array_size": 100,
+      "execution_time": 0.0011928081512451172,
+      "memory_usage": 0.0,
+      "accuracy": 0.9586176877825511,
+      "speedup": null,
+      "parameters": {
+        "alpha": 0.5,
+        "function": "exponential",
+        "test_type": "accuracy"
+      },
+      "timestamp": null
+    },
+    {
+      "method_name": "Caputo",
+      "array_size": 100,
+      "execution_time": 0.0004405975341796875,
+      "memory_usage": 0.0,
+      "accuracy": 0.6820580360081928,
+      "speedup": null,
+      "parameters": {
+        "alpha": 0.5,
+        "function": "exponential",
+        "test_type": "accuracy"
+      },
+      "timestamp": null
+    },
+    {
+      "method_name": "RL",
+      "array_size": 200,
+      "execution_time": 0.0004558563232421875,
+      "memory_usage": 0.0,
+      "accuracy": 0.016864312776412652,
+      "speedup": null,
+      "parameters": {
+        "alpha": 0.5,
+        "function": "power",
+        "test_type": "accuracy"
+      },
+      "timestamp": null
+    },
+    {
+      "method_name": "GL",
+      "array_size": 200,
+      "execution_time": 0.001535654067993164,
+      "memory_usage": 0.0,
+      "accuracy": 0.012751795328529951,
+      "speedup": null,
+      "parameters": {
+        "alpha": 0.5,
+        "function": "power",
+        "test_type": "accuracy"
+      },
+      "timestamp": null
+    },
+    {
+      "method_name": "Caputo",
+      "array_size": 200,
+      "execution_time": 0.0003485679626464844,
+      "memory_usage": 0.0,
+      "accuracy": 0.01668703989752548,
+      "speedup": null,
+      "parameters": {
+        "alpha": 0.5,
+        "function": "power",
+        "test_type": "accuracy"
+      },
+      "timestamp": null
+    },
+    {
+      "method_name": "RL",
+      "array_size": 200,
+      "execution_time": 0.00040459632873535156,
+      "memory_usage": 0.0,
+      "accuracy": 0.9563055893924418,
+      "speedup": null,
+      "parameters": {
+        "alpha": 0.5,
+        "function": "exponential",
+        "test_type": "accuracy"
+      },
+      "timestamp": null
+    },
+    {
+      "method_name": "GL",
+      "array_size": 200,
+      "execution_time": 0.001539468765258789,
+      "memory_usage": 0.0,
+      "accuracy": 0.9673788229602042,
+      "speedup": null,
+      "parameters": {
+        "alpha": 0.5,
+        "function": "exponential",
+        "test_type": "accuracy"
+      },
+      "timestamp": null
+    },
+    {
+      "method_name": "Caputo",
+      "array_size": 200,
+      "execution_time": 0.00038313865661621094,
+      "memory_usage": 0.0,
+      "accuracy": 0.6750206261109654,
+      "speedup": null,
+      "parameters": {
+        "alpha": 0.5,
+        "function": "exponential",
+        "test_type": "accuracy"
+      },
+      "timestamp": null
+    }
+  ],
+  "scaling": [
+    {
+      "method_name": "RL",
+      "array_size": 100,
+      "execution_time": 0.0008894205093383789,
+      "memory_usage": 0.0,
+      "accuracy": null,
+      "speedup": null,
+      "parameters": {
+        "alpha": 0.5,
+        "function": "scaling"
+      },
+      "timestamp": "2025-10-22 09:42:18"
+    },
+    {
+      "method_name": "GL",
+      "array_size": 100,
+      "execution_time": 0.0014390945434570312,
+      "memory_usage": 0.0,
+      "accuracy": null,
+      "speedup": null,
+      "parameters": {
+        "alpha": 0.5,
+        "function": "scaling"
+      },
+      "timestamp": "2025-10-22 09:42:18"
+    },
+    {
+      "method_name": "Caputo",
+      "array_size": 100,
+      "execution_time": 0.0010527372360229492,
+      "memory_usage": 0.0,
+      "accuracy": null,
+      "speedup": null,
+      "parameters": {
+        "alpha": 0.5,
+        "function": "scaling"
+      },
+      "timestamp": "2025-10-22 09:42:18"
+    },
+    {
+      "method_name": "RL",
+      "array_size": 200,
+      "execution_time": 0.0010634660720825195,
+      "memory_usage": 0.0,
+      "accuracy": null,
+      "speedup": null,
+      "parameters": {
+        "alpha": 0.5,
+        "function": "scaling"
+      },
+      "timestamp": "2025-10-22 09:42:18"
+    },
+    {
+      "method_name": "GL",
+      "array_size": 200,
+      "execution_time": 0.0021126270294189453,
+      "memory_usage": 0.0,
+      "accuracy": null,
+      "speedup": null,
+      "parameters": {
+        "alpha": 0.5,
+        "function": "scaling"
+      },
+      "timestamp": "2025-10-22 09:42:19"
+    },
+    {
+      "method_name": "Caputo",
+      "array_size": 200,
+      "execution_time": 0.0010436773300170898,
+      "memory_usage": 0.0,
+      "accuracy": null,
+      "speedup": null,
+      "parameters": {
+        "alpha": 0.5,
+        "function": "scaling"
+      },
+      "timestamp": "2025-10-22 09:42:19"
+    },
+    {
+      "method_name": "RL",
+      "array_size": 500,
+      "execution_time": 0.0010395050048828125,
+      "memory_usage": 0.0,
+      "accuracy": null,
+      "speedup": null,
+      "parameters": {
+        "alpha": 0.5,
+        "function": "scaling"
+      },
+      "timestamp": "2025-10-22 09:42:19"
+    },
+    {
+      "method_name": "GL",
+      "array_size": 500,
+      "execution_time": 0.004188060760498047,
+      "memory_usage": 0.0,
+      "accuracy": null,
+      "speedup": null,
+      "parameters": {
+        "alpha": 0.5,
+        "function": "scaling"
+      },
+      "timestamp": "2025-10-22 09:42:19"
+    },
+    {
+      "method_name": "Caputo",
+      "array_size": 500,
+      "execution_time": 0.001163482666015625,
+      "memory_usage": 0.0,
+      "accuracy": null,
+      "speedup": null,
+      "parameters": {
+        "alpha": 0.5,
+        "function": "scaling"
+      },
+      "timestamp": "2025-10-22 09:42:20"
+    },
+    {
+      "method_name": "RL",
+      "array_size": 1000,
+      "execution_time": 0.0015401840209960938,
+      "memory_usage": 0.0,
+      "accuracy": null,
+      "speedup": null,
+      "parameters": {
+        "alpha": 0.5,
+        "function": "scaling"
+      },
+      "timestamp": "2025-10-22 09:42:20"
+    },
+    {
+      "method_name": "GL",
+      "array_size": 1000,
+      "execution_time": 0.007334232330322266,
+      "memory_usage": 0.0,
+      "accuracy": null,
+      "speedup": null,
+      "parameters": {
+        "alpha": 0.5,
+        "function": "scaling"
+      },
+      "timestamp": "2025-10-22 09:42:20"
+    },
+    {
+      "method_name": "Caputo",
+      "array_size": 1000,
+      "execution_time": 0.0014338493347167969,
+      "memory_usage": 0.001953125,
+      "accuracy": null,
+      "speedup": null,
+      "parameters": {
+        "alpha": 0.5,
+        "function": "scaling"
+      },
+      "timestamp": "2025-10-22 09:42:21"
+    },
+    {
+      "method_name": "RL",
+      "array_size": 2000,
+      "execution_time": 0.001657247543334961,
+      "memory_usage": 0.0,
+      "accuracy": null,
+      "speedup": null,
+      "parameters": {
+        "alpha": 0.5,
+        "function": "scaling"
+      },
+      "timestamp": "2025-10-22 09:42:21"
+    },
+    {
+      "method_name": "GL",
+      "array_size": 2000,
+      "execution_time": 0.013992905616760254,
+      "memory_usage": 0.0,
+      "accuracy": null,
+      "speedup": null,
+      "parameters": {
+        "alpha": 0.5,
+        "function": "scaling"
+      },
+      "timestamp": "2025-10-22 09:42:21"
+    },
+    {
+      "method_name": "Caputo",
+      "array_size": 2000,
+      "execution_time": 0.0016756057739257812,
+      "memory_usage": 0.0,
+      "accuracy": null,
+      "speedup": null,
+      "parameters": {
+        "alpha": 0.5,
+        "function": "scaling"
+      },
+      "timestamp": "2025-10-22 09:42:21"
+    },
+    {
+      "method_name": "RL",
+      "array_size": 5000,
+      "execution_time": 0.002887248992919922,
+      "memory_usage": 0.0,
+      "accuracy": null,
+      "speedup": null,
+      "parameters": {
+        "alpha": 0.5,
+        "function": "scaling"
+      },
+      "timestamp": "2025-10-22 09:42:22"
+    },
+    {
+      "method_name": "GL",
+      "array_size": 5000,
+      "execution_time": 0.0334697961807251,
+      "memory_usage": 0.0,
+      "accuracy": null,
+      "speedup": null,
+      "parameters": {
+        "alpha": 0.5,
+        "function": "scaling"
+      },
+      "timestamp": "2025-10-22 09:42:22"
+    },
+    {
+      "method_name": "Caputo",
+      "array_size": 5000,
+      "execution_time": 0.0028640031814575195,
+      "memory_usage": 0.0,
+      "accuracy": null,
+      "speedup": null,
+      "parameters": {
+        "alpha": 0.5,
+        "function": "scaling"
+      },
+      "timestamp": "2025-10-22 09:42:22"
+    },
+    {
+      "method_name": "RL",
+      "array_size": 10000,
+      "execution_time": 0.004804134368896484,
+      "memory_usage": 0.0,
+      "accuracy": null,
+      "speedup": null,
+      "parameters": {
+        "alpha": 0.5,
+        "function": "scaling"
+      },
+      "timestamp": "2025-10-22 09:42:22"
+    },
+    {
+      "method_name": "GL",
+      "array_size": 10000,
+      "execution_time": 0.06620514392852783,
+      "memory_usage": 0.0,
+      "accuracy": null,
+      "speedup": null,
+      "parameters": {
+        "alpha": 0.5,
+        "function": "scaling"
+      },
+      "timestamp": "2025-10-22 09:42:23"
+    },
+    {
+      "method_name": "Caputo",
+      "array_size": 10000,
+      "execution_time": 0.004635453224182129,
+      "memory_usage": 0.001953125,
+      "accuracy": null,
+      "speedup": null,
+      "parameters": {
+        "alpha": 0.5,
+        "function": "scaling"
+      },
+      "timestamp": "2025-10-22 09:42:23"
+    }
+  ],
+  "memory": [
+    {
+      "method_name": "RL",
+      "array_size": 1000,
+      "execution_time": 0.0013246536254882812,
+      "memory_usage": 0.0,
+      "accuracy": null,
+      "speedup": null,
+      "parameters": {
+        "alpha": 0.5,
+        "function": "memory"
+      },
+      "timestamp": "2025-10-22 09:42:23"
+    },
+    {
+      "method_name": "GL",
+      "array_size": 1000,
+      "execution_time": 0.007378220558166504,
+      "memory_usage": 0.0,
+      "accuracy": null,
+      "speedup": null,
+      "parameters": {
+        "alpha": 0.5,
+        "function": "memory"
+      },
+      "timestamp": "2025-10-22 09:42:24"
+    },
+    {
+      "method_name": "Caputo",
+      "array_size": 1000,
+      "execution_time": 0.0013535022735595703,
+      "memory_usage": 0.0,
+      "accuracy": null,
+      "speedup": null,
+      "parameters": {
+        "alpha": 0.5,
+        "function": "memory"
+      },
+      "timestamp": "2025-10-22 09:42:24"
+    },
+    {
+      "method_name": "RL",
+      "array_size": 5000,
+      "execution_time": 0.0028957128524780273,
+      "memory_usage": 0.0,
+      "accuracy": null,
+      "speedup": null,
+      "parameters": {
+        "alpha": 0.5,
+        "function": "memory"
+      },
+      "timestamp": "2025-10-22 09:42:24"
+    },
+    {
+      "method_name": "GL",
+      "array_size": 5000,
+      "execution_time": 0.03353750705718994,
+      "memory_usage": 0.0,
+      "accuracy": null,
+      "speedup": null,
+      "parameters": {
+        "alpha": 0.5,
+        "function": "memory"
+      },
+      "timestamp": "2025-10-22 09:42:25"
+    },
+    {
+      "method_name": "Caputo",
+      "array_size": 5000,
+      "execution_time": 0.002812504768371582,
+      "memory_usage": 0.0,
+      "accuracy": null,
+      "speedup": null,
+      "parameters": {
+        "alpha": 0.5,
+        "function": "memory"
+      },
+      "timestamp": "2025-10-22 09:42:25"
+    },
+    {
+      "method_name": "RL",
+      "array_size": 10000,
+      "execution_time": 0.004671812057495117,
+      "memory_usage": 0.0,
+      "accuracy": null,
+      "speedup": null,
+      "parameters": {
+        "alpha": 0.5,
+        "function": "memory"
+      },
+      "timestamp": "2025-10-22 09:42:25"
+    },
+    {
+      "method_name": "GL",
+      "array_size": 10000,
+      "execution_time": 0.06613516807556152,
+      "memory_usage": 0.0,
+      "accuracy": null,
+      "speedup": null,
+      "parameters": {
+        "alpha": 0.5,
+        "function": "memory"
+      },
+      "timestamp": "2025-10-22 09:42:26"
+    },
+    {
+      "method_name": "Caputo",
+      "array_size": 10000,
+      "execution_time": 0.004665732383728027,
+      "memory_usage": 0.0,
+      "accuracy": null,
+      "speedup": null,
+      "parameters": {
+        "alpha": 0.5,
+        "function": "memory"
+      },
+      "timestamp": "2025-10-22 09:42:26"
+    },
+    {
+      "method_name": "RL",
+      "array_size": 20000,
+      "execution_time": 0.009304523468017578,
+      "memory_usage": 0.087890625,
+      "accuracy": null,
+      "speedup": null,
+      "parameters": {
+        "alpha": 0.5,
+        "function": "memory"
+      },
+      "timestamp": "2025-10-22 09:42:31"
+    },
+    {
+      "method_name": "GL",
+      "array_size": 20000,
+      "execution_time": 0.19071924686431885,
+      "memory_usage": 0.0859375,
+      "accuracy": null,
+      "speedup": null,
+      "parameters": {
+        "alpha": 0.5,
+        "function": "memory"
+      },
+      "timestamp": "2025-10-22 09:42:32"
+    },
+    {
+      "method_name": "Caputo",
+      "array_size": 20000,
+      "execution_time": 0.008566141128540039,
+      "memory_usage": 0.0703125,
+      "accuracy": null,
+      "speedup": null,
+      "parameters": {
+        "alpha": 0.5,
+        "function": "memory"
+      },
+      "timestamp": "2025-10-22 09:42:32"
+    }
+  ]
+}

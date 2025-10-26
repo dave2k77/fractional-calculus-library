@@ -3,7 +3,7 @@
 
 import pytest
 import numpy as np
-from hpfracc.solvers.ode_solvers import FractionalODESolver, AdaptiveFractionalODESolver
+from hpfracc.solvers.ode_solvers import FixedStepODESolver
 from hpfracc.core.definitions import FractionalOrder
 
 
@@ -27,20 +27,20 @@ class TestODESolversGoldmine:
     def test_fractional_ode_solver_initialization(self):
         """Test FractionalODESolver initialization."""
         # Basic initialization
-        solver = FractionalODESolver()
+        solver = FixedStepODESolver()
         assert isinstance(solver, FractionalODESolver)
         
         # With derivative type
-        solver_caputo = FractionalODESolver(derivative_type="caputo")
+        solver_caputo = FixedStepODESolver(derivative_type="caputo")
         assert isinstance(solver_caputo, FractionalODESolver)
         
         # With fractional order
-        solver_order = FractionalODESolver(fractional_order=self.alpha)
+        solver_order = FixedStepODESolver(fractional_order=self.alpha)
         assert isinstance(solver_order, FractionalODESolver)
         
     def test_fractional_ode_solver_solve(self):
         """Test FractionalODESolver solve method."""
-        solver = FractionalODESolver(fractional_order=self.alpha)
+        solver = FixedStepODESolver(fractional_order=self.alpha)
         
         try:
             result = solver.solve(self.ode_func, self.t_span, self.y0, t_eval=self.t_eval)
@@ -62,18 +62,18 @@ class TestODESolversGoldmine:
             
     def test_adaptive_fractional_ode_solver_initialization(self):
         """Test AdaptiveFractionalODESolver initialization."""
-        adaptive_solver = AdaptiveFractionalODESolver()
+        adaptive_solver = AdaptiveFixedStepODESolver()
         assert isinstance(adaptive_solver, AdaptiveFractionalODESolver)
         assert isinstance(adaptive_solver, FractionalODESolver)  # Inheritance
         
     def test_adaptive_solver_with_parameters(self):
         """Test adaptive solver with various parameters."""
         # With tolerance
-        solver_tol = AdaptiveFractionalODESolver(rtol=1e-6, atol=1e-8)
+        solver_tol = AdaptiveFixedStepODESolver(rtol=1e-6, atol=1e-8)
         assert isinstance(solver_tol, AdaptiveFractionalODESolver)
         
         # With step size control
-        solver_step = AdaptiveFractionalODESolver(max_step=0.1, min_step=1e-6)
+        solver_step = AdaptiveFixedStepODESolver(max_step=0.1, min_step=1e-6)
         assert isinstance(solver_step, AdaptiveFractionalODESolver)
         
     def test_different_derivative_types(self):
@@ -82,7 +82,7 @@ class TestODESolversGoldmine:
         
         for deriv_type in derivative_types:
             try:
-                solver = FractionalODESolver(derivative_type=deriv_type)
+                solver = FixedStepODESolver(derivative_type=deriv_type)
                 assert isinstance(solver, FractionalODESolver)
                 
                 # Try to solve
@@ -99,7 +99,7 @@ class TestODESolversGoldmine:
         
         for alpha in alphas:
             try:
-                solver = FractionalODESolver(fractional_order=alpha)
+                solver = FixedStepODESolver(fractional_order=alpha)
                 result = solver.solve(self.ode_func, self.t_span, self.y0, t_eval=self.t_eval)
                 assert result is not None
                 
@@ -123,7 +123,7 @@ class TestODESolversGoldmine:
             
         ode_functions = [linear_ode, nonlinear_ode, time_dependent_ode]
         
-        solver = FractionalODESolver(fractional_order=self.alpha)
+        solver = FixedStepODESolver(fractional_order=self.alpha)
         
         for ode_func in ode_functions:
             try:
@@ -137,7 +137,7 @@ class TestODESolversGoldmine:
         """Test with different initial conditions."""
         initial_conditions = [0.0, 0.5, 1.0, 2.0, -1.0]
         
-        solver = FractionalODESolver(fractional_order=self.alpha)
+        solver = FixedStepODESolver(fractional_order=self.alpha)
         
         for y0 in initial_conditions:
             try:
@@ -150,7 +150,7 @@ class TestODESolversGoldmine:
         """Test with different time spans."""
         time_spans = [(0, 0.5), (0, 1), (0, 2), (-1, 1)]
         
-        solver = FractionalODESolver(fractional_order=self.alpha)
+        solver = FixedStepODESolver(fractional_order=self.alpha)
         
         for t_span in time_spans:
             try:
@@ -162,7 +162,7 @@ class TestODESolversGoldmine:
                 
     def test_solver_methods(self):
         """Test different solver methods."""
-        solver = FractionalODESolver(fractional_order=self.alpha)
+        solver = FixedStepODESolver(fractional_order=self.alpha)
         
         # Test that solver has expected methods
         assert hasattr(solver, 'solve')
@@ -172,7 +172,7 @@ class TestODESolversGoldmine:
         
         for method in methods:
             try:
-                solver_method = FractionalODESolver(fractional_order=self.alpha, method=method)
+                solver_method = FixedStepODESolver(fractional_order=self.alpha, method=method)
                 result = solver_method.solve(self.ode_func, self.t_span, self.y0, t_eval=self.t_eval)
                 assert result is not None
             except Exception:
@@ -181,7 +181,7 @@ class TestODESolversGoldmine:
                 
     def test_adaptive_solver_solve(self):
         """Test adaptive solver solve method."""
-        adaptive_solver = AdaptiveFractionalODESolver(fractional_order=self.alpha)
+        adaptive_solver = AdaptiveFixedStepODESolver(fractional_order=self.alpha)
         
         try:
             result = adaptive_solver.solve(self.ode_func, self.t_span, self.y0, t_eval=self.t_eval)
@@ -197,7 +197,7 @@ class TestODESolversGoldmine:
             
     def test_solver_convergence(self):
         """Test solver convergence properties."""
-        solver = FractionalODESolver(fractional_order=self.alpha)
+        solver = FixedStepODESolver(fractional_order=self.alpha)
         
         # Test with different step sizes
         step_sizes = [0.1, 0.05, 0.025]
@@ -218,7 +218,7 @@ class TestODESolversGoldmine:
         
     def test_error_handling(self):
         """Test error handling for invalid inputs."""
-        solver = FractionalODESolver(fractional_order=self.alpha)
+        solver = FixedStepODESolver(fractional_order=self.alpha)
         
         # Invalid time span
         with pytest.raises((ValueError, TypeError, AssertionError)):
@@ -230,7 +230,7 @@ class TestODESolversGoldmine:
             
     def test_numerical_stability(self):
         """Test numerical stability."""
-        solver = FractionalODESolver(fractional_order=self.alpha)
+        solver = FixedStepODESolver(fractional_order=self.alpha)
         
         # Stiff ODE: dy/dt = -1000y
         def stiff_ode(t, y):
@@ -251,7 +251,7 @@ class TestODESolversGoldmine:
             return np.array([-y1, y1 - y2])
             
         try:
-            solver = FractionalODESolver(fractional_order=self.alpha)
+            solver = FixedStepODESolver(fractional_order=self.alpha)
             result = solver.solve(system_ode, self.t_span, [1.0, 0.0], t_eval=self.t_eval)
             assert result is not None
         except Exception:
@@ -260,7 +260,7 @@ class TestODESolversGoldmine:
             
     def test_solver_properties(self):
         """Test solver properties and attributes."""
-        solver = FractionalODESolver(fractional_order=self.alpha)
+        solver = FixedStepODESolver(fractional_order=self.alpha)
         
         # Test that solver has expected attributes
         assert hasattr(solver, 'fractional_order') or hasattr(solver, 'alpha') or hasattr(solver, '_alpha')
@@ -270,7 +270,7 @@ class TestODESolversGoldmine:
         """Test performance characteristics."""
         import time
         
-        solver = FractionalODESolver(fractional_order=self.alpha)
+        solver = FixedStepODESolver(fractional_order=self.alpha)
         
         # Measure solving time
         start_time = time.time()
@@ -287,7 +287,7 @@ class TestODESolversGoldmine:
             
     def test_memory_efficiency(self):
         """Test memory efficiency."""
-        solver = FractionalODESolver(fractional_order=self.alpha)
+        solver = FixedStepODESolver(fractional_order=self.alpha)
         
         # Solve multiple times to test memory handling
         for _ in range(5):
@@ -301,7 +301,7 @@ class TestODESolversGoldmine:
         """Test edge case parameters."""
         # Very small fractional order
         try:
-            solver_small = FractionalODESolver(fractional_order=0.01)
+            solver_small = FixedStepODESolver(fractional_order=0.01)
             result = solver_small.solve(self.ode_func, self.t_span, self.y0, t_eval=self.t_eval)
             assert result is not None
         except Exception:
@@ -309,7 +309,7 @@ class TestODESolversGoldmine:
             
         # Fractional order close to 1
         try:
-            solver_near_one = FractionalODESolver(fractional_order=0.99)
+            solver_near_one = FixedStepODESolver(fractional_order=0.99)
             result = solver_near_one.solve(self.ode_func, self.t_span, self.y0, t_eval=self.t_eval)
             assert result is not None
         except Exception:
@@ -317,7 +317,7 @@ class TestODESolversGoldmine:
             
     def test_different_evaluation_points(self):
         """Test with different evaluation points."""
-        solver = FractionalODESolver(fractional_order=self.alpha)
+        solver = FixedStepODESolver(fractional_order=self.alpha)
         
         # Dense evaluation
         t_dense = np.linspace(0, 1, 51)

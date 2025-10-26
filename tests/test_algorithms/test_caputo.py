@@ -29,17 +29,17 @@ class TestOptimizedCaputo:
 
     def test_optimized_caputo_validation(self):
         """Test OptimizedCaputo validation."""
-        # Test valid alpha values (L1 scheme requires 0 < α < 1)
+        # Test valid alpha values (Caputo now supports all alpha > 0)
         OptimizedCaputo(0.1)
         OptimizedCaputo(0.5)
         OptimizedCaputo(0.9)
+        OptimizedCaputo(1.0)
+        OptimizedCaputo(1.5)
+        OptimizedCaputo(2.0)
 
-        # Test invalid alpha values
+        # Test invalid alpha values (only negative values are invalid)
         with pytest.raises(ValueError):
             OptimizedCaputo(-0.1)
-
-        with pytest.raises(ValueError):
-            OptimizedCaputo(1.0)
 
     def test_optimized_caputo_compute_scalar(self):
         """Test computing Caputo derivative for scalar input."""
@@ -144,17 +144,14 @@ class TestOptimizedCaputo:
 
     def test_optimized_caputo_alpha_validation(self):
         """Test alpha parameter validation."""
-        # Test valid alpha values (L1 scheme requires 0 < α < 1)
-        for alpha in [0.1, 0.5, 0.9]:
+        # Test valid alpha values (Caputo now supports all alpha > 0)
+        for alpha in [0.1, 0.5, 0.9, 1.0, 1.5, 2.0]:
             caputo = OptimizedCaputo(alpha)
             assert caputo.alpha.alpha == alpha  # FractionalOrder object
 
-        # Test invalid alpha values
+        # Test invalid alpha values (only negative values are invalid)
         with pytest.raises(ValueError):
             OptimizedCaputo(-0.1)
-
-        with pytest.raises(ValueError):
-            OptimizedCaputo(0.0)
 
     def test_optimized_caputo_input_validation(self):
         """Test input validation."""

@@ -40,9 +40,9 @@ def basic_fractional_derivatives():
 
     for i, alpha in enumerate(alpha_values):
         # Initialize derivative calculators for this alpha
-        caputo = OptimizedCaputo(alpha=alpha)
-        riemann = OptimizedRiemannLiouville(alpha=alpha)
-        grunwald = OptimizedGrunwaldLetnikov(alpha=alpha)
+        caputo = OptimizedCaputo(order=alpha)
+        riemann = OptimizedRiemannLiouville(order=alpha)
+        grunwald = OptimizedGrunwaldLetnikov(order=alpha)
 
         # Compute derivatives
         caputo_result = caputo.compute(f, t, h)
@@ -166,7 +166,7 @@ def comparison_with_analytical():
 
     for i, alpha in enumerate(alpha_values):
         # Initialize derivative calculator for this alpha
-        caputo = OptimizedCaputo(alpha=alpha)
+        caputo = OptimizedCaputo(order=alpha)
 
         # Numerical result
         numerical_result = caputo.compute(f, t, h)
@@ -226,7 +226,7 @@ def error_analysis():
         f = f_analytical(t)
 
         # Numerical result
-        caputo = OptimizedCaputo(alpha=alpha)
+        caputo = OptimizedCaputo(order=alpha)
         numerical_result = caputo.compute(f, t, h)
 
         # Analytical result

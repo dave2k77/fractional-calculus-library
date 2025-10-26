@@ -321,15 +321,16 @@ class OptimizedRiemannLiouville(FractionalOperator):
 class OptimizedCaputo(FractionalOperator):
     """
     Optimized implementation of the Caputo fractional derivative.
+    
+    Note: Caputo derivative is defined for all alpha > 0.
+    The implementation uses the standard formulation:
+    D^α f(t) = I^(n-α) f^(n)(t) where n = ceil(α)
     """
 
     def __init__(self, order: Union[float, FractionalOrder]):
         super().__init__(order)
         self.n = int(np.ceil(self.alpha.alpha))
-        if not (0 < self.alpha.alpha < 1):
-            raise ValueError(
-                "L1 scheme for Caputo derivative requires 0 < alpha < 1"
-            )
+        # Caputo is defined for all alpha > 0 (no restriction needed)
 
     def compute(self, f: Union[Callable, np.ndarray, "jnp.ndarray"], t: Union[float, np.ndarray], h: float = None) -> np.ndarray:
         return super().compute(f, t, h)

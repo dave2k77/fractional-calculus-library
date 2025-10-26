@@ -15,6 +15,8 @@ import logging
 import time
 from functools import wraps
 import numpy as np
+import torch
+from typing import Union, Callable, Optional, Tuple, List, Dict, Any
 import warnings
 
 # Optional torch import
@@ -24,7 +26,6 @@ try:
 except ImportError:
     TORCH_AVAILABLE = False
     torch = None
-from typing import Union, Callable, Optional, Tuple, List, Dict, Any
 
 # Module-level warning tracking
 _warning_tracker = set()

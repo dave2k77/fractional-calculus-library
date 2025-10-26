@@ -36,7 +36,7 @@ class TestOptimizedMethodsEdgeCases:
     def test_optimized_riemann_liouville_zero_alpha(self):
         """Test optimized Riemann-Liouville with alpha = 0."""
         rl = OptimizedRiemannLiouville(0.0)
-        assert rl.alpha_val == 0.0
+        assert rl.alpha.alpha == 0.0
         
         def test_func(x):
             return x**2
@@ -54,7 +54,7 @@ class TestOptimizedMethodsEdgeCases:
     def test_optimized_riemann_liouville_large_alpha(self):
         """Test optimized Riemann-Liouville with large alpha."""
         rl = OptimizedRiemannLiouville(10.0)
-        assert rl.alpha_val == 10.0
+        assert rl.alpha.alpha == 10.0
         
         def test_func(x):
             return x**2
@@ -161,26 +161,26 @@ class TestOptimizedMethodsEdgeCases:
         assert len(result) > 0
     
     def test_optimized_caputo_alpha_one(self):
-        """Test optimized Caputo with alpha = 1."""
-        with pytest.raises(ValueError, match="L1 scheme requires 0 < α < 1"):
-            OptimizedCaputo(1.0)
+        """Test optimized Caputo with alpha = 1 (now valid)."""
+        # Caputo now supports alpha = 1.0
+        caputo = OptimizedCaputo(1.0)
+        assert caputo.alpha.alpha == 1.0
     
     def test_optimized_caputo_alpha_zero(self):
-        """Test optimized Caputo with alpha = 0."""
-        with pytest.raises(ValueError, match="Alpha must be positive for Caputo derivative"):
-            OptimizedCaputo(0.0)
+        """Test optimized Caputo with alpha = 0 (identity operation)."""
+        # Alpha = 0 is mathematically valid (identity operation)
+        caputo = OptimizedCaputo(0.0)
+        assert caputo.alpha.alpha == 0.0
     
     def test_optimized_caputo_alpha_close_to_one(self):
         """Test optimized Caputo with alpha close to 1."""
-        # 0.999999 is valid (< 1), so this should work without error
         caputo = OptimizedCaputo(0.999999)
-        assert caputo.alpha_val == 0.999999
+        assert caputo.alpha.alpha == 0.999999
     
     def test_optimized_caputo_alpha_close_to_zero(self):
         """Test optimized Caputo with alpha close to zero."""
-        # 1e-10 is valid (> 0), so this should work without error
         caputo = OptimizedCaputo(1e-10)
-        assert caputo.alpha_val == 1e-10
+        assert caputo.alpha.alpha == 1e-10
     
     def test_optimized_grunwald_letnikov_negative_alpha(self):
         """Test optimized Grünwald-Letnikov with negative alpha."""
@@ -190,7 +190,7 @@ class TestOptimizedMethodsEdgeCases:
     def test_optimized_grunwald_letnikov_zero_alpha(self):
         """Test optimized Grünwald-Letnikov with alpha = 0."""
         gl = OptimizedGrunwaldLetnikov(0.0)
-        assert gl.alpha_val == 0.0
+        assert gl.alpha.alpha == 0.0
         
         def test_func(x):
             return x**2
@@ -203,7 +203,7 @@ class TestOptimizedMethodsEdgeCases:
     def test_optimized_grunwald_letnikov_large_alpha(self):
         """Test optimized Grünwald-Letnikov with large alpha."""
         gl = OptimizedGrunwaldLetnikov(10.0)
-        assert gl.alpha_val == 10.0
+        assert gl.alpha.alpha == 10.0
         
         def test_func(x):
             return x**2
@@ -220,7 +220,7 @@ class TestParallelOptimizedMethodsEdgeCases:
     def test_parallel_optimized_riemann_liouville_zero_alpha(self):
         """Test parallel optimized Riemann-Liouville with alpha = 0."""
         porl = ParallelOptimizedRiemannLiouville(0.0)
-        assert porl.alpha_val == 0.0
+        assert porl.alpha.alpha == 0.0
         
         def test_func(x):
             return x**2
@@ -238,7 +238,7 @@ class TestParallelOptimizedMethodsEdgeCases:
     def test_parallel_optimized_riemann_liouville_large_alpha(self):
         """Test parallel optimized Riemann-Liouville with large alpha."""
         porl = ParallelOptimizedRiemannLiouville(10.0)
-        assert porl.alpha_val == 10.0
+        assert porl.alpha.alpha == 10.0
         
         def test_func(x):
             return x**2
@@ -273,24 +273,26 @@ class TestParallelOptimizedMethodsEdgeCases:
         assert len(result) > 0
     
     def test_parallel_optimized_caputo_alpha_one(self):
-        """Test parallel optimized Caputo with alpha = 1."""
-        with pytest.raises(ValueError, match="L1 scheme requires 0 < α < 1"):
-            ParallelOptimizedCaputo(1.0)
+        """Test parallel optimized Caputo with alpha = 1 (now valid)."""
+        # Caputo now supports alpha = 1.0
+        caputo = ParallelOptimizedCaputo(1.0)
+        assert caputo.alpha.alpha == 1.0
     
     def test_parallel_optimized_caputo_alpha_zero(self):
-        """Test parallel optimized Caputo with alpha = 0."""
-        with pytest.raises(ValueError, match="Alpha must be positive for Caputo derivative"):
-            ParallelOptimizedCaputo(0.0)
+        """Test parallel optimized Caputo with alpha = 0 (identity operation)."""
+        # Alpha = 0 is mathematically valid (identity operation)
+        caputo = ParallelOptimizedCaputo(0.0)
+        assert caputo.alpha.alpha == 0.0
     
     def test_parallel_optimized_caputo_alpha_close_to_one(self):
         """Test parallel optimized Caputo with alpha close to 1."""
-        with pytest.raises(ValueError, match="L1 scheme requires 0 < α < 1"):
-            ParallelOptimizedCaputo(0.999999)
+        caputo = ParallelOptimizedCaputo(0.999999)
+        assert caputo.alpha.alpha == 0.999999
     
     def test_parallel_optimized_caputo_alpha_close_to_zero(self):
         """Test parallel optimized Caputo with alpha close to zero."""
-        with pytest.raises(ValueError, match="Alpha must be positive for Caputo derivative"):
-            ParallelOptimizedCaputo(1e-10)
+        caputo = ParallelOptimizedCaputo(1e-10)
+        assert caputo.alpha.alpha == 1e-10
     
     def test_parallel_optimized_caputo_empty_input(self):
         """Test parallel optimized Caputo with empty input."""

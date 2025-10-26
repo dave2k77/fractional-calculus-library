@@ -9,6 +9,7 @@ import torch
 import torch.nn as nn
 from typing import Dict
 import numpy as np
+import jax
 
 # Optional NumPyro import
 try:
@@ -55,17 +56,25 @@ class ProbabilisticFractionalOrder(nn.Module):
         self.optimizer = Adam(step_size=1e-3)
         self.svi = SVI(self.model, self.guide,
                        self.optimizer, loss=Trace_ELBO())
+        self.svi_state = None  # Initialize state
+
+    def init(self, rng_key, *args, **kwargs):
+        """Initialize the SVI state."""
+        self.svi_state = self.svi.init(rng_key, *args, **kwargs)
 
     def sample(self, k: int = 1):
-        # Sampling is now handled by the guide
-        params = self.svi.get_params({})
+        if self.svi_state is None:
+            raise RuntimeError("SVI state not initialized. Call .init() first.")
+        params = self.svi.get_params(self.svi_state)
         alpha_mean = params["alpha_mean"]
         alpha_std = params["alpha_std"]
-        return numpyro.sample("alpha", dist.Normal(alpha_mean, alpha_std), sample_shape=(k,))
+        rng_key = jax.random.PRNGKey(np.random.randint(0, 2**32 - 1))
+        return numpyro.sample("alpha", dist.Normal(alpha_mean, alpha_std), rng_key=rng_key, sample_shape=(k,))
 
     def log_prob(self, value: torch.Tensor) -> torch.Tensor:
-        # Log prob from the guide's distribution
-        params = self.svi.get_params({})
+        if self.svi_state is None:
+            raise RuntimeError("SVI state not initialized. Call .init() first.")
+        params = self.svi.get_params(self.svi_state)
         alpha_mean = params["alpha_mean"]
         alpha_std = params["alpha_std"]
         return dist.Normal(alpha_mean, alpha_std).log_prob(value)
@@ -84,6 +93,14 @@ class ProbabilisticFractionalLayer(nn.Module):
 
         self.probabilistic_order = ProbabilisticFractionalOrder(model, guide)
         self.kwargs = kwargs
+        
+        # Initialize the SVI state
+        rng_key = jax.random.PRNGKey(0)
+        # We need dummy data to initialize the model and guide
+        dummy_x = jax.numpy.ones((1, 128))
+        dummy_y = jax.numpy.ones((1, 128, 1))
+        self.probabilistic_order.init(rng_key, dummy_x, dummy_y)
+
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Forward pass."""
@@ -108,7 +125,10 @@ class ProbabilisticFractionalLayer(nn.Module):
 
     def get_alpha_statistics(self) -> Dict[str, torch.Tensor]:
         """Get statistics of the fractional order distribution."""
-        params = self.probabilistic_order.svi.get_params({})
+        if self.probabilistic_order.svi_state is None:
+            return {'mean': torch.tensor(0.0), 'std': torch.tensor(1.0)}
+        params = self.probabilistic_order.svi.get_params(
+            self.probabilistic_order.svi_state)
         mean = params["alpha_mean"]
         std = params["alpha_std"]
         return {

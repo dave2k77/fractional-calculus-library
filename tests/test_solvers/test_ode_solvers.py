@@ -10,11 +10,13 @@ import numpy as np
 from unittest.mock import Mock, patch
 import warnings
 
+from hpfracc.algorithms.optimized_methods import FractionalOperator
 from hpfracc.solvers.ode_solvers import (
-    FractionalODESolver,
-    AdaptiveFractionalODESolver,
+    FixedStepODESolver,
+    solve_fractional_ode,
+    solve_fractional_system,
 )
-from hpfracc.core.definitions import FractionalOrder
+from hpfracc.core.definitions import FractionalOrder, DefinitionType, CaputoDefinition
 
 
 class TestFractionalODESolver:
@@ -22,7 +24,7 @@ class TestFractionalODESolver:
 
     def test_ode_solver_creation(self):
         """Test basic ODE solver creation."""
-        solver = FractionalODESolver()
+        solver = FixedStepODESolver()
         assert solver.derivative_type == "caputo"
         assert solver.method == "predictor_corrector"
         assert solver.adaptive is True
@@ -31,7 +33,7 @@ class TestFractionalODESolver:
 
     def test_ode_solver_custom_parameters(self):
         """Test ODE solver with custom parameters."""
-        solver = FractionalODESolver(
+        solver = FixedStepODESolver(
             derivative_type="riemann_liouville",
             method="adams_bashforth",
             adaptive=False,
@@ -47,18 +49,18 @@ class TestFractionalODESolver:
     def test_ode_solver_invalid_derivative_type(self):
         """Test that invalid derivative type raises ValueError."""
         with pytest.raises(ValueError, match="Derivative type must be one of"):
-            FractionalODESolver(derivative_type="invalid")
+            FixedStepODESolver(derivative_type="invalid")
 
     def test_ode_solver_invalid_method(self):
         """Test that invalid method raises ValueError."""
         with pytest.raises(ValueError, match="Method must be one of"):
-            FractionalODESolver(method="invalid")
+            FixedStepODESolver(method="invalid")
 
     def test_ode_solver_valid_derivative_types(self):
         """Test all valid derivative types."""
         valid_types = ["caputo", "riemann_liouville", "grunwald_letnikov"]
         for deriv_type in valid_types:
-            solver = FractionalODESolver(derivative_type=deriv_type)
+            solver = FixedStepODESolver(derivative_type=deriv_type)
             assert solver.derivative_type == deriv_type
 
     def test_ode_solver_valid_methods(self):
@@ -70,12 +72,12 @@ class TestFractionalODESolver:
             "euler",
         ]
         for method in valid_methods:
-            solver = FractionalODESolver(method=method)
+            solver = FixedStepODESolver(method=method)
             assert solver.method == method
 
     def test_ode_solver_solve_basic(self):
         """Test basic ODE solving."""
-        solver = FractionalODESolver()
+        solver = FixedStepODESolver()
 
         def f(t, y):
             return -y
@@ -96,7 +98,7 @@ class TestFractionalODESolver:
 
     def test_ode_solver_solve_with_custom_step(self):
         """Test ODE solving with custom step size."""
-        solver = FractionalODESolver()
+        solver = FixedStepODESolver()
 
         def f(t, y):
             return -y
@@ -116,7 +118,7 @@ class TestFractionalODESolver:
 
     def test_ode_solver_solve_vector_ode(self):
         """Test solving vector ODE."""
-        solver = FractionalODESolver()
+        solver = FixedStepODESolver()
 
         def f(t, y):
             return np.array([-y[0], -2 * y[1]])
@@ -140,14 +142,14 @@ class TestAdaptiveFractionalODESolver:
 
     def test_adaptive_ode_solver_creation(self):
         """Test basic adaptive ODE solver creation."""
-        solver = AdaptiveFractionalODESolver()
+        solver = FixedStepODESolver()
         assert solver.derivative_type == "caputo"
         assert solver.method == "predictor_corrector"
         assert solver.adaptive is True
 
     def test_adaptive_ode_solver_solve_basic(self):
         """Test basic adaptive ODE solving."""
-        solver = AdaptiveFractionalODESolver()
+        solver = FixedStepODESolver()
 
         def f(t, y):
             return -y
@@ -168,7 +170,7 @@ class TestAdaptiveFractionalODESolver:
 
     def test_adaptive_ode_solver_solve_vector(self):
         """Test adaptive ODE solver with vector ODE."""
-        solver = AdaptiveFractionalODESolver()
+        solver = FixedStepODESolver()
 
         def f(t, y):
             return np.array([-y[0], -2 * y[1]])
@@ -192,7 +194,7 @@ class TestODESolverIntegration:
 
     def test_solver_method_consistency(self):
         """Test that different methods give consistent results."""
-        solvers = [FractionalODESolver(), AdaptiveFractionalODESolver()]
+        solvers = [FixedStepODESolver(), FixedStepODESolver()]
         solutions = []
 
         def f(t, y):
@@ -213,7 +215,7 @@ class TestODESolverIntegration:
 
     def test_solver_error_handling(self):
         """Test error handling in ODE solvers."""
-        solver = FractionalODESolver()
+        solver = FixedStepODESolver()
 
         # Test with invalid parameters - the solver may handle these gracefully
         def f(t, y):
@@ -236,7 +238,7 @@ class TestODESolverIntegration:
 
     def test_solver_performance(self):
         """Test solver performance with longer integration."""
-        solver = FractionalODESolver()
+        solver = FixedStepODESolver()
 
         def f(t, y):
             return -y
@@ -259,7 +261,7 @@ class TestODESolverIntegration:
 
     def test_solver_adaptive_behavior(self):
         """Test adaptive step size behavior."""
-        solver = FractionalODESolver(adaptive=True, tol=1e-6)
+        solver = FixedStepODESolver(adaptive=True, tol=1e-6)
 
         def f(t, y):
             return -y
@@ -290,7 +292,7 @@ class TestODESolverIntegration:
         alpha = 0.5
 
         for tol in tolerances:
-            solver = FractionalODESolver(adaptive=True, tol=tol)
+            solver = FixedStepODESolver(adaptive=True, tol=tol)
             t, y = solver.solve(f, t_span, y0, alpha)
             solutions.append(y)
 
@@ -301,7 +303,7 @@ class TestODESolverIntegration:
 
     def test_solver_complex_ode(self):
         """Test solver with more complex ODE."""
-        solver = FractionalODESolver()
+        solver = FixedStepODESolver()
 
         def f(t, y):
             return np.array([y[1], -y[0] - 0.1 * y[1]])

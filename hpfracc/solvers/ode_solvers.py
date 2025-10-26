@@ -3,10 +3,15 @@ Fractional Ordinary Differential Equation Solvers
 
 This module provides comprehensive solvers for fractional ODEs including
 various numerical methods, adaptive step size control, and error estimation.
+
+Performance Note:
+- Uses FFT-based convolution for O(N log N) history summation instead of O(N²)
 """
 
 import numpy as np
+import time
 from typing import Union, Optional, Tuple, Callable
+from scipy import fft
 
 from ..core.definitions import FractionalOrder
 
@@ -27,9 +32,118 @@ def _get_gamma_function():
 gamma = _get_gamma_function()
 
 
-class FractionalODESolver:
+def _fft_convolution(coeffs: np.ndarray, values: np.ndarray, axis: int = 0) -> np.ndarray:
     """
-    Base class for fractional ODE solvers.
+    Fast convolution using FFT for O(N log N) performance.
+    
+    This replaces the O(N²) direct summation loop for history terms in fractional ODEs.
+    
+    Args:
+        coeffs: Coefficient array (1D)
+        values: Value array (can be 1D or 2D with axis specifying which dimension to convolve)
+        axis: Axis along which to perform convolution (default 0)
+        
+    Returns:
+        Convolution result (same shape as values)
+        
+    Mathematical basis:
+        conv(C, Y) = ifft(fft(C) * fft(Y))
+        
+    Performance:
+        - Direct summation: O(N²)
+        - FFT-based: O(N log N)
+    """
+    N = coeffs.shape[0]
+    
+    if values.ndim == 1:
+        # 1D case: simple convolution
+        M = values.shape[0]
+        if M != N:
+            raise ValueError(f"Coefficient and value array lengths must match: {N} vs {M}")
+        
+        # Zero-pad to next power of 2 for optimal FFT performance
+        size = int(2 ** np.ceil(np.log2(2 * N - 1)))
+        
+        # Perform FFT-based convolution
+        coeffs_fft = fft.fft(coeffs, n=size)
+        values_fft = fft.fft(values, n=size)
+        conv_result = fft.ifft(coeffs_fft * values_fft).real[:N]
+        
+        return conv_result
+    
+    elif values.ndim == 2:
+        # 2D case: convolve along specified axis
+        if axis == 0:
+            M = values.shape[0]
+            if M != N:
+                raise ValueError(f"Coefficient and value array lengths must match: {N} vs {M}")
+            
+            # Vectorized FFT for all columns at once (more efficient than loop)
+            size = int(2 ** np.ceil(np.log2(2 * N - 1)))
+            num_cols = values.shape[1]
+            
+            # Expand coeffs to match all columns: shape (size,) -> (size, num_cols)
+            coeffs_padded = np.zeros((size, num_cols))
+            coeffs_padded[:N, :] = coeffs[:, np.newaxis]
+            
+            # Pad values: shape (N, num_cols) -> (size, num_cols)
+            values_padded = np.zeros((size, num_cols))
+            values_padded[:N, :] = values
+            
+            # FFT along axis 0 for all columns simultaneously
+            coeffs_fft = fft.fft(coeffs_padded, axis=0)
+            values_fft = fft.fft(values_padded, axis=0)
+            
+            # Element-wise multiplication and inverse FFT
+            conv_result = fft.ifft(coeffs_fft * values_fft, axis=0).real[:N, :]
+            
+            return conv_result
+        else:
+            raise NotImplementedError("FFT convolution only implemented for axis=0")
+    else:
+        raise ValueError(f"FFT convolution only supports 1D and 2D arrays, got {values.ndim}D")
+
+
+def _fast_history_sum(coeffs: np.ndarray, f_hist: np.ndarray, reverse: bool = True, verbose: bool = False) -> np.ndarray:
+    """
+    Compute weighted sum of history using FFT-based convolution.
+    
+    This is the key optimization for fractional ODE solvers, replacing:
+        sum_{j=0}^{n} coeffs[n-j] * f_hist[j]
+    
+    with an O(N log N) FFT-based approach instead of O(N²) direct summation.
+    
+    Args:
+        coeffs: Coefficient array of length N
+        f_hist: History array of shape (N,) or (N, m) where m is state dimension
+        reverse: If True, apply coefficients in reverse order (typical for convolution)
+        
+    Returns:
+        Weighted sum result (scalar or array of length m)
+    """
+    start_time = time.perf_counter()
+    if reverse:
+        coeffs = coeffs[::-1]
+    
+    if f_hist.ndim == 1:
+        # For 1D, use direct convolution and return the last element
+        conv_full = _fft_convolution(coeffs, f_hist)
+        result = conv_full[-1]
+    else:
+        # For 2D (N, m), convolve and return the last row
+        conv_full = _fft_convolution(coeffs, f_hist, axis=0)
+        result = conv_full[-1, :]
+    
+    end_time = time.perf_counter()
+    if verbose and coeffs.shape[0] > 64: # Only print for FFT cases
+        print(f"[TIMING] _fast_history_sum (N={coeffs.shape[0]}): {end_time - start_time:.6f}s")
+    
+    return result
+
+
+class FixedStepODESolver:
+    """
+    Base class for fixed-step fractional ODE solvers.
 
     Provides common functionality for solving fractional ordinary
     differential equations of the form:
@@ -50,6 +164,12 @@ class FractionalODESolver:
         fractional_order: Optional[Union[float, FractionalOrder]] = None,
         rtol: Optional[float] = None,
         atol: Optional[float] = None,
+        # compatibility/extended params
+        order: int = 1,
+        min_h: Optional[float] = None,
+        max_h: Optional[float] = None,
+        min_step: Optional[float] = None,
+        max_step: Optional[float] = None,
     ):
         """
         Initialize fractional ODE solver.
@@ -68,11 +188,16 @@ class FractionalODESolver:
         self.max_iter = max_iter
         # Accept optional fractional_order for compatibility; stored as attribute only
         self.fractional_order = fractional_order
+        # Order compatibility (for predictor-corrector family)
+        self.order = int(order)
         # Accept rtol/atol but map to tol if provided (basic solver uses single tol)
         if rtol is not None:
             self.tol = min(self.tol, float(rtol))
         if atol is not None:
             self.tol = min(self.tol, float(atol))
+        # Step-size preferences (used by adaptive solvers)
+        self.min_h = float(min_h) if min_h is not None else (float(min_step) if min_step is not None else None)
+        self.max_h = float(max_h) if max_h is not None else (float(max_step) if max_step is not None else None)
 
         # Validate derivative type
         valid_derivatives = [
@@ -90,6 +215,19 @@ class FractionalODESolver:
         ]
         if self.method not in valid_methods:
             raise ValueError(f"Method must be one of {valid_methods}")
+
+    def _validate_alpha(self, alpha: Union[float, FractionalOrder]):
+        """Validate the fractional order."""
+        if isinstance(alpha, FractionalOrder):
+            alpha_val = alpha.alpha
+        else:
+            alpha_val = alpha
+        
+        if not 0 < alpha_val <= 2:
+            raise ValueError(f"Fractional order alpha must be in (0, 2], but got {alpha_val}")
+
+        if self.method == "predictor_corrector" and not (0.0 < alpha_val <= 1.0):
+            raise ValueError(f"The predictor-corrector method currently only supports orders in (0, 1], but got {alpha_val}")
 
     def solve(
         self,
@@ -114,6 +252,9 @@ class FractionalODESolver:
         Returns:
             Tuple of (t_values, y_values)
         """
+        # Validate alpha range
+        self._validate_alpha(alpha)
+
         t0, tf = t_span
 
         if h is None:
@@ -133,71 +274,95 @@ class FractionalODESolver:
             raise ValueError(f"Unknown method: {self.method}")
 
     def _solve_predictor_corrector(
-        self,
-        f: Callable,
-        t0: float,
-        tf: float,
-        y0: Union[float, np.ndarray],
-        alpha: Union[float, FractionalOrder],
-        h: float,
-        **kwargs,
-    ) -> Tuple[np.ndarray, np.ndarray]:
+        self, f, t0, tf, y0, alpha, h, **kwargs
+    ):
         """
-        Solve using predictor-corrector method.
-
-        Args:
-            f: Right-hand side function
-            t0: Initial time
-            tf: Final time
-            y0: Initial condition
-            alpha: Fractional order
-            h: Step size
-            **kwargs: Additional parameters
-
-        Returns:
-            Tuple of (t_values, y_values)
+        Solve using Adams-Bashforth-Moulton predictor-corrector for Caputo fractional ODEs.
+        
+        Based on the Volterra integral formulation:
+        y(t) = y_0 + (1/Γ(α)) ∫_0^t (t-τ)^(α-1) f(τ, y(τ)) dτ
+        
+        Reference: Diethelm, K. (2010). The Analysis of Fractional Differential Equations.
         """
-        # Convert to arrays if needed
-        if np.isscalar(y0):
-            y0 = np.array([y0])
+        # Only Caputo is supported in this scheme
+        if self.derivative_type != "caputo":
+            raise NotImplementedError("Predictor-corrector currently implemented for Caputo only.")
+        alpha_val = float(alpha.alpha) if hasattr(alpha, "alpha") else float(alpha)
 
-        # Time grid
-        t_values = np.arange(t0, tf + h, h)
-        N = len(t_values)
+        # grid
+        N = int(np.ceil((tf - t0) / h)) + 1
+        t_values = np.linspace(t0, tf, N, dtype=float)
 
-        # Solution array
-        y_values = np.zeros((N, len(y0)))
-        y_values[0] = y0
+        y0_arr = np.atleast_1d(np.array(y0, dtype=float))
+        m = y0_arr.size
+        Y = np.zeros((N, m), dtype=float)
+        Y[0] = y0_arr
 
-        # Compute fractional derivative coefficients
-        coeffs = self._compute_fractional_coefficients(alpha, N)
+        # history of f
+        F = np.zeros((N, m), dtype=float)
+        F[0] = f(t_values[0], Y[0])
 
-        # Main iteration loop
-        for n in range(1, N):
-            t_values[n]
+        # ABM weights: b for predictor, c for corrector
+        b, c = self._abm_weights(alpha_val, N)
+        inv_g1 = 1.0 / gamma(alpha_val + 1.0)
+        inv_g2 = 1.0 / gamma(alpha_val + 2.0)
 
-            # Predictor step (Adams-Bashforth type)
-            y_pred = self._predictor_step(
-                f, t_values, y_values, n, alpha, coeffs, h)
+        # FFT threshold: use FFT when history length exceeds this value
+        fft_threshold = kwargs.get('fft_threshold', 64)
+        
+        # Number of corrector iterations for implicit refinement
+        max_corrector_iter = kwargs.get('max_corrector_iter', 3)
+        verbose = kwargs.get('verbose', False)
 
-            # Corrector step (Adams-Moulton type)
-            y_corr = self._corrector_step(
-                f, t_values, y_values, y_pred, n, alpha, coeffs, h
-            )
+        for n in range(0, N - 1):
+            # Compute history sum for predictor: S_p = sum_{j=0..n} b_{n-j} f(t_j, y_j)
+            if n + 1 < fft_threshold:
+                Sp = (b[:n+1][::-1, None] * F[:n+1]).sum(axis=0)
+            else:
+                Sp = _fast_history_sum(b[:n+1], F[:n+1], reverse=True, verbose=verbose)
+            
+            # Predictor step: y^{p}_{n+1} = y_0 + h^α/Γ(α+1) * S_p
+            y_pred = y0_arr + (h**alpha_val) * inv_g1 * Sp
 
-            # Iterative correction
-            for _ in range(self.max_iter):
+            # Compute history sum for corrector: S_c = sum_{j=0..n} c_{n-j} f(t_j, y_j)
+            # Note: This uses same history F[:n+1] but different weights (c vs b)
+            if n + 1 < fft_threshold:
+                Sc = (c[:n+1][::-1, None] * F[:n+1]).sum(axis=0)
+            else:
+                Sc = _fast_history_sum(c[:n+1], F[:n+1], reverse=True, verbose=verbose)
+            
+            # Corrector step with iterative refinement
+            # Formula: y_{n+1} = y_0 + h^α/Γ(α+2) * (f(t_{n+1}, y_{n+1}) + S_c)
+            # This is implicit in y_{n+1}, so we iterate to convergence
+            
+            start_time_corr = time.perf_counter()
+            y_corr = y_pred.copy()  # Initial guess from predictor
+            
+            final_iter_count = 0
+            for iter_count in range(max_corrector_iter):
+                final_iter_count = iter_count + 1
                 y_old = y_corr.copy()
-                y_corr = self._corrector_step(
-                    f, t_values, y_values, y_pred, n, alpha, coeffs, h
-                )
-
-                if np.allclose(y_corr, y_old, rtol=self.tol):
+                
+                # Evaluate f at current corrector estimate
+                f_corr = f(t_values[n+1], y_corr)
+                
+                # Update corrector estimate
+                y_corr = y0_arr + (h**alpha_val) * inv_g2 * (f_corr + Sc)
+                
+                # Check convergence
+                if np.allclose(y_corr, y_old, rtol=self.tol, atol=self.tol):
                     break
+            
+            end_time_corr = time.perf_counter()
+            if verbose:
+                print(f"[TIMING] Corrector loop (n={n}, iters={final_iter_count}): {end_time_corr - start_time_corr:.6f}s")
 
-            y_values[n] = y_corr
+            # Store converged solution
+            Y[n+1] = y_corr
+            F[n+1] = f(t_values[n+1], y_corr)
 
-        return t_values, y_values
+        return t_values, Y
+
 
     def _solve_adams_bashforth(
         self,
@@ -241,8 +406,6 @@ class FractionalODESolver:
 
         # Main iteration loop
         for n in range(1, N):
-            t_values[n]
-
             # Adams-Bashforth step
             y_values[n] = self._adams_bashforth_step(
                 f, t_values, y_values, n, alpha, coeffs, h
@@ -289,8 +452,6 @@ class FractionalODESolver:
 
         # Main iteration loop
         for n in range(1, N):
-            t_values[n]
-
             # Fractional Runge-Kutta step
             y_values[n] = self._runge_kutta_step(
                 f, t_values, y_values, n, alpha, h)
@@ -334,18 +495,34 @@ class FractionalODESolver:
         y_values = np.zeros((N, len(y0)))
         y_values[0] = y0
 
-        # Compute fractional derivative coefficients
-        coeffs = self._compute_fractional_coefficients(alpha, N)
-
         # Main iteration loop
         for n in range(1, N):
-            t_values[n]
-
             # Fractional Euler step
             y_values[n] = self._euler_step(
-                f, t_values, y_values, n, alpha, coeffs, h)
+                f, t_values, y_values, n, alpha, h)
 
         return t_values, y_values
+
+    def _euler_step(
+        self,
+        f: Callable,
+        t_values: np.ndarray,
+        y_values: np.ndarray,
+        n: int,
+        alpha: Union[float, FractionalOrder],
+        h: float,
+    ) -> np.ndarray:
+        """Minimal fractional Euler update for 0<α≤1.
+
+        y_n = y_{n-1} + h^α / Γ(α+1) * f(t_{n-1}, y_{n-1})
+        """
+        if isinstance(alpha, FractionalOrder):
+            alpha_val = float(alpha.alpha)
+        else:
+            alpha_val = float(alpha)
+
+        inv_gamma = 1.0 / gamma(alpha_val + 1.0)
+        return y_values[n - 1] + (h ** alpha_val) * inv_gamma * f(t_values[n - 1], y_values[n - 1])
 
     def _compute_fractional_coefficients(
         self, alpha: Union[float, FractionalOrder], N: int
@@ -382,560 +559,19 @@ class FractionalODESolver:
 
         return coeffs
 
-    def _predictor_step(
-        self,
-        f: Callable,
-        t_values: np.ndarray,
-        y_values: np.ndarray,
-        n: int,
-        alpha: Union[float, FractionalOrder],
-        coeffs: np.ndarray,
-        h: float,
-    ) -> np.ndarray:
-        """
-        Predictor step for Adams-Bashforth type method.
+    def _abm_weights(self, alpha: float, N: int):
+        # Predictor weights b_k = (k+1)^α - k^α
+        k = np.arange(N, dtype=float)
+        b = (k + 1.0)**alpha - k**alpha
+        # Corrector weights c_k = Δ^2 (k)^{α+1}
+        c = np.empty(N, dtype=float)
+        c[0] = 1.0
+        if N > 1:
+            kk = np.arange(1, N, dtype=float)
+            c[1:] = (kk + 1.0)**(alpha + 1.0) - 2.0*kk**(alpha + 1.0) + (kk - 1.0)**(alpha + 1.0)
+        return b, c
 
-        Args:
-            f: Right-hand side function
-            t_values: Time points
-            y_values: Solution values
-            n: Current time step
-            alpha: Fractional order
-            coeffs: Fractional coefficients
-            h: Step size
 
-        Returns:
-            Predicted solution
-        """
-        if isinstance(alpha, FractionalOrder):
-            alpha_val = alpha.alpha
-        else:
-            alpha_val = alpha
-
-        # Compute fractional derivative term
-        frac_term = 0.0
-        for j in range(n):
-            frac_term += coeffs[j] * (y_values[n - j] - y_values[n - j - 1])
-
-        # Predictor formula
-        t_n = t_values[n]
-        y_pred = y_values[n - 1] + (h**alpha_val / gamma(alpha_val + 1)) * (
-            f(t_n, y_values[n - 1]) - frac_term
-        )
-
-        return y_pred
-
-    def _corrector_step(
-        self,
-        f: Callable,
-        t_values: np.ndarray,
-        y_values: np.ndarray,
-        y_pred: np.ndarray,
-        n: int,
-        alpha: Union[float, FractionalOrder],
-        coeffs: np.ndarray,
-        h: float,
-    ) -> np.ndarray:
-        """
-        Corrector step for Adams-Moulton type method.
-
-        Args:
-            f: Right-hand side function
-            t_values: Time points
-            y_values: Solution values
-            y_pred: Predicted solution
-            n: Current time step
-            alpha: Fractional order
-            coeffs: Fractional coefficients
-            h: Step size
-
-        Returns:
-            Corrected solution
-        """
-        if isinstance(alpha, FractionalOrder):
-            alpha_val = alpha.alpha
-        else:
-            alpha_val = alpha
-
-        # Compute fractional derivative term
-        frac_term = 0.0
-        for j in range(n):
-            frac_term += coeffs[j] * (y_values[n - j] - y_values[n - j - 1])
-
-        # Corrector formula
-        t_n = t_values[n]
-        y_corr = y_values[n - 1] + (h**alpha_val / gamma(alpha_val + 1)) * (
-            0.5 * (f(t_n, y_pred) +
-                   f(t_values[n - 1], y_values[n - 1])) - frac_term
-        )
-
-        return y_corr
-
-    def _adams_bashforth_step(
-        self,
-        f: Callable,
-        t_values: np.ndarray,
-        y_values: np.ndarray,
-        n: int,
-        alpha: Union[float, FractionalOrder],
-        coeffs: np.ndarray,
-        h: float,
-    ) -> np.ndarray:
-        """
-        Adams-Bashforth step.
-
-        Args:
-            f: Right-hand side function
-            t_values: Time points
-            y_values: Solution values
-            n: Current time step
-            alpha: Fractional order
-            coeffs: Fractional coefficients
-            h: Step size
-
-        Returns:
-            Solution at next time step
-        """
-        if isinstance(alpha, FractionalOrder):
-            alpha_val = alpha.alpha
-        else:
-            alpha_val = alpha
-
-        # Compute fractional derivative term
-        frac_term = 0.0
-        for j in range(n):
-            frac_term += coeffs[j] * (y_values[n - j] - y_values[n - j - 1])
-
-        # Adams-Bashforth formula
-        t_n = t_values[n]
-        y_next = y_values[n - 1] + (h**alpha_val / gamma(alpha_val + 1)) * (
-            f(t_n, y_values[n - 1]) - frac_term
-        )
-
-        return y_next
-
-    def _runge_kutta_step(
-        self,
-        f: Callable,
-        t_values: np.ndarray,
-        y_values: np.ndarray,
-        n: int,
-        alpha: Union[float, FractionalOrder],
-        h: float,
-    ) -> np.ndarray:
-        """
-        Fractional Runge-Kutta step.
-
-        Args:
-            f: Right-hand side function
-            t_values: Time points
-            y_values: Solution values
-            n: Current time step
-            alpha: Fractional order
-            h: Step size
-
-        Returns:
-            Solution at next time step
-        """
-        if isinstance(alpha, FractionalOrder):
-            alpha_val = alpha.alpha
-        else:
-            alpha_val = alpha
-
-        t_n = t_values[n]
-        y_n = y_values[n - 1]
-
-        # Runge-Kutta coefficients
-        k1 = f(t_n, y_n)
-        k2 = f(t_n + h / 2, y_n + h / 2 * k1)
-        k3 = f(t_n + h / 2, y_n + h / 2 * k2)
-        k4 = f(t_n + h, y_n + h * k3)
-
-        # Runge-Kutta formula
-        y_next = (
-            y_n
-            + (h**alpha_val / gamma(alpha_val + 1)) *
-            (k1 + 2 * k2 + 2 * k3 + k4) / 6
-        )
-
-        return y_next
-
-    def _euler_step(
-        self,
-        f: Callable,
-        t_values: np.ndarray,
-        y_values: np.ndarray,
-        n: int,
-        alpha: Union[float, FractionalOrder],
-        coeffs: np.ndarray,
-        h: float,
-    ) -> np.ndarray:
-        """
-        Fractional Euler step.
-
-        Args:
-            f: Right-hand side function
-            t_values: Time points
-            y_values: Solution values
-            n: Current time step
-            alpha: Fractional order
-            coeffs: Fractional coefficients
-            h: Step size
-
-        Returns:
-            Solution at next time step
-        """
-        if isinstance(alpha, FractionalOrder):
-            alpha_val = alpha.alpha
-        else:
-            alpha_val = alpha
-
-        # Compute fractional derivative term
-        frac_term = 0.0
-        for j in range(n):
-            frac_term += coeffs[j] * (y_values[n - j] - y_values[n - j - 1])
-
-        # Euler formula
-        t_n = t_values[n]
-        y_next = y_values[n - 1] + (h**alpha_val / gamma(alpha_val + 1)) * (
-            f(t_n, y_values[n - 1]) - frac_term
-        )
-
-        return y_next
-
-
-class AdaptiveFractionalODESolver(FractionalODESolver):
-    """
-    Adaptive fractional ODE solver with error estimation and step size control.
-    """
-
-    def __init__(
-        self,
-        derivative_type: str = "caputo",
-        method: str = "predictor_corrector",
-        tol: float = 1e-6,
-        max_iter: int = 1000,
-        min_h: float = 1e-8,
-        max_h: float = 1e-2,
-        *,
-        rtol: Optional[float] = None,
-        atol: Optional[float] = None,
-        max_step: Optional[float] = None,
-        min_step: Optional[float] = None,
-        fractional_order: Optional[Union[float, FractionalOrder]] = None,
-    ):
-        """
-        Initialize adaptive fractional ODE solver.
-
-        Args:
-            derivative_type: Type of fractional derivative
-            method: Numerical method
-            tol: Tolerance for error control
-            max_iter: Maximum number of iterations
-            min_h: Minimum step size
-            max_h: Maximum step size
-        """
-        super().__init__(derivative_type, method, True, tol, max_iter)
-        # Map aliases for step sizes if provided
-        if max_step is not None:
-            max_h = float(max_step)
-        if min_step is not None:
-            min_h = float(min_step)
-        self.min_h = min_h
-        self.max_h = max_h
-        # Accept rtol/atol for compatibility; use the most stringent among tol/rtol/atol
-        if rtol is not None:
-            self.tol = min(self.tol, float(rtol))
-        if atol is not None:
-            self.tol = min(self.tol, float(atol))
-        # Preserve fractional_order argument for compatibility
-        self.fractional_order = fractional_order
-
-    def solve(
-        self,
-        f: Callable,
-        t_span: Tuple[float, float],
-        y0: Union[float, np.ndarray],
-        alpha: Union[float, FractionalOrder],
-        h0: Optional[float] = None,
-        **kwargs,
-    ) -> Tuple[np.ndarray, np.ndarray]:
-
-        t0, tf = t_span
-        if h0 is None:
-            h0 = (tf - t0) / 100.0
-
-        # ensure array
-        y0 = np.atleast_1d(np.array(y0, dtype=float))
-
-        t_values = [t0]
-        y_values = [y0.copy()]
-
-        t = float(t0)
-        y = y0.copy()
-        h = float(h0)
-
-        # Controller parameters (robust defaults)
-        safety = 0.9          # safety factor on step adaptation
-        max_growth = 5.0      # limit how fast h can grow
-        min_shrink = 0.2      # limit how fast h can shrink
-        # exponent when accepting (typical for embedded order diff)
-        p_acc = 0.5
-        p_rej = 0.25          # exponent when rejecting
-        tiny = 10*np.finfo(float).eps
-
-        # Global iteration cap as a last resort
-        total_iters = 0
-        max_total_iters = getattr(self, "max_total_iters", 10_0000)
-
-        while t < tf - tiny:
-            total_iters += 1
-            if total_iters > max_total_iters:
-                raise RuntimeError(
-                    "Adaptive solver exceeded maximum total iterations; likely stalled.")
-
-            # Enforce a floor on the step that depends on current magnitude of t
-            h_floor = max(getattr(self, "min_h", 1e-12),
-                          10*np.finfo(float).eps * max(1.0, abs(t)))
-
-            # avoid negative or zero step
-            h = max(h, h_floor)
-
-            # Do not step beyond tf
-            if t + h > tf:
-                h = tf - t
-
-            # If FP says no progress, force a slightly bigger step
-            if t + h <= t:
-                # snap to remaining interval if needed
-                h = max(h_floor, (tf - t))
-
-            # Inner retry loop for the same target (PI controller pattern)
-            retries = 0
-            max_retries = getattr(self, "max_retries", 20)
-
-            while True:
-                t_next = t + h
-                # Protect again against degeneracy
-                if t_next <= t + tiny:
-                    # If even advancing by tiny doesn’t move, we’re at FP limit; break
-                    t_next = np.nextafter(t, tf)
-                    h = t_next - t
-
-                # Take a trial step
-                y_trial = self._adaptive_step(f, t, t_next, y, alpha, h)
-
-                # Compute a scalar error norm robustly
-                err_val = self._estimate_error(
-                    f, t, t_next, y, y_trial, alpha, h)
-
-                # Convert to finite scalar
-                if isinstance(err_val, np.ndarray):
-                    err = float(np.linalg.norm(err_val, ord=np.inf))
-                else:
-                    err = float(err_val)
-
-                if not np.isfinite(err):
-                    # Non-finite error: shrink hard and retry
-                    h_new = max(min_shrink * h, h_floor)
-                    if h_new == h or retries >= max_retries:
-                        # Give up on error estimate; accept to avoid infinite loop
-                        break
-                    h = h_new
-                    retries += 1
-                    continue
-
-                # Bound away from zero to avoid division overflow,
-                # but treat exact zero as "perfect" and grow to the cap.
-                if err == 0.0:
-                    factor = max_growth
-                else:
-                    factor = safety * \
-                        (self.tol / err) ** (p_acc if err <= self.tol else p_rej)
-                    # clamp
-                    factor = float(np.clip(factor, min_shrink, max_growth))
-
-                if err <= self.tol:
-                    # Accept the step
-                    t = t_next
-                    y = y_trial
-                    t_values.append(t)
-                    y_values.append(y.copy())
-                    # Propose next h
-                    h = max(h_floor, min(
-                        getattr(self, "max_h", np.inf), h * factor))
-                    break
-                else:
-                    # Reject: shrink and retry (do not advance t)
-                    h_new = max(h_floor, h * factor)
-                    # If we can’t shrink further or we’ve retried too much, force accept to avoid stall
-                    if (h_new >= h * 0.9999 and h <= h_floor * 1.0001) or retries >= max_retries:
-                        # Accept with warning behaviour: take the step but increase a bit to escape
-                        t = t_next
-                        y = y_trial
-                        t_values.append(t)
-                        y_values.append(y.copy())
-                        h = max(h_floor, min(
-                            getattr(self, "max_h", np.inf), h * 1.25))
-                        break
-                    h = h_new
-                    retries += 1
-
-        return np.array(t_values, dtype=float), np.vstack(y_values)
-
-    def _adaptive_step(
-        self,
-        f: Callable,
-        t_current: float,
-        t_next: float,
-        y_current: np.ndarray,
-        alpha: Union[float, FractionalOrder],
-        h: float,
-    ) -> np.ndarray:
-        """
-        Compute adaptive step.
-
-        Args:
-            f: Right-hand side function
-            t_current: Current time
-            t_next: Next time
-            y_current: Current solution
-            alpha: Fractional order
-            h: Step size
-
-        Returns:
-            Solution at next time
-        """
-        if self.method == "predictor_corrector":
-            return self._adaptive_predictor_corrector(
-                f, t_current, t_next, y_current, alpha, h
-            )
-        elif self.method == "runge_kutta":
-            return self._adaptive_runge_kutta(
-                f, t_current, t_next, y_current, alpha, h)
-        else:
-            # Fall back to non-adaptive method
-            return self._euler_step(
-                f,
-                np.array([t_current, t_next]),
-                np.array([y_current, y_current]),
-                1,
-                alpha,
-                self._compute_fractional_coefficients(alpha, 2),
-                h,
-            )
-
-    def _adaptive_predictor_corrector(
-        self,
-        f: Callable,
-        t_current: float,
-        t_next: float,
-        y_current: np.ndarray,
-        alpha: Union[float, FractionalOrder],
-        h: float,
-    ) -> np.ndarray:
-        """
-        Adaptive predictor-corrector step.
-
-        Args:
-            f: Right-hand side function
-            t_current: Current time
-            t_next: Next time
-            y_current: Current solution
-            alpha: Fractional order
-            h: Step size
-
-        Returns:
-            Solution at next time
-        """
-        # Predictor step
-        y_pred = y_current + (h**alpha / gamma(alpha + 1)
-                              ) * f(t_current, y_current)
-
-        # Corrector step with iteration
-        y_corr = y_pred
-        for _ in range(self.max_iter):
-            y_old = y_corr.copy()
-            y_corr = y_current + (h**alpha / gamma(alpha + 1)) * (
-                0.5 * (f(t_next, y_pred) + f(t_current, y_current))
-            )
-
-            if np.allclose(y_corr, y_old, rtol=self.tol):
-                break
-
-        return y_corr
-
-    def _adaptive_runge_kutta(
-        self,
-        f: Callable,
-        t_current: float,
-        t_next: float,
-        y_current: np.ndarray,
-        alpha: Union[float, FractionalOrder],
-        h: float,
-    ) -> np.ndarray:
-        """
-        Adaptive Runge-Kutta step.
-
-        Args:
-            f: Right-hand side function
-            t_current: Current time
-            t_next: Next time
-            y_current: Current solution
-            alpha: Fractional order
-            h: Step size
-
-        Returns:
-            Solution at next time
-        """
-        # Runge-Kutta coefficients
-        k1 = f(t_current, y_current)
-        k2 = f(t_current + h / 2, y_current + h / 2 * k1)
-        k3 = f(t_current + h / 2, y_current + h / 2 * k2)
-        k4 = f(t_next, y_current + h * k3)
-
-        # Runge-Kutta formula
-        y_next = (
-            y_current + (h**alpha / gamma(alpha + 1)) *
-            (k1 + 2 * k2 + 2 * k3 + k4) / 6
-        )
-
-        return y_next
-
-    def _estimate_error(
-        self,
-        f: Callable,
-        t_current: float,
-        t_next: float,
-        y_current: np.ndarray,
-        y_next: np.ndarray,
-        alpha: Union[float, FractionalOrder],
-        h: float,
-    ) -> float:
-        """
-        Estimate local truncation error.
-
-        Args:
-            f: Right-hand side function
-            t_current: Current time
-            t_next: Next time
-            y_current: Current solution
-            y_next: Next solution
-            alpha: Fractional order
-            h: Step size
-
-        Returns:
-            Estimated error
-        """
-        # Use difference between predictor and corrector as error estimate
-        y_pred = y_current + (h**alpha / gamma(alpha + 1)
-                              ) * f(t_current, y_current)
-        error = np.linalg.norm(y_next - y_pred)
-
-        return error
-
-
-# Convenience functions
 def solve_fractional_ode(
     f: Callable,
     t_span: Tuple[float, float],
@@ -943,33 +579,22 @@ def solve_fractional_ode(
     alpha: Union[float, FractionalOrder],
     derivative_type: str = "caputo",
     method: str = "predictor_corrector",
-    adaptive: bool = True,
+    adaptive: bool = False,
     h: Optional[float] = None,
     **kwargs,
 ) -> Tuple[np.ndarray, np.ndarray]:
     """
     Solve fractional ODE.
-
-    Args:
-        f: Right-hand side function f(t, y)
-        t_span: Time interval (t0, tf)
-        y0: Initial condition(s)
-        alpha: Fractional order
-        derivative_type: Type of fractional derivative
-        method: Numerical method
-        adaptive: Use adaptive step size control
-        h: Step size (None for adaptive)
-        **kwargs: Additional solver parameters
-
-    Returns:
-        Tuple of (t_values, y_values)
     """
     if adaptive:
-        solver = AdaptiveFractionalODESolver(derivative_type, method)
-    else:
-        solver = FractionalODESolver(derivative_type, method, adaptive)
+        raise NotImplementedError("The adaptive solver is currently disabled due to a critical implementation flaw. Please use the fixed-step solver (adaptive=False).")
+
+    solver = FixedStepODESolver(derivative_type, method, adaptive=False)
 
     return solver.solve(f, t_span, y0, alpha, h, **kwargs)
+
+# Backwards-compatibility alias for tests and external users
+AdaptiveFractionalODESolver = None
 
 
 def solve_fractional_system(

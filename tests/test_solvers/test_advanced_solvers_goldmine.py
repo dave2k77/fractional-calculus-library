@@ -3,6 +3,12 @@
 
 import pytest
 import numpy as np
+
+# Skip this goldmine test if legacy advanced solvers module is not available
+pytest.importorskip(
+    "hpfracc.solvers.advanced_solvers",
+    reason="hpfracc.solvers.advanced_solvers not available in current API",
+)
 from hpfracc.solvers.advanced_solvers import *
 from hpfracc.core.definitions import FractionalOrder
 

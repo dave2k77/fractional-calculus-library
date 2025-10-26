@@ -21,8 +21,8 @@ def setup_jax_gpu() -> bool:
     try:
         import jax
 
-        # Set environment variables to prefer GPU
-        os.environ['JAX_PLATFORM_NAME'] = 'gpu'
+        # DON'T set JAX_PLATFORM_NAME - let JAX auto-detect to avoid PJRT plugin conflicts
+        # os.environ['JAX_PLATFORM_NAME'] = 'gpu'  # REMOVED: causes "ALREADY_EXISTS: PJRT_Api already exists" error
 
         # Check if GPU is available
         devices = jax.devices()
