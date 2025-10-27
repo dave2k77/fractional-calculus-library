@@ -71,7 +71,7 @@ class TestNeuralFractionalSDE:
         model = NeuralFractionalSDE(self.config)
         
         assert model.config is self.config
-        assert model.fractional_order.alpha == 0.5
+        assert model.fractional_order_value == 0.5
         assert model.input_dim == 2
         assert model.diffusion_dim == 1
     
@@ -112,10 +112,10 @@ class TestNeuralFractionalSDE:
         
         # Forward pass
         with torch.no_grad():
-            trajectory = model.forward(t, x0)
+            trajectory = model.forward(x0, t)
         
         # Check output shape
-        assert trajectory.shape == (3, 1, 2)  # (time_steps, batch_size, output_dim)
+        assert trajectory.shape == (101, 1, 2)  # (time_steps, batch_size, output_dim) - num_steps + 1
         assert not torch.any(torch.isnan(trajectory))
         assert not torch.any(torch.isinf(trajectory))
     
@@ -225,7 +225,7 @@ class TestNeuralFractionalSDE:
                        if 'alpha' in name]
         
         assert len(alpha_params) == 0
-        assert model.fractional_order.alpha == 0.7
+        assert model.fractional_order_value == 0.7
     
     def test_batch_processing(self):
         """Test batch processing"""
@@ -283,7 +283,7 @@ class TestNeuralFractionalSDE:
                 trajectory = model.forward(t, x0)
             
             assert trajectory.shape == (3, 1, 2)
-            assert model.fractional_order.alpha == alpha
+            assert model.fractional_order_value == alpha
 
 
 class TestCreateNeuralFSDE:
@@ -300,7 +300,7 @@ class TestCreateNeuralFSDE:
         
         assert isinstance(model, NeuralFractionalSDE)
         assert model.input_dim == 3
-        assert model.fractional_order.alpha == 0.6
+        assert model.fractional_order_value == 0.6
     
     def test_create_with_custom_config(self):
         """Test creating neural fSDE with custom config"""
