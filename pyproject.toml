@@ -13,7 +13,7 @@ maintainers = [
     {name = "Davian R. Chin", email = "d.r.chin@pgr.reading.ac.uk"}
 ]
 readme = "README.md"
-license = "MIT"
+license = {text = "MIT"}
 requires-python = ">=3.9"
 keywords = ["fractional-calculus", "numerical-methods", "machine-learning", "graph-neural-networks", "autograd", "spectral-methods", "stochastic-optimization", "jax", "pytorch", "numba", "scientific-computing", "mathematics", "deep-learning"]
 classifiers = [
