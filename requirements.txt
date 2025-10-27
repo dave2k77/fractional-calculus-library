@@ -37,6 +37,9 @@ pre-commit>=2.15.0
 # Neural ODE dependencies
 torchdiffeq>=0.2.5
 
+# Probabilistic programming (optional, for Bayesian models)
+# numpyro>=0.13.0
+
 # Jupyter for examples and development
 jupyter>=1.0.0
 ipykernel>=6.0.0

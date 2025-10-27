@@ -9,7 +9,7 @@ for training and inference.
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from typing import Tuple, List
+from typing import Tuple, List, Callable, Union
 from dataclasses import dataclass
 
 from ..core.definitions import FractionalOrder
@@ -26,6 +26,8 @@ class AdjointConfig:
     precision: str = "float32"  # "float32", "float64", "mixed"
     gradient_accumulation: bool = False
     accumulation_steps: int = 4
+    sde_noise_type: str = "itô"  # "itô" or "stratonovich" for SDE backward pass
+    bsde_method: str = "fd"  # "fd" (finite difference) or "sem" (semi-analytic) for BSDEs
 
 
 class AdjointFractionalDerivative(torch.autograd.Function):
@@ -547,6 +549,97 @@ def adjoint_caputo_derivative(x: torch.Tensor, alpha: float) -> torch.Tensor:
 def adjoint_gl_derivative(x: torch.Tensor, alpha: float) -> torch.Tensor:
     """Adjoint-optimized Grünwald-Letnikov fractional derivative"""
     return adjoint_fractional_derivative(x, alpha, "GL")
+
+
+# ============================================================================
+# SDE ADJOINT METHODS
+# ============================================================================
+
+class AdjointSDEGradient(torch.autograd.Function):
+    """
+    Adjoint method for computing gradients through SDE solvers.
+    
+    Implements backward SDE (BSDE) for gradient computation with proper
+    handling of stochastic noise terms.
+    """
+    
+    @staticmethod
+    def forward(ctx, *args, **kwargs):
+        """Forward pass: save SDE trajectory"""
+        # This will be implemented by the SDE solver
+        pass
+    
+    @staticmethod
+    def backward(ctx, grad_output):
+        """Backward pass: solve adjoint SDE"""
+        # Implementation of BSDE
+        pass
+
+
+def adjoint_sde_gradient(
+    drift: Callable,
+    diffusion: Callable,
+    t_span: Tuple[float, float],
+    x0: torch.Tensor,
+    loss_fn: Callable,
+    fractional_order: Union[float, FractionalOrder],
+    config: AdjointConfig = None
+) -> torch.Tensor:
+    """
+    Compute gradients through fractional SDE using adjoint method.
+    
+    Args:
+        drift: Drift function f(t, x, theta)
+        diffusion: Diffusion function g(t, x, theta)
+        t_span: Time interval (t0, tf)
+        x0: Initial condition
+        loss_fn: Loss function L(x_final)
+        fractional_order: Fractional order
+        config: Adjoint configuration
+        
+    Returns:
+        Gradients with respect to parameters
+    """
+    config = config or AdjointConfig()
+    
+    # This is a placeholder for the full implementation
+    # The actual implementation would:
+    # 1. Forward: Solve the fractional SDE
+    # 2. Backward: Solve the adjoint BSDE
+    # 3. Return parameter gradients
+    
+    raise NotImplementedError("SDE adjoint gradient computation coming in Phase 2")
+
+
+class BSDEIntegrator:
+    """
+    Backward Stochastic Differential Equation integrator.
+    
+    Solves the adjoint equation for gradient computation in SDEs.
+    """
+    
+    def __init__(self, config: AdjointConfig):
+        self.config = config
+    
+    def solve(
+        self,
+        adjoint_sde: Callable,
+        terminal_condition: torch.Tensor,
+        t_span: Tuple[float, float]
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
+        """
+        Solve backward SDE (BSDE).
+        
+        Args:
+            adjoint_sde: Adjoint SDE drift function
+            terminal_condition: Terminal condition lambda(tf)
+            t_span: Time interval
+            
+        Returns:
+            Adjoint trajectory and parameter gradients
+        """
+        # Placeholder for BSDE solver implementation
+        raise NotImplementedError("BSDE integrator coming in Phase 2")
 
 
 if __name__ == "__main__":

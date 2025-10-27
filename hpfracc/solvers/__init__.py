@@ -13,6 +13,34 @@ from .pde_solvers import (
     solve_fractional_pde
 )
 
+from .sde_solvers import (
+    FractionalSDESolver,
+    FractionalEulerMaruyama,
+    FractionalMilstein,
+    SDESolution,
+    solve_fractional_sde,
+    solve_fractional_sde_system
+)
+
+from .noise_models import (
+    NoiseModel,
+    BrownianMotion,
+    FractionalBrownianMotion,
+    LevyNoise,
+    ColouredNoise,
+    NoiseConfig,
+    create_noise_model,
+    generate_noise_trajectory
+)
+
+from .coupled_solvers import (
+    CoupledSystemSolver,
+    OperatorSplittingSolver,
+    MonolithicSolver,
+    CoupledSolution,
+    solve_coupled_graph_sde
+)
+
 __all__ = [
     # ODE Solvers
     'FixedStepODESolver',
@@ -25,6 +53,31 @@ __all__ = [
     'FractionalAdvectionSolver',
     'FractionalReactionDiffusionSolver',
     'solve_fractional_pde',
+    
+    # SDE Solvers
+    'FractionalSDESolver',
+    'FractionalEulerMaruyama',
+    'FractionalMilstein',
+    'SDESolution',
+    'solve_fractional_sde',
+    'solve_fractional_sde_system',
+    
+    # Noise Models
+    'NoiseModel',
+    'BrownianMotion',
+    'FractionalBrownianMotion',
+    'LevyNoise',
+    'ColouredNoise',
+    'NoiseConfig',
+    'create_noise_model',
+    'generate_noise_trajectory',
+    
+    # Coupled Solvers
+    'CoupledSystemSolver',
+    'OperatorSplittingSolver',
+    'MonolithicSolver',
+    'CoupledSolution',
+    'solve_coupled_graph_sde',
 ]
 
 # Backward-compatibility aliases for tests expecting legacy names

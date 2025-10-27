@@ -713,3 +713,292 @@ class FractionalCombinedLoss(FractionalLossFunction):
             total_loss += weight * loss
 
         return total_loss
+
+
+# ============================================================================
+# SDE-SPECIFIC LOSS FUNCTIONS
+# ============================================================================
+
+class FractionalSDEMSELoss(FractionalLossFunction):
+    """
+    MSE loss for fractional SDE trajectory matching.
+    
+    Computes L2 distance between predicted and target trajectories,
+    accounting for stochastic variability through multiple samples.
+    """
+    
+    def __init__(
+        self,
+        num_samples: int = 10,
+        reduction: str = "mean",
+        fractional_order: float = 0.5,
+        method: str = "RL",
+        backend: Optional[BackendType] = None
+    ):
+        """
+        Initialize SDE MSE loss.
+        
+        Args:
+            num_samples: Number of stochastic samples to average over
+            reduction: Reduction type ("mean", "sum", "none")
+            fractional_order: Fractional order for loss computation
+            method: Fractional derivative method
+            backend: Computation backend
+        """
+        super().__init__(fractional_order, method, backend)
+        self.num_samples = num_samples
+        self.reduction = reduction
+    
+    def compute_loss(self, predictions: Any, targets: Any) -> Any:
+        """
+        Compute MSE loss for SDE trajectories.
+        
+        Args:
+            predictions: Predicted trajectories (may be stochastic samples)
+            targets: Target trajectories
+            
+        Returns:
+            MSE loss
+        """
+        if self.backend == BackendType.TORCH:
+            import torch
+            import torch.nn.functional as F
+            
+            # Handle multiple samples - average across samples
+            if predictions.dim() == 3:  # (num_samples, batch, features)
+                predictions = predictions.mean(dim=0)
+            
+            loss = F.mse_loss(predictions, targets, reduction=self.reduction)
+            return loss
+        else:
+            # JAX/NUMBA implementation
+            # Average over samples if needed
+            if len(predictions.shape) == 3:
+                predictions = self.tensor_ops.mean(predictions, axis=0)
+            
+            squared_diff = (predictions - targets) ** 2
+            
+            if self.reduction == "mean":
+                return self.tensor_ops.mean(squared_diff)
+            elif self.reduction == "sum":
+                return self.tensor_ops.sum(squared_diff)
+            else:
+                return squared_diff
+
+
+class FractionalKLDivergenceLoss(FractionalLossFunction):
+    """
+    KL divergence loss for matching SDE distributions.
+    
+    Measures divergence between predicted and target distributions
+    in stochastic dynamics.
+    """
+    
+    def __init__(
+        self,
+        eps: float = 1e-8,
+        fractional_order: float = 0.5,
+        method: str = "RL",
+        backend: Optional[BackendType] = None
+    ):
+        """
+        Initialize KL divergence loss.
+        
+        Args:
+            eps: Small constant for numerical stability
+            fractional_order: Fractional order for loss computation
+            method: Fractional derivative method
+            backend: Computation backend
+        """
+        super().__init__(fractional_order, method, backend)
+        self.eps = eps
+    
+    def compute_loss(self, predictions: Any, targets: Any) -> Any:
+        """
+        Compute KL divergence loss.
+        
+        Args:
+            predictions: Predicted probabilities or samples
+            targets: Target probabilities or samples
+            
+        Returns:
+            KL divergence loss
+        """
+        if self.backend == BackendType.TORCH:
+            import torch
+            import torch.nn.functional as F
+            
+            # Ensure probabilities are in [0, 1]
+            pred = torch.clamp(predictions, self.eps, 1.0 - self.eps)
+            tgt = torch.clamp(targets, self.eps, 1.0)
+            
+            kl = tgt * torch.log(tgt / pred)
+            return kl.sum()
+        else:
+            # JAX/NUMBA implementation
+            pred = self.tensor_ops.clip(predictions, self.eps, 1.0 - self.eps)
+            tgt = self.tensor_ops.clip(targets, self.eps, 1.0)
+            
+            kl = tgt * self.tensor_ops.log(tgt / pred)
+            return self.tensor_ops.sum(kl)
+
+
+class FractionalPathwiseLoss(FractionalLossFunction):
+    """
+    Pathwise loss with uncertainty weighting.
+    
+    Weighted loss that accounts for prediction uncertainty
+    in stochastic trajectories.
+    """
+    
+    def __init__(
+        self,
+        uncertainty_weight: float = 1.0,
+        fractional_order: float = 0.5,
+        method: str = "RL",
+        backend: Optional[BackendType] = None
+    ):
+        """
+        Initialize pathwise loss.
+        
+        Args:
+            uncertainty_weight: Weight for uncertainty term
+            fractional_order: Fractional order for loss computation
+            method: Fractional derivative method
+            backend: Computation backend
+        """
+        super().__init__(fractional_order, method, backend)
+        self.uncertainty_weight = uncertainty_weight
+    
+    def compute_loss(self, predictions: Any, targets: Any) -> Any:
+        """
+        Compute pathwise loss with uncertainty weighting.
+        
+        Args:
+            predictions: Predicted trajectories with uncertainty
+            targets: Target trajectories
+            
+        Returns:
+            Weighted pathwise loss
+        """
+        if self.backend == BackendType.TORCH:
+            import torch
+            
+            # Compute trajectory loss
+            trajectory_loss = (predictions - targets) ** 2
+            
+            # Estimate uncertainty as variance
+            if predictions.dim() == 3:  # (num_samples, batch, features)
+                uncertainty = predictions.var(dim=0)
+            else:
+                uncertainty = torch.zeros_like(trajectory_loss)
+            
+            # Weighted combination
+            loss = trajectory_loss + self.uncertainty_weight * uncertainty
+            return loss.mean()
+        else:
+            # JAX/NUMBA implementation
+            trajectory_loss = (predictions - targets) ** 2
+            
+            if len(predictions.shape) == 3:
+                uncertainty = self.tensor_ops.var(predictions, axis=0)
+            else:
+                uncertainty = self.tensor_ops.zeros_like(trajectory_loss)
+            
+            loss = trajectory_loss + self.uncertainty_weight * uncertainty
+            return self.tensor_ops.mean(loss)
+
+
+class FractionalMomentMatchingLoss(FractionalLossFunction):
+    """
+    Moment matching loss for SDE distributions.
+    
+    Matches statistical moments (mean, variance, etc.) between
+    predicted and target distributions.
+    """
+    
+    def __init__(
+        self,
+        moments: list = None,
+        weights: list = None,
+        fractional_order: float = 0.5,
+        method: str = "RL",
+        backend: Optional[BackendType] = None
+    ):
+        """
+        Initialize moment matching loss.
+        
+        Args:
+            moments: List of moments to match (default: [1, 2] for mean, variance)
+            weights: Weights for each moment
+            fractional_order: Fractional order for loss computation
+            method: Fractional derivative method
+            backend: Computation backend
+        """
+        super().__init__(fractional_order, method, backend)
+        self.moments = moments or [1, 2]
+        self.weights = weights or [1.0] * len(self.moments)
+        
+        if len(self.weights) != len(self.moments):
+            raise ValueError("Number of weights must match number of moments")
+    
+    def compute_loss(self, predictions: Any, targets: Any) -> Any:
+        """
+        Compute moment matching loss.
+        
+        Args:
+            predictions: Predicted samples or distribution parameters
+            targets: Target samples or distribution parameters
+            
+        Returns:
+            Moment matching loss
+        """
+        if self.backend == BackendType.TORCH:
+            import torch
+            
+            total_loss = 0.0
+            
+            for moment, weight in zip(self.moments, self.weights):
+                # Compute moments
+                pred_moment = self._compute_moment(predictions, moment)
+                tgt_moment = self._compute_moment(targets, moment)
+                
+                # Add weighted squared difference
+                total_loss += weight * (pred_moment - tgt_moment) ** 2
+            
+            return total_loss
+        else:
+            # JAX/NUMBA implementation
+            total_loss = 0.0
+            
+            for moment, weight in zip(self.moments, self.weights):
+                pred_moment = self._compute_moment(predictions, moment)
+                tgt_moment = self._compute_moment(targets, moment)
+                
+                total_loss += weight * (pred_moment - tgt_moment) ** 2
+            
+            return total_loss
+    
+    def _compute_moment(self, x: Any, order: int) -> Any:
+        """Compute statistical moment of given order."""
+        if self.backend == BackendType.TORCH:
+            import torch
+            if order == 1:
+                # Mean
+                return x.mean(dim=0) if x.dim() > 1 else x.mean()
+            elif order == 2:
+                # Variance
+                return x.var(dim=0) if x.dim() > 1 else x.var()
+            else:
+                # Higher moments
+                centered = x - x.mean()
+                return (centered ** order).mean(dim=0) if x.dim() > 1 else (centered ** order).mean()
+        else:
+            # JAX/NUMBA implementation
+            if order == 1:
+                return self.tensor_ops.mean(x, axis=0) if len(x.shape) > 1 else self.tensor_ops.mean(x)
+            elif order == 2:
+                return self.tensor_ops.var(x, axis=0) if len(x.shape) > 1 else self.tensor_ops.var(x)
+            else:
+                centered = x - self.tensor_ops.mean(x)
+                return self.tensor_ops.mean(centered ** order, axis=0) if len(x.shape) > 1 else self.tensor_ops.mean(centered ** order)
