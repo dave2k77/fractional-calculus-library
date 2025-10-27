@@ -184,6 +184,10 @@ class BinomialCoefficients:
         else:
             result = self._binomial_scipy(n, k)
 
+        # Convert to integer if result is a whole number
+        if isinstance(result, (int, float)) and result == int(result):
+            result = int(result)
+
         # Cache scalar results
         if isinstance(n, (float, int)) and isinstance(k, (float, int)):
             if len(self._cache) < self.cache_size:
@@ -196,11 +200,23 @@ class BinomialCoefficients:
         n: Union[float, np.ndarray], k: Union[float, np.ndarray]
     ) -> Union[float, np.ndarray]:
         """SciPy implementation for reference and fallback."""
-        return scipy_special.binom(n, k)
+        result = scipy_special.binom(n, k)
+        
+        # Convert to integer if result is a whole number
+        if isinstance(result, (int, float)) and result == int(result):
+            return int(result)
+        elif isinstance(result, np.ndarray):
+            # Handle array case
+            integer_mask = (result == result.astype(int))
+            result = result.astype(float)
+            result[integer_mask] = result[integer_mask].astype(int)
+            return result
+        
+        return result
 
     @staticmethod
     @jit(nopython=True)
-    def _binomial_numba_scalar(n: float, k: float) -> float:
+    def _binomial_numba_scalar(n: float, k: float) -> Union[int, float]:
         """
         NUMBA-optimized binomial coefficient for scalar inputs.
 
@@ -219,9 +235,9 @@ class BinomialCoefficients:
             if k_int > n_int // 2:
                 k_int = n_int - k_int  # Use symmetry
 
-            result = 1.0
+            result = 1
             for i in range(k_int):
-                result = result * (n_int - i) / (i + 1)
+                result = result * (n_int - i) // (i + 1)
             return result
 
         # For fractional cases, use approximation

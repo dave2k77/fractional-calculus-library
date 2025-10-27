@@ -106,9 +106,9 @@ class MittagLefflerFunction:
             return np.exp(z)
         elif alpha == 2.0 and beta == 1.0:
             if np.isscalar(z):
-                return np.cos(np.sqrt(-z))
+                return np.cos(np.sqrt(-z)) if z <= 0 else np.cosh(np.sqrt(z))
             else:
-                return np.cos(np.sqrt(-z))
+                return np.where(z <= 0, np.cos(np.sqrt(-z)), np.cosh(np.sqrt(z)))
         elif alpha == 2.0 and beta == 2.0:
             if np.isscalar(z):
                 return 1.0 if z == 0 else np.sin(np.sqrt(z)) / np.sqrt(z)
