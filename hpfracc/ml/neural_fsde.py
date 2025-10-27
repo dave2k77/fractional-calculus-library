@@ -215,8 +215,10 @@ class NeuralFractionalSDE(BaseNeuralODE):
             t_np = t
         
         # Get time span - handle both 1D and 2D arrays
-        t_start = float(t_np[0]) if t_np[0].ndim == 0 else float(t_np[0].item())
-        t_end = float(t_np[-1]) if t_np[-1].ndim == 0 else float(t_np[-1].item())
+        # Flatten if needed to get scalar values
+        t_flat = t_np.flatten()
+        t_start = float(t_flat[0])
+        t_end = float(t_flat[-1])
         t_span = (t_start, t_end)
         
         # Wrapper functions for drift and diffusion
