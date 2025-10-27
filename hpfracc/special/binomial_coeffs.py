@@ -216,7 +216,7 @@ class BinomialCoefficients:
 
     @staticmethod
     @jit(nopython=True)
-    def _binomial_numba_scalar(n: float, k: float) -> Union[int, float]:
+    def _binomial_numba_scalar(n: float, k: float) -> float:
         """
         NUMBA-optimized binomial coefficient for scalar inputs.
 
