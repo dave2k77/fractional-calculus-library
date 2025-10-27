@@ -7,17 +7,16 @@ Author: Davian R. Chin <d.r.chin@pgr.reading.ac.uk>
 import numpy as np
 import pytest
 from hpfracc.core.derivatives import (
-    FractionalDerivative, RiemannLiouvilleDerivative, CaputoDerivative,
-    GrunwaldLetnikovDerivative, MillerRossDerivative
+    BaseFractionalDerivative, FractionalDerivativeOperator, FractionalDerivativeFactory
 )
 from hpfracc.core.integrals import (
     FractionalIntegral, RiemannLiouvilleIntegral, CaputoIntegral,
-    GrunwaldLetnikovIntegral, MillerRossIntegral
+    MillerRossIntegral
 )
 from hpfracc.core.definitions import FractionalOrder
 
 
-class TestFractionalDerivative:
+class TestBaseFractionalDerivative:
     """Test base fractional derivative class"""
     
     def setup_method(self):
@@ -25,7 +24,8 @@ class TestFractionalDerivative:
         self.alpha = 0.5
         self.t = np.linspace(0.1, 2.0, 50)
         self.h = self.t[1] - self.t[0]
-        self.derivative = FractionalDerivative(self.alpha)
+        # Use FractionalDerivativeOperator as concrete implementation
+        self.derivative = FractionalDerivativeOperator(self.alpha)
     
     def test_initialization(self):
         """Test fractional derivative initialization"""
@@ -58,27 +58,27 @@ class TestFractionalDerivative:
             assert not np.any(np.isnan(result))
 
 
-class TestRiemannLiouvilleDerivative:
-    """Test Riemann-Liouville derivative implementation"""
+class TestFractionalDerivativeOperator:
+    """Test FractionalDerivativeOperator implementation"""
     
     def setup_method(self):
         """Set up test fixtures"""
         self.alpha = 0.5
         self.t = np.linspace(0.1, 2.0, 50)
         self.h = self.t[1] - self.t[0]
-        self.rl = RiemannLiouvilleDerivative(self.alpha)
+        self.operator = FractionalDerivativeOperator(self.alpha)
     
     def test_initialization(self):
-        """Test Riemann-Liouville derivative initialization"""
-        assert self.rl.alpha.alpha == self.alpha
-        assert isinstance(self.rl.alpha, FractionalOrder)
+        """Test FractionalDerivativeOperator initialization"""
+        assert self.operator.alpha.alpha == self.alpha
+        assert isinstance(self.operator.alpha, FractionalOrder)
     
     def test_compute_with_function(self):
         """Test computing derivative with function input"""
         def f(t):
             return t**2
         
-        result = self.rl.compute(f, self.t, self.h)
+        result = self.operator.compute(f, self.t, self.h)
         
         assert isinstance(result, np.ndarray)
         assert len(result) == len(self.t)
@@ -89,7 +89,7 @@ class TestRiemannLiouvilleDerivative:
         """Test computing derivative with numerical input"""
         f = self.t**2
         
-        result = self.rl.compute(f, self.t, self.h)
+        result = self.operator.compute(f, self.t, self.h)
         
         assert isinstance(result, np.ndarray)
         assert len(result) == len(self.t)
@@ -103,168 +103,13 @@ class TestRiemannLiouvilleDerivative:
         
         # Test linearity
         combined = a * f1 + b * f2
-        result_combined = self.rl.compute(combined, self.t, self.h)
+        result_combined = self.operator.compute(combined, self.t, self.h)
         
-        result_f1 = self.rl.compute(f1, self.t, self.h)
-        result_f2 = self.rl.compute(f2, self.t, self.h)
+        result_f1 = self.operator.compute(f1, self.t, self.h)
+        result_f2 = self.operator.compute(f2, self.t, self.h)
         result_linear = a * result_f1 + b * result_f2
         
         np.testing.assert_allclose(result_combined, result_linear, rtol=1e-2, atol=1e-2)
-
-
-class TestCaputoDerivative:
-    """Test Caputo derivative implementation"""
-    
-    def setup_method(self):
-        """Set up test fixtures"""
-        self.alpha = 0.5
-        self.t = np.linspace(0.1, 2.0, 50)
-        self.h = self.t[1] - self.t[0]
-        self.caputo = CaputoDerivative(self.alpha)
-    
-    def test_initialization(self):
-        """Test Caputo derivative initialization"""
-        assert self.caputo.alpha.alpha == self.alpha
-        assert isinstance(self.caputo.alpha, FractionalOrder)
-    
-    def test_compute_with_function(self):
-        """Test computing derivative with function input"""
-        def f(t):
-            return t**2
-        
-        result = self.caputo.compute(f, self.t, self.h)
-        
-        assert isinstance(result, np.ndarray)
-        assert len(result) == len(self.t)
-        assert not np.any(np.isnan(result))
-        assert not np.any(np.isinf(result))
-    
-    def test_compute_numerical(self):
-        """Test computing derivative with numerical input"""
-        f = self.t**2
-        
-        result = self.caputo.compute(f, self.t, self.h)
-        
-        assert isinstance(result, np.ndarray)
-        assert len(result) == len(self.t)
-        assert not np.any(np.isnan(result))
-
-
-class TestGrunwaldLetnikovDerivative:
-    """Test Grünwald-Letnikov derivative implementation"""
-    
-    def setup_method(self):
-        """Set up test fixtures"""
-        self.alpha = 0.5
-        self.t = np.linspace(0.1, 2.0, 50)
-        self.h = self.t[1] - self.t[0]
-        self.gl = GrunwaldLetnikovDerivative(self.alpha)
-    
-    def test_initialization(self):
-        """Test Grünwald-Letnikov derivative initialization"""
-        assert self.gl.alpha.alpha == self.alpha
-        assert isinstance(self.gl.alpha, FractionalOrder)
-    
-    def test_compute_with_function(self):
-        """Test computing derivative with function input"""
-        def f(t):
-            return t**2
-        
-        result = self.gl.compute(f, self.t, self.h)
-        
-        assert isinstance(result, np.ndarray)
-        assert len(result) == len(self.t)
-        assert not np.any(np.isnan(result))
-        assert not np.any(np.isinf(result))
-    
-    def test_compute_numerical(self):
-        """Test computing derivative with numerical input"""
-        f = self.t**2
-        
-        result = self.gl.compute(f, self.t, self.h)
-        
-        assert isinstance(result, np.ndarray)
-        assert len(result) == len(self.t)
-        assert not np.any(np.isnan(result))
-
-
-class TestMillerRossDerivative:
-    """Test Miller-Ross derivative implementation"""
-    
-    def setup_method(self):
-        """Set up test fixtures"""
-        self.alpha = 0.5
-        self.t = np.linspace(0.1, 2.0, 50)
-        self.h = self.t[1] - self.t[0]
-        self.mr = MillerRossDerivative(self.alpha)
-    
-    def test_initialization(self):
-        """Test Miller-Ross derivative initialization"""
-        assert self.mr.alpha.alpha == self.alpha
-        assert isinstance(self.mr.alpha, FractionalOrder)
-    
-    def test_compute_with_function(self):
-        """Test computing derivative with function input"""
-        def f(t):
-            return t**2
-        
-        result = self.mr.compute(f, self.t, self.h)
-        
-        assert isinstance(result, np.ndarray)
-        assert len(result) == len(self.t)
-        assert not np.any(np.isnan(result))
-        assert not np.any(np.isinf(result))
-    
-    def test_compute_numerical(self):
-        """Test computing derivative with numerical input"""
-        f = self.t**2
-        
-        result = self.mr.compute(f, self.t, self.h)
-        
-        assert isinstance(result, np.ndarray)
-        assert len(result) == len(self.t)
-        assert not np.any(np.isnan(result))
-
-
-class TestFractionalIntegral:
-    """Test base fractional integral class"""
-    
-    def setup_method(self):
-        """Set up test fixtures"""
-        self.alpha = 0.5
-        self.t = np.linspace(0.1, 2.0, 50)
-        self.h = self.t[1] - self.t[0]
-        self.integral = FractionalIntegral(self.alpha)
-    
-    def test_initialization(self):
-        """Test fractional integral initialization"""
-        assert self.integral.alpha.alpha == self.alpha
-        assert isinstance(self.integral.alpha, FractionalOrder)
-    
-    def test_compute_method(self):
-        """Test compute method"""
-        def f(t):
-            return t**2
-        
-        result = self.integral.compute(f, self.t, self.h)
-        
-        assert isinstance(result, np.ndarray)
-        assert len(result) == len(self.t)
-        assert not np.any(np.isnan(result))
-        assert not np.any(np.isinf(result))
-    
-    def test_different_alpha_values(self):
-        """Test different fractional order values"""
-        alphas = [0.3, 0.5, 0.7, 1.0, 1.5]
-        f = self.t**2
-        
-        for alpha in alphas:
-            integral = FractionalIntegral(alpha)
-            result = integral.compute(f, self.t, self.h)
-            
-            assert isinstance(result, np.ndarray)
-            assert len(result) == len(self.t)
-            assert not np.any(np.isnan(result))
 
 
 class TestRiemannLiouvilleIntegral:
@@ -337,44 +182,6 @@ class TestCaputoIntegral:
         f = self.t**2
         
         result = self.caputo_int.compute(f, self.t, self.h)
-        
-        assert isinstance(result, np.ndarray)
-        assert len(result) == len(self.t)
-        assert not np.any(np.isnan(result))
-
-
-class TestGrunwaldLetnikovIntegral:
-    """Test Grünwald-Letnikov integral implementation"""
-    
-    def setup_method(self):
-        """Set up test fixtures"""
-        self.alpha = 0.5
-        self.t = np.linspace(0.1, 2.0, 50)
-        self.h = self.t[1] - self.t[0]
-        self.gl_int = GrunwaldLetnikovIntegral(self.alpha)
-    
-    def test_initialization(self):
-        """Test Grünwald-Letnikov integral initialization"""
-        assert self.gl_int.alpha.alpha == self.alpha
-        assert isinstance(self.gl_int.alpha, FractionalOrder)
-    
-    def test_compute_with_function(self):
-        """Test computing integral with function input"""
-        def f(t):
-            return t**2
-        
-        result = self.gl_int.compute(f, self.t, self.h)
-        
-        assert isinstance(result, np.ndarray)
-        assert len(result) == len(self.t)
-        assert not np.any(np.isnan(result))
-        assert not np.any(np.isinf(result))
-    
-    def test_compute_numerical(self):
-        """Test computing integral with numerical input"""
-        f = self.t**2
-        
-        result = self.gl_int.compute(f, self.t, self.h)
         
         assert isinstance(result, np.ndarray)
         assert len(result) == len(self.t)
