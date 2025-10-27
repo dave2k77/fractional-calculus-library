@@ -311,11 +311,15 @@ class NeuralFractionalSDE(BaseNeuralODE):
         if self.learn_alpha:
             return torch.clamp(self.alpha_param, 0.1, 1.9)
         return self.fractional_order_value
+    
+    def adjoint_forward(self, x0: torch.Tensor, t: torch.Tensor, **kwargs) -> torch.Tensor:
+        """Adjoint-compatible forward pass."""
+        return self.forward(x0, t, **kwargs)
 
 
 def create_neural_fsde(
-    input_dim: int,
-    output_dim: int,
+    input_dim: int = None,
+    output_dim: int = None,
     hidden_dim: int = 64,
     num_layers: int = 3,
     fractional_order: float = 0.5,
@@ -324,7 +328,8 @@ def create_neural_fsde(
     learn_alpha: bool = False,
     use_adjoint: bool = True,
     drift_net: Optional[nn.Module] = None,
-    diffusion_net: Optional[nn.Module] = None
+    diffusion_net: Optional[nn.Module] = None,
+    config: Optional[NeuralFSDEConfig] = None
 ) -> NeuralFractionalSDE:
     """
     Factory function to create a neural fractional SDE.
@@ -345,18 +350,26 @@ def create_neural_fsde(
     Returns:
         NeuralFractionalSDE instance
     """
-    config = NeuralFSDEConfig(
-        input_dim=input_dim,
-        hidden_dim=hidden_dim,
-        output_dim=output_dim,
-        num_layers=num_layers,
-        fractional_order=fractional_order,
-        use_adjoint=use_adjoint,
-        diffusion_dim=diffusion_dim,
-        noise_type=noise_type,
-        drift_net=drift_net,
-        diffusion_net=diffusion_net
-    )
+    if config is not None:
+        # Use provided config
+        pass
+    else:
+        # Create config from parameters
+        if input_dim is None or output_dim is None:
+            raise ValueError("input_dim and output_dim must be provided when config is None")
+        config = NeuralFSDEConfig(
+            input_dim=input_dim,
+            hidden_dim=hidden_dim,
+            output_dim=output_dim,
+            num_layers=num_layers,
+            fractional_order=fractional_order,
+            use_adjoint=use_adjoint,
+            diffusion_dim=diffusion_dim,
+            noise_type=noise_type,
+            learn_alpha=learn_alpha,
+            drift_net=drift_net,
+            diffusion_net=diffusion_net
+        )
     
     model = NeuralFractionalSDE(config)
     model.learn_alpha = learn_alpha

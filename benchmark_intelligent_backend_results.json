@@ -1,0 +1,63 @@
+{
+  "ml_layers": {},
+  "gpu_methods": {
+    "100": {
+      "backend": "jax",
+      "time_ms": 50.89112500233265,
+      "memory_mb": 0.000762939453125
+    },
+    "1000": {
+      "backend": "jax",
+      "time_ms": 55.109539675565124,
+      "memory_mb": 0.00762939453125
+    },
+    "10000": {
+      "backend": "jax",
+      "time_ms": 135.44798700119523,
+      "memory_mb": 0.0762939453125
+    }
+  },
+  "ode_solvers": {
+    "50": {
+      "time_ms": 1.800978997683463,
+      "per_step_us": 36.01957995366926
+    },
+    "100": {
+      "time_ms": 4.673291667131707,
+      "per_step_us": 46.73291667131707
+    },
+    "500": {
+      "time_ms": 35.975368664367124,
+      "per_step_us": 71.95073732873425
+    },
+    "1000": {
+      "time_ms": 90.60064366591784,
+      "per_step_us": 90.60064366591784
+    }
+  },
+  "selector_overhead": {
+    "Small data": {
+      "selections_per_sec": 1510809.664629799,
+      "overhead_us": 0.6618967454414815
+    },
+    "Medium data": {
+      "selections_per_sec": 1684621.8043299816,
+      "overhead_us": 0.5936050438322127
+    },
+    "Large data": {
+      "selections_per_sec": 531243.2078295455,
+      "overhead_us": 1.882377007859759
+    },
+    "Neural network": {
+      "selections_per_sec": 1412777.2351993907,
+      "overhead_us": 0.7078256749082357
+    }
+  },
+  "memory_aware": {
+    "torch": {
+      "memory_gb": 7.525390625,
+      "threshold_elements": 707028582,
+      "threshold_m": 707.028582
+    }
+  }
+}
