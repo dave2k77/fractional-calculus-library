@@ -26,6 +26,7 @@ class NeuralFSDEConfig(NeuralODEConfig):
     drift_net: Optional[nn.Module] = None
     diffusion_net: Optional[nn.Module] = None
     use_sde_adjoint: bool = True  # Use SDE-specific adjoint method
+    learn_alpha: bool = False  # Whether to learn fractional order
 
 
 class NeuralFractionalSDE(BaseNeuralODE):
@@ -103,8 +104,16 @@ class NeuralFractionalSDE(BaseNeuralODE):
                 nn.Linear(self.hidden_dim, output_dim)
             )
             
-            # Use softplus to ensure positive diffusion
-            self.diffusion_activation = nn.Softplus()
+        # Use softplus to ensure positive diffusion
+        self.diffusion_activation = nn.Softplus()
+    
+    def drift_function(self, t: torch.Tensor, x: torch.Tensor) -> torch.Tensor:
+        """Alias for drift() for compatibility with tests."""
+        return self.drift(t, x)
+    
+    def diffusion_function(self, t: torch.Tensor, x: torch.Tensor) -> torch.Tensor:
+        """Alias for diffusion() for compatibility with tests."""
+        return self.diffusion(t, x)
     
     def drift(self, t: torch.Tensor, x: torch.Tensor) -> torch.Tensor:
         """
@@ -205,8 +214,10 @@ class NeuralFractionalSDE(BaseNeuralODE):
         else:
             t_np = t
         
-        # Get time span
-        t_span = (float(t_np[0]), float(t_np[-1]))
+        # Get time span - handle both 1D and 2D arrays
+        t_start = float(t_np[0]) if t_np[0].ndim == 0 else float(t_np[0].item())
+        t_end = float(t_np[-1]) if t_np[-1].ndim == 0 else float(t_np[-1].item())
+        t_span = (t_start, t_end)
         
         # Wrapper functions for drift and diffusion
         def drift_func(t_val: float, x_val: np.ndarray) -> np.ndarray:
