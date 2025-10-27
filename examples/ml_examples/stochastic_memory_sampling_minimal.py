@@ -42,10 +42,10 @@ class TinyModel(nn.Module):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         z = torch.relu(self.proj(x))
         z = self.frac(z)
-        # If stochastic layer returns vector, average over feature dim
+        # If stochastic layer returns vector, use it directly
         if z.dim() == 2:
-            z = z.mean(dim=1, keepdim=True)
-        return self.head(torch.cat([x, z.expand_as(x)[:, :1]], dim=1))
+            z = z
+        return self.head(z)
 
 
 def main() -> None:

@@ -252,7 +252,7 @@ def example_fractional_z_transform():
     for i, (signal_name, signal) in enumerate(signals.items()):
         # Plot original signal
         plt.subplot(2, 4, i + 1)
-        plt.stem(n, signal, use_line_collection=True)
+        plt.stem(n, signal)
         plt.title(f'{signal_name} Signal')
         plt.xlabel('n')
         plt.ylabel('x[n]')

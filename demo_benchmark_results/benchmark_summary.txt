@@ -5,14 +5,13 @@ PERFORMANCE BENCHMARK
 ------------------------------
 
 Method: RL
-  Execution Time: 0.001188s ± 0.000135s
-  Memory Usage: 0.00MB ± 0.00MB
+  Execution Time: 0.000694s ± 0.000150s
 
 Method: GL
-  Execution Time: 0.004368s ± 0.002292s
+  Execution Time: 0.000695s ± 0.000122s
 
 Method: Caputo
-  Execution Time: 0.001159s ± 0.000164s
+  Execution Time: 0.000753s ± 0.000086s
 
 ==================================================
 
@@ -20,15 +19,15 @@ ACCURACY BENCHMARK
 ------------------------------
 
 Method: RL
-  Execution Time: 0.000465s ± 0.000070s
+  Execution Time: 0.000122s ± 0.000021s
   Relative Error: 4.90e-01 ± 4.61e-01
 
 Method: GL
-  Execution Time: 0.001150s ± 0.000309s
+  Execution Time: 0.000128s ± 0.000020s
   Relative Error: 4.86e-01 ± 4.70e-01
 
 Method: Caputo
-  Execution Time: 0.000405s ± 0.000033s
+  Execution Time: 0.000127s ± 0.000022s
   Relative Error: 3.53e-01 ± 3.32e-01
 
 ==================================================
@@ -37,14 +36,13 @@ SCALING BENCHMARK
 ------------------------------
 
 Method: RL
-  Execution Time: 0.001983s ± 0.001310s
+  Execution Time: 0.001798s ± 0.001893s
 
 Method: GL
-  Execution Time: 0.018392s ± 0.022069s
+  Execution Time: 0.018598s ± 0.042798s
 
 Method: Caputo
-  Execution Time: 0.001981s ± 0.001232s
-  Memory Usage: 0.00MB ± 0.00MB
+  Execution Time: 0.001897s ± 0.001914s
 
 ==================================================
 
@@ -52,16 +50,16 @@ MEMORY BENCHMARK
 ------------------------------
 
 Method: RL
-  Execution Time: 0.004549s ± 0.002990s
-  Memory Usage: 0.09MB ± 0.00MB
+  Execution Time: 0.006734s ± 0.006279s
+  Memory Usage: 0.11MB ± 0.00MB
 
 Method: GL
-  Execution Time: 0.074443s ± 0.070285s
+  Execution Time: 0.152588s ± 0.199243s
   Memory Usage: 0.09MB ± 0.00MB
 
 Method: Caputo
-  Execution Time: 0.004349s ± 0.002703s
-  Memory Usage: 0.07MB ± 0.00MB
+  Execution Time: 0.006854s ± 0.006489s
+  Memory Usage: 0.16MB ± 0.00MB
 
 ==================================================
 

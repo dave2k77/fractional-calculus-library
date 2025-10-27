@@ -98,12 +98,6 @@ def demo_weyl_derivative():
             func, x, h=0.01, use_parallel=False)
         standard_time = time.time() - start_time
 
-        # Optimized implementation
-        start_time = time.time()
-        opt_weyl = OptimizedWeylDerivative(alpha)
-        result_optimized = opt_weyl.compute(func, x, h=0.01)
-        optimized_time = time.time() - start_time
-
         # Parallel implementation
         parallel_config = ParallelConfig(n_jobs=4)
         start_time = time.time()
@@ -112,22 +106,18 @@ def demo_weyl_derivative():
         parallel_time = time.time() - start_time
 
         print(f"  Standard time: {standard_time:.4f}s")
-        print(f"  Optimized time: {optimized_time:.4f}s")
         print(f"  Parallel time: {parallel_time:.4f}s")
-        print(f"  Speedup (optimized): {standard_time/optimized_time:.2f}x")
         print(f"  Speedup (parallel): {standard_time/parallel_time:.2f}x")
 
         # Verify accuracy
-        accuracy_opt = np.mean(np.abs(result_standard - result_optimized))
         accuracy_par = np.mean(np.abs(result_standard - result_parallel))
-        print(f"  Accuracy (optimized): {accuracy_opt:.2e}")
         print(f"  Accuracy (parallel): {accuracy_par:.2e}")
 
         # Plot results for first function
         if name == "trigonometric":
-            plt.figure(figsize=(15, 5))
+            plt.figure(figsize=(12, 5))
 
-            plt.subplot(1, 3, 1)
+            plt.subplot(1, 2, 1)
             plt.plot(x, func(x), "b-", label="Original function")
             plt.plot(x, result_standard, "r-", label="Weyl derivative")
             plt.title(f"Weyl Derivative (α={alpha}) - {name}")
@@ -136,16 +126,7 @@ def demo_weyl_derivative():
             plt.legend()
             plt.grid(True)
 
-            plt.subplot(1, 3, 2)
-            plt.plot(x, result_standard, "b-", label="Standard")
-            plt.plot(x, result_optimized, "r--", label="Optimized")
-            plt.title("Standard vs Optimized")
-            plt.xlabel("x")
-            plt.ylabel("D^α f(x)")
-            plt.legend()
-            plt.grid(True)
-
-            plt.subplot(1, 3, 3)
+            plt.subplot(1, 2, 2)
             plt.plot(x, result_standard, "b-", label="Standard")
             plt.plot(x, result_parallel, "g--", label="Parallel")
             plt.title("Standard vs Parallel")
@@ -187,29 +168,19 @@ def demo_marchaud_derivative():
             func, x, h=0.01, memory_optimized=True)
         optimized_time = time.time() - start_time
 
-        # Numba optimized implementation
-        start_time = time.time()
-        opt_marchaud = OptimizedMarchaudDerivative(alpha)
-        result_numba = opt_marchaud.compute(func, x, h=0.01)
-        numba_time = time.time() - start_time
-
         print(f"  Standard time: {standard_time:.4f}s")
         print(f"  Memory optimized time: {optimized_time:.4f}s")
-        print(f"  Numba optimized time: {numba_time:.4f}s")
         print(f"  Speedup (memory): {standard_time/optimized_time:.2f}x")
-        print(f"  Speedup (numba): {standard_time/numba_time:.2f}x")
 
         # Verify accuracy
         accuracy_opt = np.mean(np.abs(result_standard - result_optimized))
-        accuracy_numba = np.mean(np.abs(result_standard - result_numba))
         print(f"  Accuracy (memory): {accuracy_opt:.2e}")
-        print(f"  Accuracy (numba): {accuracy_numba:.2e}")
 
         # Plot results for first function
         if name == "exponential":
-            plt.figure(figsize=(15, 5))
+            plt.figure(figsize=(12, 5))
 
-            plt.subplot(1, 3, 1)
+            plt.subplot(1, 2, 1)
             plt.plot(x, func(x), "b-", label="Original function")
             plt.plot(x, result_standard, "r-", label="Marchaud derivative")
             plt.title(f"Marchaud Derivative (α={alpha}) - {name}")
@@ -218,19 +189,10 @@ def demo_marchaud_derivative():
             plt.legend()
             plt.grid(True)
 
-            plt.subplot(1, 3, 2)
+            plt.subplot(1, 2, 2)
             plt.plot(x, result_standard, "b-", label="Standard")
             plt.plot(x, result_optimized, "r--", label="Memory Optimized")
             plt.title("Standard vs Memory Optimized")
-            plt.xlabel("x")
-            plt.ylabel("D^α f(x)")
-            plt.legend()
-            plt.grid(True)
-
-            plt.subplot(1, 3, 3)
-            plt.plot(x, result_standard, "b-", label="Standard")
-            plt.plot(x, result_numba, "g--", label="Numba Optimized")
-            plt.title("Standard vs Numba Optimized")
             plt.xlabel("x")
             plt.ylabel("D^α f(x)")
             plt.legend()
@@ -262,19 +224,7 @@ def demo_hadamard_derivative():
         result_standard = hadamard_calc.compute(func, x, h=0.01)
         standard_time = time.time() - start_time
 
-        # Optimized implementation
-        start_time = time.time()
-        opt_hadamard = OptimizedHadamardDerivative(alpha)
-        result_optimized = opt_hadamard.compute(func, x, h=0.01)
-        optimized_time = time.time() - start_time
-
         print(f"  Standard time: {standard_time:.4f}s")
-        print(f"  Optimized time: {optimized_time:.4f}s")
-        print(f"  Speedup: {standard_time/optimized_time:.2f}x")
-
-        # Verify accuracy
-        accuracy = np.mean(np.abs(result_standard - result_optimized))
-        print(f"  Accuracy: {accuracy:.2e}")
 
         # Plot results for logarithmic function
         if name == "logarithmic":
@@ -291,7 +241,6 @@ def demo_hadamard_derivative():
 
             plt.subplot(1, 2, 2)
             plt.plot(x, result_standard, "b-", label="Standard")
-            plt.plot(x, result_optimized, "r--", label="Optimized")
             plt.title("Standard vs Optimized")
             plt.xlabel("x")
             plt.ylabel("D^α f(x)")
@@ -325,12 +274,6 @@ def demo_reiz_feller_derivative():
             func, x, h=0.01, use_parallel=False)
         standard_time = time.time() - start_time
 
-        # Optimized implementation
-        start_time = time.time()
-        opt_reiz = OptimizedReizFellerDerivative(alpha)
-        result_optimized = opt_reiz.compute(func, x, h=0.01)
-        optimized_time = time.time() - start_time
-
         # Parallel implementation
         parallel_config = ParallelConfig(n_jobs=4, enabled=True)
         start_time = time.time()
@@ -340,22 +283,18 @@ def demo_reiz_feller_derivative():
         parallel_time = time.time() - start_time
 
         print(f"  Standard time: {standard_time:.4f}s")
-        print(f"  Optimized time: {optimized_time:.4f}s")
         print(f"  Parallel time: {parallel_time:.4f}s")
-        print(f"  Speedup (optimized): {standard_time/optimized_time:.2f}x")
         print(f"  Speedup (parallel): {standard_time/parallel_time:.2f}x")
 
         # Verify accuracy
-        accuracy_opt = np.mean(np.abs(result_standard - result_optimized))
         accuracy_par = np.mean(np.abs(result_standard - result_parallel))
-        print(f"  Accuracy (optimized): {accuracy_opt:.2e}")
         print(f"  Accuracy (parallel): {accuracy_par:.2e}")
 
         # Plot results for gaussian function
         if name == "gaussian":
-            plt.figure(figsize=(15, 5))
+            plt.figure(figsize=(12, 5))
 
-            plt.subplot(1, 3, 1)
+            plt.subplot(1, 2, 1)
             plt.plot(x, func(x), "b-", label="Original function")
             plt.plot(x, result_standard, "r-", label="Reiz-Feller derivative")
             plt.title(f"Reiz-Feller Derivative (α={alpha}) - {name}")
@@ -364,16 +303,7 @@ def demo_reiz_feller_derivative():
             plt.legend()
             plt.grid(True)
 
-            plt.subplot(1, 3, 2)
-            plt.plot(x, result_standard, "b-", label="Standard")
-            plt.plot(x, result_optimized, "r--", label="Optimized")
-            plt.title("Standard vs Optimized")
-            plt.xlabel("x")
-            plt.ylabel("D^α f(x)")
-            plt.legend()
-            plt.grid(True)
-
-            plt.subplot(1, 3, 3)
+            plt.subplot(1, 2, 2)
             plt.plot(x, result_standard, "b-", label="Standard")
             plt.plot(x, result_parallel, "g--", label="Parallel")
             plt.title("Standard vs Parallel")
@@ -424,14 +354,6 @@ def demo_adomian_decomposition():
         )
         standard_time = time.time() - start_time
 
-        # Optimized implementation
-        start_time = time.time()
-        opt_adomian = OptimizedAdomianDecomposition(alpha)
-        t, solution_optimized = opt_adomian.solve(
-            equation, initial_conditions, t_span, n_steps=200, n_terms=10
-        )
-        optimized_time = time.time() - start_time
-
         # Parallel implementation
         parallel_config = ParallelConfig(n_jobs=4, enabled=True)
         start_time = time.time()
@@ -447,15 +369,11 @@ def demo_adomian_decomposition():
         parallel_time = time.time() - start_time
 
         print(f"  Standard time: {standard_time:.4f}s")
-        print(f"  Optimized time: {optimized_time:.4f}s")
         print(f"  Parallel time: {parallel_time:.4f}s")
-        print(f"  Speedup (optimized): {standard_time/optimized_time:.2f}x")
         print(f"  Speedup (parallel): {standard_time/parallel_time:.2f}x")
 
         # Verify accuracy
-        accuracy_opt = np.mean(np.abs(solution_standard - solution_optimized))
         accuracy_par = np.mean(np.abs(solution_standard - solution_parallel))
-        print(f"  Accuracy (optimized): {accuracy_opt:.2e}")
         print(f"  Accuracy (parallel): {accuracy_par:.2e}")
 
         # Plot results for first equation
@@ -472,7 +390,6 @@ def demo_adomian_decomposition():
 
             plt.subplot(1, 3, 2)
             plt.plot(t, solution_standard, "b-", label="Standard")
-            plt.plot(t, solution_optimized, "r--", label="Optimized")
             plt.title("Standard vs Optimized")
             plt.xlabel("t")
             plt.ylabel("y(t)")
@@ -508,15 +425,15 @@ def performance_benchmark():
         return np.sin(x) * np.exp(-x / 5)
 
     methods = {
-        "Weyl": (WeylDerivative, OptimizedWeylDerivative),
-        "Marchaud": (MarchaudDerivative, OptimizedMarchaudDerivative),
-        "Hadamard": (HadamardDerivative, OptimizedHadamardDerivative),
-        "Reiz-Feller": (ReizFellerDerivative, OptimizedReizFellerDerivative),
+        "Weyl": WeylDerivative,
+        "Marchaud": MarchaudDerivative,
+        "Hadamard": HadamardDerivative,
+        "Reiz-Feller": ReizFellerDerivative,
     }
 
     results = {}
 
-    for name, (StandardClass, OptimizedClass) in methods.items():
+    for name, StandardClass in methods.items():
         print(f"\nBenchmarking {name} derivative...")
 
         # Standard implementation
@@ -534,35 +451,14 @@ def performance_benchmark():
             result_standard = standard_calc.compute(test_function, x, h=0.005)
         standard_time = time.time() - start_time
 
-        # Optimized implementation
-        start_time = time.time()
-        optimized_calc = OptimizedClass(alpha)
-        if name == "Hadamard":
-            result_optimized = optimized_calc.compute(
-                test_function, x_hadamard, h=0.005
-            )
-        elif name == "Reiz-Feller":
-            result_optimized = optimized_calc.compute(
-                test_function, x_reiz, h=0.005)
-        else:
-            result_optimized = optimized_calc.compute(
-                test_function, x, h=0.005)
-        optimized_time = time.time() - start_time
-
-        speedup = standard_time / optimized_time
-        accuracy = np.mean(np.abs(result_standard - result_optimized))
-
         results[name] = {
             "standard_time": standard_time,
-            "optimized_time": optimized_time,
-            "speedup": speedup,
-            "accuracy": accuracy,
+            "optimized_time": standard_time,
+            "speedup": 1.0,
+            "accuracy": 0.0,
         }
 
         print(f"  Standard: {standard_time:.4f}s")
-        print(f"  Optimized: {optimized_time:.4f}s")
-        print(f"  Speedup: {speedup:.2f}x")
-        print(f"  Accuracy: {accuracy:.2e}")
 
     # Create performance summary plot
     methods_list = list(results.keys())

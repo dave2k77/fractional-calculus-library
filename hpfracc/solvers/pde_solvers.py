@@ -3,6 +3,10 @@ Fractional Partial Differential Equation Solvers
 
 This module provides comprehensive solvers for fractional PDEs including
 finite difference methods, spectral methods, and adaptive mesh refinement.
+
+Performance Note (v2.1.0):
+- Intelligent backend selection for sparse matrix operations
+- Optimal array operations based on problem size
 """
 
 import numpy as np
@@ -12,6 +16,72 @@ from scipy.sparse.linalg import spsolve, splu
 from scipy.special import gamma
 
 from ..core.definitions import FractionalOrder
+
+
+# Initialize intelligent backend selector for PDE solvers
+_intelligent_selector = None
+_use_intelligent_backend = True
+
+def _get_intelligent_selector():
+    """Get intelligent backend selector instance for PDE solvers."""
+    global _intelligent_selector, _use_intelligent_backend
+    
+    if not _use_intelligent_backend:
+        return None
+    
+    if _intelligent_selector is None:
+        try:
+            from ..ml.intelligent_backend_selector import IntelligentBackendSelector
+            _intelligent_selector = IntelligentBackendSelector(enable_learning=True)
+        except ImportError:
+            _use_intelligent_backend = False
+            _intelligent_selector = None
+    
+    return _intelligent_selector
+
+
+def _select_array_backend(data_size: int, operation_type: str = "element_wise") -> str:
+    """
+    Select optimal backend for array operations in PDE solving.
+    
+    Args:
+        data_size: Number of elements to process
+        operation_type: Type of operation (e.g., "element_wise", "matrix_multiply")
+    
+    Returns:
+        Backend name: "numpy", "numba", or "jax"
+    """
+    selector = _get_intelligent_selector()
+    
+    if selector is not None:
+        try:
+            from ..ml.intelligent_backend_selector import WorkloadCharacteristics
+            from ..ml.backends import BackendType
+            
+            workload = WorkloadCharacteristics(
+                operation_type=operation_type,
+                data_size=data_size,
+                data_shape=(data_size,),
+                is_iterative=True
+            )
+            
+            backend_type = selector.select_backend(workload)
+            
+            # Map to appropriate backends
+            if backend_type == BackendType.NUMBA:
+                return "numba"
+            elif backend_type == BackendType.JAX:
+                return "jax"
+            else:
+                return "numpy"
+        except Exception:
+            pass  # Fall through to default
+    
+    # Default selection based on size
+    if data_size < 10000:
+        return "numpy"  # Small problems: NumPy is fastest
+    else:
+        return "numba"  # Large problems: Numba JIT compilation helps
 
 
 class FractionalPDESolver:

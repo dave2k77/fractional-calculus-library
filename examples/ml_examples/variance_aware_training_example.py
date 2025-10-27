@@ -32,7 +32,7 @@ class FractionalNeuralNetwork(nn.Module):
         
         # Fractional layers (use smaller k to avoid indexing issues)
         self.stochastic_layer = StochasticFractionalLayer(alpha=0.5, k=4, method="importance")
-        self.probabilistic_layer = create_normal_alpha_layer(0.5, 0.1, learnable=True)
+        self.probabilistic_layer = create_normal_alpha_layer(mean=0.5, std=0.1, learnable=True)
         
         # Activation
         self.relu = nn.ReLU()
@@ -48,6 +48,8 @@ class FractionalNeuralNetwork(nn.Module):
                 stoch_out = stoch_out.unsqueeze(0).unsqueeze(-1).expand(x.shape[0], 1)
             elif stoch_out.dim() == 1:  # 1D output
                 stoch_out = stoch_out.unsqueeze(-1)
+            elif stoch_out.dim() == 2:  # Take mean to get single feature
+                stoch_out = stoch_out.mean(dim=1, keepdim=True)
         except (IndexError, RuntimeError):
             # Fallback: use mean of input as stochastic output
             stoch_out = x.mean(dim=1, keepdim=True)
@@ -59,6 +61,8 @@ class FractionalNeuralNetwork(nn.Module):
                 prob_out = prob_out.unsqueeze(0).unsqueeze(-1).expand(x.shape[0], 1)
             elif prob_out.dim() == 1:  # 1D output
                 prob_out = prob_out.unsqueeze(-1)
+            elif prob_out.dim() == 2:  # Take mean to get single feature
+                prob_out = prob_out.mean(dim=1, keepdim=True)
         except (IndexError, RuntimeError):
             # Fallback: use std of input as probabilistic output
             prob_out = x.std(dim=1, keepdim=True)

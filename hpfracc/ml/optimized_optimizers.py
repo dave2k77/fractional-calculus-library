@@ -324,6 +324,7 @@ class OptimizedFractionalAdam(OptimizedBaseOptimizer):
     """Optimized Adam with fractional calculus integration"""
 
     def __init__(self,
+                 params=None,  # Added for PyTorch compatibility
                  lr: float = 0.001,
                  betas: Tuple[float, float] = (0.9, 0.999),
                  eps: float = 1e-8,
@@ -344,6 +345,7 @@ class OptimizedFractionalAdam(OptimizedBaseOptimizer):
         super().__init__(config)
         self.betas = betas
         self.eps = eps
+        self.params = params  # Store params for later use
 
     def step(self, params: List[Any], gradients: Optional[List[Any]] = None) -> None:
         """Optimized Adam step"""

@@ -75,13 +75,23 @@ class LayerConfig:
 
 
 class BackendManager:
-    """Optimal backend management based on benchmark results"""
+    """Intelligent backend management with workload-aware selection and performance learning"""
 
     def __init__(self):
         self.available_backends = self._detect_available_backends()
         self.performance_cache = {}
         self.benchmark_results = {}
         self.backend_priority = ['pytorch', 'jax', 'numba', 'robust']
+        
+        # Use intelligent backend selector for optimal performance
+        try:
+            from .intelligent_backend_selector import IntelligentBackendSelector
+            self.intelligent_selector = IntelligentBackendSelector(enable_learning=True)
+            self.use_intelligent_selection = True
+        except ImportError:
+            self.intelligent_selector = None
+            self.use_intelligent_selection = False
+            warnings.warn("Intelligent backend selector not available, using simple selection")
 
     def _detect_available_backends(self) -> Dict[str, bool]:
         """Detect available backends and their capabilities"""
@@ -94,14 +104,49 @@ class BackendManager:
         return backends
 
     def select_optimal_backend(self, config: LayerConfig, input_shape: Tuple[int, ...]) -> str:
-        """Select optimal backend based on benchmark results"""
+        """Select optimal backend based on workload characteristics and learning"""
+        # Honor explicit backend preference
         if config.backend != BackendType.AUTO:
             backend_name = config.backend.value.lower()
             if self.available_backends.get(backend_name, False):
                 return backend_name
 
         input_size = np.prod(input_shape)
-
+        
+        # Use intelligent selector if available
+        if self.use_intelligent_selection and self.intelligent_selector:
+            from .intelligent_backend_selector import WorkloadCharacteristics
+            
+            # Determine operation type from config
+            operation_type = "neural_network"
+            if hasattr(config, 'use_fractional') and config.use_fractional:
+                operation_type = "fractional_derivative"
+            
+            # Create workload characteristics
+            workload = WorkloadCharacteristics(
+                operation_type=operation_type,
+                data_size=int(input_size),
+                data_shape=input_shape,
+                requires_gradient=True  # Neural networks typically need gradients
+            )
+            
+            # Get optimal backend from intelligent selector
+            backend_type = self.intelligent_selector.select_backend(workload)
+            
+            # Map BackendType to string name
+            backend_map = {
+                BackendType.TORCH: 'pytorch',
+                BackendType.JAX: 'jax',
+                BackendType.NUMBA: 'numba'
+            }
+            
+            selected = backend_map.get(backend_type, 'pytorch')
+            
+            # Verify backend is available
+            if self.available_backends.get(selected, False):
+                return selected
+        
+        # Fallback to simple selection (original logic)
         if config.performance_mode == "speed":
             return 'pytorch'
         elif config.performance_mode == "memory":

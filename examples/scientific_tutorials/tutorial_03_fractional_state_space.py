@@ -118,7 +118,7 @@ class FractionalStateSpaceModel:
             y0,
             self.alpha.alpha,
             h=dt,
-            adaptive=True
+            adaptive=False
         )
 
         # Add noise

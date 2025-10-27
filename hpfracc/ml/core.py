@@ -76,9 +76,9 @@ class FractionalNeuralNetwork:
         self.tensor_ops = get_tensor_ops(self.backend)
 
         # Initialize fractional derivative calculators
-        self.rl_calculator = OptimizedRiemannLiouville(alpha=fractional_order)
-        self.caputo_calculator = OptimizedCaputo(alpha=fractional_order)
-        self.gl_calculator = OptimizedGrunwaldLetnikov(alpha=fractional_order)
+        self.rl_calculator = OptimizedRiemannLiouville(fractional_order)
+        self.caputo_calculator = OptimizedCaputo(fractional_order)
+        self.gl_calculator = OptimizedGrunwaldLetnikov(fractional_order)
 
         # Build network layers
         self.layers = []
@@ -370,8 +370,8 @@ class FractionalAttention:
         self._initialize_weights()
 
         # Fractional derivative calculators
-        self.rl_calculator = OptimizedRiemannLiouville(alpha=fractional_order)
-        self.caputo_calculator = OptimizedCaputo(alpha=fractional_order)
+        self.rl_calculator = OptimizedRiemannLiouville(fractional_order)
+        self.caputo_calculator = OptimizedCaputo(fractional_order)
 
     def _initialize_weights(self):
         """Initialize attention weights"""
@@ -528,15 +528,15 @@ class FractionalAttention:
 
         # Transpose for attention computation (batch_size, n_heads, seq_len,
         # d_k)
-        q = self.tensor_ops.transpose(q, (0, 2, 1, 3))
-        k = self.tensor_ops.transpose(k, (0, 2, 1, 3))
-        v = self.tensor_ops.transpose(v, (0, 2, 1, 3))
+        q = self.tensor_ops.transpose(q, dims=(0, 2, 1, 3))
+        k = self.tensor_ops.transpose(k, dims=(0, 2, 1, 3))
+        v = self.tensor_ops.transpose(v, dims=(0, 2, 1, 3))
 
         # Apply fractional attention
         context = self.fractional_attention(q, k, v, method)
 
         # Reshape and apply output projection
-        context = self.tensor_ops.transpose(context, (0, 2, 1, 3))
+        context = self.tensor_ops.transpose(context, dims=(0, 2, 1, 3))
         context = self.tensor_ops.reshape(
             context, (batch_size, seq_len, self.d_model))
         output = self.tensor_ops.matmul(context, self.w_o)
@@ -553,7 +553,7 @@ class FractionalAttention:
             if self.backend == BackendType.TORCH:
                 output = output.permute(1, 0, 2).contiguous()
             else:
-                output = self.tensor_ops.transpose(output, (1, 0, 2))
+                output = self.tensor_ops.transpose(output, dims=(1, 0, 2))
 
         return output
 
@@ -576,7 +576,7 @@ class FractionalLossFunction:
         self.fractional_order = FractionalOrder(fractional_order)
         self.backend = backend or get_backend_manager().active_backend
         self.tensor_ops = get_tensor_ops(self.backend)
-        self.rl_calculator = OptimizedRiemannLiouville(alpha=fractional_order)
+        self.rl_calculator = OptimizedRiemannLiouville(fractional_order)
 
     @abstractmethod
     def compute_loss(self, predictions: Any, targets: Any) -> Any:

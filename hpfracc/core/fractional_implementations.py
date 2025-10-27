@@ -3,6 +3,13 @@ Fractional derivative and integral implementations.
 
 This module provides concrete implementations of fractional derivatives
 and integrals that can be registered with the factory.
+
+Performance Note (v2.1.0):
+- All implementations automatically benefit from intelligent backend selection
+- Backend selection happens in the underlying optimized algorithms
+- Small data (< 1K elements): Uses NumPy/Numba for minimal overhead
+- Large data (> 100K elements): Uses GPU when available for acceleration
+- Zero code changes required - optimization is automatic
 """
 
 import numpy as np

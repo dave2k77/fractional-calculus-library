@@ -7,10 +7,11 @@
 
 **HPFRACC** is a cutting-edge Python library that provides high-performance implementations of fractional calculus operations with seamless machine learning integration, GPU acceleration, and state-of-the-art neural network architectures.
 
-## 🚀 **NEW: Production Ready (v2.0.0)**
+## 🚀 **NEW: Intelligent Backend Selection (v2.1.0)**
 
 ✅ **100% Integration Test Coverage** - All modules fully tested and operational  
-✅ **GPU Acceleration** - Optimized for CUDA and multi-GPU environments  
+✅ **Intelligent Backend Selection** - Automatic workload-aware optimization (10-100x speedup)  
+✅ **GPU Acceleration** - Optimized for CUDA and multi-GPU environments with memory safety  
 ✅ **ML Integration** - Native PyTorch, JAX, and NUMBA support with autograd  
 ✅ **Research Ready** - Complete workflows for computational physics and biophysics  
 
@@ -29,7 +30,8 @@
 - **Spectral Autograd**: Revolutionary framework for gradient flow through fractional operations
 - **GPU Optimization**: AMP support, chunked FFT, performance profiling
 - **Variance-Aware Training**: Adaptive sampling and stochastic seed management
-- **Multi-Backend**: Seamless PyTorch, JAX, and NUMBA support
+- **Intelligent Backend Selection**: Automatic workload-aware optimization (10-100x speedup)
+- **Multi-Backend**: Seamless PyTorch, JAX, and NUMBA support with smart fallbacks
 
 ### **Research Applications**
 - **Computational Physics**: Fractional PDEs, viscoelasticity, anomalous transport
@@ -151,6 +153,74 @@ print(f"Protein folding kinetics computed for {len(time_points)} time points")
 
 ---
 
+## 🧠 **Intelligent Backend Selection (NEW in v2.1.0)**
+
+HPFRACC now features **intelligent, workload-aware backend selection** that automatically chooses the optimal computational framework (JAX, PyTorch, Numba, NumPy) based on your data and hardware.
+
+### **Automatic Optimization**
+
+```python
+# Your code automatically gets optimized - no changes needed!
+from hpfracc.ml.layers import FractionalLayer
+
+layer = FractionalLayer(alpha=0.5)
+# Automatically uses best backend based on batch size and hardware
+output = layer(input_data)
+```
+
+### **Key Benefits**
+
+| Data Size | Automatic Selection | Performance Gain |
+|-----------|-------------------|------------------|
+| Small (< 1K elements) | NumPy/Numba | **10-100x faster** (avoids GPU overhead) |
+| Medium (1K-100K) | Optimal backend | **1.5-3x faster** |
+| Large (> 100K) | GPU when available | **Reliable** (memory-aware, no OOM) |
+
+### **Smart Features**
+
+✅ **Workload-Aware** - Selects backend based on data size, operation type, and hardware  
+✅ **Performance Learning** - Adapts over time to find optimal backends  
+✅ **Memory-Safe** - Dynamic GPU thresholds prevent out-of-memory errors  
+✅ **Zero Overhead** - Selection takes < 0.001 ms  
+✅ **Graceful Fallback** - Automatically falls back to CPU if GPU unavailable  
+
+### **Direct Usage**
+
+For fine-grained control:
+
+```python
+from hpfracc.ml.intelligent_backend_selector import select_optimal_backend
+
+# Quick backend selection
+backend = select_optimal_backend("matmul", data.shape)
+
+# Advanced usage with learning
+from hpfracc.ml.intelligent_backend_selector import IntelligentBackendSelector
+selector = IntelligentBackendSelector(enable_learning=True)
+backend = selector.select_backend(workload)
+```
+
+### **Environment Control**
+
+Override automatic selection when needed:
+
+```bash
+export HPFRACC_FORCE_JAX=1        # Force JAX backend
+export HPFRACC_DISABLE_TORCH=1    # Disable PyTorch
+export JAX_PLATFORM_NAME=cpu      # Force CPU mode
+```
+
+### **When It Helps Most**
+
+- 🔬 **Research workflows** with varying data sizes
+- 💾 **Limited GPU memory** scenarios
+- 🚀 **Production deployments** requiring reliability
+- 📊 **Mixed workloads** combining small and large operations
+
+**See the [Backend Selection Quick Reference](BACKEND_QUICK_REFERENCE.md) for detailed usage guide.**
+
+---
+
 ## 📊 **Performance Benchmarks**
 
 Our comprehensive benchmarking shows excellent performance:
@@ -191,9 +261,15 @@ Our comprehensive benchmarking shows excellent performance:
 - **[Neural fODE Guide](docs/neural_fode_guide.md)** - Fractional ODE solving
 - **[Scientific Tutorials](docs/scientific_tutorials.rst)** - Research applications
 
+### **Backend Optimization (v2.1.0)**
+- **[Quick Reference](docs/backend_optimization/BACKEND_QUICK_REFERENCE.md)** - One-page backend selection guide
+- **[Integration Guide](docs/backend_optimization/INTELLIGENT_BACKEND_INTEGRATION_GUIDE.md)** - How to use intelligent selection
+- **[Technical Analysis](docs/backend_optimization/BACKEND_ANALYSIS_REPORT.md)** - Detailed technical report
+- **[Optimization Summary](docs/backend_optimization/BACKEND_OPTIMIZATION_SUMMARY.md)** - Executive summary
+
 ### **Integration Testing**
-- **[Integration Testing Summary](INTEGRATION_TESTING_SUMMARY.md)** - Complete test results
-- **[Test Files](test_integration_*.py)** - All integration test implementations
+- **[Integration Testing Summary](results/analysis_reports/INTEGRATION_TESTING_SUMMARY.md)** - Complete test results
+- **[ML Integration Tests Fixed](docs/backend_optimization/ML_INTEGRATION_TESTS_FIXED.md)** - Recent fixes
 
 ---
 

@@ -17,7 +17,7 @@ The examples cover:
 """
 
 from hpfracc.special.gamma_beta import gamma
-from hpfracc.solvers.predictor_corrector import PredictorCorrectorSolver
+from hpfracc.solvers import PredictorCorrectorSolver
 from hpfracc.algorithms.optimized_methods import L1L2Schemes
 from hpfracc.solvers.pde_solvers import FractionalDiffusionSolver
 import numpy as np
@@ -106,7 +106,7 @@ def fractional_diffusion_equation():
     # 3D surface plot
     ax1 = plt.subplot(2, 2, 1, projection="3d")
     X, T_mesh = np.meshgrid(x, t)
-    surf = ax1.plot_surface(X, T_mesh, u, cmap="viridis", alpha=0.8)
+    surf = ax1.plot_surface(X, T_mesh, u.T, cmap="viridis", alpha=0.8)
     ax1.set_xlabel("Position x")
     ax1.set_ylabel("Time t")
     ax1.set_zlabel("Solution u(x,t)")
@@ -139,7 +139,7 @@ def fractional_diffusion_equation():
 
     # Contour plot
     ax4 = plt.subplot(2, 2, 4)
-    contour = ax4.contourf(X, T_mesh, u, levels=20, cmap="viridis")
+    contour = ax4.contourf(X, T_mesh, u.T, levels=20, cmap="viridis")
     ax4.set_xlabel("Position x")
     ax4.set_ylabel("Time t")
     ax4.set_title("Fractional Diffusion: Contour Plot")
@@ -209,7 +209,7 @@ def fractional_wave_equation():
     # 3D surface plot
     ax1 = plt.subplot(2, 2, 1, projection="3d")
     X, T_mesh = np.meshgrid(x, t)
-    surf = ax1.plot_surface(X, T_mesh, u, cmap="coolwarm", alpha=0.8)
+    surf = ax1.plot_surface(X, T_mesh, u.T, cmap="coolwarm", alpha=0.8)
     ax1.set_xlabel("Position x")
     ax1.set_ylabel("Time t")
     ax1.set_zlabel("Solution u(x,t)")
@@ -242,7 +242,7 @@ def fractional_wave_equation():
 
     # Contour plot
     ax4 = plt.subplot(2, 2, 4)
-    contour = ax4.contourf(X, T_mesh, u, levels=20, cmap="coolwarm")
+    contour = ax4.contourf(X, T_mesh, u.T, levels=20, cmap="coolwarm")
     ax4.set_xlabel("Position x")
     ax4.set_ylabel("Time t")
     ax4.set_title("Fractional Diffusion: Contour Plot")
@@ -501,7 +501,7 @@ def predictor_corrector_demo():
 
     ax2 = plt.subplot(2, 3, 2, projection="3d")
     X, T_mesh = np.meshgrid(x, t)
-    surf2 = ax2.plot_surface(X, T_mesh, u_std, cmap="plasma", alpha=0.8)
+    surf2 = ax2.plot_surface(X, T_mesh, u_std.T, cmap="plasma", alpha=0.8)
     ax2.set_xlabel("Position x")
     ax2.set_ylabel("Time t")
     ax2.set_zlabel("Solution u(x,t)")
@@ -665,7 +665,7 @@ def anomalous_transport_demo():
         X, T_mesh = np.meshgrid(x, t)
         # Safeguard against non-finite values for plotting
         u_plot = np.nan_to_num(u)
-        surf = ax.plot_surface(X, T_mesh, u_plot, cmap="viridis", alpha=0.8)
+        surf = ax.plot_surface(X, T_mesh, u_plot.T, cmap="viridis", alpha=0.8)
         ax.set_xlabel("Position x")
         ax.set_ylabel("Time t")
         ax.set_zlabel("u(x,t)")
@@ -878,7 +878,7 @@ def memory_effects_demo():
 
     # Contour comparison
     ax6 = plt.subplot(2, 4, 6)
-    contour1 = ax6.contourf(X, T_mesh, u_fractional,
+    contour1 = ax6.contourf(X, T_mesh, u_fractional.T,
                             levels=20, cmap="viridis")
     ax6.set_xlabel("Position x")
     ax6.set_ylabel("Time t")
@@ -886,7 +886,7 @@ def memory_effects_demo():
     plt.colorbar(contour1, ax=ax6)
 
     ax7 = plt.subplot(2, 4, 7)
-    contour2 = ax7.contourf(X, T_mesh, u_normal, levels=20, cmap="plasma")
+    contour2 = ax7.contourf(X, T_mesh, u_normal.T, levels=20, cmap="plasma")
     ax7.set_xlabel("Position x")
     ax7.set_ylabel("Time t")
     ax7.set_title("Normal: Contour")
@@ -895,7 +895,7 @@ def memory_effects_demo():
     # Difference plot
     ax8 = plt.subplot(2, 4, 8)
     diff = u_fractional - u_normal
-    contour3 = ax8.contourf(X, T_mesh, diff, levels=20, cmap="RdBu")
+    contour3 = ax8.contourf(X, T_mesh, diff.T, levels=20, cmap="RdBu")
     ax8.set_xlabel("Position x")
     ax8.set_ylabel("Time t")
     ax8.set_title("Difference (Fractional - Normal)")

@@ -42,7 +42,15 @@ from ..special import gamma
 
 
 class GPUConfig:
-    """Configuration for GPU acceleration."""
+    """
+    Configuration for GPU acceleration with intelligent backend selection.
+    
+    Now uses workload-aware backend selection that considers:
+    - Data size and shape
+    - Available GPU memory
+    - Operation type
+    - Historical performance
+    """
 
     def __init__(
         self,
@@ -53,6 +61,7 @@ class GPUConfig:
         monitor_performance: bool = True,
         fallback_to_cpu: bool = True,
         device_id: Optional[int] = None,
+        use_intelligent_selection: bool = True,
     ):
         self.backend = backend
         self.memory_limit = memory_limit
@@ -61,9 +70,23 @@ class GPUConfig:
         self.monitor_performance = monitor_performance
         self.fallback_to_cpu = fallback_to_cpu
         self.device_id = device_id
+        self.use_intelligent_selection = use_intelligent_selection
+        
+        # Initialize intelligent selector if requested
+        self.intelligent_selector = None
+        if use_intelligent_selection and backend == "auto":
+            try:
+                # Import here to avoid circular dependency
+                import sys
+                import os
+                sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+                from ml.intelligent_backend_selector import IntelligentBackendSelector
+                self.intelligent_selector = IntelligentBackendSelector(enable_learning=True)
+            except ImportError:
+                pass  # Fall back to simple selection
 
-        # Auto-detect best backend
-        if backend == "auto":
+        # Auto-detect best backend (simple fallback if intelligent selector not available)
+        if backend == "auto" and self.intelligent_selector is None:
             if JAX_AVAILABLE:
                 self.backend = "jax"
             elif CUPY_AVAILABLE:
@@ -85,6 +108,54 @@ class GPUConfig:
             "memory_usage": [],
             "speedup": 1.0,
         }
+    
+    def select_backend_for_data(self, data_shape: tuple, operation_type: str = "derivative") -> str:
+        """
+        Select optimal backend based on data characteristics.
+        
+        Args:
+            data_shape: Shape of the data to process
+            operation_type: Type of operation (e.g., "derivative", "fft")
+        
+        Returns:
+            Backend name ("jax", "cupy", or "numpy")
+        """
+        if self.backend != "auto":
+            return self.backend
+        
+        if self.intelligent_selector is not None:
+            try:
+                from ml.intelligent_backend_selector import WorkloadCharacteristics
+                from ml.backends import BackendType
+                
+                # Create workload characteristics
+                workload = WorkloadCharacteristics(
+                    operation_type=operation_type,
+                    data_size=int(np.prod(data_shape)),
+                    data_shape=data_shape,
+                    is_iterative=True
+                )
+                
+                # Get optimal backend
+                backend_type = self.intelligent_selector.select_backend(workload)
+                
+                # Map to GPU config backend names
+                if backend_type == BackendType.JAX and JAX_AVAILABLE:
+                    return "jax"
+                elif backend_type == BackendType.TORCH and CUPY_AVAILABLE:
+                    return "cupy"
+                else:
+                    return "numpy"
+            except Exception:
+                pass  # Fall through to simple selection
+        
+        # Simple fallback selection
+        if JAX_AVAILABLE:
+            return "jax"
+        elif CUPY_AVAILABLE:
+            return "cupy"
+        else:
+            return "numpy"
 
 
 class GPUOptimizedRiemannLiouville:
