@@ -1,4 +1,4 @@
-# Deployment Summary - v2.1.0
+# Deployment Summary - v2.2.0
 
 **Date:** October 27, 2025  
 **Status:** ✅ Pushed to GitHub - Ready for PyPI Release
@@ -102,8 +102,8 @@
    - Click "Draft a new release"
 
 2. **Fill Release Information:**
-   - **Choose a tag:** `v2.1.0` (create new tag)
-   - **Release title:** `v2.1.0 - Intelligent Backend Selection`
+   - **Choose a tag:** `v2.2.0` (create new tag)
+   - **Release title:** `v2.2.0 - Intelligent Backend Selection`
    - **Description:** Copy from CHANGELOG.md:
 
 ```markdown
@@ -151,7 +151,7 @@ See full details in CHANGELOG.md
 
 Before creating the GitHub release:
 
-- [x] Version updated to 2.1.0 in `pyproject.toml`
+- [x] Version updated to 2.2.0 in `pyproject.toml`
 - [x] CHANGELOG.md updated with release notes
 - [x] All tests passing locally
 - [x] Code committed and pushed to GitHub
@@ -175,14 +175,14 @@ Once you create the GitHub release:
 
 2. **Verify on PyPI:**
    - Visit: https://pypi.org/project/hpfracc/
-   - Should show version 2.1.0
+   - Should show version 2.2.0
    - Check that description renders correctly
 
 3. **Test Installation:**
    ```bash
    pip install --upgrade hpfracc
    python -c "import hpfracc; print(hpfracc.__version__)"
-   # Should print: 2.1.0
+   # Should print: 2.2.0
    ```
 
 4. **Test Functionality:**
@@ -282,7 +282,7 @@ Release is successful when:
 
 - ✅ GitHub Actions workflow completes (all green)
 - ✅ Package appears on PyPI: https://pypi.org/project/hpfracc/
-- ✅ Version shows as 2.1.0
+- ✅ Version shows as 2.2.0
 - ✅ `pip install hpfracc` installs successfully
 - ✅ Imports work: `from hpfracc.ml.intelligent_backend_selector import ...`
 - ✅ All tests pass in clean environment
@@ -311,7 +311,7 @@ External resources:
 - ✅ Documentation complete and organized
 - ✅ CI/CD workflows configured
 - ✅ CHANGELOG updated
-- ✅ Version number set to 2.1.0
+- ✅ Version number set to 2.2.0
 
 **What You Need to Do:**
 1. Configure PyPI trusted publishing (5 minutes)

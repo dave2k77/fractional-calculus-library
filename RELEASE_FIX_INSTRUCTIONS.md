@@ -53,13 +53,13 @@ git tag -d v2.2.1
 git push origin :refs/tags/v2.2.1
 ```
 
-### Step 3: Create New Release (v2.1.0)
+### Step 3: Create New Release (v2.2.0)
 
 1. Go to: https://github.com/dave2k77/fractional-calculus-library/releases/new
 
-2. **Choose a tag:** `v2.1.0` (create new tag from: main)
+2. **Choose a tag:** `v2.2.0` (create new tag from: main)
 
-3. **Release title:** `v2.1.0 - Intelligent Backend Selection`
+3. **Release title:** `v2.2.0 - Intelligent Backend Selection`
 
 4. **Description:** Copy this:
 
@@ -185,7 +185,7 @@ After creating the release, the GitHub Actions workflow will:
 ```bash
 pip install --upgrade hpfracc
 python -c "import hpfracc; print(hpfracc.__version__)"
-# Should print: 2.1.0
+# Should print: 2.2.0
 ```
 
 ---
@@ -196,7 +196,7 @@ Release is successful when:
 
 - ✅ All GitHub Actions jobs complete (green checks)
 - ✅ Package appears on PyPI: https://pypi.org/project/hpfracc/
-- ✅ Version shows as 2.1.0
+- ✅ Version shows as 2.2.0
 - ✅ `pip install hpfracc` works
 - ✅ Imports work correctly
 
@@ -232,7 +232,7 @@ Release is successful when:
 
 **Action Required**:
 1. Delete old v2.2.1 release and tag (2 minutes)
-2. Create new v2.1.0 release (5 minutes)
+2. Create new v2.2.0 release (5 minutes)
 3. Wait for automated deployment (30-40 seconds)
 4. Verify on PyPI (1 minute)
 

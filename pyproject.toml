@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "hpfracc"
-version = "2.1.0"
+version = "2.2.0"
 description = "High-Performance Fractional Calculus Library with Fractional Autograd Framework, GPU Acceleration, Machine Learning Integration, and Graph Neural Networks"
 authors = [
     {name = "Davian R. Chin", email = "d.r.chin@pgr.reading.ac.uk"}

@@ -7,7 +7,7 @@
 
 **HPFRACC** is a cutting-edge Python library that provides high-performance implementations of fractional calculus operations with seamless machine learning integration, GPU acceleration, and state-of-the-art neural network architectures.
 
-## 🚀 **NEW: Intelligent Backend Selection (v2.1.0)**
+## 🚀 **NEW: Intelligent Backend Selection (v2.2.0)**
 
 ✅ **100% Integration Test Coverage** - All modules fully tested and operational  
 ✅ **Intelligent Backend Selection** - Automatic workload-aware optimization (10-100x speedup)  
@@ -153,7 +153,7 @@ print(f"Protein folding kinetics computed for {len(time_points)} time points")
 
 ---
 
-## 🧠 **Intelligent Backend Selection (NEW in v2.1.0)**
+## 🧠 **Intelligent Backend Selection (NEW in v2.2.0)**
 
 HPFRACC now features **intelligent, workload-aware backend selection** that automatically chooses the optimal computational framework (JAX, PyTorch, Numba, NumPy) based on your data and hardware.
 
@@ -261,7 +261,7 @@ Our comprehensive benchmarking shows excellent performance:
 - **[Neural fODE Guide](docs/neural_fode_guide.md)** - Fractional ODE solving
 - **[Scientific Tutorials](docs/scientific_tutorials.rst)** - Research applications
 
-### **Backend Optimization (v2.1.0)**
+### **Backend Optimization (v2.2.0)**
 - **[Quick Reference](docs/backend_optimization/BACKEND_QUICK_REFERENCE.md)** - One-page backend selection guide
 - **[Integration Guide](docs/backend_optimization/INTELLIGENT_BACKEND_INTEGRATION_GUIDE.md)** - How to use intelligent selection
 - **[Technical Analysis](docs/backend_optimization/BACKEND_ANALYSIS_REPORT.md)** - Detailed technical report
