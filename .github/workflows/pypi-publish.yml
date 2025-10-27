@@ -24,7 +24,7 @@ jobs:
         pip install -e .
         python -c "import hpfracc; print(f'✓ HPFRACC version: {hpfracc.__version__}')"
         python -c "from hpfracc.ml.intelligent_backend_selector import IntelligentBackendSelector; print('✓ Intelligent backend selector imported')"
-        python -c "from hpfracc.core import FractionalCalculator; print('✓ Core modules imported')"
+        python -c "from hpfracc.core import create_fractional_derivative; print('✓ Core modules imported')"
         echo "✓ All basic imports successful"
 
   build:

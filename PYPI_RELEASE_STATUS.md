@@ -105,7 +105,7 @@ python -c "import hpfracc; print(f'Version: {hpfracc.__version__}')"
 ### 3. Test Key Features
 ```bash
 python -c "from hpfracc.ml.intelligent_backend_selector import IntelligentBackendSelector; print('✅ Intelligent backend selector imported')"
-python -c "from hpfracc.core import FractionalCalculator; print('✅ Core modules imported')"
+python -c "from hpfracc.core import create_fractional_derivative; print('✅ Core modules imported')"
 ```
 
 ---
