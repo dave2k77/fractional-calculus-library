@@ -14,8 +14,7 @@ import numpy as np
 
 from hpfracc.ml.probabilistic_fractional_orders import (
     ProbabilisticFractionalOrder,
-    ReparameterizedFractionalDerivative,
-    ScoreFunctionFractionalDerivative,
+    ProbabilisticFractionalLayer,
     create_normal_alpha_layer,
     create_uniform_alpha_layer,
     create_beta_alpha_layer

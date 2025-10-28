@@ -11,7 +11,10 @@ from hpfracc.core.derivatives import (
 )
 from hpfracc.core.integrals import (
     FractionalIntegral, RiemannLiouvilleIntegral, CaputoIntegral,
-    MillerRossIntegral
+    MillerRossIntegral, WeylIntegral
+)
+from hpfracc.core.fractional_implementations import (
+    RiemannLiouvilleDerivative, CaputoDerivative, GrunwaldLetnikovDerivative
 )
 from hpfracc.core.definitions import FractionalOrder
 
@@ -26,6 +29,9 @@ class TestBaseFractionalDerivative:
         self.h = self.t[1] - self.t[0]
         # Use FractionalDerivativeOperator as concrete implementation
         self.derivative = FractionalDerivativeOperator(self.alpha)
+        # Set implementation using Riemann-Liouville from fractional_implementations
+        from hpfracc.core.fractional_implementations import RiemannLiouvilleDerivative
+        self.derivative.set_implementation(RiemannLiouvilleDerivative(self.alpha))
     
     def test_initialization(self):
         """Test fractional derivative initialization"""
@@ -37,7 +43,7 @@ class TestBaseFractionalDerivative:
         def f(t):
             return t**2
         
-        result = self.derivative.compute(f, self.t, self.h)
+        result = self.derivative(f, self.t, h=self.h)
         
         assert isinstance(result, np.ndarray)
         assert len(result) == len(self.t)
@@ -50,8 +56,8 @@ class TestBaseFractionalDerivative:
         f = self.t**2
         
         for alpha in alphas:
-            derivative = FractionalDerivative(alpha)
-            result = derivative.compute(f, self.t, self.h)
+            derivative = RiemannLiouvilleDerivative(alpha)
+            result = derivative(f, self.t, h=self.h)
             
             assert isinstance(result, np.ndarray)
             assert len(result) == len(self.t)
@@ -78,7 +84,7 @@ class TestFractionalDerivativeOperator:
         def f(t):
             return t**2
         
-        result = self.operator.compute(f, self.t, self.h)
+        result = self.operator(f, self.t, h=self.h)
         
         assert isinstance(result, np.ndarray)
         assert len(result) == len(self.t)
@@ -89,7 +95,7 @@ class TestFractionalDerivativeOperator:
         """Test computing derivative with numerical input"""
         f = self.t**2
         
-        result = self.operator.compute(f, self.t, self.h)
+        result = self.operator(f, self.t, h=self.h)
         
         assert isinstance(result, np.ndarray)
         assert len(result) == len(self.t)
@@ -103,10 +109,10 @@ class TestFractionalDerivativeOperator:
         
         # Test linearity
         combined = a * f1 + b * f2
-        result_combined = self.operator.compute(combined, self.t, self.h)
+        result_combined = self.operator(combined, self.t, h=self.h)
         
-        result_f1 = self.operator.compute(f1, self.t, self.h)
-        result_f2 = self.operator.compute(f2, self.t, self.h)
+        result_f1 = self.operator(f1, self.t, h=self.h)
+        result_f2 = self.operator(f2, self.t, h=self.h)
         result_linear = a * result_f1 + b * result_f2
         
         np.testing.assert_allclose(result_combined, result_linear, rtol=1e-2, atol=1e-2)
@@ -132,7 +138,7 @@ class TestRiemannLiouvilleIntegral:
         def f(t):
             return t**2
         
-        result = self.rl_int.compute(f, self.t, self.h)
+        result = self.rl_int.compute(f, self.t, h=self.h)
         
         assert isinstance(result, np.ndarray)
         assert len(result) == len(self.t)
@@ -143,7 +149,7 @@ class TestRiemannLiouvilleIntegral:
         """Test computing integral with numerical input"""
         f = self.t**2
         
-        result = self.rl_int.compute(f, self.t, self.h)
+        result = self.rl_int.compute(f, self.t, h=self.h)
         
         assert isinstance(result, np.ndarray)
         assert len(result) == len(self.t)
@@ -170,7 +176,7 @@ class TestCaputoIntegral:
         def f(t):
             return t**2
         
-        result = self.caputo_int.compute(f, self.t, self.h)
+        result = self.caputo_int.compute(f, self.t, h=self.h)
         
         assert isinstance(result, np.ndarray)
         assert len(result) == len(self.t)
@@ -181,7 +187,7 @@ class TestCaputoIntegral:
         """Test computing integral with numerical input"""
         f = self.t**2
         
-        result = self.caputo_int.compute(f, self.t, self.h)
+        result = self.caputo_int.compute(f, self.t, h=self.h)
         
         assert isinstance(result, np.ndarray)
         assert len(result) == len(self.t)
@@ -208,7 +214,7 @@ class TestMillerRossIntegral:
         def f(t):
             return t**2
         
-        result = self.mr_int.compute(f, self.t, self.h)
+        result = self.mr_int.compute(f, self.t, h=self.h)
         
         assert isinstance(result, np.ndarray)
         assert len(result) == len(self.t)
@@ -219,7 +225,7 @@ class TestMillerRossIntegral:
         """Test computing integral with numerical input"""
         f = self.t**2
         
-        result = self.mr_int.compute(f, self.t, self.h)
+        result = self.mr_int.compute(f, self.t, h=self.h)
         
         assert isinstance(result, np.ndarray)
         assert len(result) == len(self.t)
@@ -242,8 +248,8 @@ class TestDerivativeIntegralRelations:
         f = self.t**2
         
         # Compute integral then derivative
-        integral_result = self.integral.compute(f, self.t, self.h)
-        derivative_result = self.derivative.compute(integral_result, self.t, self.h)
+        integral_result = self.integral.compute(f, self.t, h=self.h)
+        derivative_result = self.derivative(integral_result, self.t, h=self.h)
         
         # Should recover original function (approximately)
         np.testing.assert_allclose(derivative_result, f, rtol=1e-1, atol=1e-1)
@@ -253,7 +259,7 @@ class TestDerivativeIntegralRelations:
         f = self.t**2
         
         # Compute derivative then integral
-        derivative_result = self.derivative.compute(f, self.t, self.h)
+        derivative_result = self.derivative(f, self.t, h=self.h)
         integral_result = self.integral.compute(derivative_result, self.t, self.h)
         
         # Should recover original function (approximately)
@@ -277,10 +283,10 @@ class TestMathematicalConsistency:
         gl = GrunwaldLetnikovDerivative(self.alpha)
         mr = MillerRossDerivative(self.alpha)
         
-        result_rl = rl.compute(self.f, self.t, self.h)
-        result_caputo = caputo.compute(self.f, self.t, self.h)
-        result_gl = gl.compute(self.f, self.t, self.h)
-        result_mr = mr.compute(self.f, self.t, self.h)
+        result_rl = rl(self.f, self.t, h=self.h)
+        result_caputo = caputo(self.f, self.t, h=self.h)
+        result_gl = gl(self.f, self.t, h=self.h)
+        result_mr = mr(self.f, self.t, h=self.h)
         
         # Results should be similar (not identical due to different definitions)
         # but should have same order of magnitude
@@ -292,13 +298,13 @@ class TestMathematicalConsistency:
         """Test consistency between different integral methods"""
         rl_int = RiemannLiouvilleIntegral(self.alpha)
         caputo_int = CaputoIntegral(self.alpha)
-        gl_int = GrunwaldLetnikovIntegral(self.alpha)
+        gl_int = WeylIntegral(self.alpha)
         mr_int = MillerRossIntegral(self.alpha)
         
-        result_rl = rl_int.compute(self.f, self.t, self.h)
-        result_caputo = caputo_int.compute(self.f, self.t, self.h)
-        result_gl = gl_int.compute(self.f, self.t, self.h)
-        result_mr = mr_int.compute(self.f, self.t, self.h)
+        result_rl = rl_int.compute(self.f, self.t, h=self.h)
+        result_caputo = caputo_int.compute(self.f, self.t, h=self.h)
+        result_gl = gl_int.compute(self.f, self.t, h=self.h)
+        result_mr = mr_int.compute(self.f, self.t, h=self.h)
         
         # Results should be similar (not identical due to different definitions)
         # but should have same order of magnitude
@@ -327,11 +333,11 @@ class TestErrorHandling:
         
         # Test empty time array
         with pytest.raises(ValueError):
-            derivative.compute(lambda t: t, np.array([]), 0.01)
+            derivative(lambda t: t, np.array([]), h=0.01)
         
         # Test single point
         with pytest.raises(ValueError):
-            derivative.compute(lambda t: t, np.array([1.0]), 0.01)
+            derivative(lambda t: t, np.array([1.0]), h=0.01)
     
     def test_invalid_step_size(self):
         """Test handling of invalid step sizes"""
@@ -341,11 +347,11 @@ class TestErrorHandling:
         
         # Test negative step size
         with pytest.raises(ValueError):
-            derivative.compute(lambda t: t, t, -0.01)
+            derivative(lambda t: t, t, h=-0.01)
         
         # Test zero step size
         with pytest.raises(ValueError):
-            derivative.compute(lambda t: t, t, 0.0)
+            derivative(lambda t: t, t, h=0.0)
 
 
 if __name__ == "__main__":
