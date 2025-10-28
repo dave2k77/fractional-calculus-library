@@ -35,19 +35,24 @@ def beta_function(a: Union[float, np.ndarray], b: Union[float, np.ndarray]) -> U
     if np.isscalar(a) and np.isscalar(b):
         if a <= 0 or b <= 0:
             return np.nan
+        # Use SciPy directly for better performance
+        return scipy_special.beta(a, b)
     else:
         # For arrays, handle element-wise
         a = np.asarray(a)
         b = np.asarray(b)
+        
+        # Ensure both arrays have compatible shapes
+        if a.shape != b.shape:
+            # Broadcast to common shape
+            a, b = np.broadcast_arrays(a, b)
+        
         result = np.full_like(a, np.nan, dtype=float)
         valid_mask = (a > 0) & (b > 0)
         if np.any(valid_mask):
             result[valid_mask] = scipy_special.beta(
                 a[valid_mask], b[valid_mask])
         return result
-
-    # Use SciPy directly for better performance
-    return scipy_special.beta(a, b)
 
 
 def log_gamma_function(x: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
