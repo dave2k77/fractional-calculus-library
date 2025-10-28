@@ -200,11 +200,16 @@ class FractionalOperator:
             raise ValueError("Step size must be positive")
 
         if JAX_AVAILABLE:
-            f_array_jax = jnp.asarray(f_array)
-            # This will be overridden in subclasses
-            result = self._compute_jit(
-                f_array_jax, self.alpha.alpha, step_size)
-            return np.asarray(result)
+            try:
+                f_array_jax = jnp.asarray(f_array)
+                # This will be overridden in subclasses
+                result = self._compute_jit(
+                    f_array_jax, self.alpha.alpha, step_size)
+                return np.asarray(result)
+            except Exception as e:
+                # JAX failed (likely due to CuDNN issues), fall back to NumPy
+                warnings.warn(f"JAX computation failed ({e}), falling back to NumPy")
+                return self._numpy_kernel(f_array, self.alpha.alpha, step_size)
         else:
             # Fallback for non-JAX environments
             return self._numpy_kernel(f_array, self.alpha.alpha, step_size)
@@ -304,10 +309,15 @@ class OptimizedRiemannLiouville(FractionalOperator):
             raise ValueError("Step size must be positive")
 
         if JAX_AVAILABLE:
-            f_array_jax = jnp.asarray(f_array)
-            result = self._compute_jit(
-                f_array_jax, self.alpha.alpha, self.n, step_size)
-            return np.asarray(result)
+            try:
+                f_array_jax = jnp.asarray(f_array)
+                result = self._compute_jit(
+                    f_array_jax, self.alpha.alpha, self.n, step_size)
+                return np.asarray(result)
+            except Exception as e:
+                # JAX failed (likely due to CuDNN issues), fall back to NumPy
+                warnings.warn(f"JAX computation failed ({e}), falling back to NumPy")
+                return self._numpy_kernel(f_array, self.alpha.alpha, step_size)
         else:
             return self._numpy_kernel(f_array, self.alpha.alpha, step_size)
 
