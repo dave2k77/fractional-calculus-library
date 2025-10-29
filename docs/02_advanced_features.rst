@@ -102,30 +102,17 @@ GPU Optimization Features
 Performance Benchmarks
 ~~~~~~~~~~~~~~~~~~~~~~
 
-.. list-table:: Performance Benchmarks
-   :header-rows: 1
-   :widths: 35 15 15 15 20
-
-   * - Operation
-     - CPU Time
-     - GPU Time
-     - Speedup
-   * - Caputo Derivative (10K)
-     - 0.5s
-     - 0.1s
-     - **5x**
-   * - Fractional FFT (10K)
-     - 0.05s
-     - 0.01s
-     - **5x**
-   * - Neural Network (10K)
-     - 0.1s
-     - 0.02s
-     - **5x**
-   * - Caputo Derivative (100K)
-     - 20s
-     - 2s
-     - **10x**
++---------------------------+----------+----------+---------+
+| Operation                 | CPU Time | GPU Time | Speedup |
++===========================+==========+==========+=========+
+| Caputo Derivative (10K)   | 0.5s     | 0.1s     | **5x**  |
++---------------------------+----------+----------+---------+
+| Fractional FFT (10K)      | 0.05s    | 0.01s    | **5x**  |
++---------------------------+----------+----------+---------+
+| Neural Network (10K)      | 0.1s     | 0.02s    | **5x**  |
++---------------------------+----------+----------+---------+
+| Caputo Derivative (100K)  | 20s      | 2s       | **10x** |
++---------------------------+----------+----------+---------+
 
 Multi-Backend Support
 ---------------------
