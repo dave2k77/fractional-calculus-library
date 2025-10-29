@@ -40,6 +40,8 @@ dependencies = [
     "matplotlib>=3.5.0",
     
     # JAX ecosystem for automatic differentiation and GPU acceleration
+    # Note: For CUDA 12 GPU support, install separately with: pip install "jax[cuda12]"
+    # JAX CUDA 12 wheels (built with 12.3) are compatible with CUDA ≥12.1 including 12.8
     "jax>=0.4.0",
     "jaxlib>=0.4.0",
     "optax>=0.1.0",  # JAX optimization library
@@ -99,10 +101,15 @@ docs = [
 gpu = [
     "cupy>=10.0.0",  # CUDA acceleration
     "cudf>=21.0.0",  # GPU DataFrame
+    # Note: For JAX GPU with CUDA 12 support, install separately:
+    #       pip install torch==2.9.0 --index-url https://download.pytorch.org/whl/cu128
+    #       pip install --upgrade "jax[cuda12]"
+    # JAX CUDA 12 wheels work with CUDA ≥12.1, compatible with PyTorch CUDA 12.8
 ]
 
 ml = [
-    "torch>=1.12.0",  # PyTorch for deep learning
+    "torch>=1.12.0",  # PyTorch for deep learning (for CUDA 12.8: install with --index-url)
+    # Note: For JAX GPU with CUDA 12, install separately: pip install "jax[cuda12]"
     "jax>=0.4.0",     # JAX for numerical computing
     "jaxlib>=0.4.0",  # JAX backend
     "numba>=0.56.0",  # NUMBA for JIT compilation
