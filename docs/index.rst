@@ -11,7 +11,7 @@ What is HPFRACC?
 Key Features
 -----------
 
-* **🚀 Neural Fractional SDE Solvers (v3.0.0)**: Complete framework for learning stochastic dynamics with memory
+* **🚀 Neural Fractional SDE Solvers**: Complete framework for learning stochastic dynamics with memory
 * **🧠 Intelligent Backend Selection (v2.2.0)**: Revolutionary automatic optimization with 10-100x speedup
 * **Advanced Fractional Calculus**: Riemann-Liouville, Caputo, Grünwald-Letnikov, Weyl, Marchaud, Hadamard, Reiz-Feller definitions
 * **Machine Learning Integration**: Native PyTorch, JAX, and NUMBA support with autograd-friendly fractional derivatives
@@ -29,7 +29,7 @@ Key Features
 * **Production Ready**: Robust error handling with intelligent fallback mechanisms
 * **Analytics**: Built-in performance monitoring and usage analytics
 
-Current Status - PRODUCTION READY (v3.0.0)
+Current Status - PRODUCTION READY (v3.0.1)
 -----------------------------------------
 
 * **Intelligent Backend Selection**: Revolutionary automatic optimization (100% complete)
@@ -46,7 +46,7 @@ Current Status - PRODUCTION READY (v3.0.0)
 * **Production Deployment**: Robust error handling and intelligent fallback mechanisms
 * **Documentation**: Comprehensive coverage with updated examples and API reference
 * **Neural Fractional SDE Solvers**: Complete framework with adjoint training (100% complete)
-* **PyPI Package**: Published as hpfracc-3.0.0
+* **PyPI Package**: Published as hpfracc-3.0.1
 * **Status**: ✅ PRODUCTION READY FOR RESEARCH AND INDUSTRY
 
 Quick Start
@@ -163,7 +163,7 @@ If you use HPFRACC in your research, please cite:
      title={HPFRACC: High-Performance Fractional Calculus Library with Neural Fractional SDE Solvers},
      author={Chin, Davian R.},
      year={2025},
-     version={3.0.0},
+     version={3.0.1},
      doi={10.5281/zenodo.17476041},
      url={https://github.com/dave2k77/fractional_calculus_library},
      publisher={Zenodo},
@@ -182,7 +182,7 @@ Getting Help
 
 ----
 
-**HPFRACC v3.0.0** - *Empowering Research with High-Performance Fractional Calculus, Neural Fractional SDE Solvers, and Intelligent Backend Selection* | © 2025 Davian R. Chin
+**HPFRACC v3.0.1** - *Empowering Research with High-Performance Fractional Calculus, Neural Fractional SDE Solvers, and Intelligent Backend Selection* | © 2025 Davian R. Chin
 
 .. toctree::
    :maxdepth: 2

@@ -6,7 +6,7 @@ authors:
     family-names: Chin
     affiliation: "University of Reading, Department of Biomedical Engineering"
     email: d.r.chin@pgr.reading.ac.uk
-version: 3.0.0
+version: 3.0.1
 date-released: 2025-01-28
 license: MIT
 repository-code: https://github.com/dave2k77/fractional-calculus-library

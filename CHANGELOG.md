@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.0.1] - 2025-01-28
+
+### Changed
+- Updated version number to 3.0.1
+- Documentation updates for DOI integration
+
+### Fixed
+- Minor documentation and citation updates
+
+---
+
 ## [3.0.0] - 2025-10-29
 
 ### 🚀 **MAJOR RELEASE: Neural Fractional SDE Solvers**

@@ -10,9 +10,9 @@
 
 **HPFRACC** is a cutting-edge Python library that provides high-performance implementations of fractional calculus operations with seamless machine learning integration, GPU acceleration, and state-of-the-art neural network architectures.
 
-> **🚀 Version 3.0.0**: Major release featuring comprehensive Neural Fractional SDE Solvers with adjoint training, graph-SDE coupling, Bayesian inference, and coupled system solvers. Building on the revolutionary intelligent backend selection from v2.2.0.
+> **🚀 Version 3.0.1**: Bug fixes and improvements. Building on v3.0.0's comprehensive Neural Fractional SDE Solvers with adjoint training, graph-SDE coupling, Bayesian inference, and coupled system solvers, plus intelligent backend selection from v2.2.0.
 
-## 🚀 **NEW IN VERSION 3.0.0: Neural Fractional SDE Solvers**
+## 🚀 **Neural Fractional SDE Solvers**
 
 ### **Major Release Highlights**
 
@@ -31,7 +31,7 @@
 
 ## 🎯 **Key Features**
 
-### **🚀 NEW: Neural Fractional SDE Solvers (v3.0.0)**
+### **🚀 Neural Fractional SDE Solvers**
 
 #### **Fractional SDE Solvers**
 - **FractionalEulerMaruyama**: First-order convergence method with FFT-based history
@@ -143,7 +143,7 @@ print(f"HPFRACC version: {hpfracc.__version__}")
 print(f"Fractional derivative computed for {len(x)} points")
 ```
 
-### **Neural Fractional SDE (v3.0.0)**
+### **Neural Fractional SDE**
 ```python
 from hpfracc.ml.neural_fsde import create_neural_fsde
 from hpfracc.solvers.sde_solvers import solve_fractional_sde
@@ -474,7 +474,7 @@ where neural networks `NN_θ` and `NN_φ` learn the drift and diffusion function
 - **[Mathematical Theory](docs/mathematical_theory.md)** - Deep mathematical foundations
 - **[Examples](docs/examples.rst)** - Comprehensive code examples
 
-### **Neural Fractional SDE (v3.0.0)**
+### **Neural Fractional SDE**
 - **[SDE API Reference](docs/sde_api_reference.rst)** - Complete SDE solver documentation
 - **[SDE Examples](docs/sde_examples.rst)** - Neural fSDE code examples
 - **[Neural fSDE Examples](examples/neural_fsde_examples/)** - Practical examples
@@ -528,7 +528,7 @@ where neural networks `NN_θ` and `NN_φ` learn the drift and diffusion function
 
 ## 📈 **Current Status**
 
-### **✅ Production Ready (v3.0.0)**
+### **✅ Production Ready (v3.0.1)**
 - **Core Methods**: 100% implemented and tested
 - **Neural fSDE Solvers**: Complete framework with adjoint training
 - **GPU Acceleration**: 100% functional with optimization
@@ -568,7 +568,7 @@ If you use HPFRACC in your research, please cite:
   title={HPFRACC: High-Performance Fractional Calculus Library with Neural Fractional SDE Solvers},
   author={Chin, Davian R.},
   year={2025},
-  version={3.0.0},
+  version={3.0.1},
   doi={10.5281/zenodo.17476041},
   url={https://github.com/dave2k77/fractional_calculus_library},
   publisher={Zenodo},
@@ -595,6 +595,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**HPFRACC v3.0.0** - *Empowering Research with High-Performance Fractional Calculus, Neural Fractional SDE Solvers, and Intelligent Backend Selection*
+**HPFRACC v3.0.1** - *Empowering Research with High-Performance Fractional Calculus, Neural Fractional SDE Solvers, and Intelligent Backend Selection*
 
 *© 2025 Davian R. Chin, Department of Biomedical Engineering, University of Reading*
