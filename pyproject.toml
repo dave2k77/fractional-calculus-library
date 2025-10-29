@@ -119,6 +119,11 @@ probabilistic = [
     "numpyro>=0.13.0",  # Probabilistic programming with NumPyro
 ]
 
+examples = [
+    "pywavelets>=1.0.0",  # Wavelet transforms for signal processing examples
+    # Note: Used in scientific tutorials for wavelet analysis
+]
+
 [project.urls]
 Homepage = "https://github.com/dave2k77/fractional_calculus_library"
 Repository = "https://github.com/dave2k77/fractional_calculus_library.git"
