@@ -1,8 +1,8 @@
-# Mathematical Theory of Fractional Calculus (HPFRACC v2.2.0)
+# Mathematical Theory of Fractional Calculus (HPFRACC v3.0.0)
 
 ## Introduction
 
-Fractional calculus extends the classical calculus of integer-order derivatives and integrals to arbitrary real or complex orders. This document provides the mathematical foundations for the fractional operators implemented in the HPFRACC library, including the revolutionary intelligent backend selection system introduced in v2.2.0.
+Fractional calculus extends the classical calculus of integer-order derivatives and integrals to arbitrary real or complex orders. This document provides the mathematical foundations for the fractional operators implemented in the HPFRACC library, including Neural Fractional SDE Solvers (v3.0.0), intelligent backend selection system (v2.2.0), and the complete Fractional Autograd Framework.
 
 ## Historical Development
 
@@ -656,6 +656,32 @@ As the field continues to evolve, new definitions and methods will be added to t
 
 6. **Li, C., & Zeng, F.** (2015). *Numerical Methods for Fractional Calculus*. CRC Press.
 7. **Baleanu, D., Diethelm, K., Scalas, E., & Trujillo, J. J.** (2012). *Fractional Calculus: Models and Numerical Methods*. World Scientific.
+
+## Neural Fractional SDE Theory (HPFRACC v3.0.0)
+
+### Fractional Stochastic Differential Equations
+
+A fractional stochastic differential equation (fSDE) is given by:
+
+$$D^\alpha X(t) = f(t, X(t)) dt + g(t, X(t)) dW(t)$$
+
+where:
+- $D^\alpha$ is the Caputo or Riemann-Liouville fractional derivative of order $\alpha \in (0, 1)$
+- $f(t, X(t))$ is the drift function
+- $g(t, X(t))$ is the diffusion function  
+- $dW(t)$ is the increment of a Wiener process
+
+### Neural Fractional SDEs
+
+In neural fractional SDEs, the drift and diffusion functions are parameterized by neural networks:
+
+$$D^\alpha X(t) = \text{NN}_\theta(t, X(t)) dt + \text{NN}_\phi(t, X(t)) dW(t)$$
+
+where $\theta$ and $\phi$ are learnable parameters.
+
+### Adjoint Method for fSDEs
+
+The adjoint method enables memory-efficient gradient computation through fractional SDEs by solving a backward fractional differential equation for the adjoint state.
 
 ## Intelligent Backend Selection Theory (HPFRACC v2.2.0)
 

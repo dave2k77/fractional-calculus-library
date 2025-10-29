@@ -1,14 +1,14 @@
-# HPFRACC Performance Optimization Guide (v2.2.0)
+# HPFRACC Performance Optimization Guide (v3.0.0)
 
 ## Overview
 
-This guide provides comprehensive strategies for optimizing performance when using HPFRACC v2.2.0, with particular focus on the revolutionary intelligent backend selection system that automatically optimizes performance based on workload characteristics.
+This guide provides comprehensive strategies for optimizing performance when using HPFRACC v3.0.0, with particular focus on Neural Fractional SDE Solvers, the revolutionary intelligent backend selection system that automatically optimizes performance based on workload characteristics, and advanced optimization techniques.
 
 ## Intelligent Backend Selection
 
 ### Automatic Optimization
 
-HPFRACC v2.2.0 features **revolutionary intelligent backend selection** that automatically optimizes performance with zero configuration required:
+HPFRACC v3.0.0 features **Neural Fractional SDE Solvers** with adjoint training and **revolutionary intelligent backend selection** that automatically optimizes performance with zero configuration required:
 
 ```python
 import hpfracc
@@ -524,7 +524,7 @@ class AdaptiveOptimizer:
 
 ## Conclusion
 
-HPFRACC v2.2.0's intelligent backend selection system provides unprecedented performance optimization with zero configuration required. By following the strategies outlined in this guide, users can achieve optimal performance across a wide range of fractional calculus operations.
+HPFRACC v3.0.0's Neural Fractional SDE Solvers and intelligent backend selection system provide unprecedented performance optimization with zero configuration required. By following the strategies outlined in this guide, users can achieve optimal performance across a wide range of fractional calculus operations, including stochastic differential equations.
 
 The intelligent backend selection system automatically:
 - Selects optimal backends based on workload characteristics
@@ -533,4 +533,4 @@ The intelligent backend selection system automatically:
 - Provides graceful fallback mechanisms
 - Monitors and optimizes performance
 
-With these capabilities, HPFRACC v2.2.0 delivers exceptional performance for fractional calculus applications in research and industry.
+With these capabilities, HPFRACC v3.0.0 delivers exceptional performance for fractional calculus applications in research and industry, including advanced stochastic modeling with neural fractional SDEs.

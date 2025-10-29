@@ -2,7 +2,7 @@
 User Guide
 ==========
 
-Welcome to the HPFRACC User Guide! This comprehensive guide will help you get started with the High-Performance Fractional Calculus Library v2.2.0, featuring **revolutionary intelligent backend selection**, complete Fractional Autograd Framework, machine learning integration, and advanced optimization capabilities.
+Welcome to the HPFRACC User Guide! This comprehensive guide will help you get started with the High-Performance Fractional Calculus Library v3.0.0, featuring **Neural Fractional SDE Solvers**, revolutionary intelligent backend selection, complete Fractional Autograd Framework, machine learning integration, and advanced optimization capabilities.
 
 Installation
 -----------

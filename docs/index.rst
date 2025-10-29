@@ -11,6 +11,7 @@ What is HPFRACC?
 Key Features
 -----------
 
+* **🚀 Neural Fractional SDE Solvers (v3.0.0)**: Complete framework for learning stochastic dynamics with memory
 * **🧠 Intelligent Backend Selection (v2.2.0)**: Revolutionary automatic optimization with 10-100x speedup
 * **Advanced Fractional Calculus**: Riemann-Liouville, Caputo, Grünwald-Letnikov, Weyl, Marchaud, Hadamard, Reiz-Feller definitions
 * **Machine Learning Integration**: Native PyTorch, JAX, and NUMBA support with autograd-friendly fractional derivatives
@@ -19,12 +20,16 @@ Key Features
 * **Graph Neural Networks**: GCN, GAT, GraphSAGE, and Graph U-Net architectures with fractional components
 * **Advanced Solvers**: Fractional ODE and PDE solvers with intelligent backend selection
 * **Neural fODE Framework**: Learning-based solution of fractional ODEs
+* **Neural Fractional SDE Solvers**: Learnable drift and diffusion with adjoint training
+* **Stochastic Noise Models**: Brownian motion, fractional Brownian motion, Lévy noise, coloured noise
+* **Graph-SDE Coupling**: Spatio-temporal dynamics with graph neural networks
+* **Bayesian Neural fSDEs**: Uncertainty quantification with NumPyro integration
 * **High Performance**: Optimized algorithms with GPU acceleration and memory management
 * **Multi-Backend**: Seamless switching between computation backends with automatic optimization
 * **Production Ready**: Robust error handling with intelligent fallback mechanisms
 * **Analytics**: Built-in performance monitoring and usage analytics
 
-Current Status - PRODUCTION READY (v2.2.0)
+Current Status - PRODUCTION READY (v3.0.0)
 -----------------------------------------
 
 * **Intelligent Backend Selection**: Revolutionary automatic optimization (100% complete)
@@ -40,7 +45,8 @@ Current Status - PRODUCTION READY (v2.2.0)
 * **Research Workflows**: Complete end-to-end pipelines validated
 * **Production Deployment**: Robust error handling and intelligent fallback mechanisms
 * **Documentation**: Comprehensive coverage with updated examples and API reference
-* **PyPI Package**: Published as hpfracc-2.2.0
+* **Neural Fractional SDE Solvers**: Complete framework with adjoint training (100% complete)
+* **PyPI Package**: Published as hpfracc-3.0.0
 * **Status**: ✅ PRODUCTION READY FOR RESEARCH AND INDUSTRY
 
 Quick Start
@@ -98,11 +104,12 @@ Core Concepts & Theory
 * :doc:`mathematical_theory` - Deep mathematical theory and foundations including ML models, Neural fODEs, GNNs, and autograd kernels
 * :doc:`fractional_operators_guide` - Comprehensive guide to all fractional operators including ML autograd
 
-Neural Fractional SDE Solver (v3.0.0)
+Neural Fractional SDE Solvers (v3.0.0)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 * :doc:`neural_fsde_guide` - Comprehensive guide to neural fractional SDEs
-* :doc:`api_reference` - Complete API reference including SDE solvers and noise models
+* :doc:`sde_api_reference` - Complete SDE solver API reference
+* :doc:`sde_examples` - Neural fSDE code examples and tutorials
 
 API Reference
 ~~~~~~~~~~~~
@@ -167,10 +174,10 @@ If you use HPFRACC in your research, please cite:
 .. code-block:: bibtex
 
    @software{hpfracc2025,
-     title={HPFRACC: High-Performance Fractional Calculus Library with Fractional Autograd Framework},
+     title={HPFRACC: High-Performance Fractional Calculus Library with Neural Fractional SDE Solvers},
      author={Chin, Davian R.},
      year={2025},
-     version={2.0.0},
+     version={3.0.0},
      url={https://github.com/dave2k77/fractional_calculus_library},
      note={Department of Biomedical Engineering, University of Reading}
    }
@@ -185,7 +192,7 @@ Getting Help
 
 ----
 
-**HPFRACC v2.0.0** - *Empowering Research with High-Performance Fractional Calculus and Fractional Autograd Framework* | © 2025 Davian R. Chin
+**HPFRACC v3.0.0** - *Empowering Research with High-Performance Fractional Calculus, Neural Fractional SDE Solvers, and Intelligent Backend Selection* | © 2025 Davian R. Chin
 
 .. toctree::
    :maxdepth: 2
@@ -194,6 +201,9 @@ Getting Help
    user_guide
    spectral_autograd_guide
    fractional_autograd_guide
+   neural_fsde_guide
+   sde_api_reference
+   sde_examples
    api_reference
    examples
    scientific_tutorials
