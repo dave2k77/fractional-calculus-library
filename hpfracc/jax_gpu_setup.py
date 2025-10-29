@@ -68,6 +68,20 @@ def setup_jax_gpu_safe() -> bool:
         # Clear any existing plugins first
         clear_jax_plugins()
         
+        # Prioritize pip-installed CuDNN libraries over conda's older versions
+        try:
+            import site
+            for path in site.getsitepackages() + [site.getusersitepackages()]:
+                cudnn_lib_path = os.path.join(path, 'nvidia', 'cudnn', 'lib')
+                if os.path.exists(cudnn_lib_path):
+                    # Add to LD_LIBRARY_PATH if not already there
+                    ld_path = os.environ.get('LD_LIBRARY_PATH', '')
+                    if cudnn_lib_path not in ld_path:
+                        os.environ['LD_LIBRARY_PATH'] = f'{cudnn_lib_path}:{ld_path}' if ld_path else cudnn_lib_path
+                        break
+        except Exception:
+            pass  # Non-critical, continue without library path adjustment
+        
         # Check CuDNN compatibility
         cudnn_info = check_cudnn_compatibility()
         if not cudnn_info.get('cudnn_available', False):
