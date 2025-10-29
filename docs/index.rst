@@ -157,6 +157,8 @@ Citation
 
 If you use HPFRACC in your research, please cite:
 
+**Current Citation (without DOI):**
+
 .. code-block:: bibtex
 
    @software{hpfracc2025,
@@ -165,8 +167,26 @@ If you use HPFRACC in your research, please cite:
      year={2025},
      version={3.0.0},
      url={https://github.com/dave2k77/fractional_calculus_library},
+     publisher={Zenodo},
      note={Department of Biomedical Engineering, University of Reading}
    }
+
+**After obtaining DOI from Zenodo, update to:**
+
+.. code-block:: bibtex
+
+   @software{hpfracc2025,
+     title={HPFRACC: High-Performance Fractional Calculus Library with Neural Fractional SDE Solvers},
+     author={Chin, Davian R.},
+     year={2025},
+     version={3.0.0},
+     doi={10.5281/zenodo.XXXXXXXXX},
+     url={https://github.com/dave2k77/fractional_calculus_library},
+     publisher={Zenodo},
+     note={Department of Biomedical Engineering, University of Reading}
+   }
+
+**To obtain a DOI**: See :doc:`ZENODO_DOI_SETUP` for step-by-step instructions on getting a DOI via Zenodo.
 
 Getting Help
 -----------

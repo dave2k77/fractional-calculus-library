@@ -1,0 +1,23 @@
+cff-version: 1.2.0
+message: "If you use HPFRACC in your research, please cite it using the information below."
+title: "HPFRACC: High-Performance Fractional Calculus Library with Neural Fractional SDE Solvers"
+authors:
+  - given-names: Davian R.
+    family-names: Chin
+    affiliation: "University of Reading, Department of Biomedical Engineering"
+    email: d.r.chin@pgr.reading.ac.uk
+version: 3.0.0
+date-released: 2025-01-28
+license: MIT
+repository-code: https://github.com/dave2k77/fractional-calculus-library
+url: https://github.com/dave2k77/fractional-calculus-library
+keywords:
+  - fractional-calculus
+  - numerical-methods
+  - machine-learning
+  - neural-networks
+  - stochastic-differential-equations
+  - gpu-acceleration
+  - autograd
+  - spectral-methods
+abstract: "HPFRACC is a high-performance Python library for fractional calculus operations with neural network integration. It provides implementations of fractional derivatives (Riemann-Liouville, Caputo, Grünwald-Letnikov), fractional integrals, special functions, and advanced machine learning capabilities including neural fractional ODEs and SDEs, graph neural networks, and intelligent backend selection for optimal performance."
