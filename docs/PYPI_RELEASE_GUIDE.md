@@ -51,7 +51,7 @@ Go to GitHub → Releases → Create a new release:
 2. Add a new pending publisher:
    - **PyPI Project Name:** `hpfracc`
    - **Owner:** `dave2k77` (your GitHub username)
-   - **Repository name:** `fractional_calculus_library`
+   - **Repository name:** `hpfracc`
    - **Workflow name:** `pypi-publish.yml`
    - **Environment name:** `pypi`
 

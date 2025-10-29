@@ -125,12 +125,12 @@ examples = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/dave2k77/fractional_calculus_library"
-Repository = "https://github.com/dave2k77/fractional_calculus_library.git"
-Documentation = "https://fractional-calculus-library.readthedocs.io"
-"Bug Tracker" = "https://github.com/dave2k77/fractional_calculus_library/issues"
-"Source Code" = "https://github.com/dave2k77/fractional_calculus_library"
-"Download" = "https://github.com/dave2k77/fractional_calculus_library/releases"
+Homepage = "https://github.com/dave2k77/hpfracc"
+Repository = "https://github.com/dave2k77/hpfracc.git"
+Documentation = "https://hpfracc.readthedocs.io"
+"Bug Tracker" = "https://github.com/dave2k77/hpfracc/issues"
+"Source Code" = "https://github.com/dave2k77/hpfracc"
+"Download" = "https://github.com/dave2k77/hpfracc/releases"
 "Academic Contact" = "https://www.reading.ac.uk/people/d.r.chin"
 
 [tool.setuptools.packages.find]

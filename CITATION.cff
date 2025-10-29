@@ -9,8 +9,8 @@ authors:
 version: 3.0.1
 date-released: 2025-01-28
 license: MIT
-repository-code: https://github.com/dave2k77/fractional-calculus-library
-url: https://github.com/dave2k77/fractional-calculus-library
+repository-code: https://github.com/dave2k77/hpfracc
+url: https://github.com/dave2k77/hpfracc
 doi: 10.5281/zenodo.17476041
 keywords:
   - fractional-calculus

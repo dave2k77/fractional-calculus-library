@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![PyPI version](https://badge.fury.io/py/hpfracc.svg)](https://badge.fury.io/py/hpfracc)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17476041.svg)](https://doi.org/10.5281/zenodo.17476041)
-[![Integration Tests](https://img.shields.io/badge/Integration%20Tests-100%25-success)](https://github.com/dave2k77/fractional_calculus_library)
+[![Integration Tests](https://img.shields.io/badge/Integration%20Tests-100%25-success)](https://github.com/dave2k77/hpfracc)
 [![Documentation](https://readthedocs.org/projects/hpfracc/badge/?version=latest)](https://hpfracc.readthedocs.io/)
 [![Downloads](https://pepy.tech/badge/hpfracc)](https://pepy.tech/project/hpfracc)
 
@@ -570,7 +570,7 @@ If you use HPFRACC in your research, please cite:
   year={2025},
   version={3.0.1},
   doi={10.5281/zenodo.17476041},
-  url={https://github.com/dave2k77/fractional_calculus_library},
+  url={https://github.com/dave2k77/hpfracc},
   publisher={Zenodo},
   note={Department of Biomedical Engineering, University of Reading}
 }
@@ -584,7 +584,7 @@ If you use HPFRACC in your research, please cite:
 
 - **Documentation**: Browse the comprehensive guides above
 - **Examples**: Check the [examples directory](examples/) for practical implementations
-- **Issues**: Report bugs or request features on [GitHub Issues](https://github.com/dave2k77/fractional_calculus_library/issues)
+- **Issues**: Report bugs or request features on [GitHub Issues](https://github.com/dave2k77/hpfracc/issues)
 - **Academic Contact**: [d.r.chin@pgr.reading.ac.uk](mailto:d.r.chin@pgr.reading.ac.uk)
 
 ---

@@ -147,9 +147,9 @@ Active Development
 Quick Links
 ----------
 
-* **GitHub Repository**: `fractional_calculus_library <https://github.com/dave2k77/fractional_calculus_library>`_
+* **GitHub Repository**: `hpfracc <https://github.com/dave2k77/hpfracc>`_
 * **PyPI Package**: `hpfracc <https://pypi.org/project/hpfracc/>`_
-* **Issue Tracker**: `GitHub Issues <https://github.com/dave2k77/fractional_calculus_library/issues>`_
+* **Issue Tracker**: `GitHub Issues <https://github.com/dave2k77/hpfracc/issues>`_
 * **Academic Contact**: `d.r.chin@pgr.reading.ac.uk <mailto:d.r.chin@pgr.reading.ac.uk>`_
 
 Citation
@@ -165,7 +165,7 @@ If you use HPFRACC in your research, please cite:
      year={2025},
      version={3.0.1},
      doi={10.5281/zenodo.17476041},
-     url={https://github.com/dave2k77/fractional_calculus_library},
+     url={https://github.com/dave2k77/hpfracc},
      publisher={Zenodo},
      note={Department of Biomedical Engineering, University of Reading}
    }
