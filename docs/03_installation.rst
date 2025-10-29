@@ -118,11 +118,22 @@ If you encounter CuDNN version mismatch errors:
 CUDA Version Compatibility
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-| Component | CUDA Version | Status |
-|-----------|--------------|--------|
-| PyTorch | 12.8 | ✅ Fully supported |
-| JAX | 12.3 (wheels) → 12.8 (runtime) | ✅ Compatible |
-| CuDNN | 9.12.0+ | ✅ Recommended |
+.. list-table:: CUDA Version Compatibility
+   :header-rows: 1
+   :widths: 20 40 40
+
+   * - Component
+     - CUDA Version
+     - Status
+   * - PyTorch
+     - 12.8
+     - ✅ Fully supported
+   * - JAX
+     - 12.3 (wheels) → 12.8 (runtime)
+     - ✅ Compatible
+   * - CuDNN
+     - 9.12.0+
+     - ✅ Recommended
 
 **Key Point**: JAX's CUDA 12 wheels are built with CUDA 12.3 but work with CUDA ≥12.1, including 12.8. This ensures compatibility between JAX and PyTorch installations.
 

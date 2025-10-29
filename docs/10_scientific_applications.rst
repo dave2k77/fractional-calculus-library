@@ -25,11 +25,30 @@ HPFRACC v3.0.0 features revolutionary intelligent backend selection with automat
 Performance Benchmarks
 ~~~~~~~~~~~~~~~~~~~~~~
 
-| Method | Data Size | CPU Time | GPU Time | Speedup |
-|--------|-----------|----------|----------|---------|
-| Caputo Derivative | 10K | 0.5s | 0.1s | **5x** |
-| Fractional FFT | 10K | 0.05s | 0.01s | **5x** |
-| Neural Network | 10K | 0.1s | 0.02s | **5x** |
+.. list-table:: Performance Benchmarks
+   :header-rows: 1
+   :widths: 30 15 15 15 25
+
+   * - Method
+     - Data Size
+     - CPU Time
+     - GPU Time
+     - Speedup
+   * - Caputo Derivative
+     - 10K
+     - 0.5s
+     - 0.1s
+     - **5x**
+   * - Fractional FFT
+     - 10K
+     - 0.05s
+     - 0.01s
+     - **5x**
+   * - Neural Network
+     - 10K
+     - 0.1s
+     - 0.02s
+     - **5x**
 
 For comprehensive optimization strategies, see :doc:`PERFORMANCE_OPTIMIZATION_GUIDE`.
 
