@@ -15,17 +15,32 @@ import logging
 import time
 from functools import wraps
 import numpy as np
-import torch
-from typing import Union, Callable, Optional, Tuple, List, Dict, Any
+from typing import Union, Callable, Optional, Tuple, List, Dict, Any, TYPE_CHECKING
 import warnings
 
-# Optional torch import
-try:
+if TYPE_CHECKING:
     import torch
-    TORCH_AVAILABLE = True
-except ImportError:
-    TORCH_AVAILABLE = False
-    torch = None
+
+# Optional torch import - lazy loading to avoid CuDNN errors at import time
+TORCH_AVAILABLE = False
+torch = None
+
+def _get_torch():
+    """Lazy import torch to avoid CuDNN loading errors."""
+    global torch, TORCH_AVAILABLE
+    if torch is None and not TORCH_AVAILABLE:
+        try:
+            import torch as _torch
+            torch = _torch
+            TORCH_AVAILABLE = True
+        except (ImportError, OSError) as e:
+            # OSError can occur if CuDNN libraries aren't found
+            TORCH_AVAILABLE = False
+            torch = None
+            warnings.warn(f"PyTorch not available or failed to load: {e}. "
+                         f"Some functions may have limited functionality.",
+                         category=ImportWarning)
+    return torch
 
 # Module-level warning tracking
 _warning_tracker = set()
@@ -256,7 +271,7 @@ def validate_function(f: Callable, domain: Tuple[float, float] = (
 
 
 def validate_tensor_input(x: Union[np.ndarray,
-                                   torch.Tensor],
+                                   "torch.Tensor"],
                           expected_shape: Optional[Tuple] = None) -> bool:
     """
     Validate tensor input for fractional calculus operations.
@@ -271,11 +286,14 @@ def validate_tensor_input(x: Union[np.ndarray,
     if isinstance(x, np.ndarray):
         if not np.isfinite(x).all():
             return False
-    elif isinstance(x, torch.Tensor):
-        if not torch.isfinite(x).all():
-            return False
     else:
-        return False
+        # Check if it's a torch Tensor (lazy import)
+        torch = _get_torch()
+        if torch is not None and isinstance(x, "torch.Tensor"):
+            if not torch.isfinite(x).all():
+                return False
+        else:
+            return False
 
     if expected_shape is not None:
         if x.shape != expected_shape:
@@ -479,7 +497,7 @@ def safe_divide(
 
 
 def check_numerical_stability(
-        values: Union[np.ndarray, torch.Tensor], tolerance: float = 1e-10) -> bool:
+        values: Union[np.ndarray, "torch.Tensor"], tolerance: float = 1e-10) -> bool:
     """
     Check if numerical values are stable.
 
@@ -495,12 +513,15 @@ def check_numerical_stability(
             np.isfinite(values)) and np.all(
             np.abs(values) < 1 /
             tolerance)
-    elif isinstance(values, torch.Tensor):
-        return torch.all(
-            torch.isfinite(values)) and torch.all(
-            torch.abs(values) < 1 / tolerance)
     else:
-        return False
+        # Check if it's a torch Tensor (lazy import)
+        torch = _get_torch()
+        if torch is not None and isinstance(values, "torch.Tensor"):
+            return torch.all(
+                torch.isfinite(values)) and torch.all(
+                torch.abs(values) < 1 / tolerance)
+        else:
+            return False
 
 
 # Common mathematical operations
@@ -523,17 +544,20 @@ def vectorize_function(func: Callable, vectorize: bool = True) -> Callable:
                 return [func(xi) for xi in x]
             elif isinstance(x, np.ndarray):
                 return np.array([func(xi) for xi in x])
-            elif isinstance(x, torch.Tensor):
-                return torch.tensor([func(float(xi)) for xi in x])
             else:
-                return func(x)
+                # Check if it's a torch Tensor (lazy import)
+                torch = _get_torch()
+                if torch is not None and isinstance(x, "torch.Tensor"):
+                    return torch.tensor([func(float(xi)) for xi in x])
+                else:
+                    return func(x)
         return vectorized_func
 
 
 def normalize_array(arr: Union[np.ndarray,
-                               torch.Tensor],
+                               "torch.Tensor"],
                     norm_type: str = "l2") -> Union[np.ndarray,
-                                                    torch.Tensor]:
+                                                    "torch.Tensor"]:
     """
     Normalize an array using different norm types.
 
@@ -558,22 +582,24 @@ def normalize_array(arr: Union[np.ndarray,
 
         return arr / norm if norm > 0 else arr
 
-    elif isinstance(arr, torch.Tensor):
-        if norm_type == "l1":
-            norm = torch.sum(torch.abs(arr))
-        elif norm_type == "l2":
-            norm = torch.sqrt(torch.sum(arr ** 2))
-        elif norm_type == "max":
-            norm = torch.max(torch.abs(arr))
-        elif norm_type == "minmax":
-            return (arr - torch.min(arr)) / (torch.max(arr) - torch.min(arr))
-        else:
-            raise ValueError(f"Unknown norm type: {norm_type}")
-
-        return arr / norm if norm > 0 else arr
-
     else:
-        raise TypeError(f"Unsupported type: {type(arr)}")
+        # Check if it's a torch Tensor (lazy import)
+        torch = _get_torch()
+        if torch is not None and isinstance(arr, "torch.Tensor"):
+            if norm_type == "l1":
+                norm = torch.sum(torch.abs(arr))
+            elif norm_type == "l2":
+                norm = torch.sqrt(torch.sum(arr ** 2))
+            elif norm_type == "max":
+                norm = torch.max(torch.abs(arr))
+            elif norm_type == "minmax":
+                return (arr - torch.min(arr)) / (torch.max(arr) - torch.min(arr))
+            else:
+                raise ValueError(f"Unknown norm type: {norm_type}")
+
+            return arr / norm if norm > 0 else arr
+        else:
+            raise ValueError(f"Unsupported array type: {type(arr)}")
 
 
 def smooth_function(func: Callable, smoothing_factor: float = 0.1) -> Callable:
@@ -605,10 +631,10 @@ def smooth_function(func: Callable, smoothing_factor: float = 0.1) -> Callable:
 # Utility functions for fractional calculus
 def fractional_power(x: Union[float,
                               np.ndarray,
-                              torch.Tensor],
+                              "torch.Tensor"],
                      alpha: float) -> Union[float,
                                             np.ndarray,
-                                            torch.Tensor]:
+                                            "torch.Tensor"]:
     """
     Compute fractional power with proper handling of negative values.
 
@@ -642,29 +668,31 @@ def fractional_power(x: Union[float,
 
         return result
 
-    elif isinstance(x, torch.Tensor):
-        result = torch.zeros_like(x, dtype=torch.float32)
-        positive_mask = x >= 0
-        negative_mask = x < 0
-
-        result[positive_mask] = x[positive_mask] ** alpha
-        if alpha != int(alpha):
-            result[negative_mask] = torch.nan
-        else:
-            result[negative_mask] = x[negative_mask] ** alpha
-
-        return result
-
     else:
-        raise TypeError(f"Unsupported type: {type(x)}")
+        # Check if it's a torch Tensor (lazy import)
+        torch = _get_torch()
+        if torch is not None and isinstance(x, "torch.Tensor"):
+            result = torch.zeros_like(x, dtype=torch.float32)
+            positive_mask = x >= 0
+            negative_mask = x < 0
+
+            result[positive_mask] = x[positive_mask] ** alpha
+            if alpha != int(alpha):
+                result[negative_mask] = torch.nan
+            else:
+                result[negative_mask] = x[negative_mask] ** alpha
+
+            return result
+        else:
+            raise TypeError(f"Unsupported type: {type(x)}")
 
 
 def fractional_exponential(x: Union[float,
                                     np.ndarray,
-                                    torch.Tensor],
+                                    "torch.Tensor"],
                            alpha: float) -> Union[float,
                                                   np.ndarray,
-                                                  torch.Tensor]:
+                                                  "torch.Tensor"]:
     """
     Compute fractional exponential function.
 
@@ -682,11 +710,13 @@ def fractional_exponential(x: Union[float,
     elif isinstance(x, np.ndarray):
         return np.exp(alpha * x)
 
-    elif isinstance(x, torch.Tensor):
-        return torch.exp(alpha * x)
-
     else:
-        raise TypeError(f"Unsupported type: {type(x)}")
+        # Check if it's a torch Tensor (lazy import)
+        torch = _get_torch()
+        if torch is not None and isinstance(x, "torch.Tensor"):
+            return torch.exp(alpha * x)
+        else:
+            raise TypeError(f"Unsupported type: {type(x)}")
 
 
 # Configuration utilities
