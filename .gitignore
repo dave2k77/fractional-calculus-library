@@ -212,6 +212,18 @@ data/reference_solutions/
 benchmark_results/
 performance_logs/
 
+# Analytics databases
+*_analytics.db
+analytics_reports/
+
+# Test output files
+smoke_output.txt
+test_output*.txt
+
+# Coverage reports
+coverage.json
+coverage.xml
+
 # Documentation builds
 docs/build/
 docs/_build/
