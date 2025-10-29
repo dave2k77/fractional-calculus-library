@@ -81,7 +81,7 @@ Once processed (typically 5-10 minutes after release):
 
 1. Visit your Zenodo uploads page
 2. Find your release
-3. The DOI will be displayed, e.g.: `10.5281/zenodo.XXXXXXXXX`
+3. The DOI will be displayed, e.g.: `10.5281/zenodo.17476041` (example from HPFRACC v3.0.0)
 4. Click "Get citation" for formatted citations
 
 ## Citation Format
@@ -95,7 +95,7 @@ After receiving your DOI, update citations to:
   author={Chin, Davian R.},
   year={2025},
   version={3.0.0},
-  doi={10.5281/zenodo.XXXXXXXXX},
+  doi={10.5281/zenodo.17476041},
   url={https://github.com/dave2k77/fractional-calculus-library},
   publisher={Zenodo},
   note={Department of Biomedical Engineering, University of Reading}
@@ -106,7 +106,7 @@ After receiving your DOI, update citations to:
 ```
 Chin, D. R. (2025). HPFRACC: High-Performance Fractional Calculus Library 
 with Neural Fractional SDE Solvers (Version 3.0.0) [Computer software]. 
-Zenodo. https://doi.org/10.5281/zenodo.XXXXXXXXX
+Zenodo. https://doi.org/10.5281/zenodo.17476041
 ```
 
 ## Manual Upload (Alternative)
@@ -129,8 +129,9 @@ If you prefer manual control:
 
 3. **Badge**: Add a DOI badge to your README:
    ```markdown
-   [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.XXXXXXXXX.svg)](https://doi.org/10.5281/zenodo.XXXXXXXXX)
+   [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17476041.svg)](https://doi.org/10.5281/zenodo.17476041)
    ```
+   (Example from HPFRACC v3.0.0)
 
 4. **CITATION File**: Create `CITATION.cff` in repository root:
    ```yaml
@@ -142,9 +143,9 @@ If you prefer manual control:
        family-names: Chin
        affiliation: University of Reading, Department of Biomedical Engineering
        email: d.r.chin@pgr.reading.ac.uk
-   version: 3.0.0
-   date-released: 2025-01-XX
-   doi: 10.5281/zenodo.XXXXXXXXX
+version: 3.0.0
+date-released: 2025-01-28
+doi: 10.5281/zenodo.17476041
    license: MIT
    repository-code: https://github.com/dave2k77/fractional-calculus-library
    ```
@@ -180,6 +181,6 @@ While Zenodo is recommended, other options include:
 - DOI assignment is **permanent** - once assigned, it cannot be changed
 - Each version/release can have its own DOI
 - Zenodo provides free storage and DOI assignment
-- The DOI format is: `10.5281/zenodo.XXXXXXXXX`
+- The DOI format is: `10.5281/zenodo.XXXXXXXXX` (example: `10.5281/zenodo.17476041` for HPFRACC v3.0.0)
 - DOI becomes available within 5-10 minutes after GitHub release
 
