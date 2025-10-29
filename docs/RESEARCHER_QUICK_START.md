@@ -435,4 +435,4 @@ Your HPFRACC library is now ready for:
 
 **Happy Researching! 🔬🚀**
 
-*HPFRACC v2.0.0 - Production Ready for Computational Physics and Biophysics Research*
+*HPFRACC v3.0.0 - Production Ready for Computational Physics and Biophysics Research*
