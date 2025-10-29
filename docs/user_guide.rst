@@ -2,7 +2,7 @@
 User Guide
 ==========
 
-Welcome to the HPFRACC User Guide! This comprehensive guide will help you get started with the High-Performance Fractional Calculus Library v2.0.0, featuring the complete Fractional Autograd Framework, machine learning integration, and advanced optimization capabilities.
+Welcome to the HPFRACC User Guide! This comprehensive guide will help you get started with the High-Performance Fractional Calculus Library v2.2.0, featuring **revolutionary intelligent backend selection**, complete Fractional Autograd Framework, machine learning integration, and advanced optimization capabilities.
 
 Installation
 -----------
@@ -16,10 +16,19 @@ Install the core library:
 
    pip install hpfracc
 
+Installation with GPU Support
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+For GPU acceleration with intelligent backend selection:
+
+.. code-block:: bash
+
+   pip install hpfracc[gpu]
+
 Installation with Machine Learning Dependencies
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-For full machine learning capabilities including PyTorch, JAX, and NUMBA:
+For full machine learning capabilities including PyTorch, JAX, and NUMBA with intelligent backend selection:
 
 .. code-block:: bash
 
@@ -37,8 +46,46 @@ For development and contribution:
    pip install -e .[dev]
    pip install -e .[ml]
 
+Requirements
+~~~~~~~~~~~~
+
+- **Python**: 3.9+ (dropped 3.8 support)
+- **Required**: NumPy, SciPy, Matplotlib
+- **Optional**: PyTorch, JAX, Numba (for acceleration)
+- **GPU**: CUDA-compatible GPU (optional)
+
 Quick Start
 ----------
+
+Intelligent Backend Selection (v2.2.0)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The revolutionary intelligent backend selection automatically optimizes performance:
+
+.. code-block:: python
+
+   import hpfracc
+   from hpfracc.ml.intelligent_backend_selector import IntelligentBackendSelector
+   from hpfracc.ml.intelligent_backend_selector import WorkloadCharacteristics
+
+   # Create intelligent backend selector
+   selector = IntelligentBackendSelector(enable_learning=True)
+
+   # Define workload characteristics
+   workload = WorkloadCharacteristics(
+       operation_type="fractional_derivative",
+       data_size=10000,
+       data_shape=(100, 100),
+       requires_gradient=True
+   )
+
+   # Select optimal backend automatically
+   backend = selector.select_backend(workload)
+   print(f"Selected backend: {backend}")
+
+   # Use with fractional operations
+   frac_deriv = hpfracc.create_fractional_derivative(alpha=0.5, definition="caputo")
+   result = frac_deriv(f, x)  # Automatically uses optimal backend
 
 Spectral Autograd Framework
 ~~~~~~~~~~~~~~~~~~~~~~~~~~

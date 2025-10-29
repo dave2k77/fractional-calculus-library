@@ -63,7 +63,7 @@ class FractionalIntegral:
             raise ValueError(
                 f"Fractional order must be non-negative, got {self.alpha.alpha}")
 
-        if self.method not in ["RL", "Caputo", "Weyl", "Hadamard"]:
+        if self.method not in ["RL", "Caputo", "Weyl", "Hadamard", "MillerRoss"]:
             raise ValueError(f"Unknown method: {self.method}")
 
     def __call__(self,

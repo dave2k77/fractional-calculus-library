@@ -26,6 +26,7 @@ class NeuralFSDEConfig(NeuralODEConfig):
     drift_net: Optional[nn.Module] = None
     diffusion_net: Optional[nn.Module] = None
     use_sde_adjoint: bool = True  # Use SDE-specific adjoint method
+    learn_alpha: bool = False  # Whether to learn fractional order
 
 
 class NeuralFractionalSDE(BaseNeuralODE):
@@ -89,11 +90,11 @@ class NeuralFractionalSDE(BaseNeuralODE):
         else:
             # Default diffusion network
             # Output shape: (batch, output_dim, diffusion_dim) for multiplicative
-            # or (batch, output_dim) for additive
+            # or (batch, diffusion_dim) for additive
             if self.noise_type == "multiplicative":
                 output_dim = self.output_dim * self.diffusion_dim
             else:
-                output_dim = self.output_dim
+                output_dim = self.diffusion_dim
             
             self.diffusion_net = nn.Sequential(
                 nn.Linear(self.input_dim + 1, self.hidden_dim),
@@ -103,8 +104,16 @@ class NeuralFractionalSDE(BaseNeuralODE):
                 nn.Linear(self.hidden_dim, output_dim)
             )
             
-            # Use softplus to ensure positive diffusion
-            self.diffusion_activation = nn.Softplus()
+        # Use softplus to ensure positive diffusion
+        self.diffusion_activation = nn.Softplus()
+    
+    def drift_function(self, t: torch.Tensor, x: torch.Tensor) -> torch.Tensor:
+        """Alias for drift() for compatibility with tests."""
+        return self.drift(t, x)
+    
+    def diffusion_function(self, t: torch.Tensor, x: torch.Tensor) -> torch.Tensor:
+        """Alias for diffusion() for compatibility with tests."""
+        return self.diffusion(t, x)
     
     def drift(self, t: torch.Tensor, x: torch.Tensor) -> torch.Tensor:
         """
@@ -117,15 +126,23 @@ class NeuralFractionalSDE(BaseNeuralODE):
         Returns:
             Drift vector
         """
-        # Prepare input
+        # Ensure x has batch dimension
         if x.dim() == 1:
             x = x.unsqueeze(0)
+        batch_size = x.shape[0]
         
-        t_expanded = t.unsqueeze(-1) if t.dim() > 0 else t
-        if t_expanded.dim() == 1 and x.dim() == 2:
-            t_expanded = t_expanded.unsqueeze(0)
+        # Ensure t has proper shape (batch, 1)
+        if t.dim() == 0:  # Scalar
+            t_expanded = t.unsqueeze(0).unsqueeze(0).expand(batch_size, 1)
+        elif t.dim() == 1:  # 1D tensor
+            if t.shape[0] == 1:  # Single time value
+                t_expanded = t.unsqueeze(0).expand(batch_size, 1)
+            else:  # Multiple time values (should match batch)
+                t_expanded = t.unsqueeze(-1)
+        else:  # Already 2D
+            t_expanded = t
         
-        # Concatenate time and state
+        # Concatenate [t, x]
         input_tensor = torch.cat([t_expanded, x], dim=-1)
         
         # Forward pass through drift network
@@ -144,15 +161,23 @@ class NeuralFractionalSDE(BaseNeuralODE):
         Returns:
             Diffusion matrix
         """
-        # Prepare input
+        # Ensure x has batch dimension
         if x.dim() == 1:
             x = x.unsqueeze(0)
+        batch_size = x.shape[0]
         
-        t_expanded = t.unsqueeze(-1) if t.dim() > 0 else t
-        if t_expanded.dim() == 1 and x.dim() == 2:
-            t_expanded = t_expanded.unsqueeze(0)
+        # Ensure t has proper shape (batch, 1)
+        if t.dim() == 0:  # Scalar
+            t_expanded = t.unsqueeze(0).unsqueeze(0).expand(batch_size, 1)
+        elif t.dim() == 1:  # 1D tensor
+            if t.shape[0] == 1:  # Single time value
+                t_expanded = t.unsqueeze(0).expand(batch_size, 1)
+            else:  # Multiple time values (should match batch)
+                t_expanded = t.unsqueeze(-1)
+        else:  # Already 2D
+            t_expanded = t
         
-        # Concatenate time and state
+        # Concatenate [t, x]
         input_tensor = torch.cat([t_expanded, x], dim=-1)
         
         # Forward pass through diffusion network
@@ -161,7 +186,6 @@ class NeuralFractionalSDE(BaseNeuralODE):
         
         # Reshape for multiplicative noise
         if self.noise_type == "multiplicative":
-            batch_size = x.shape[0]
             diffusion = diffusion.view(batch_size, self.output_dim, self.diffusion_dim)
         
         return diffusion
@@ -200,32 +224,45 @@ class NeuralFractionalSDE(BaseNeuralODE):
         else:
             x0_np = x0
         
+        # Flatten x0 if batched (SDE solver expects 1D)
+        if x0_np.ndim == 2:
+            if x0_np.shape[0] == 1:
+                x0_np = x0_np.flatten()
+            else:
+                raise ValueError("SDE solver only supports single trajectory, got batch size > 1")
+        
         if isinstance(t, torch.Tensor):
             t_np = t.detach().cpu().numpy()
         else:
             t_np = t
         
-        # Get time span
-        t_span = (float(t_np[0]), float(t_np[-1]))
+        # Get time span - handle both 1D and 2D arrays
+        # Flatten if needed to get scalar values
+        t_flat = t_np.flatten()
+        t_start = float(t_flat[0])
+        t_end = float(t_flat[-1])
+        t_span = (t_start, t_end)
         
         # Wrapper functions for drift and diffusion
         def drift_func(t_val: float, x_val: np.ndarray) -> np.ndarray:
-            x_t = torch.from_numpy(x_val).float()
-            t_t = torch.tensor([t_val]).float()
+            # x_val is 1D array from SDE solver
+            x_t = torch.from_numpy(x_val).float().unsqueeze(0)  # Add batch dim
+            t_t = torch.tensor([[t_val]]).float()  # Shape: (1, 1)
             drift_val = self.drift(t_t, x_t)
-            return drift_val.detach().cpu().numpy()
+            return drift_val.squeeze(0).detach().cpu().numpy()  # Remove batch dim
         
         def diffusion_func(t_val: float, x_val: np.ndarray) -> np.ndarray:
-            x_t = torch.from_numpy(x_val).float()
-            t_t = torch.tensor([t_val]).float()
+            # x_val is 1D array from SDE solver
+            x_t = torch.from_numpy(x_val).float().unsqueeze(0)  # Add batch dim
+            t_t = torch.tensor([[t_val]]).float()  # Shape: (1, 1)
             diff_val = self.diffusion(t_t, x_t)
             
             # Handle different noise types
             if self.noise_type == "additive":
-                return diff_val.detach().cpu().numpy()
+                return diff_val.squeeze(0).detach().cpu().numpy()
             else:
                 # For multiplicative, return as matrix
-                return diff_val.detach().cpu().numpy()
+                return diff_val.squeeze(0).detach().cpu().numpy()
         
         # Solve fractional SDE
         try:
@@ -242,9 +279,10 @@ class NeuralFractionalSDE(BaseNeuralODE):
                 seed=seed
             )
             
-            # Convert back to torch tensor
-            y_final = torch.from_numpy(solution.y[-1]).float()
-            return y_final
+            # Convert solution to expected shape
+            trajectory = torch.from_numpy(solution.y).float()  # Shape: (time_steps, output_dim)
+            trajectory = trajectory.unsqueeze(1)  # Add batch dimension: (time_steps, 1, output_dim)
+            return trajectory
         
         except Exception as e:
             # Fallback to simple ODE-like integration
@@ -253,25 +291,35 @@ class NeuralFractionalSDE(BaseNeuralODE):
             dt = (t_span[1] - t_span[0]) / num_steps
             alpha = self.fractional_order()
             
+            # Store trajectory for proper return shape
+            trajectory = [y.clone()]
+            
             for i in range(num_steps):
                 t_curr = t_span[0] + i * dt
-                drift_val = self.drift(torch.tensor([t_curr]), y)
+                drift_val = self.drift(torch.tensor([[t_curr]]), y)
                 
                 # Simplified update
                 y = y + dt**alpha * drift_val
+                trajectory.append(y.clone())
             
-            return y
+            # Convert to tensor with proper shape
+            trajectory_tensor = torch.stack(trajectory, dim=0)  # (time_steps, batch_size, output_dim)
+            return trajectory_tensor
     
     def get_fractional_order(self) -> Union[float, torch.Tensor]:
         """Get the fractional order parameter."""
         if self.learn_alpha:
             return torch.clamp(self.alpha_param, 0.1, 1.9)
         return self.fractional_order_value
+    
+    def adjoint_forward(self, x0: torch.Tensor, t: torch.Tensor, **kwargs) -> torch.Tensor:
+        """Adjoint-compatible forward pass."""
+        return self.forward(x0, t, **kwargs)
 
 
 def create_neural_fsde(
-    input_dim: int,
-    output_dim: int,
+    input_dim: int = None,
+    output_dim: int = None,
     hidden_dim: int = 64,
     num_layers: int = 3,
     fractional_order: float = 0.5,
@@ -280,7 +328,8 @@ def create_neural_fsde(
     learn_alpha: bool = False,
     use_adjoint: bool = True,
     drift_net: Optional[nn.Module] = None,
-    diffusion_net: Optional[nn.Module] = None
+    diffusion_net: Optional[nn.Module] = None,
+    config: Optional[NeuralFSDEConfig] = None
 ) -> NeuralFractionalSDE:
     """
     Factory function to create a neural fractional SDE.
@@ -301,18 +350,26 @@ def create_neural_fsde(
     Returns:
         NeuralFractionalSDE instance
     """
-    config = NeuralFSDEConfig(
-        input_dim=input_dim,
-        hidden_dim=hidden_dim,
-        output_dim=output_dim,
-        num_layers=num_layers,
-        fractional_order=fractional_order,
-        use_adjoint=use_adjoint,
-        diffusion_dim=diffusion_dim,
-        noise_type=noise_type,
-        drift_net=drift_net,
-        diffusion_net=diffusion_net
-    )
+    if config is not None:
+        # Use provided config
+        pass
+    else:
+        # Create config from parameters
+        if input_dim is None or output_dim is None:
+            raise ValueError("input_dim and output_dim must be provided when config is None")
+        config = NeuralFSDEConfig(
+            input_dim=input_dim,
+            hidden_dim=hidden_dim,
+            output_dim=output_dim,
+            num_layers=num_layers,
+            fractional_order=fractional_order,
+            use_adjoint=use_adjoint,
+            diffusion_dim=diffusion_dim,
+            noise_type=noise_type,
+            learn_alpha=learn_alpha,
+            drift_net=drift_net,
+            diffusion_net=diffusion_net
+        )
     
     model = NeuralFractionalSDE(config)
     model.learn_alpha = learn_alpha

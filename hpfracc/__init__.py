@@ -22,6 +22,49 @@ __affiliation__ = "Department of Biomedical Engineering, University of Reading"
 # Users should import symbols from submodules explicitly, e.g.:
 #   from hpfracc.algorithms.optimized_methods import OptimizedCaputo
 
+# Core definitions
+from .core.definitions import FractionalOrder
+
+# Optimized methods
+from .algorithms.optimized_methods import (
+    OptimizedRiemannLiouville,
+    OptimizedCaputo,
+    OptimizedGrunwaldLetnikov,
+    optimized_riemann_liouville,
+)
+
+# Advanced methods
+from .algorithms.advanced_methods import (
+    WeylDerivative,
+    MarchaudDerivative,
+    HadamardDerivative,
+    ReizFellerDerivative,
+)
+
+# Special methods
+from .algorithms.special_methods import (
+    FractionalLaplacian,
+    FractionalFourierTransform,
+    FractionalZTransform,
+    FractionalMellinTransform,
+)
+
+# Integrals
+from .core.integrals import (
+    RiemannLiouvilleIntegral,
+    CaputoIntegral,
+)
+
+# Novel derivatives
+from .core.fractional_implementations import (
+    CaputoFabrizioDerivative,
+    AtanganaBaleanuDerivative,
+    CaputoDerivative,
+)
+
+# Alias for backward compatibility
+Caputo = CaputoDerivative
+
 __all__ = [
     "__version__",
     "__author__",
@@ -30,6 +73,7 @@ __all__ = [
     "OptimizedRiemannLiouville",
     "OptimizedCaputo",
     "OptimizedGrunwaldLetnikov",
+    "optimized_riemann_liouville",
     "FractionalOrder",
     "WeylDerivative",
     "MarchaudDerivative",
@@ -40,6 +84,7 @@ __all__ = [
     "CaputoFabrizioDerivative",
     "AtanganaBaleanuDerivative",
     "Caputo",
+    "CaputoDerivative",
     "HadamardDerivative",
     "ReizFellerDerivative",
     "FractionalZTransform",

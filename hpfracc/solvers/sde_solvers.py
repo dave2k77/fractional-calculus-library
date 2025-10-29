@@ -261,18 +261,40 @@ class FractionalEulerMaruyama(FractionalSDESolver):
             
             # Compute diffusion term
             diffusion_val = diffusion(t_curr, x_curr)
-            if diffusion_val.ndim == 1:
-                diffusion_val = diffusion_val[:, np.newaxis]
+            
+            # Handle scalar diffusion (additive noise)
+            if np.isscalar(diffusion_val):
+                diffusion_val = np.full(dim, diffusion_val)
+            elif diffusion_val.ndim == 0:
+                diffusion_val = np.full(dim, float(diffusion_val))
+            elif diffusion_val.ndim == 1 and len(diffusion_val) == dim:
+                # Already correct shape
+                pass
+            else:
+                # Multiplicative noise case - diffusion_val should be (dim, dim) or (dim,)
+                if diffusion_val.ndim == 1:
+                    # Diagonal multiplicative noise
+                    diffusion_val = diffusion_val
+                else:
+                    # Full matrix case - not implemented yet
+                    raise NotImplementedError("Full matrix diffusion not yet implemented")
             
             # Compute fractional memory term (simplified)
             # In full implementation, this would account for full history
             memory_term = np.zeros_like(x_curr)
             
             # Update using Euler-Maruyama scheme
-            y[i + 1] = (x_curr + 
-                       dt**alpha * drift_val / gamma(2 - alpha) +
-                       diffusion_val @ dW +
-                       memory_term)
+            # For additive noise: dX = f dt + g dW
+            # For multiplicative noise: dX = f dt + g(X) dW
+            if diffusion_val.ndim == 1:
+                # Additive or diagonal multiplicative noise
+                y[i + 1] = (x_curr + 
+                           dt**alpha * drift_val / gamma(2 - alpha) +
+                           diffusion_val * dW +
+                           memory_term)
+            else:
+                # Matrix case (not implemented)
+                raise NotImplementedError("Matrix diffusion not yet implemented")
         
         # Create solution object
         solution = SDESolution(
@@ -357,15 +379,39 @@ class FractionalMilstein(FractionalSDESolver):
             drift_val = drift(t_curr, x_curr)
             diffusion_val = diffusion(t_curr, x_curr)
             
+            # Handle scalar diffusion (additive noise)
+            if np.isscalar(diffusion_val):
+                diffusion_val = np.full(dim, diffusion_val)
+            elif diffusion_val.ndim == 0:
+                diffusion_val = np.full(dim, float(diffusion_val))
+            elif diffusion_val.ndim == 1 and len(diffusion_val) == dim:
+                # Already correct shape
+                pass
+            else:
+                # Multiplicative noise case - diffusion_val should be (dim, dim) or (dim,)
+                if diffusion_val.ndim == 1:
+                    # Diagonal multiplicative noise
+                    diffusion_val = diffusion_val
+                else:
+                    # Full matrix case - not implemented yet
+                    raise NotImplementedError("Full matrix diffusion not yet implemented")
+            
             # Simplified Milstein correction term
             # In full implementation, would include derivative of diffusion
             correction_term = np.zeros_like(x_curr)
             
             # Update using Milstein scheme
-            y[i + 1] = (x_curr + 
-                       dt**alpha * drift_val / gamma(2 - alpha) +
-                       diffusion_val @ dW +
-                       correction_term)
+            # For additive noise: dX = f dt + g dW + (1/2) g g' dW^2
+            # For multiplicative noise: dX = f dt + g(X) dW + (1/2) g(X) g'(X) dW^2
+            if diffusion_val.ndim == 1:
+                # Additive or diagonal multiplicative noise
+                y[i + 1] = (x_curr + 
+                           dt**alpha * drift_val / gamma(2 - alpha) +
+                           diffusion_val * dW +
+                           correction_term)
+            else:
+                # Matrix case (not implemented)
+                raise NotImplementedError("Matrix diffusion not yet implemented")
         
         # Create solution object
         solution = SDESolution(

@@ -1,0 +1,1294 @@
+{
+  "derivative_methods": {
+    "riemann_liouville": [
+      {
+        "method_name": "riemann_liouville",
+        "test_size": 100,
+        "fractional_order": 0.25,
+        "execution_time": 0.0002758774033281952,
+        "throughput": 362479.85080907785,
+        "memory_usage": 0.0078125,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "riemann_liouville",
+        "test_size": 500,
+        "fractional_order": 0.25,
+        "execution_time": 0.00033728639828041197,
+        "throughput": 1482419.6959887834,
+        "memory_usage": 0.01171875,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "riemann_liouville",
+        "test_size": 1000,
+        "fractional_order": 0.25,
+        "execution_time": 0.0004829000070458278,
+        "throughput": 2070822.0861655502,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "riemann_liouville",
+        "test_size": 100,
+        "fractional_order": 0.5,
+        "execution_time": 0.00023310399847105147,
+        "throughput": 428993.0702858309,
+        "memory_usage": 0.0078125,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "riemann_liouville",
+        "test_size": 500,
+        "fractional_order": 0.5,
+        "execution_time": 0.00031526819802820685,
+        "throughput": 1585951.2730023765,
+        "memory_usage": 0.0078125,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "riemann_liouville",
+        "test_size": 1000,
+        "fractional_order": 0.5,
+        "execution_time": 0.0005283596023218706,
+        "throughput": 1892650.3760043553,
+        "memory_usage": 0.00390625,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "riemann_liouville",
+        "test_size": 100,
+        "fractional_order": 0.75,
+        "execution_time": 0.0002237672044429928,
+        "throughput": 446893.0120878197,
+        "memory_usage": 0.00390625,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "riemann_liouville",
+        "test_size": 500,
+        "fractional_order": 0.75,
+        "execution_time": 0.00032615819945931436,
+        "throughput": 1532998.4063833754,
+        "memory_usage": 0.00390625,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "riemann_liouville",
+        "test_size": 1000,
+        "fractional_order": 0.75,
+        "execution_time": 0.00044247720506973565,
+        "throughput": 2260003.427391016,
+        "memory_usage": 0.00390625,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      }
+    ],
+    "caputo": [
+      {
+        "method_name": "caputo",
+        "test_size": 100,
+        "fractional_order": 0.25,
+        "execution_time": 0.0002491063991328701,
+        "throughput": 401434.8902641449,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "caputo",
+        "test_size": 500,
+        "fractional_order": 0.25,
+        "execution_time": 0.00047703359741717576,
+        "throughput": 1048144.2034841408,
+        "memory_usage": 0.00390625,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "caputo",
+        "test_size": 1000,
+        "fractional_order": 0.25,
+        "execution_time": 0.0005015135975554585,
+        "throughput": 1993963.882284204,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "caputo",
+        "test_size": 100,
+        "fractional_order": 0.5,
+        "execution_time": 0.00022796959965489804,
+        "throughput": 438654.9792225836,
+        "memory_usage": 0.0078125,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "caputo",
+        "test_size": 500,
+        "fractional_order": 0.5,
+        "execution_time": 0.0003543487982824445,
+        "throughput": 1411039.0734314267,
+        "memory_usage": 0.00390625,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "caputo",
+        "test_size": 1000,
+        "fractional_order": 0.5,
+        "execution_time": 0.00044933300523553044,
+        "throughput": 2225520.912882467,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "caputo",
+        "test_size": 100,
+        "fractional_order": 0.75,
+        "execution_time": 0.0002421907993266359,
+        "throughput": 412897.6008916541,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "caputo",
+        "test_size": 500,
+        "fractional_order": 0.75,
+        "execution_time": 0.00031155699980445206,
+        "throughput": 1604842.7745607505,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "caputo",
+        "test_size": 1000,
+        "fractional_order": 0.75,
+        "execution_time": 0.00046796200331300497,
+        "throughput": 2136925.6326803346,
+        "memory_usage": 0.00390625,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      }
+    ],
+    "grunwald_letnikov": [
+      {
+        "method_name": "grunwald_letnikov",
+        "test_size": 100,
+        "fractional_order": 0.25,
+        "execution_time": 0.0008142750069964677,
+        "throughput": 122808.63239172685,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "grunwald_letnikov",
+        "test_size": 500,
+        "fractional_order": 0.25,
+        "execution_time": 0.00338716359983664,
+        "throughput": 147616.13523011247,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "grunwald_letnikov",
+        "test_size": 1000,
+        "fractional_order": 0.25,
+        "execution_time": 0.006744882601196878,
+        "throughput": 148260.5493863674,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "grunwald_letnikov",
+        "test_size": 100,
+        "fractional_order": 0.5,
+        "execution_time": 0.0008329721982590854,
+        "throughput": 120052.02599678635,
+        "memory_usage": 0.00390625,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "grunwald_letnikov",
+        "test_size": 500,
+        "fractional_order": 0.5,
+        "execution_time": 0.0033928459946764634,
+        "throughput": 147368.90527436958,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "grunwald_letnikov",
+        "test_size": 1000,
+        "fractional_order": 0.5,
+        "execution_time": 0.006722455401904881,
+        "throughput": 148755.1705760129,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "grunwald_letnikov",
+        "test_size": 100,
+        "fractional_order": 0.75,
+        "execution_time": 0.000831576797645539,
+        "throughput": 120253.47542539921,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "grunwald_letnikov",
+        "test_size": 500,
+        "fractional_order": 0.75,
+        "execution_time": 0.00341198839887511,
+        "throughput": 146542.1160766091,
+        "memory_usage": 0.00390625,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "grunwald_letnikov",
+        "test_size": 1000,
+        "fractional_order": 0.75,
+        "execution_time": 0.006726407998939976,
+        "throughput": 148667.75850611372,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      }
+    ],
+    "comparison": {
+      "fastest_method": "riemann_liouville",
+      "most_memory_efficient": "grunwald_letnikov",
+      "best_throughput": 1340356.7997909093,
+      "summary_stats": {
+        "riemann_liouville": {
+          "avg_throughput": 1340356.7997909093,
+          "avg_memory_usage": 0.005642361111111111,
+          "avg_execution_time": 0.0003516886907164007,
+          "total_tests": 9,
+          "success_rate": 1.0
+        },
+        "caputo": {
+          "avg_throughput": 1297047.1055224119,
+          "avg_memory_usage": 0.002170138888888889,
+          "avg_execution_time": 0.00036455719996916335,
+          "total_tests": 9,
+          "success_rate": 1.0
+        },
+        "grunwald_letnikov": {
+          "avg_throughput": 138924.97431816638,
+          "avg_memory_usage": 0.0008680555555555555,
+          "avg_execution_time": 0.0036516186664812267,
+          "total_tests": 9,
+          "success_rate": 1.0
+        }
+      }
+    }
+  },
+  "special_functions": {
+    "mittag_leffler": [
+      {
+        "method_name": "mittag_leffler",
+        "test_size": 1,
+        "fractional_order": 0.25,
+        "execution_time": 4.713099915534258e-05,
+        "throughput": 21217.4581044638,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "mittag_leffler",
+        "test_size": 1,
+        "fractional_order": 0.25,
+        "execution_time": 0.00011986880272161216,
+        "throughput": 8342.454227414266,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "mittag_leffler",
+        "test_size": 1,
+        "fractional_order": 0.25,
+        "execution_time": 0.0001203580031869933,
+        "throughput": 8308.545950586747,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "mittag_leffler",
+        "test_size": 1,
+        "fractional_order": 0.5,
+        "execution_time": 4.5236799633130434e-05,
+        "throughput": 22105.896263882074,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "mittag_leffler",
+        "test_size": 1,
+        "fractional_order": 0.5,
+        "execution_time": 0.00011793060402851552,
+        "throughput": 8479.563114577119,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "mittag_leffler",
+        "test_size": 1,
+        "fractional_order": 0.5,
+        "execution_time": 0.00011824319954030215,
+        "throughput": 8457.145982921063,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "mittag_leffler",
+        "test_size": 1,
+        "fractional_order": 0.75,
+        "execution_time": 6.719339871779084e-05,
+        "throughput": 14882.414330609374,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "mittag_leffler",
+        "test_size": 1,
+        "fractional_order": 0.75,
+        "execution_time": 0.0001199246005853638,
+        "throughput": 8338.572695834728,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "mittag_leffler",
+        "test_size": 1,
+        "fractional_order": 0.75,
+        "execution_time": 0.00012277719797566534,
+        "throughput": 8144.834843015409,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "mittag_leffler",
+        "test_size": 1,
+        "fractional_order": 1.0,
+        "execution_time": 4.5301398495212196e-05,
+        "throughput": 22074.373710685504,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "mittag_leffler",
+        "test_size": 1,
+        "fractional_order": 1.0,
+        "execution_time": 0.00011940180265810341,
+        "throughput": 8375.082936255261,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "mittag_leffler",
+        "test_size": 1,
+        "fractional_order": 1.0,
+        "execution_time": 0.00011902500118594616,
+        "throughput": 8401.596219585459,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "mittag_leffler",
+        "test_size": 1,
+        "fractional_order": 0.25,
+        "execution_time": 2.708959800656885e-05,
+        "throughput": 36914.53818390048,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "mittag_leffler",
+        "test_size": 1,
+        "fractional_order": 0.25,
+        "execution_time": 3.997339808847755e-05,
+        "throughput": 25016.637259274008,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "mittag_leffler",
+        "test_size": 1,
+        "fractional_order": 0.25,
+        "execution_time": 5.45576011063531e-05,
+        "throughput": 18329.251648191555,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "mittag_leffler",
+        "test_size": 1,
+        "fractional_order": 0.5,
+        "execution_time": 2.6031004381366074e-05,
+        "throughput": 38415.72861920902,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "mittag_leffler",
+        "test_size": 1,
+        "fractional_order": 0.5,
+        "execution_time": 6.019019638188183e-05,
+        "throughput": 16614.00128445195,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "mittag_leffler",
+        "test_size": 1,
+        "fractional_order": 0.5,
+        "execution_time": 5.364739918150008e-05,
+        "throughput": 18640.23261625035,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "mittag_leffler",
+        "test_size": 1,
+        "fractional_order": 0.75,
+        "execution_time": 2.7303799288347364e-05,
+        "throughput": 36624.939607828754,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "mittag_leffler",
+        "test_size": 1,
+        "fractional_order": 0.75,
+        "execution_time": 3.937240107916295e-05,
+        "throughput": 25398.50180814169,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "mittag_leffler",
+        "test_size": 1,
+        "fractional_order": 0.75,
+        "execution_time": 5.3635603399015964e-05,
+        "throughput": 18644.332059818807,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "mittag_leffler",
+        "test_size": 1,
+        "fractional_order": 1.0,
+        "execution_time": 2.7231802232563495e-05,
+        "throughput": 36721.77079797571,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "mittag_leffler",
+        "test_size": 1,
+        "fractional_order": 1.0,
+        "execution_time": 3.775679797399789e-05,
+        "throughput": 26485.296785195438,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "mittag_leffler",
+        "test_size": 1,
+        "fractional_order": 1.0,
+        "execution_time": 5.2539401804097e-05,
+        "throughput": 19033.33432932273,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "mittag_leffler",
+        "test_size": 1,
+        "fractional_order": 0.25,
+        "execution_time": 1.867919636424631e-05,
+        "throughput": 53535.493738589925,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "mittag_leffler",
+        "test_size": 1,
+        "fractional_order": 0.25,
+        "execution_time": 2.09879974136129e-05,
+        "throughput": 47646.279932900885,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "mittag_leffler",
+        "test_size": 1,
+        "fractional_order": 0.25,
+        "execution_time": 2.4531601229682565e-05,
+        "throughput": 40763.74756940152,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "mittag_leffler",
+        "test_size": 1,
+        "fractional_order": 0.5,
+        "execution_time": 1.7378199845552445e-05,
+        "throughput": 57543.359432359575,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "mittag_leffler",
+        "test_size": 1,
+        "fractional_order": 0.5,
+        "execution_time": 2.0980200497433542e-05,
+        "throughput": 47663.98682044662,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "mittag_leffler",
+        "test_size": 1,
+        "fractional_order": 0.5,
+        "execution_time": 2.4128996301442385e-05,
+        "throughput": 41443.9120263043,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "mittag_leffler",
+        "test_size": 1,
+        "fractional_order": 0.75,
+        "execution_time": 1.6317798872478308e-05,
+        "throughput": 61282.77519626778,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "mittag_leffler",
+        "test_size": 1,
+        "fractional_order": 0.75,
+        "execution_time": 2.103600127156824e-05,
+        "throughput": 47537.55179467385,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "mittag_leffler",
+        "test_size": 1,
+        "fractional_order": 0.75,
+        "execution_time": 2.3373207659460606e-05,
+        "throughput": 42784.02924278291,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "mittag_leffler",
+        "test_size": 1,
+        "fractional_order": 1.0,
+        "execution_time": 7.057999027892947e-07,
+        "throughput": 1416832.158871144,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "mittag_leffler",
+        "test_size": 1,
+        "fractional_order": 1.0,
+        "execution_time": 6.994028808549046e-07,
+        "throughput": 1429791.0794671949,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "mittag_leffler",
+        "test_size": 1,
+        "fractional_order": 1.0,
+        "execution_time": 6.974005373194814e-07,
+        "throughput": 1433896.22818988,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "mittag_leffler",
+        "test_size": 1,
+        "fractional_order": 0.25,
+        "execution_time": 1.0352605022490024e-05,
+        "throughput": 96594.04544340266,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "mittag_leffler",
+        "test_size": 1,
+        "fractional_order": 0.25,
+        "execution_time": 1.1492799967527389e-05,
+        "throughput": 87010.99843601858,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "mittag_leffler",
+        "test_size": 1,
+        "fractional_order": 0.25,
+        "execution_time": 1.378239830955863e-05,
+        "throughput": 72556.31259085446,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "mittag_leffler",
+        "test_size": 1,
+        "fractional_order": 0.5,
+        "execution_time": 1.0236195521429181e-05,
+        "throughput": 97692.5458200294,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "mittag_leffler",
+        "test_size": 1,
+        "fractional_order": 0.5,
+        "execution_time": 1.141680113505572e-05,
+        "throughput": 87590.20921626304,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "mittag_leffler",
+        "test_size": 1,
+        "fractional_order": 0.5,
+        "execution_time": 1.2555602006614209e-05,
+        "throughput": 79645.72303846575,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "mittag_leffler",
+        "test_size": 1,
+        "fractional_order": 0.75,
+        "execution_time": 1.0182199184782803e-05,
+        "throughput": 98210.61067971349,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "mittag_leffler",
+        "test_size": 1,
+        "fractional_order": 0.75,
+        "execution_time": 1.1354801245033741e-05,
+        "throughput": 88068.4723950911,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "mittag_leffler",
+        "test_size": 1,
+        "fractional_order": 0.75,
+        "execution_time": 1.2625797535292804e-05,
+        "throughput": 79202.91745568602,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "mittag_leffler",
+        "test_size": 1,
+        "fractional_order": 1.0,
+        "execution_time": 1.7579994164407254e-06,
+        "throughput": 568828.4026991411,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "mittag_leffler",
+        "test_size": 1,
+        "fractional_order": 1.0,
+        "execution_time": 1.6795966075733304e-06,
+        "throughput": 595381.054886026,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "mittag_leffler",
+        "test_size": 1,
+        "fractional_order": 1.0,
+        "execution_time": 1.6617996152490377e-06,
+        "throughput": 601757.2701448362,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "mittag_leffler",
+        "test_size": 1,
+        "fractional_order": 0.25,
+        "execution_time": 5.744601367041469e-06,
+        "throughput": 174076.4826150175,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "mittag_leffler",
+        "test_size": 1,
+        "fractional_order": 0.25,
+        "execution_time": 7.008996908552944e-06,
+        "throughput": 142673.76816498794,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "mittag_leffler",
+        "test_size": 1,
+        "fractional_order": 0.25,
+        "execution_time": 6.796998786740005e-06,
+        "throughput": 147123.7573193128,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "mittag_leffler",
+        "test_size": 1,
+        "fractional_order": 0.5,
+        "execution_time": 5.56020240765065e-06,
+        "throughput": 179849.56781861646,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "mittag_leffler",
+        "test_size": 1,
+        "fractional_order": 0.5,
+        "execution_time": 6.728799780830741e-06,
+        "throughput": 148614.91388833383,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "mittag_leffler",
+        "test_size": 1,
+        "fractional_order": 0.5,
+        "execution_time": 6.714800838381052e-06,
+        "throughput": 148924.74461552332,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "mittag_leffler",
+        "test_size": 1,
+        "fractional_order": 0.75,
+        "execution_time": 5.722601781599224e-06,
+        "throughput": 174745.69053807945,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "mittag_leffler",
+        "test_size": 1,
+        "fractional_order": 0.75,
+        "execution_time": 6.71680027153343e-06,
+        "throughput": 148880.4132286194,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "mittag_leffler",
+        "test_size": 1,
+        "fractional_order": 0.75,
+        "execution_time": 6.684803520329297e-06,
+        "throughput": 149593.02797140993,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "mittag_leffler",
+        "test_size": 1,
+        "fractional_order": 1.0,
+        "execution_time": 5.426001735031605e-06,
+        "throughput": 184297.76635413762,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "mittag_leffler",
+        "test_size": 1,
+        "fractional_order": 1.0,
+        "execution_time": 5.409601726569235e-06,
+        "throughput": 184856.49231596928,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "mittag_leffler",
+        "test_size": 1,
+        "fractional_order": 1.0,
+        "execution_time": 6.6963955760002135e-06,
+        "throughput": 149334.06914967595,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      }
+    ],
+    "binomial_coefficients": [
+      {
+        "method_name": "binomial_coefficients",
+        "test_size": 10,
+        "fractional_order": 5,
+        "execution_time": 7.956026820465923e-07,
+        "throughput": 1256908.7844545976,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "binomial_coefficients",
+        "test_size": 20,
+        "fractional_order": 10,
+        "execution_time": 2.6240013539791107e-07,
+        "throughput": 3810973.6433007987,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "binomial_coefficients",
+        "test_size": 50,
+        "fractional_order": 25,
+        "execution_time": 1.9440194591879846e-07,
+        "throughput": 5143981.431223426,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "binomial_coefficients",
+        "test_size": 100,
+        "fractional_order": 50,
+        "execution_time": 1.9060098566114902e-07,
+        "throughput": 5246562.58482211,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      }
+    ],
+    "comparison": {
+      "mittag_leffler_stats": {
+        "avg_throughput": 161169.93937410915,
+        "avg_memory_usage": 0.0,
+        "avg_execution_time": 3.3925763564184304e-05,
+        "total_tests": 60
+      },
+      "binomial_coefficients_stats": {
+        "avg_throughput": 3864606.6109502334,
+        "avg_memory_usage": 0.0,
+        "avg_execution_time": 3.6075143725611266e-07,
+        "total_tests": 4
+      },
+      "overall_summary": {}
+    }
+  },
+  "ml_layers": {},
+  "scalability": {
+    "derivative_scalability": [
+      {
+        "method_name": "riemann_liouville_scalability",
+        "test_size": 100,
+        "fractional_order": 0.5,
+        "execution_time": 0.0002587602008134127,
+        "throughput": 386458.1944427698,
+        "memory_usage": 0.00390625,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "riemann_liouville_scalability",
+        "test_size": 500,
+        "fractional_order": 0.5,
+        "execution_time": 0.0003574742004275322,
+        "throughput": 1398702.3382442978,
+        "memory_usage": 0.00390625,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "riemann_liouville_scalability",
+        "test_size": 1000,
+        "fractional_order": 0.5,
+        "execution_time": 0.0004942620027577505,
+        "throughput": 2023218.4437008477,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "riemann_liouville_scalability",
+        "test_size": 2000,
+        "fractional_order": 0.5,
+        "execution_time": 0.001344428802258335,
+        "throughput": 1487620.6137807032,
+        "memory_usage": 0.00390625,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "riemann_liouville_scalability",
+        "test_size": 5000,
+        "fractional_order": 0.5,
+        "execution_time": 0.0016702334047295152,
+        "throughput": 2993593.5814969055,
+        "memory_usage": 0.00390625,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "riemann_liouville_scalability",
+        "test_size": 10000,
+        "fractional_order": 0.5,
+        "execution_time": 0.0030935313989175484,
+        "throughput": 3232551.640981915,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      }
+    ],
+    "special_functions_scalability": [
+      {
+        "method_name": "binomial_coefficients_scalability",
+        "test_size": 10,
+        "fractional_order": 5,
+        "execution_time": 3.728055162355304e-07,
+        "throughput": 2682363.7431593738,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "binomial_coefficients_scalability",
+        "test_size": 50,
+        "fractional_order": 25,
+        "execution_time": 2.0659936126321554e-07,
+        "throughput": 4840286.019693747,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "binomial_coefficients_scalability",
+        "test_size": 100,
+        "fractional_order": 50,
+        "execution_time": 1.9060098566114902e-07,
+        "throughput": 5246562.58482211,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "binomial_coefficients_scalability",
+        "test_size": 200,
+        "fractional_order": 100,
+        "execution_time": 2.1059822756797076e-07,
+        "throughput": 4748378.044526747,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "binomial_coefficients_scalability",
+        "test_size": 500,
+        "fractional_order": 250,
+        "execution_time": 1.9620056264102458e-07,
+        "throughput": 5096825.3431038065,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      },
+      {
+        "method_name": "binomial_coefficients_scalability",
+        "test_size": 1000,
+        "fractional_order": 500,
+        "execution_time": 2.1440209820866585e-07,
+        "throughput": 4664133.459303904,
+        "memory_usage": 0.0,
+        "accuracy": null,
+        "success": true,
+        "error_message": null
+      }
+    ],
+    "comparison": {
+      "derivative_scalability_trend": {
+        "sizes": [
+          100,
+          500,
+          1000,
+          2000,
+          5000,
+          10000
+        ],
+        "throughputs": [
+          386458.1944427698,
+          1398702.3382442978,
+          2023218.4437008477,
+          1487620.6137807032,
+          2993593.5814969055,
+          3232551.640981915
+        ],
+        "memory_usage": [
+          0.00390625,
+          0.00390625,
+          0.0,
+          0.00390625,
+          0.00390625,
+          0.0
+        ],
+        "scalability_factor": 8.36455711760207
+      },
+      "special_functions_scalability_trend": {
+        "sizes": [
+          10,
+          50,
+          100,
+          200,
+          500,
+          1000
+        ],
+        "throughputs": [
+          2682363.7431593738,
+          4840286.019693747,
+          5246562.58482211,
+          4748378.044526747,
+          5096825.3431038065,
+          4664133.459303904
+        ],
+        "memory_usage": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scalability_factor": 1.7388146820872024
+      },
+      "scalability_summary": {}
+    }
+  },
+  "comparison": {},
+  "summary": {
+    "total_benchmarks": 103,
+    "successful_benchmarks": 103,
+    "failed_benchmarks": 0,
+    "success_rate": 1.0,
+    "execution_time": 5.066464424133301,
+    "best_performers": {
+      "best_derivative_method": {
+        "method": "riemann_liouville",
+        "throughput": 1340356.7997909093
+      }
+    },
+    "performance_insights": {}
+  },
+  "metadata": {
+    "benchmark_date": "2025-10-27 10:36:08",
+    "config": {
+      "warmup_runs": 3,
+      "benchmark_runs": 5,
+      "test_sizes": [
+        100,
+        500,
+        1000
+      ],
+      "fractional_orders": [
+        0.25,
+        0.5,
+        0.75
+      ]
+    },
+    "platform": {
+      "python_version": "3.13.5 | packaged by Anaconda, Inc. | (main, Jun 12 2025, 16:09:02) [GCC 11.2.0]",
+      "numpy_version": "2.3.4",
+      "cpu_count": 16,
+      "memory_gb": 29.969085693359375
+    }
+  }
+}
