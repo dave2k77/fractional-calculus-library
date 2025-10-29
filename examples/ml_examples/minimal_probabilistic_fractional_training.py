@@ -11,12 +11,30 @@ from hpfracc.ml import (
     create_normal_alpha_layer,
 )
 
+# Check if NumPyro is available for probabilistic layers
+try:
+    from hpfracc.ml.probabilistic_fractional_orders import NUMPYRO_AVAILABLE
+    NUMPYRO_AVAILABLE = NUMPYRO_AVAILABLE
+except (ImportError, AttributeError):
+    NUMPYRO_AVAILABLE = False
+
 class TinyNet(nn.Module):
     def __init__(self):
         super().__init__()
         self.frac_spec = SpectralFractionalLayer(input_size=128, alpha_init=0.6)
         self.frac_stoch = StochasticFractionalLayer(alpha=0.6, k=32, method="importance")
-        self.frac_prob = create_normal_alpha_layer(mean=0.5, std=0.1, learnable=False)
+        
+        # Use probabilistic layer if NumPyro is available, otherwise use a simple spectral layer
+        if NUMPYRO_AVAILABLE:
+            try:
+                self.frac_prob = create_normal_alpha_layer(mean=0.5, std=0.1, learnable=False)
+            except (ImportError, RuntimeError):
+                # Fallback to spectral layer if probabilistic layer fails
+                self.frac_prob = SpectralFractionalLayer(input_size=128, alpha_init=0.5)
+        else:
+            # Use spectral layer as fallback when NumPyro is not available
+            self.frac_prob = SpectralFractionalLayer(input_size=128, alpha_init=0.5)
+        
         # Three fractional features -> linear expects 3 inputs
         self.linear = nn.Linear(3, 1)
 

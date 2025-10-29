@@ -211,6 +211,8 @@ def create_probabilistic_fractional_layer(**kwargs) -> ProbabilisticFractionalLa
 
 def create_normal_alpha_layer(**kwargs) -> ProbabilisticFractionalLayer:
     """Create probabilistic fractional layer with normal distribution."""
+    if not NUMPYRO_AVAILABLE:
+        raise ImportError("NumPyro backend is required. Install with: pip install numpyro")
     return ProbabilisticFractionalLayer(**kwargs)
 
 
