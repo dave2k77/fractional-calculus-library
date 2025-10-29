@@ -94,8 +94,32 @@
 ## 🚀 **Quick Start**
 
 ### **Installation**
+
+**Basic Installation**
 ```bash
 pip install hpfracc
+```
+
+**Installation with GPU Support**
+
+For GPU acceleration with PyTorch and JAX:
+
+```bash
+# Install PyTorch with CUDA 12.8 first
+pip install torch==2.9.0 --index-url https://download.pytorch.org/whl/cu128
+
+# Then install JAX with CUDA 12 support
+pip install --upgrade "jax[cuda12]"
+
+# Install HPFRACC with GPU extras
+pip install hpfracc[gpu]
+```
+
+**Note:** JAX's CUDA 12 wheels are built with CUDA 12.3 but are compatible with CUDA ≥12.1, which includes CUDA 12.8. CUDA libraries are backward compatible, so JAX will work with PyTorch's CUDA 12.8 installation.
+
+**For Machine Learning Features**
+```bash
+pip install hpfracc[ml]  # Includes PyTorch, JAX, and other ML dependencies
 ```
 
 ### **Basic Fractional Calculus**

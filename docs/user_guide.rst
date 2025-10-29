@@ -21,6 +21,23 @@ Installation with GPU Support
 
 For GPU acceleration with intelligent backend selection:
 
+**Recommended Installation for CUDA 12.8 (PyTorch) and CUDA 12 (JAX):**
+
+.. code-block:: bash
+
+   # Install PyTorch with CUDA 12.8 first
+   pip install torch==2.9.0 --index-url https://download.pytorch.org/whl/cu128
+   
+   # Then install JAX with CUDA 12 support
+   pip install --upgrade "jax[cuda12]"
+   
+   # Install HPFRACC with GPU extras
+   pip install hpfracc[gpu]
+
+**Note:** JAX's CUDA 12 wheels are built with CUDA 12.3 but are compatible with CUDA ≥12.1, which includes CUDA 12.8. CUDA libraries are backward compatible, so JAX will work correctly with PyTorch's CUDA 12.8 installation.
+
+**Alternative (simpler but may have version conflicts):**
+
 .. code-block:: bash
 
    pip install hpfracc[gpu]
