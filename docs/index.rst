@@ -94,45 +94,31 @@ Basic Usage
    result_learnable = SpectralFractionalDerivative.apply(x, alpha_val, -1, "fft")
    print(f"Learnable alpha: {alpha_val.item():.4f}")
 
-Documentation Sections
----------------------
+Documentation Structure
+-----------------------
 
-Core Concepts & Theory
-~~~~~~~~~~~~~~~~~~~~~~
+Main Chapters
+~~~~~~~~~~~~
 
-* :doc:`model_theory` - Mathematical foundations and theoretical background
-* :doc:`mathematical_theory` - Deep mathematical theory and foundations including ML models, Neural fODEs, GNNs, and autograd kernels
-* :doc:`fractional_operators_guide` - Comprehensive guide to all fractional operators including ML autograd
-
-Neural Fractional SDE Solvers (v3.0.0)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-* :doc:`neural_fsde_guide` - Comprehensive guide to neural fractional SDEs
-* :doc:`sde_api_reference` - Complete SDE solver API reference
-* :doc:`sde_examples` - Neural fSDE code examples and tutorials
+1. **Core Features and Testing Status** - Production readiness and feature overview
+2. **Advanced Features** - Intelligent backend selection, GPU acceleration, optimization
+3. **Installation and Quick Start** - Setup instructions and quick start examples
+4. **Basic Examples** - Fundamental fractional calculus operations
+5. **Advanced Examples** - Signal processing, image processing, neural networks
+6. **Integrals and Derivatives** - Comprehensive operator guide
+7. **Fractional Neural Networks** - ML integration with spectral autograd
+8. **Fractional Graph Neural Networks** - GNN architectures with fractional calculus
+9. **Neural Fractional ODEs and SDEs** - Learning-based solution frameworks
+10. **Scientific Applications and Tutorials** - Research applications and optimization
+11. **Advanced Usage** - Configuration, troubleshooting, best practices
+12. **Theoretical Foundations** - Mathematical theory and model foundations
 
 API Reference
 ~~~~~~~~~~~~
 
-* :doc:`api_reference` - Main library functions and classes
-* :doc:`api_reference` - Complete API reference for all modules
+Sectional API documentation organized by functional area:
 
-Examples & Tutorials
-~~~~~~~~~~~~~~~~~~~
-
-* :doc:`examples` - Comprehensive code examples and use cases
-* :doc:`scientific_tutorials` - Advanced scientific tutorials and research applications
-* :doc:`user_guide` - Machine learning workflows and best practices including autograd
-* :doc:`spectral_autograd_guide` - Complete guide to the Spectral Autograd Framework
-* :doc:`fractional_autograd_guide` - Complete guide to the Fractional Autograd Framework
-* :doc:`neural_fode_guide` - Complete guide to the Neural fODE framework
-
-
-Development & Testing
-~~~~~~~~~~~~~~~~~~~~
-
-* :doc:`testing_status` - Complete integration testing results and production readiness
-* :doc:`RESEARCHER_QUICK_START` - Quick start guide for computational physics and biophysics research
+* :doc:`api/index` - API reference index with links to all sections
 
 Why Choose HPFRACC?
 ------------------
@@ -196,21 +182,50 @@ Getting Help
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: Main Documentation:
+
+   01_core_features
+   02_advanced_features
+   03_installation
+   04_basic_examples
+   05_advanced_examples
+   06_derivatives_integrals
+   07_fractional_neural_networks
+   08_fractional_gnn
+   09_neural_ode_sde
+   10_scientific_applications
+   11_advanced_usage
+   12_theoretical_foundations
+
+.. toctree::
+   :maxdepth: 2
+   :caption: API Reference:
+
+   api/index
+   api/core_api
+   api/derivatives_integrals_api
+   api/solvers_api
+   api/fnn_api
+   api/fgnn_api
+   api/neural_ode_sde_api
+   api/special_api
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Additional Guides:
 
    user_guide
-   spectral_autograd_guide
    fractional_autograd_guide
    neural_fsde_guide
-   sde_api_reference
-   sde_examples
-   api_reference
-   examples
-   scientific_tutorials
-   fractional_operators_guide
-   mathematical_theory
-   model_theory
-   testing_status
    neural_fode_guide
+   spectral_autograd_guide
+   JAX_GPU_SETUP
    RESEARCHER_QUICK_START
+   PERFORMANCE_OPTIMIZATION_GUIDE
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Development:
+
+   13_development
 

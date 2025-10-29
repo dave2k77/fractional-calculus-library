@@ -327,4 +327,4 @@ See Also
 
 * :doc:`fractional_autograd_guide` - Complete fractional autograd framework
 * :doc:`api_reference` - Full API documentation
-* :doc:`examples` - Practical examples and tutorials
+* :doc:`04_basic_examples` and :doc:`05_advanced_examples` - Practical examples and tutorials

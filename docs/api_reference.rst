@@ -848,4 +848,4 @@ Debugging Tips
 3. **Verify backend compatibility**
 4. **Test with small datasets first**
 
-For more detailed examples, see the :doc:`examples` section.
+For more detailed examples, see :doc:`04_basic_examples` and :doc:`05_advanced_examples`.
