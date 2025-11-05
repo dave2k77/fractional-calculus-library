@@ -515,7 +515,12 @@ class FractionalDiffusionSolver(FractionalPDESolver):
         beta_val = float(beta.alpha) if hasattr(beta, "alpha") else float(beta)
         
         if not (0.0 < alpha_val < 1.0):
-            raise NotImplementedError("Spectral scheme below is for 0 < alpha < 1.")
+            raise NotImplementedError(
+                f"Spectral PDE scheme is implemented for 0 < α < 1, got α={alpha_val}. "
+                "For α ≥ 1, consider decomposing into integer and fractional parts, or use "
+                "finite difference schemes with the L1/L2 methods. For α ≤ 0, the problem "
+                "is not well-defined for fractional PDEs."
+            )
             
         u_prev = solution[:, n-1]
         

@@ -289,8 +289,14 @@ def validate_tensor_input(x: Union[np.ndarray,
     else:
         # Check if it's a torch Tensor (lazy import)
         torch = _get_torch()
-        if torch is not None and isinstance(x, "torch.Tensor"):
-            if not torch.isfinite(x).all():
+        if torch is not None:
+            try:
+                if isinstance(x, torch.Tensor):
+                    if not torch.isfinite(x).all():
+                        return False
+                else:
+                    return False
+            except (TypeError, AttributeError):
                 return False
         else:
             return False

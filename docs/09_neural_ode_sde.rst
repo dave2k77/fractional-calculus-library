@@ -83,6 +83,13 @@ where:
 - :math:`g_\theta: \mathbb{R}^{d} \to \mathbb{R}^{d \times m}` is the learnable diffusion function
 - :math:`W(t)` is a Wiener process (or more general noise)
 
+**Note on Diffusion Functions**: Currently supported diffusion types:
+- **Scalar diffusion** (additive noise): :math:`g_\theta(t, X(t)) = \sigma \in \mathbb{R}`
+- **Vector diffusion** (diagonal multiplicative noise): :math:`g_\theta(t, X(t)) = \sigma(t, X(t)) \in \mathbb{R}^{d}`
+- **Matrix diffusion** (full multiplicative noise): :math:`g_\theta: \mathbb{R}^{d} \to \mathbb{R}^{d \times d}` - *Not yet implemented*
+
+For matrix diffusion, consider using diagonal approximation or standard (non-fractional) SDE solvers first.
+
 Basic Usage
 ~~~~~~~~~~~
 

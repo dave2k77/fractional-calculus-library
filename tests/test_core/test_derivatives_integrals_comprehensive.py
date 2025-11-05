@@ -14,7 +14,8 @@ from hpfracc.core.integrals import (
     MillerRossIntegral, WeylIntegral
 )
 from hpfracc.core.fractional_implementations import (
-    RiemannLiouvilleDerivative, CaputoDerivative, GrunwaldLetnikovDerivative
+    RiemannLiouvilleDerivative, CaputoDerivative, GrunwaldLetnikovDerivative,
+    MillerRossDerivative
 )
 from hpfracc.core.definitions import FractionalOrder
 
@@ -57,7 +58,7 @@ class TestBaseFractionalDerivative:
         
         for alpha in alphas:
             derivative = RiemannLiouvilleDerivative(alpha)
-            result = derivative(f, self.t, h=self.h)
+            result = derivative.compute(f, self.t, h=self.h)
             
             assert isinstance(result, np.ndarray)
             assert len(result) == len(self.t)
@@ -249,7 +250,7 @@ class TestDerivativeIntegralRelations:
         
         # Compute integral then derivative
         integral_result = self.integral.compute(f, self.t, h=self.h)
-        derivative_result = self.derivative(integral_result, self.t, h=self.h)
+        derivative_result = self.derivative.compute(integral_result, self.t, h=self.h)
         
         # Should recover original function (approximately)
         np.testing.assert_allclose(derivative_result, f, rtol=1e-1, atol=1e-1)
@@ -259,7 +260,7 @@ class TestDerivativeIntegralRelations:
         f = self.t**2
         
         # Compute derivative then integral
-        derivative_result = self.derivative(f, self.t, h=self.h)
+        derivative_result = self.derivative.compute(f, self.t, h=self.h)
         integral_result = self.integral.compute(derivative_result, self.t, self.h)
         
         # Should recover original function (approximately)
@@ -283,10 +284,10 @@ class TestMathematicalConsistency:
         gl = GrunwaldLetnikovDerivative(self.alpha)
         mr = MillerRossDerivative(self.alpha)
         
-        result_rl = rl(self.f, self.t, h=self.h)
-        result_caputo = caputo(self.f, self.t, h=self.h)
-        result_gl = gl(self.f, self.t, h=self.h)
-        result_mr = mr(self.f, self.t, h=self.h)
+        result_rl = rl.compute(self.f, self.t, h=self.h)
+        result_caputo = caputo.compute(self.f, self.t, h=self.h)
+        result_gl = gl.compute(self.f, self.t, h=self.h)
+        result_mr = mr.compute(self.f, self.t, h=self.h)
         
         # Results should be similar (not identical due to different definitions)
         # but should have same order of magnitude
@@ -318,13 +319,12 @@ class TestErrorHandling:
     
     def test_invalid_alpha_values(self):
         """Test handling of invalid alpha values"""
-        # Test negative alpha
+        # Test negative alpha - should raise ValueError at construction
         with pytest.raises(ValueError):
             RiemannLiouvilleDerivative(-0.5)
         
-        # Test alpha >= 2
-        with pytest.raises(ValueError):
-            RiemannLiouvilleDerivative(2.5)
+        # Note: alpha >= 2 is actually valid for fractional derivatives
+        # (e.g., second-order fractional derivative), so we don't test for that
     
     def test_invalid_time_arrays(self):
         """Test handling of invalid time arrays"""
@@ -333,11 +333,11 @@ class TestErrorHandling:
         
         # Test empty time array
         with pytest.raises(ValueError):
-            derivative(lambda t: t, np.array([]), h=0.01)
+            derivative.compute(lambda t: t, np.array([]), h=0.01)
         
         # Test single point
         with pytest.raises(ValueError):
-            derivative(lambda t: t, np.array([1.0]), h=0.01)
+            derivative.compute(lambda t: t, np.array([1.0]), h=0.01)
     
     def test_invalid_step_size(self):
         """Test handling of invalid step sizes"""
@@ -347,11 +347,11 @@ class TestErrorHandling:
         
         # Test negative step size
         with pytest.raises(ValueError):
-            derivative(lambda t: t, t, h=-0.01)
+            derivative.compute(lambda t: t, t, h=-0.01)
         
         # Test zero step size
         with pytest.raises(ValueError):
-            derivative(lambda t: t, t, h=0.0)
+            derivative.compute(lambda t: t, t, h=0.0)
 
 
 if __name__ == "__main__":

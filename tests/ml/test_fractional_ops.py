@@ -1,16 +1,32 @@
 """
 Tests for fractional operations module.
 """
+import os
 import pytest
 import numpy as np
+
+# Force JAX to use CPU for tests to avoid GPU/CuDNN version issues
+os.environ.setdefault("JAX_PLATFORMS", "cpu")
 
 try:
     import jax
     import jax.numpy as jnp
     from hpfracc.ml.fractional_ops import spectral_derivative_jax
     JAX_AVAILABLE = True
-except ImportError:
-    JAX_AVAILABLE = False
+except (ImportError, RuntimeError) as e:
+    # Handle JAX initialization errors (e.g., CuDNN version mismatch)
+    if "JAX" in str(e) or "DNN" in str(e) or "CuDNN" in str(e):
+        # Try to force CPU mode
+        os.environ["JAX_PLATFORMS"] = "cpu"
+        try:
+            import jax
+            import jax.numpy as jnp
+            from hpfracc.ml.fractional_ops import spectral_derivative_jax
+            JAX_AVAILABLE = True
+        except Exception:
+            JAX_AVAILABLE = False
+    else:
+        JAX_AVAILABLE = False
 
 @pytest.mark.skipif(not JAX_AVAILABLE, reason="JAX not available")
 class TestFractionalOpsJax:

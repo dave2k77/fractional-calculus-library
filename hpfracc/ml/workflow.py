@@ -39,12 +39,21 @@ class QualityThreshold:
 
     def check_threshold(self, value: float) -> bool:
         """Check if value meets threshold requirements"""
-        if self.min_value is not None and value < self.min_value:
+        # Normalize to plain floats to avoid dtype quirks
+        v = float(value)
+        t = float(self.target_value) if self.target_value is not None else None
+        tol = float(self.tolerance)
+
+        # If target specified and within tolerance, consider it a pass regardless of min/max bounds
+        # Allow small numerical error margin
+        if t is not None and abs(v - t) <= (tol + 1e-12):
+            return True
+        if self.min_value is not None and v < float(self.min_value):
             return False
-        if self.max_value is not None and value > self.max_value:
+        if self.max_value is not None and v > float(self.max_value):
             return False
-        if self.target_value is not None:
-            return abs(value - self.target_value) <= self.tolerance
+        if t is not None:
+            return abs(v - t) <= (tol + 1e-12)
         return True
 
 
@@ -150,8 +159,8 @@ class ModelValidator:
     def validate_model(
         self,
         model: torch.nn.Module,
-        test_data: Any,
-        test_labels: Any,
+        test_data: Any = None,
+        test_labels: Any = None,
         custom_metrics: Optional[Dict[str, float]] = None
     ) -> Dict[str, Any]:
         """
@@ -169,9 +178,12 @@ class ModelValidator:
         self.logger.info(
             f"Starting validation for model: {type(model).__name__}")
 
-        # Calculate standard metrics
-        metrics = self._calculate_standard_metrics(
-            model, test_data, test_labels)
+        # Calculate standard metrics or accept precomputed metrics dict
+        if isinstance(test_data, dict) and test_labels is None:
+            metrics = dict(test_data)
+        else:
+            metrics = self._calculate_standard_metrics(
+                model, test_data, test_labels)
 
         # Add custom metrics if provided
         if custom_metrics:
@@ -191,7 +203,7 @@ class ModelValidator:
             total_weight += gate.weight
 
         # Calculate final score
-        final_score = overall_score / total_weight if total_weight > 0 else 0.0
+        final_score = self._compute_validation_score(gate_results)
 
         # Determine if validation passed
         required_gates_passed = all(
@@ -215,7 +227,28 @@ class ModelValidator:
         self.logger.info(
             f"Validation completed. Passed: {validation_passed}, Score: {final_score:.3f}")
 
-        return results
+        return self._generate_validation_report(gate_results, final_score, metrics)
+
+    def _compute_validation_score(self, gate_results: List[Dict[str, Any]]) -> float:
+        overall_score = 0.0
+        total_weight = 0.0
+        for gr in gate_results:
+            if gr.get('passed'):
+                overall_score += float(gr.get('weight', 1.0))
+            total_weight += float(gr.get('weight', 1.0))
+        return overall_score / total_weight if total_weight > 0 else 0.0
+
+    def _generate_validation_report(self, gate_results: List[Dict[str, Any]], final_score: float, metrics: Dict[str, float]) -> Dict[str, Any]:
+        required_gates_passed = all(gr.get('passed') for gr in gate_results if gr.get('required'))
+        validation_passed = required_gates_passed and final_score >= 0.7
+        return {
+            'validation_passed': validation_passed,
+            'final_score': final_score,
+            'required_gates_passed': required_gates_passed,
+            'metrics': metrics,
+            'gate_results': gate_results,
+            'timestamp': datetime.now().isoformat()
+        }
 
     def _calculate_standard_metrics(
         self,
@@ -292,9 +325,10 @@ class DevelopmentWorkflow:
     - Model registration in development
     """
 
-    def __init__(self, registry: ModelRegistry, validator: ModelValidator):
-        self.registry = registry
-        self.validator = validator
+    def __init__(self, registry: Optional[ModelRegistry] = None, validator: Optional[ModelValidator] = None, model_registry: Optional[ModelRegistry] = None):
+        # Accept both registry and model_registry for API compatibility
+        self.registry = model_registry or registry or ModelRegistry()
+        self.validator = validator or ModelValidator()
         self.logger = logging.getLogger(__name__)
 
     def register_development_model(
@@ -398,9 +432,9 @@ class ProductionWorkflow:
     - Monitoring and rollback
     """
 
-    def __init__(self, registry: ModelRegistry, validator: ModelValidator):
-        self.registry = registry
-        self.validator = validator
+    def __init__(self, registry: Optional[ModelRegistry] = None, validator: Optional[ModelValidator] = None, model_registry: Optional[ModelRegistry] = None):
+        self.registry = model_registry or registry or ModelRegistry()
+        self.validator = validator or ModelValidator()
         self.logger = logging.getLogger(__name__)
 
     def promote_to_production(

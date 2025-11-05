@@ -277,7 +277,12 @@ class FractionalEulerMaruyama(FractionalSDESolver):
                     diffusion_val = diffusion_val
                 else:
                     # Full matrix case - not implemented yet
-                    raise NotImplementedError("Full matrix diffusion not yet implemented")
+                    raise NotImplementedError(
+                        "Full matrix diffusion (σ: R^d → R^{d×d}) is not yet implemented. "
+                        "Currently supported: scalar diffusion (additive noise) or vector diffusion "
+                        "(diagonal multiplicative noise). For matrix diffusion, consider using "
+                        "diagonal approximation or standard (non-fractional) SDE solvers."
+                    )
             
             # Compute fractional memory term (simplified)
             # In full implementation, this would account for full history
@@ -294,7 +299,10 @@ class FractionalEulerMaruyama(FractionalSDESolver):
                            memory_term)
             else:
                 # Matrix case (not implemented)
-                raise NotImplementedError("Matrix diffusion not yet implemented")
+                raise NotImplementedError(
+                    "Matrix diffusion update not yet implemented. "
+                    "This should not occur if the earlier validation is working correctly."
+                )
         
         # Create solution object
         solution = SDESolution(
@@ -394,7 +402,12 @@ class FractionalMilstein(FractionalSDESolver):
                     diffusion_val = diffusion_val
                 else:
                     # Full matrix case - not implemented yet
-                    raise NotImplementedError("Full matrix diffusion not yet implemented")
+                    raise NotImplementedError(
+                        "Full matrix diffusion (σ: R^d → R^{d×d}) is not yet implemented. "
+                        "Currently supported: scalar diffusion (additive noise) or vector diffusion "
+                        "(diagonal multiplicative noise). For matrix diffusion, consider using "
+                        "diagonal approximation or standard (non-fractional) SDE solvers."
+                    )
             
             # Simplified Milstein correction term
             # In full implementation, would include derivative of diffusion
@@ -411,7 +424,10 @@ class FractionalMilstein(FractionalSDESolver):
                            correction_term)
             else:
                 # Matrix case (not implemented)
-                raise NotImplementedError("Matrix diffusion not yet implemented")
+                raise NotImplementedError(
+                    "Matrix diffusion update not yet implemented. "
+                    "This should not occur if the earlier validation is working correctly."
+                )
         
         # Create solution object
         solution = SDESolution(

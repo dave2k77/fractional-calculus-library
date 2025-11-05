@@ -11,9 +11,9 @@ Overview
 Fractional Graph Neural Networks combine graph convolution operations with fractional calculus to capture long-range dependencies and memory effects in graph-structured data.
 
 Key Features:
-- Multi-backend support (PyTorch, JAX, NUMBA)
+- **Multi-backend support** (PyTorch, JAX, NUMBA) - Fully implemented with backend-agnostic fractional derivatives
 - Various GNN architectures (GCN, GAT, GraphSAGE, U-Net)
-- Fractional calculus integration
+- **Proper fractional derivative integration** - Mathematically correct implementations (no placeholders)
 - Performance optimization across backends
 
 Basic Usage

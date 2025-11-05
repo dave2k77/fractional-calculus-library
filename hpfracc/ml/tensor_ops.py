@@ -133,6 +133,38 @@ class TensorOps:
             torch_kwargs = kwargs.copy()
             if 'requires_grad' in torch_kwargs and not torch_kwargs['requires_grad']:
                 del torch_kwargs['requires_grad']
+            # Normalize dtype/device from strings
+            dtype = torch_kwargs.get('dtype', None)
+            device = torch_kwargs.get('device', None)
+            torch = self.tensor_lib
+            if isinstance(dtype, str):
+                dtype_map = {
+                    'float32': torch.float32,
+                    'float': torch.float32,
+                    'fp32': torch.float32,
+                    'float64': torch.float64,
+                    'double': torch.float64,
+                    'fp64': torch.float64,
+                    'float16': torch.float16,
+                    'half': torch.float16,
+                    'fp16': torch.float16,
+                    'bfloat16': getattr(torch, 'bfloat16', None),
+                    'bf16': getattr(torch, 'bfloat16', None),
+                    'int64': torch.int64,
+                    'long': torch.int64,
+                    'int32': torch.int32,
+                    'int': torch.int32,
+                    'int16': torch.int16,
+                    'short': torch.int16,
+                    'int8': torch.int8,
+                    'uint8': torch.uint8,
+                    'bool': torch.bool,
+                }
+                mapped = dtype_map.get(dtype.lower())
+                if mapped is not None:
+                    torch_kwargs['dtype'] = mapped
+            if isinstance(device, str):
+                torch_kwargs['device'] = torch.device(device)
             return self.tensor_lib.tensor(data, **torch_kwargs)
         elif self.backend == BackendType.JAX:
             # JAX doesn't support requires_grad
@@ -187,8 +219,9 @@ class TensorOps:
             torch = self.tensor_lib
             return torch.no_grad()
         elif self.backend == BackendType.JAX:
-            import jax
-            return jax.disable_jit()
+            # JAX doesn't have a no_grad context manager - it uses functional programming
+            # Return nullcontext as documented
+            return nullcontext()
         elif self.backend == BackendType.NUMBA:
             return nullcontext()
         else:
@@ -349,9 +382,13 @@ class TensorOps:
         if self.backend == BackendType.TORCH:
             return tensor.repeat(*((reps,) if isinstance(reps, int) else reps))
         elif self.backend == BackendType.JAX:
-            import numpy as np
-            # JAX lacks jnp.tile in older versions; fall back via NumPy then re-box
-            return self.tensor_lib.array(np.tile(self.to_numpy(tensor), reps))
+            # Try to use jnp.tile if available (modern JAX versions have it)
+            try:
+                return self.tensor_lib.tile(tensor, reps)
+            except AttributeError:
+                # Fallback for older JAX versions
+                import numpy as np
+                return self.tensor_lib.array(np.tile(self.to_numpy(tensor), reps))
         elif self.backend == BackendType.NUMBA:
             import numpy as np
             return np.tile(tensor, reps)
@@ -445,14 +482,30 @@ class TensorOps:
 
         elif self.backend == BackendType.JAX:
             if dims is not None:
-                # jnp.transpose expects axes as positional args, not a tuple
-                return tensor.transpose(*dims)
+                # jnp.transpose expects axes as positional args or as a tuple
+                # Try method call first, fall back to jnp.transpose if needed
+                try:
+                    if isinstance(dims, tuple):
+                        return tensor.transpose(*dims)
+                    else:
+                        return tensor.transpose(dims)
+                except (TypeError, AttributeError):
+                    # Fallback to jnp.transpose function
+                    return self.tensor_lib.transpose(tensor, dims)
             if dim0 is not None and dim1 is not None:
                 axes = list(range(tensor.ndim))
                 axes[dim0], axes[dim1] = axes[dim1], axes[dim0]
-                return tensor.transpose(*axes)
+                try:
+                    return tensor.transpose(*axes)
+                except (TypeError, AttributeError):
+                    return self.tensor_lib.transpose(tensor, axes)
             # default: reverse axes (matrix transpose if 2D)
-            return tensor.transpose()
+            try:
+                return tensor.transpose()
+            except (TypeError, AttributeError):
+                # Fallback for edge cases
+                axes = tuple(reversed(range(tensor.ndim)))
+                return self.tensor_lib.transpose(tensor, axes)
 
         elif self.backend == BackendType.NUMBA:
             import numpy as np

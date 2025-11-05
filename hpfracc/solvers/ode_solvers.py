@@ -206,7 +206,11 @@ def _fft_convolution(coeffs: np.ndarray, values: np.ndarray, axis: int = 0) -> n
             
             return conv_result
         else:
-            raise NotImplementedError("FFT convolution only implemented for axis=0")
+            raise NotImplementedError(
+                "FFT convolution is currently only implemented for axis=0 (time axis). "
+                "For multi-dimensional problems, transpose your data so time is the first axis, "
+                "or use direct convolution methods instead of FFT-based approach."
+            )
     else:
         raise ValueError(f"FFT convolution only supports 1D and 2D arrays, got {values.ndim}D")
 
@@ -393,7 +397,11 @@ class FixedStepODESolver:
         """
         # Only Caputo is supported in this scheme
         if self.derivative_type != "caputo":
-            raise NotImplementedError("Predictor-corrector currently implemented for Caputo only.")
+            raise NotImplementedError(
+                "Predictor-corrector method is currently implemented for Caputo derivative only. "
+                "For Riemann-Liouville or other derivative types, use the fixed-step Euler method "
+                "or convert your problem to use Caputo formulation."
+            )
         alpha_val = float(alpha.alpha) if hasattr(alpha, "alpha") else float(alpha)
 
         # grid

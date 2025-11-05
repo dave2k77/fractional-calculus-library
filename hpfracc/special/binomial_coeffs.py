@@ -240,18 +240,35 @@ class BinomialCoefficients:
                 result = result * (n_int - i) // (i + 1)
             return result
 
-        # For fractional cases, use approximation
-        # This is a simplified approximation for fractional binomial coefficients
+        # For fractional cases, use the gamma function relationship
+        # For fractional binomial coefficients: C(n,k) = Γ(n+1) / (Γ(k+1) * Γ(n-k+1))
+        # We can compute this using the logarithm to avoid overflow:
+        # log(C(n,k)) = log(Γ(n+1)) - log(Γ(k+1)) - log(Γ(n-k+1))
+        
         if k == 0:
             return 1.0
         if k == 1:
             return n
         if k == 2:
             return n * (n - 1) / 2.0
-
-        # For other fractional cases, use a simple approximation
-        # This is not mathematically rigorous but avoids Numba typing issues
-        return 1.0  # Placeholder - should be replaced with proper implementation
+        
+        # For other fractional cases, use log-gamma formula
+        # This is more accurate than simple approximations
+        # Using Stirling's approximation for log-gamma:
+        # log Γ(x) ≈ (x-0.5)*log(x) - x + 0.5*log(2π)
+        import math
+        
+        def log_gamma_approx(x):
+            """Stirling's approximation for log-gamma"""
+            if x <= 0:
+                return 0.0
+            return (x - 0.5) * math.log(x) - x + 0.5 * math.log(2.0 * math.pi)
+        
+        # Compute log of binomial coefficient
+        log_result = log_gamma_approx(n + 1) - log_gamma_approx(k + 1) - log_gamma_approx(n - k + 1)
+        
+        # Return the exponential
+        return math.exp(log_result)
 
     @staticmethod
     def _binomial_jax_impl(n: "jnp.ndarray", k: "jnp.ndarray") -> "jnp.ndarray":
@@ -305,7 +322,17 @@ class BinomialCoefficients:
         """
         NUMBA-optimized fractional binomial coefficient for scalar inputs.
 
-        Uses the gamma function relationship for generalized binomial coefficients.
+        Uses the recursive formula for generalized binomial coefficients:
+        C(α,k) = C(α,k-1) * (α-k+1) / k
+        
+        This provides accurate computation for all fractional orders α and integer k.
+        
+        Args:
+            alpha: Fractional parameter (can be any real number)
+            k: Integer parameter
+            
+        Returns:
+            Generalized binomial coefficient C(α,k)
         """
         # Handle special cases
         if k < 0:
@@ -316,10 +343,16 @@ class BinomialCoefficients:
             return alpha
         if k == 2:
             return alpha * (alpha - 1) / 2.0
-
-        # For other cases, use a simple approximation
-        # This avoids Numba typing issues with gamma function
-        return 1.0  # Placeholder - should be replaced with proper implementation
+        if k == 3:
+            return alpha * (alpha - 1) * (alpha - 2) / 6.0
+        
+        # For other cases, use recursive formula for efficiency
+        # C(α,k) = C(α,k-1) * (α-k+1) / k
+        result = 1.0
+        for i in range(1, int(k) + 1):
+            result *= (alpha - i + 1) / i
+        
+        return result
 
     @staticmethod
     def _binomial_fractional_jax(

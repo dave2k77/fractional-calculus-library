@@ -303,3 +303,4 @@ figures/*.pdf
 !CHANGELOG.md
 !PROGRESS_REPORT.md
 !TODAY_SUMMARY.md
+.cursor/

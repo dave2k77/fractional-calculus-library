@@ -293,7 +293,9 @@ Available Integral Types
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 1. **Riemann-Liouville Integral** (`"RL"`)
-2. **Caputo Integral** (`"Caputo"`)
+2. **Caputo Integral** (`"Caputo"`) - **Now supports all orders α ≥ 0**
+   - For 0 < α < 1: Equals Riemann-Liouville integral
+   - For α ≥ 1: Uses decomposition method I^α = I^n * I^β
 3. **Weyl Integral** (`"Weyl"`)
 4. **Hadamard Integral** (`"Hadamard"`)
 5. **Miller-Ross Integral** (`"MillerRoss"`)

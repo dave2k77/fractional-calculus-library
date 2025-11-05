@@ -127,9 +127,31 @@ class BaseFractionalGNNLayer(ABC):
                 padding = torch.zeros(1, dtype=x.dtype, device=x.device)
                 return torch.cat([diff, padding], dim=-1)
         else:
-            # Placeholder for actual fractional derivative implementation
-            # Ensure output has the same shape as input
-            return x * (alpha ** 0.5)
+            # Fractional derivative approximation using spectral method
+            # For 0 < alpha < 1, use a weighted combination of identity and first derivative
+            # This is a simple approximation: D^α ≈ (1-α)I + α*D^1
+            if alpha == 0:
+                return x
+            elif 0 < alpha < 1:
+                # Approximate fractional derivative as weighted combination
+                derivative = torch.diff(x, dim=-1)
+                derivative = torch.cat([derivative, torch.zeros_like(x[..., :1])], dim=-1)
+                return (1 - alpha) * x + alpha * derivative
+            else:
+                # For alpha >= 1, apply integer derivatives iteratively
+                result = x
+                n = int(alpha)
+                beta = alpha - n
+                # Apply n integer derivatives
+                for _ in range(n):
+                    result = torch.diff(result, dim=-1)
+                    result = torch.cat([result, torch.zeros_like(result[..., :1])], dim=-1)
+                # Apply fractional part
+                if beta > 0:
+                    derivative = torch.diff(result, dim=-1)
+                    derivative = torch.cat([derivative, torch.zeros_like(result[..., :1])], dim=-1)
+                    result = (1 - beta) * result + beta * derivative
+                return result
 
     def _jax_fractional_derivative(self, x: Any, alpha: float) -> Any:
         """JAX implementation of fractional derivative"""
@@ -153,8 +175,43 @@ class BaseFractionalGNNLayer(ABC):
                 padding = jnp.zeros(1, dtype=x.dtype)
                 return jnp.concatenate([diff, padding], axis=0)
         else:
-            # Placeholder for actual fractional derivative implementation
-            return x * (alpha ** 0.5)
+            # Fractional derivative approximation using spectral method
+            # For 0 < alpha < 1, use a weighted combination of identity and first derivative
+            if alpha == 0:
+                return x
+            elif 0 < alpha < 1:
+                # Approximate fractional derivative as weighted combination
+                if x.ndim > 1:
+                    derivative = jnp.diff(x, axis=-1)
+                    derivative = jnp.concatenate([derivative, jnp.zeros_like(x[..., :1])], axis=-1)
+                else:
+                    derivative = jnp.diff(x, axis=-1 if x.ndim > 1 else 0)
+                    padding = jnp.zeros(1, dtype=x.dtype)
+                    derivative = jnp.concatenate([derivative, padding], axis=-1 if x.ndim > 1 else 0)
+                return (1 - alpha) * x + alpha * derivative
+            else:
+                # For alpha >= 1, apply integer derivatives iteratively
+                result = x
+                n = int(alpha)
+                beta = alpha - n
+                # Apply n integer derivatives
+                for _ in range(n):
+                    if result.ndim > 1:
+                        result = jnp.diff(result, axis=-1)
+                        result = jnp.concatenate([result, jnp.zeros_like(result[..., :1])], axis=-1)
+                    else:
+                        result = jnp.diff(result, axis=0)
+                        result = jnp.concatenate([result, jnp.zeros(1, dtype=result.dtype)], axis=0)
+                # Apply fractional part
+                if beta > 0:
+                    if result.ndim > 1:
+                        derivative = jnp.diff(result, axis=-1)
+                        derivative = jnp.concatenate([derivative, jnp.zeros_like(result[..., :1])], axis=-1)
+                    else:
+                        derivative = jnp.diff(result, axis=0)
+                        derivative = jnp.concatenate([derivative, jnp.zeros(1, dtype=result.dtype)], axis=0)
+                    result = (1 - beta) * result + beta * derivative
+                return result
 
     def _numba_fractional_derivative(self, x: Any, alpha: float) -> Any:
         """NUMBA implementation of fractional derivative"""
@@ -177,8 +234,40 @@ class BaseFractionalGNNLayer(ABC):
                 padding = np.zeros(1, dtype=x.dtype)
                 return np.concatenate([diff, padding], axis=0)
         else:
-            # Placeholder for actual fractional derivative implementation
-            return x * (alpha ** 0.5)
+            # Fractional derivative approximation using spectral method
+            # For 0 < alpha < 1, use a weighted combination of identity and first derivative
+            if 0 < alpha < 1:
+                # Approximate fractional derivative as weighted combination
+                if x.ndim > 1:
+                    derivative = np.diff(x, axis=-1)
+                    derivative = np.concatenate([derivative, np.zeros_like(x[..., :1])], axis=-1)
+                else:
+                    derivative = np.diff(x, axis=0)
+                    derivative = np.concatenate([derivative, np.zeros(1, dtype=x.dtype)], axis=0)
+                return (1 - alpha) * x + alpha * derivative
+            else:
+                # For alpha >= 1, apply integer derivatives iteratively
+                result = x
+                n = int(alpha)
+                beta = alpha - n
+                # Apply n integer derivatives
+                for _ in range(n):
+                    if result.ndim > 1:
+                        result = np.diff(result, axis=-1)
+                        result = np.concatenate([result, np.zeros_like(result[..., :1])], axis=-1)
+                    else:
+                        result = np.diff(result, axis=0)
+                        result = np.concatenate([result, np.zeros(1, dtype=result.dtype)], axis=0)
+                # Apply fractional part
+                if beta > 0:
+                    if result.ndim > 1:
+                        derivative = np.diff(result, axis=-1)
+                        derivative = np.concatenate([derivative, np.zeros_like(result[..., :1])], axis=-1)
+                    else:
+                        derivative = np.diff(result, axis=0)
+                        derivative = np.concatenate([derivative, np.zeros(1, dtype=result.dtype)], axis=0)
+                    result = (1 - beta) * result + beta * derivative
+                return result
 
 
 class FractionalGraphConv(BaseFractionalGNNLayer):

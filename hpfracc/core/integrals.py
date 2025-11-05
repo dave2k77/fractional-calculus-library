@@ -213,6 +213,20 @@ class CaputoIntegral(FractionalIntegral):
 
     The Caputo fractional integral is related to the Riemann-Liouville integral
     and is often more suitable for initial value problems.
+
+    Supports all fractional orders α ≥ 0:
+    - For 0 < α < 1: Equals Riemann-Liouville integral
+    - For α ≥ 1: Uses decomposition I^α = I^n * I^β where α = n + β
+    
+    Examples:
+        >>> from hpfracc.core.integrals import CaputoIntegral
+        >>> def f(x): return x**2
+        >>> # For 0 < α < 1
+        >>> integral_05 = CaputoIntegral(0.5)
+        >>> result = integral_05(f, 1.0)
+        >>> # For α ≥ 1
+        >>> integral_15 = CaputoIntegral(1.5)
+        >>> result = integral_15(f, 1.0)
     """
 
     def __init__(self, order: Union[float, FractionalOrder]):
@@ -229,17 +243,83 @@ class CaputoIntegral(FractionalIntegral):
         Compute Caputo fractional integral.
 
         For the Caputo integral, we use the relationship:
-        I^α_C f(t) = I^α f(t) - Σ_{k=0}^{n-1} (t^k/k!) f^(k)(0)
+        I^α_C f(t) = I^α f(t) - Σ_{k=0}^{n-1} (t^(k+α)/Γ(k+α+1)) f^(k)(0)
 
         where n = ⌈α⌉
+        
+        For 0 < α < 1, the Caputo integral equals the Riemann-Liouville integral.
+        For α ≥ 1, we decompose into integer and fractional parts.
         """
         # For 0 < α < 1, Caputo integral equals Riemann-Liouville integral
         if 0 < self.alpha.alpha < 1:
             rl_integral = RiemannLiouvilleIntegral(self.alpha)
             return rl_integral(f, x)
+        elif self.alpha.alpha >= 1:
+            # For α ≥ 1, decompose: I^α = I^n * I^β where α = n + β, 0 < β < 1
+            n = int(self.alpha.alpha)
+            beta = self.alpha.alpha - n
+            
+            # First apply Riemann-Liouville integral of order β
+            if beta > 0:
+                rl_integral_beta = RiemannLiouvilleIntegral(beta)
+                intermediate = rl_integral_beta(f, x)
+            else:
+                # If alpha is an integer, use standard integration
+                from scipy.integrate import quad
+                if callable(f):
+                    f_callable = f
+                else:
+                    # Coerce array to callable
+                    f_callable = self._coerce_function(f, x)
+                
+                if isinstance(x, (int, float)):
+                    # Scalar case
+                    def integrand_n(tau):
+                        return (x - tau) ** (n - 1) * f_callable(tau)
+                    result, _ = quad(integrand_n, 0, x, limit=100, epsabs=1e-8, epsrel=1e-8)
+                    return result / gamma(n)
+                else:
+                    # Array case
+                    result = np.zeros_like(x, dtype=float)
+                    for i, xi in enumerate(x):
+                        if xi > 0:
+                            def integrand_n(tau):
+                                return (xi - tau) ** (n - 1) * f_callable(tau)
+                            result[i], _ = quad(integrand_n, 0, xi, limit=100, epsabs=1e-8, epsrel=1e-8)
+                            result[i] /= gamma(n)
+                    return result
+            
+            # Then apply repeated integration n times
+            current = intermediate if beta > 0 else f
+            for _ in range(n):
+                # Apply RL integral of order 1
+                rl_integral_1 = RiemannLiouvilleIntegral(1.0)
+                current = rl_integral_1(current, x)
+            
+            return current
         else:
-            raise NotImplementedError(
-                "Caputo integral for α ≥ 1 not yet implemented")
+            # α = 0 case
+            if callable(f):
+                return f(x) if isinstance(x, (int, float)) else np.array([f(xi) for xi in x])
+            else:
+                return f
+    
+    def _coerce_function(self, f: Union[Callable, np.ndarray], x_arg: Union[float, np.ndarray, "torch.Tensor"]) -> Callable:
+        """If f is an array, create an interpolating callable over x grid."""
+        if callable(f):
+            return f
+        if isinstance(f, np.ndarray):
+            if isinstance(x_arg, np.ndarray):
+                grid = x_arg
+            else:
+                # For scalar x, build a linspace grid matching f length
+                grid = np.linspace(0.0, float(x_arg), num=len(f))
+
+            def interp_fn(tau):
+                return np.interp(tau, grid, f)
+            return interp_fn
+        # Fallback: treat as constant
+        return lambda tau: float(f)
 
     # Compatibility alias to accept optional step size
     def compute(self,
@@ -304,7 +384,9 @@ class WeylIntegral(FractionalIntegral):
     # Compatibility with tests expecting a compute(...) API
     def compute(self,
                 f: Callable,
-                x: Union[float, np.ndarray, "torch.Tensor"]) -> Union[float, np.ndarray, "torch.Tensor"]:
+                x: Union[float, np.ndarray, "torch.Tensor"],
+                h: float = None) -> Union[float, np.ndarray, "torch.Tensor"]:
+        """Compute Weyl integral; h parameter is accepted for compatibility but not used."""
         return self.__call__(f, x)
 
     def _compute_array_torch(

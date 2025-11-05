@@ -8,6 +8,14 @@ import numpy as np
 import sys
 import os
 
+# Force JAX to use CPU for tests to avoid GPU/CuDNN version issues
+os.environ.setdefault("JAX_PLATFORMS", "cpu")
+
+# Force matplotlib to use non-interactive backend for tests
+os.environ.setdefault("MPLBACKEND", "Agg")
+import matplotlib
+matplotlib.use("Agg")
+
 # Add hpfracc to path for imports
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 

@@ -140,11 +140,15 @@ The Riemann-Liouville fractional integral of order :math:`\alpha` is defined as:
 Caputo Fractional Integral
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-For :math:`0 < \alpha < 1`, the Caputo fractional integral equals the Riemann-Liouville integral:
+The Caputo fractional integral supports all orders :math:`\alpha \geq 0`:
 
-.. math::
+- For :math:`0 < \alpha < 1`, the Caputo fractional integral equals the Riemann-Liouville integral:
 
-   I^\alpha_C f(t) = I^\alpha f(t)
+  .. math::
+
+     I^\alpha_C f(t) = I^\alpha f(t)
+
+- For :math:`\alpha \geq 1`, we use decomposition: :math:`I^\alpha = I^n \circ I^\beta` where :math:`\alpha = n + \beta`, :math:`0 < \beta < 1`
 
 Weyl Fractional Integral
 ~~~~~~~~~~~~~~~~~~~~~~~

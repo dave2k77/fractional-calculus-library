@@ -347,12 +347,18 @@ HPFRACC supports various types of fractional integrals:
 
 .. code-block:: python
 
-   from hpfracc import caputo_integral
+   from hpfracc.core.integrals import CaputoIntegral
 
-   # Create Caputo fractional integral
-   result = caputo_integral(x, f(x), alpha)
+   # Create Caputo fractional integral (supports all orders α ≥ 0)
+   # For 0 < α < 1
+   integral_05 = CaputoIntegral(0.5)
+   result = integral_05(f, x)
+   
+   # For α ≥ 1 (newly implemented)
+   integral_15 = CaputoIntegral(1.5)
+   result = integral_15(f, x)
 
-**Note**: Weyl and Hadamard integrals are available but require specific implementations. For now, use Riemann-Liouville and Caputo integrals which are implemented.
+**Note**: Caputo integral now supports all fractional orders α ≥ 0. For 0 < α < 1, it equals the Riemann-Liouville integral. For α ≥ 1, it uses a decomposition method. Weyl and Hadamard integrals are available but require specific implementations.
 
 Special Functions
 ~~~~~~~~~~~~~~~~

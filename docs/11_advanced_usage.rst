@@ -302,6 +302,49 @@ The intelligent backend selector automatically optimizes performance:
 
 See :doc:`02_advanced_features` for comprehensive backend optimization guide.
 
+Known Limitations
+------------------
+
+This section documents intentional limitations and planned future enhancements.
+
+Solver Limitations
+~~~~~~~~~~~~~~~~~~
+
+**SDE Solvers - Matrix Diffusion**:
+- Full matrix diffusion (:math:`g_\theta: \mathbb{R}^{d} \to \mathbb{R}^{d \times d}`) is not yet implemented
+- Currently supported: scalar diffusion (additive noise) and vector diffusion (diagonal multiplicative noise)
+- **Workaround**: Use diagonal approximation or standard (non-fractional) SDE solvers first
+
+**ODE Solvers - FFT Convolution**:
+- FFT convolution is currently only implemented for `axis=0` (time axis)
+- **Workaround**: Transpose your data so time is the first axis, or use direct convolution methods
+
+**ODE Solvers - Predictor-Corrector**:
+- Currently implemented for Caputo derivative only
+- **Workaround**: Use fixed-step Euler method or convert problem to Caputo formulation
+
+**PDE Solvers - Spectral Scheme**:
+- Spectral scheme is implemented for :math:`0 < \alpha < 1` only
+- **Workaround**: For :math:`\alpha \geq 1`, decompose into integer and fractional parts, or use finite difference schemes
+
+**Adaptive ODE Solver**:
+- Currently disabled due to known implementation flaw
+- **Workaround**: Use fixed-step solver with `adaptive=False`
+
+Backend Support
+~~~~~~~~~~~~~~~
+
+**Multi-Backend Fractional Derivatives**:
+- ✅ PyTorch: Full support with autograd
+- ✅ JAX: Full support with Caputo derivatives
+- ✅ NumPy/NUMBA: Fractional scaling approximation
+- All ML modules (training, losses, data) now support all backends
+
+**GPU Optimization**:
+- ✅ FFT-based methods: Fully implemented
+- ✅ Mellin transform: GPU-optimized implementation available
+- ✅ Fractional Laplacian: GPU-optimized
+
 Summary
 -------
 
@@ -312,6 +355,7 @@ Advanced Usage covers:
 ✅ **Best Practices**: Code organization, error handling, optimization  
 ✅ **GPU Setup**: JAX and PyTorch GPU configuration  
 ✅ **Backend Optimization**: Intelligent selection and manual configuration  
+✅ **Known Limitations**: Documented limitations with workarounds  
 
 Next Steps
 ----------

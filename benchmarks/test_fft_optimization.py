@@ -11,7 +11,7 @@ import time
 import matplotlib
 matplotlib.use('Agg')  # Use non-interactive backend
 import matplotlib.pyplot as plt
-from hpfracc.solvers.ode_solvers import FractionalODESolver, solve_fractional_ode
+from hpfracc.solvers.ode_solvers import FixedStepODESolver, solve_fractional_ode
 from hpfracc.core.definitions import FractionalOrder
 
 
