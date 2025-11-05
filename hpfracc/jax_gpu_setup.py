@@ -1,11 +1,33 @@
 """
 JAX GPU Setup for HPFRACC Library
 Automatically configures JAX to use GPU when available with proper conflict resolution.
+
+This module now uses the centralized JAX configuration from core.jax_config
+to prevent PJRT plugin conflicts and system-level errors.
 """
 
 import os
 import warnings
 from typing import Optional, Dict, Any
+
+# Use centralized JAX configuration
+try:
+    from ..core.jax_config import (
+        initialize_jax_once, 
+        get_jax_safely, 
+        is_jax_available, 
+        is_jax_gpu_available
+    )
+except ImportError:
+    # Fallback if core module not available
+    def initialize_jax_once(*args, **kwargs):
+        return {'available': False, 'gpu_available': False, 'initialized': False}
+    def get_jax_safely():
+        return None, None
+    def is_jax_available():
+        return False
+    def is_jax_gpu_available():
+        return False
 
 
 def clear_jax_plugins():
@@ -58,55 +80,33 @@ def setup_jax_gpu_safe() -> bool:
     """
     Set up JAX to use GPU when available with proper conflict resolution.
     
-    This function handles PJRT plugin conflicts and CuDNN compatibility issues
-    that commonly occur with JAX-GPU setups.
+    This function uses the centralized JAX configuration to prevent
+    PJRT plugin conflicts and handle system-level errors gracefully.
     
     Returns:
         bool: True if GPU is available and configured, False if using CPU fallback
     """
-    try:
-        # Clear any existing plugins first
-        clear_jax_plugins()
-        
-        # Prioritize pip-installed CuDNN libraries over conda's older versions
-        try:
-            import site
-            for path in site.getsitepackages() + [site.getusersitepackages()]:
-                cudnn_lib_path = os.path.join(path, 'nvidia', 'cudnn', 'lib')
-                if os.path.exists(cudnn_lib_path):
-                    # Add to LD_LIBRARY_PATH if not already there
-                    ld_path = os.environ.get('LD_LIBRARY_PATH', '')
-                    if cudnn_lib_path not in ld_path:
-                        os.environ['LD_LIBRARY_PATH'] = f'{cudnn_lib_path}:{ld_path}' if ld_path else cudnn_lib_path
-                        break
-        except Exception:
-            pass  # Non-critical, continue without library path adjustment
-        
-        # Check CuDNN compatibility
-        cudnn_info = check_cudnn_compatibility()
-        if not cudnn_info.get('cudnn_available', False):
-            warnings.warn("CuDNN not available or incompatible. GPU performance may be degraded.")
-        
-        # Import JAX after clearing environment
-        import jax
-        
-        # Let JAX auto-detect GPU without forcing platform
-        devices = jax.devices()
-        gpu_devices = [d for d in devices if 'gpu' in str(d).lower() or 'cuda' in str(d).lower()]
-        
-        if gpu_devices:
-            print(f"✅ JAX GPU detected: {gpu_devices}")
-            if 'warning' in cudnn_info:
-                print(f"⚠️  {cudnn_info['warning']}")
-            return True
-        else:
-            print("ℹ️  No GPU detected, using CPU fallback")
-            return False
-            
-    except Exception as e:
-        warnings.warn(f"Failed to configure JAX GPU: {e}")
-        print("ℹ️  Falling back to CPU execution")
+    # Use centralized initialization (handles all conflicts automatically)
+    config = initialize_jax_once()
+    
+    if not config['available']:
         return False
+    
+    # Check GPU availability
+    gpu_available = is_jax_gpu_available()
+    
+    if gpu_available:
+        try:
+            jax, jnp = get_jax_safely()
+            if jax is not None:
+                devices = jax.devices()
+                gpu_devices = [d for d in devices if 'gpu' in str(d).lower() or 'cuda' in str(d).lower()]
+                if gpu_devices:
+                    return True
+        except Exception:
+            pass
+    
+    return False
 
 
 def setup_jax_gpu() -> bool:
@@ -176,6 +176,7 @@ def force_cpu_fallback() -> bool:
 
 
 # Auto-configure JAX on import with safe setup
+# Note: This uses centralized initialization which prevents conflicts
 _jax_gpu_available = setup_jax_gpu_safe()
 
 # Export the configuration status

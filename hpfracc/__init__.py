@@ -22,6 +22,14 @@ __affiliation__ = "Department of Biomedical Engineering, University of Reading"
 # Users should import symbols from submodules explicitly, e.g.:
 #   from hpfracc.algorithms.optimized_methods import OptimizedCaputo
 
+# Initialize JAX configuration early to prevent conflicts
+# This must happen before any other module imports JAX
+try:
+    from .core.jax_config import initialize_jax_once
+    initialize_jax_once()
+except ImportError:
+    pass  # core.jax_config may not be available in all installs
+
 # Core definitions
 from .core.definitions import FractionalOrder
 

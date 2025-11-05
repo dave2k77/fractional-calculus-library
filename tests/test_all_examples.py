@@ -18,12 +18,14 @@ os.environ['JAX_PLATFORM_NAME'] = 'cpu'
 def test_example(example_path, timeout=120):
     """Test a single example file."""
     try:
+        # Get project root (parent of tests directory)
+        project_root = Path(__file__).parent.parent
         result = subprocess.run(
             ['python', str(example_path)],
             capture_output=True,
             text=True,
             timeout=timeout,
-            cwd='/home/davianc/Documents/fractional-calculus-library'
+            cwd=str(project_root)
         )
         
         return {
@@ -48,7 +50,9 @@ def test_example(example_path, timeout=120):
         }
 
 def main():
-    base_path = Path('/home/davianc/Documents/fractional-calculus-library/examples')
+    # Get project root (parent of tests directory)
+    project_root = Path(__file__).parent.parent
+    base_path = project_root / 'examples'
     
     # List of all Python examples to test
     example_files = list(base_path.rglob('*.py'))
@@ -116,8 +120,9 @@ def main():
                         print(f"    {line}")
     
     # Save detailed results to JSON
-    output_file = '/home/davianc/Documents/fractional-calculus-library/example_test_results.json'
-    with open(output_file, 'w') as f:
+    project_root = Path(__file__).parent.parent
+    output_file = project_root / 'example_test_results.json'
+    with open(str(output_file), 'w') as f:
         json.dump({
             'timestamp': datetime.now().isoformat(),
             'summary': {
@@ -130,7 +135,7 @@ def main():
             'results': results
         }, f, indent=2)
     
-    print(f"\n📄 Detailed results saved to: {output_file}")
+    print(f"\n📄 Detailed results saved to: {output_file.absolute()}")
     
     return 0 if (failed + timeout + error) == 0 else 1
 

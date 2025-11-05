@@ -11,20 +11,26 @@ from ..core.definitions import FractionalOrder
 import warnings
 from scipy.signal import convolve
 
-# Optional JAX import
+# Use centralized JAX configuration to prevent conflicts
 try:
-    import jax
-    import jax.numpy as jnp
-    from jax.scipy.signal import convolve as jax_convolve
-    JAX_AVAILABLE = True
-except ImportError:
+    from ..core.jax_config import get_jax_safely, is_jax_available
+    jax, jnp = get_jax_safely()
+    JAX_AVAILABLE = (jax is not None and jnp is not None)
+    if JAX_AVAILABLE:
+        from jax.scipy.signal import convolve as jax_convolve
+        # Configure JAX settings
+        jax.config.update("jax_enable_x64", True)
+except (ImportError, AttributeError):
     JAX_AVAILABLE = False
+    jax = None
+    jnp = None
 
 from ..special.gamma_beta import gamma as gamma_func
 
 # JAX Implementations
 if JAX_AVAILABLE:
-    jax.config.update("jax_enable_x64", True)
+    # jax.config.update already called above
+    pass
 
     def _jnp_gradient_edge_order_2(f, h):
         """JAX implementation of numpy.gradient with edge_order=2."""
